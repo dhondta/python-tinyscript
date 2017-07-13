@@ -118,7 +118,7 @@ def initialize(glob, sudo=False):
     glob['args'].verbose = [logging.INFO, logging.DEBUG][glob['args'].debug]
     logging.basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT,
                         level=glob['args'].verbose)
-    glob['args'] = logging.getLogger()
+    glob['logger'] = logging.getLogger()
     if colored_logs_present:
         coloredlogs.DEFAULT_LOG_FORMAT = LOG_FORMAT
         coloredlogs.DEFAULT_DATE_FORMAT = DATE_FORMAT
