@@ -94,9 +94,9 @@ def shutdown():
 
 if __name__ == '__main__':
     global logger
-    parser.add_argument("-i", dest="integer", type=int, default=1,
+    parser.add_argument("-i", dest="integer", type=int, default=-1,
                         help="an example integer (default: 1)")
-    parser.add_argument("-k", dest="integer2", type=int, default=2,
+    parser.add_argument("-k", dest="integer2", type=int, default=-1,
                         help="another example integer (default: 2)")
     initialize(globals())  # this appends 'args' and 'logger' to globals
     # two kinds of validation: without default => triggers exit ;
@@ -104,8 +104,13 @@ if __name__ == '__main__':
     validate(globals(),
         ("integer", " ? < 0", "Integer must be greater or equal to 0"),
         ("integer2", " ? < 0", "Same as for the other integer", 1000),
-    )  # this will exit because of 'integer'
+    )  # this will exit because of 'integer' whose default is -1
+       # and will only give a warning for 'integer2' whose default is -1
     logger.info(args)
     while True:
         pass  # Ctrl+C will use shutdown()
+
+# 'python example.py' will fail
+# 'python example.py -i 0' will give a warning for 'integer2'
+# 'python example.py -i 0 -k 0' will work
 ```
