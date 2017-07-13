@@ -122,7 +122,7 @@ def initialize(glob, sudo=False):
     if colored_logs_present:
         coloredlogs.DEFAULT_LOG_FORMAT = LOG_FORMAT
         coloredlogs.DEFAULT_DATE_FORMAT = DATE_FORMAT
-        coloredlogs.install(args.verbose)
+        coloredlogs.install(glob['args'].verbose)
 
 
 def validate(*arg_checks):
