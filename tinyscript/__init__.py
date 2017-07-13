@@ -64,17 +64,24 @@ def __exit_handler(signal=None, frame=None, code=0):
 signal.signal(signal.SIGINT, __exit_handler)
 
 
-def exit_handler(code=0):
+def __updated_exit_handler(signal=None, frame=None, code=0):
+    __exit_handler(signal, frame, code)
+
+
+def exit_handler(glob=None):
     """
     Customized exit handler decorator.
 
-    :param code: exit code
-    :return: the decorator function
+    :param glob: globals() instance from the calling script
     """
     def __wrapper(f):
-        def __new_exit_handler(signal, frame, *args, **kwargs):
+        global __updated_exit_handler
+        def __new_exit_handler(signal=None, frame=None, code=0, *args, **kwargs):
             f(*args, **kwargs)
-            __exit_handler(signal, frame, code=code)
+            __exit_handler(signal, frame, code)
+        if glob is not None:
+            glob[f] = __new_exit_handler
+        __updated_exit_handler = __new_exit_handler
         # this rebinds termination signal (Ctrl+C) to the new exit handler
         signal.signal(signal.SIGINT, __new_exit_handler)
         return __new_exit_handler
@@ -90,7 +97,7 @@ def initialize(glob, sudo=False):
     :param glob: globals() instance from the calling script
     :param sudo: if True, require sudo credentials and re-run script with sudo
     """
-    global args, logger, parser
+    global parser
     p = glob['__file__']
     p = p[2:] if p.startswith("./") else p
     e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
@@ -116,16 +123,16 @@ def initialize(glob, sudo=False):
             os.execvp("sudo", ["sudo"] + python + sys.argv)
     # configure logging and get the root logger
     glob['args'].verbose = [logging.INFO, logging.DEBUG][glob['args'].debug]
-    logging.basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT,
+    logging.basicConfig(format=glob['LOG_FORMAT'], datefmt=glob['DATE_FORMAT'],
                         level=glob['args'].verbose)
     glob['logger'] = logging.getLogger()
     if colored_logs_present:
-        coloredlogs.DEFAULT_LOG_FORMAT = LOG_FORMAT
-        coloredlogs.DEFAULT_DATE_FORMAT = DATE_FORMAT
+        coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
+        coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
         coloredlogs.install(glob['args'].verbose)
 
 
-def validate(*arg_checks):
+def validate(glob, *arg_checks):
     """
     Function for validating group of arguments ; each argument is represented as
      a 4-tuple like follows:
@@ -141,21 +148,23 @@ def validate(*arg_checks):
                               implies that the script will not exit after the
                               validation (if no other blocking argument present)
 
+    :param glob: globals() instance from the calling script
     :param arg_checks: list of 3/4-tuples
     """
-    global args, logger
-    if args is None or logger is None:
+    if glob['args'] is None or glob['logger'] is None:
         return
     exit_app = False
     for check in arg_checks:
         check = check + (None, ) * (4 - len(check))
         param, condition, message, default = check
-        if eval(condition.replace(" ? ", " args.{} ".format(param))):
-            logger.error(message or "Validation failed")
+        if eval(condition.replace(" ? ", " glob['args'].{} ".format(param))):
+            glob['logger'].error(message or "Validation failed")
             exit_app |= default is None
             if default is not None:
-                setattr(args, param, default)
+                setattr(glob['args'], param, default)
     if exit_app:
+        os.kill(os.getpid(), signal.SIGINT)
+
         exit_handler(2)
 
 

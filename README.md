@@ -11,6 +11,7 @@ NB: By "self-contained", it is meant that the script does not rely on relative l
 - Creates a logger and enables colored logging
 - Reduce lines for defining input arguments and increase script lisibility
 - Pre-imports some common built-in modules
+- Customize exit handler for clean shutdown
 
 
 ## Usage
@@ -88,7 +89,7 @@ if __name__ == '__main__':
     initialize(globals())  # this appends 'args' and 'logger' to globals
     # two kinds of validation: without default => triggers exit ;
     #                          with default    => sets the default and continues
-    validate(
+    validate(globals(),
         ("integer", " ? >= 0", "Integer must be greater or equal to 0"),
         ("integer2", " ? >= 0", "Same as for the other integer", 1000),
     )  # this will exit because of 'integer'
