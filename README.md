@@ -4,6 +4,18 @@ This library is currently a very minimalistic module aimed to shorten and format
 
 NB: By "self-contained", it is meant that the script does not rely on relative libraries or any configuration or other file, only on Python installed libraries. Such a tool is thus contained in a single file. This is because it is more convenient for deploying its into an executable path.
 
+## Installation
+
+```
+sudo pip install tinyscript
+```
+
+or
+
+```
+sudo pip3 install tinyscript
+```
+
 
 ## Features
 
