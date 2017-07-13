@@ -1,4 +1,4 @@
-# PyScript
+# TinyScript
 
 This library is currently a very minimalistic module aimed to shorten and format the way a "self-contained" Python tool can be made. It is mostly based on a script template that was used for building some specific tools holding useful metadata. It is not aimed to provide helpers as many other libraries already do this.
 
@@ -43,7 +43,7 @@ Constants that can be overwritten:
 
 ### Defining arguments
 
-Import from PyScript prevents from redefining a parser and the ```initialize(globals())``` call achieves arguments parsing so that it only remains to add new arguments in the main script.
+Import from TinyScript prevents from redefining a parser and the ```initialize(globals())``` call achieves arguments parsing so that it only remains to add new arguments in the main script.
 
 NB: A ```verbose``` switch is built-in like follows and can be overwritten:
 
@@ -65,7 +65,7 @@ __reference__ = "A great book !"
 __examples__ = ["-v", "-i 0"]
 __doc__ = "This is an example tool"
 
-from pyscript import *
+from tinyscript import *
 
 if __name__ == '__main__':
     global logger
