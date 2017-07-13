@@ -86,7 +86,7 @@ def initialize(glob, sudo=False):
                                 help="debug verbose level (default: false)")
     for method, args, kwargs in parser.calls:
         getattr(glob['parser'], method)(*args, **kwargs)
-    glob['args'] = parser.parse_args()
+    glob['args'] = glob['parser'].parse_args()
     if sudo:
         # if not root, restart the script in another process and jump to this
         if os.geteuid() != 0:
