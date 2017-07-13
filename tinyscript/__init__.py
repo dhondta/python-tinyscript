@@ -83,10 +83,13 @@ def initialize(glob, sudo=False):
     glob['parser'] = argparse.ArgumentParser(prog=p,
         description=__descr_format(glob), epilog=e,
         formatter_class=argparse.RawTextHelpFormatter)
-    glob['parser'].add_argument("-v", dest="debug", action="store_true",
-                                help="debug verbose level (default: false)")
     for method, args, kwargs in parser.calls:
         getattr(glob['parser'], method)(*args, **kwargs)
+    try:
+        glob['parser'].add_argument("-v", dest="debug", action="store_true",
+                                    help="debug verbose level (default: false)")
+    except ArgumentError:
+        pass  # if debug argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
     if sudo:
         # if not root, restart the script in another process and jump to this
