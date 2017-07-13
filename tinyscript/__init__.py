@@ -163,9 +163,7 @@ def validate(glob, *arg_checks):
             if default is not None:
                 setattr(glob['args'], param, default)
     if exit_app:
-        os.kill(os.getpid(), signal.SIGINT)
-
-        exit_handler(2)
+        __updated_exit_handler(code=2)
 
 
 class ProxyArgumentParser(object):
