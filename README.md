@@ -7,14 +7,26 @@ NB: By "self-contained", it is meant that the script does not rely on relative l
 
 ## Features
 
-- Formats tool's help using argparse and script metadata
+- Formats tool's help using ```argparse``` and script metadata
 - Creates a logger and enables colored logging
 - Reduce lines for defining input arguments and increase script lisibility
+- Pre-imports some common built-in modules
 
 
 ## Usage
 
 Every customization MUST be declared <u>before</u> the ```initialize(globals())``` call. Once invoked, this function appends useful references to the script's dictionary of global variables.
+
+### Pre-imported modules
+
+List of pre-imported built-in modules:
+- ```logging```
+- ```os```
+- ```random```
+- ```re```
+- ```signal```
+- ```sys```
+- ```time```
 
 ### Customizing metadata
 

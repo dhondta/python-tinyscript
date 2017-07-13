@@ -18,10 +18,10 @@ except:
 
 
 __all__ = [
-    'LOG_FORMAT', 'DATE_FORMAT',                             # constants
-    'parser',                                                # instances
-    'exit_handler', 'initialize', 'validate',                # functions
-    'loggin', 'os', 'random', 're', 'signal', 'sys', 'time', # modules
+    'LOG_FORMAT', 'DATE_FORMAT',                              # constants
+    'parser',                                                 # instances
+    'exit_handler', 'initialize', 'validate',                 # functions
+    'logging', 'os', 'random', 're', 'signal', 'sys', 'time', # modules
 ]
 
 
