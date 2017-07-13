@@ -18,17 +18,6 @@ NB: By "self-contained", it is meant that the script does not rely on relative l
 
 Every customization MUST be declared <u>before</u> the ```initialize(globals())``` call. Once invoked, this function appends useful references to the script's dictionary of global variables.
 
-### Pre-imported modules
-
-List of pre-imported built-in modules:
-- ```logging```
-- ```os```
-- ```random```
-- ```re```
-- ```signal```
-- ```sys```
-- ```time```
-
 ### Customizing metadata
 
 Metadata fields used in the documentation:
@@ -66,6 +55,25 @@ parser.add_argument("-v", dest="debug", action="store_true",
 ```
 
 
+### Pre-imported modules
+
+List of pre-imported built-in modules:
+- ```logging```
+- ```os```
+- ```random```
+- ```re```
+- ```signal```
+- ```sys```
+- ```time```
+
+
+### Customizing the exit handler
+
+By default, an exit handler is bound to SIGINT signal with namely the graceful shutdown of `logging`. In some cases, it could be useful to add some extra lines to this handler, e.g. when using a socket that should be closed for clean shutdown.
+
+This can be achieved by using the `exit_handler()` decorator (see hereafter for an example). It takes `globals()` as its single argument and is `None` by default so that it can update the custom exit handler with the default one. If this argument is missing, the `None` means that the custom exit handler will then not be updated. In both cases, the exit handler bound to SIGINT will be updated as well.
+
+
 ## Example
 
 ```py
@@ -80,18 +88,24 @@ __doc__ = "This is an example tool"
 
 from tinyscript import *
 
+@exit_handler(globals())
+def shutdown():
+    logger.info("Shutting down...")
+
 if __name__ == '__main__':
     global logger
     parser.add_argument("-i", dest="integer", type=int, default=1,
-                        help="an example integer")
+                        help="an example integer (default: 1)")
     parser.add_argument("-k", dest="integer2", type=int, default=2,
-                        help="another example integer")
+                        help="another example integer (default: 2)")
     initialize(globals())  # this appends 'args' and 'logger' to globals
     # two kinds of validation: without default => triggers exit ;
     #                          with default    => sets the default and continues
     validate(globals(),
-        ("integer", " ? >= 0", "Integer must be greater or equal to 0"),
-        ("integer2", " ? >= 0", "Same as for the other integer", 1000),
+        ("integer", " ? < 0", "Integer must be greater or equal to 0"),
+        ("integer2", " ? < 0", "Same as for the other integer", 1000),
     )  # this will exit because of 'integer'
     logger.info(args)
+    while True:
+        pass  # Ctrl+C will use shutdown()
 ```
