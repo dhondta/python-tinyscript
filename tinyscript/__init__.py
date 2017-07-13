@@ -71,6 +71,7 @@ def initialize(glob, sudo=False):
      calling script.
 
     :param glob: globals() instance from the calling script
+    :param sudo: if True, require sudo credentials and re-run script with sudo
     """
     global args, logger, parser
     p = glob['__file__']
