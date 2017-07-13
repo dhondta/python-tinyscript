@@ -158,9 +158,11 @@ def validate(glob, *arg_checks):
         check = check + (None, ) * (4 - len(check))
         param, condition, message, default = check
         if eval(condition.replace(" ? ", " glob['args'].{} ".format(param))):
-            glob['logger'].error(message or "Validation failed")
-            exit_app |= default is None
-            if default is not None:
+            if default is None:
+                glob['logger'].error(message or "Validation failed")
+                exit_app = True
+            else:
+                glob['logger'].warn(message or "Validation failed")
                 setattr(glob['args'], param, default)
     if exit_app:
         __updated_exit_handler(code=2)
