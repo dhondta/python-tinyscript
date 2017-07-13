@@ -18,10 +18,10 @@ except:
 
 
 __all__ = [
-    'LOG_FORMAT', 'DATE_FORMAT',                   # constants
-    'parser',                                      # instances
-    'exit_handler', 'initialize', 'validate',      # functions
-    'os', 'random', 're', 'signal', 'sys', 'time', # modules
+    'LOG_FORMAT', 'DATE_FORMAT',                             # constants
+    'parser',                                                # instances
+    'exit_handler', 'initialize', 'validate',                # functions
+    'loggin', 'os', 'random', 're', 'signal', 'sys', 'time', # modules
 ]
 
 
@@ -50,7 +50,7 @@ def __descr_format(g):
     return s + "\n\n" + g['__doc__'] if '__doc__' in g else s
 
 
-def exit_handler(signal=None, frame=None, code=0):
+def __exit_handler(signal=None, frame=None, code=0):
     """
     Exit handler.
 
@@ -60,8 +60,25 @@ def exit_handler(signal=None, frame=None, code=0):
     """
     logging.shutdown()
     sys.exit(code)
-# bind termination signal (Ctrl+C) to exit handler
-signal.signal(signal.SIGINT, exit_handler)
+# bind termination signal (Ctrl+C) to the default exit handler
+signal.signal(signal.SIGINT, __exit_handler)
+
+
+def exit_handler(code=0):
+    """
+    Customized exit handler decorator.
+
+    :param code: exit code
+    :return: the decorator function
+    """
+    def __wrapper(f):
+        def __new_exit_handler(signal, frame, *args, **kwargs):
+            f(*args, **kwargs)
+            __exit_handler(signal, frame, code=code)
+        # this rebinds termination signal (Ctrl+C) to the new exit handler
+        signal.signal(signal.SIGINT, __new_exit_handler)
+        return __new_exit_handler
+    return __wrapper
 
 
 def initialize(glob, sudo=False):
@@ -85,6 +102,7 @@ def initialize(glob, sudo=False):
         formatter_class=argparse.RawTextHelpFormatter)
     for method, args, kwargs in parser.calls:
         getattr(glob['parser'], method)(*args, **kwargs)
+    # TODO: adapt debug argument in several ways for supporting -vvv, -vvvv, ...
     try:
         glob['parser'].add_argument("-v", dest="debug", action="store_true",
                                     help="debug verbose level (default: false)")
@@ -138,7 +156,7 @@ def validate(*arg_checks):
             if default is not None:
                 setattr(args, param, default)
     if exit_app:
-        exit_handler(code=2)
+        exit_handler(2)
 
 
 class ProxyArgumentParser(object):
@@ -160,4 +178,5 @@ class ProxyArgumentParser(object):
         del self.__current_call
 
 
+# TODO: working this way does not support subparsers...
 parser = ProxyArgumentParser()

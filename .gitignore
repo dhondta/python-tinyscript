@@ -23,6 +23,7 @@ eggs/
 lib64/
 parts/
 sdist/
+update.sh
 
 var/
 *.egg-info/
