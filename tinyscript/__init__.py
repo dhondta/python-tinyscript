@@ -113,7 +113,7 @@ def initialize(glob, sudo=False):
     try:
         glob['parser'].add_argument("-v", dest="debug", action="store_true",
                                     help="debug verbose level (default: false)")
-    except ArgumentError:
+    except argparse.ArgumentError:
         pass  # if debug argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
     if sudo:
