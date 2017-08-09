@@ -64,6 +64,18 @@ def __exit_handler(signal=None, frame=None, code=0):
 signal.signal(signal.SIGINT, __exit_handler)
 
 
+def __get_calls_from_parser(proxy_parser, real_parser):
+    """
+    This actually executes the calls registered in the ProxyArgumentParser.
+
+    :param parser: ProxyArgumentParser instance
+    """
+    for method, safe, args, kwargs, proxy_subparser in proxy_parser.calls:
+        real_subparser = getattr(real_parser, method)(*args, **kwargs)
+        if real_subparser is not None:
+            __get_calls_from_parser(proxy_subparser, real_subparser)
+
+
 def __updated_exit_handler(signal=None, frame=None, code=0):
     __exit_handler(signal, frame, code)
 
@@ -88,7 +100,7 @@ def exit_handler(glob=None):
     return __wrapper
 
 
-def initialize(glob, sudo=False):
+def initialize(glob, sudo=False, multi_debug_level=False):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
@@ -107,29 +119,35 @@ def initialize(glob, sudo=False):
     glob['parser'] = argparse.ArgumentParser(prog=p,
         description=__descr_format(glob), epilog=e,
         formatter_class=argparse.RawTextHelpFormatter)
-    for method, args, kwargs in parser.calls:
-        getattr(glob['parser'], method)(*args, **kwargs)
-    # TODO: adapt debug argument in several ways for supporting -vvv, -vvvv, ...
+    __get_calls_from_parser(parser, glob['parser'])
     try:
-        glob['parser'].add_argument("-v", dest="debug", action="store_true",
-                                    help="debug verbose level (default: false)")
+        glob['parser'].add_argument("-v", dest="verbose",
+            action="count" if multi_debug_level else "store_true",
+            help="debug verbose level (default: {})"
+                 .format(["false", "error"][multi_debug_level]))
     except argparse.ArgumentError:
         pass  # if debug argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
+    sys.exit()
     if sudo:
         # if not root, restart the script in another process and jump to this
         if os.geteuid() != 0:
             python = [] if glob['__file__'].startswith("./") else ["python"]
             os.execvp("sudo", ["sudo"] + python + sys.argv)
     # configure logging and get the root logger
-    glob['args'].verbose = [logging.INFO, logging.DEBUG][glob['args'].debug]
+    if multi_debug_level:
+        glob['args']._debug_level = [logging.ERROR, logging.WARNING,
+            logging.INFO, logging.DEBUG][min(glob['args'].verbose, 3)]
+    else:
+        glob['args']._debug_level = [logging.INFO, logging.DEBUG] \
+                                    [glob['args'].verbose]
     logging.basicConfig(format=glob['LOG_FORMAT'], datefmt=glob['DATE_FORMAT'],
-                        level=glob['args'].verbose)
+                        level=glob['args']._debug_level)
     glob['logger'] = logging.getLogger()
     if colored_logs_present:
         coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
         coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
-        coloredlogs.install(glob['args'].verbose)
+        coloredlogs.install(glob['args']._debug_level)
 
 
 def validate(glob, *arg_checks):
@@ -177,15 +195,18 @@ class ProxyArgumentParser(object):
         self.__parser = argparse.ArgumentParser()
 
     def __getattr__(self, name):
-        if hasattr(self.__parser, name) and \
-            callable(getattr(self.__parser, name)):
-            self.__current_call = name
-            return self.__collect
+        self.__current_call = name
+        self.__call_exists = hasattr(self.__parser, name) and \
+                             callable(getattr(self.__parser, name))
+        return self.__collect
 
     def __collect(self, *args, **kwargs):
-        self.calls.append((self.__current_call, args, kwargs))
+        subparser = ProxyArgumentParser()
+        self.calls.append((self.__current_call, self.__call_exists,
+                           args, kwargs, subparser))
         del self.__current_call
+        del self.__call_exists
+        return subparser
 
 
-# TODO: working this way does not support subparsers...
 parser = ProxyArgumentParser()

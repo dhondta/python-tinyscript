@@ -59,12 +59,14 @@ Constants that can be overwritten:
 
 Import from TinyScript prevents from redefining a parser and the ```initialize(globals())``` call achieves arguments parsing so that it only remains to add new arguments in the main script.
 
-NB: A ```verbose``` switch is built-in like follows and can be overwritten:
+NB: A ```verbose``` switch is built-in by default like follows and can be overwritten:
 
 ```
-parser.add_argument("-v", dest="debug", action="store_true",
+parser.add_argument("-v", dest="verbose", action="store_true",
                     help="debug verbose level (default: false)")
 ```
+
+This switch can also be configured for counting `v`'s to set the debug level. In this case, append `multi_debug_level=True` to the `initialize` call.
 
 
 ### Pre-imported modules
@@ -110,7 +112,13 @@ if __name__ == '__main__':
                         help="an example integer (default: 1)")
     parser.add_argument("-k", dest="integer2", type=int, default=-1,
                         help="another example integer (default: 2)")
-    initialize(globals())  # this appends 'args' and 'logger' to globals
+    initialize(globals(),  # this appends 'args' and 'logger' to globals
+               sudo=False, # this allows to require for sudo or not
+               multi_debug_level=True)  # this allows to use -v, -vv, -vvv
+                           #  no -v  => ERROR
+                           #  -v     => WARNING
+                           #  -vv    => INFO
+                           #  -vvv   => DEBUG
     # two kinds of validation: without default => triggers exit ;
     #                          with default    => sets the default and continues
     validate(globals(),
