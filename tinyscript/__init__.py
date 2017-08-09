@@ -203,6 +203,7 @@ def validate(glob, *arg_checks):
     :param glob: globals() instance from the calling script
     :param arg_checks: list of 3/4-tuples
     """
+    locals().update(glob)
     if glob['args'] is None or glob['logger'] is None:
         return
     exit_app = False
