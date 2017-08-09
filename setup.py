@@ -4,7 +4,7 @@ from distutils.core import setup
 setup(
   name = "tinyscript",
   packages = ["tinyscript"],
-  version = "0.2.1",
+  version = "0.2.2",
   license = "GPLv3",
   description = "A tiny library for easily building \"self-contained\" CLI "
                 "Python tools with base features in a shortened way",

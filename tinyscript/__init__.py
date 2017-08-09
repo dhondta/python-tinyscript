@@ -128,7 +128,7 @@ def exit_handler(glob=None):
     return __wrapper
 
 
-def initialize(glob, sudo=False, multi_debug_level=False):
+def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
@@ -136,6 +136,9 @@ def initialize(glob, sudo=False, multi_debug_level=False):
 
     :param glob: globals() instance from the calling script
     :param sudo: if True, require sudo credentials and re-run script with sudo
+    :param multi_debug_level: allow to use -v, -vv, -vvv (ajust logging level)
+                               instead of just -v (only debug on/off)
+    :param add_help: set add_help in ArgumentParser
     """
     global parser, __parsers
     # first, format help message's variables and create the real argument parser
@@ -146,13 +149,13 @@ def initialize(glob, sudo=False, multi_debug_level=False):
     e = "Usage examples:\n" + '\n'.join(["  python {0} {1}".format(p, x) \
         for x in e]) if e is not None else e
     glob['parser'] = argparse.ArgumentParser(prog=p, epilog=e,
-        description=__descr_format(glob),
+        description=__descr_format(glob), add_help=add_help,
         formatter_class=argparse.RawTextHelpFormatter)
     # then populate the real parser
     __parsers = {}
     __get_calls_from_parser(parser, glob['parser'])
     try:
-        glob['parser'].add_argument("-v", dest="verbose",
+        glob['parser'].add_argument("-v", dest="verbose", default=0,
             action="count" if multi_debug_level else "store_true",
             help="debug verbose level (default: {})"
                  .format(["false", "error"][multi_debug_level]))
