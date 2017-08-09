@@ -21,7 +21,7 @@ __all__ = [
     'LOG_FORMAT', 'DATE_FORMAT',                              # constants
     'parser',                                                 # instances
     'exit_handler', 'initialize', 'validate',                 # functions
-    'logging', 'os', 'random', 're', 'signal', 'sys', 'time', # modules
+    'logging', 'os', 'random', 're', 'signal','sys', 'time',  # modules
 ]
 
 
@@ -70,10 +70,38 @@ def __get_calls_from_parser(proxy_parser, real_parser):
 
     :param parser: ProxyArgumentParser instance
     """
+    __parsers[proxy_parser] = real_parser
     for method, safe, args, kwargs, proxy_subparser in proxy_parser.calls:
+        args = (__proxy_to_real_parser(v) for v in args)
+        kwargs = {k: __proxy_to_real_parser(v) for k, v in kwargs.items()}
         real_subparser = getattr(real_parser, method)(*args, **kwargs)
         if real_subparser is not None:
             __get_calls_from_parser(proxy_subparser, real_subparser)
+
+
+def __proxy_to_real_parser(value):
+    """
+    This recursively converts ProxyArgumentParser instances to actual parsers.
+
+    Use case: defining subparsers with a parent
+      >>> [...]
+      >>> parser.add_argument(...)  # argument common to all subparsers
+      >>> subparsers = parser.add_subparsers()
+      >>> subparsers.add_parser(..., parents=[parent])
+                                                ^
+                              this is an instance of ProxyArgumentParser
+                              and must be converted to an actual parser instance
+
+    :param value: a value coming from args or kwargs aimed to an actual parser
+    """
+    if isinstance(value, ProxyArgumentParser):
+        return __parsers[value]
+    elif any(isinstance(value, t) for t in [list, tuple]):
+        new_value = []
+        for subvalue in iter(value):
+            new_value.append(__proxy_to_real_parser(subvalue))
+        return new_value
+    return value
 
 
 def __updated_exit_handler(signal=None, frame=None, code=0):
@@ -109,16 +137,19 @@ def initialize(glob, sudo=False, multi_debug_level=False):
     :param glob: globals() instance from the calling script
     :param sudo: if True, require sudo credentials and re-run script with sudo
     """
-    global parser
+    global parser, __parsers
+    # first, format help message's variables and create the real argument parser
     p = glob['__file__']
     p = p[2:] if p.startswith("./") else p
     e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
         else glob['__examples__']
     e = "Usage examples:\n" + '\n'.join(["  python {0} {1}".format(p, x) \
         for x in e]) if e is not None else e
-    glob['parser'] = argparse.ArgumentParser(prog=p,
-        description=__descr_format(glob), epilog=e,
+    glob['parser'] = argparse.ArgumentParser(prog=p, epilog=e,
+        description=__descr_format(glob),
         formatter_class=argparse.RawTextHelpFormatter)
+    # then populate the real parser
+    __parsers = {}
     __get_calls_from_parser(parser, glob['parser'])
     try:
         glob['parser'].add_argument("-v", dest="verbose",
@@ -128,13 +159,13 @@ def initialize(glob, sudo=False, multi_debug_level=False):
     except argparse.ArgumentError:
         pass  # if debug argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
-    sys.exit()
+    # if sudo required, restart the script
     if sudo:
         # if not root, restart the script in another process and jump to this
         if os.geteuid() != 0:
             python = [] if glob['__file__'].startswith("./") else ["python"]
             os.execvp("sudo", ["sudo"] + python + sys.argv)
-    # configure logging and get the root logger
+    # finally, configure logging and get the root logger
     if multi_debug_level:
         glob['args']._debug_level = [logging.ERROR, logging.WARNING,
             logging.INFO, logging.DEBUG][min(glob['args'].verbose, 3)]
