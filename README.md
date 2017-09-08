@@ -1,3 +1,7 @@
+[![pypi](https://img.shields.io/pypi/v/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
+[![python](https://img.shields.io/pypi/pyversions/tinyscript.svg](https://pypi.python.org/pypi/tinyscript/)
+[![license](https://img.shields.io/pypi/l/tinyscript.svg](https://pypi.python.org/pypi/tinyscript/)
+
 # TinyScript
 
 This library is currently a very minimalistic module aimed to shorten and format the way a "self-contained" Python tool can be made. It is mostly based on a script template that was used for building some specific tools holding useful metadata. It is not aimed to provide helpers as many other libraries already do this.
