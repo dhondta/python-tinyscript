@@ -60,8 +60,10 @@ def __exit_handler(signal=None, frame=None, code=0):
     """
     logging.shutdown()
     sys.exit(code)
-# bind termination signal (Ctrl+C) to the default exit handler
+# bind interrupt signal (Ctrl+C) to the default exit handler
 signal.signal(signal.SIGINT, __exit_handler)
+# bind termination signal to the default exit handler
+signal.signal(signal.SIGTERM, __exit_handler)
 
 
 def __get_calls_from_parser(proxy_parser, real_parser):
@@ -122,8 +124,10 @@ def exit_handler(glob=None):
         if glob is not None:
             glob[f] = __new_exit_handler
         __updated_exit_handler = __new_exit_handler
-        # this rebinds termination signal (Ctrl+C) to the new exit handler
+        # rebind interrupt signal (Ctrl+C) to the new exit handler
         signal.signal(signal.SIGINT, __new_exit_handler)
+        # rebind termination signal to the new exit handler
+        signal.signal(signal.SIGTERM, __exit_handler)
         return __new_exit_handler
     return __wrapper
 
