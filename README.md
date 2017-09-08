@@ -1,6 +1,6 @@
 [![pypi](https://img.shields.io/pypi/v/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
-[![python](https://img.shields.io/pypi/pyversions/tinyscript.svg](https://pypi.python.org/pypi/tinyscript/)
-[![license](https://img.shields.io/pypi/l/tinyscript.svg](https://pypi.python.org/pypi/tinyscript/)
+[![python](https://img.shields.io/pypi/pyversions/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
+[![license](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 
 # TinyScript
 
