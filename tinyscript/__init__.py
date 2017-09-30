@@ -118,16 +118,15 @@ def exit_handler(glob=None):
     """
     def __wrapper(f):
         global __updated_exit_handler
-        def __new_exit_handler(signal=None, frame=None, code=0, *args, **kwargs):
+        def __new_exit_handler(s=None, f=None, c=0, *args, **kwargs):
             f(*args, **kwargs)
-            __exit_handler(signal, frame, code)
+            __exit_handler(s, f, c)
         if glob is not None:
             glob[f] = __new_exit_handler
+        # overwrite __updated_exit_handler, used in "validate"
         __updated_exit_handler = __new_exit_handler
-        # rebind interrupt signal (Ctrl+C) to the new exit handler
-        signal.signal(signal.SIGINT, __new_exit_handler)
         # rebind termination signal to the new exit handler
-        signal.signal(signal.SIGTERM, __exit_handler)
+        signal.signal(signal.SIGTERM, __new_exit_handler)
         return __new_exit_handler
     return __wrapper
 
@@ -186,6 +185,25 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
         coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
         coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
         coloredlogs.install(glob['args']._debug_level)
+
+
+def interrupt_handler(glob=None):
+    """
+    Customized interrupt handler decorator.
+
+    :param glob: globals() instance from the calling script
+    """
+    def __wrapper(f):
+        global __updated_interrupt_handler
+        def __new_interrupt_handler(s=None, f=None, c=0, *args, **kwargs):
+            f(*args, **kwargs)
+            __exit_handler(s, f, c)
+        if glob is not None:
+            glob[f] = __new_interrupt_handler
+        # rebind interrupt signal (Ctrl+C) to the new exit handler
+        signal.signal(signal.SIGINT, __new_interrupt_handler)
+        return __new_interrupt_handler
+    return __wrapper
 
 
 def validate(glob, *arg_checks):

@@ -85,11 +85,11 @@ List of pre-imported built-in modules:
 - ```time```
 
 
-### Customizing the exit handler
+### Customizing the exit/interrupt handler
 
-By default, an exit handler is bound to SIGINT signal with namely the graceful shutdown of `logging`. In some cases, it could be useful to add some extra lines to this handler, e.g. when using a socket that should be closed for clean shutdown.
+By default, an exit handler is bound to SIGTERM signal with namely the graceful shutdown of `logging`. Moreover, an interrupt handler is bound to SIGINT that does, by default, the exact same thing as the exit handler. In some cases, it could be useful to add some extra lines to these handler, e.g. when using a socket that should be closed for clean shutdown.
 
-This can be achieved by using the `exit_handler()` decorator (see hereafter for an example). It takes `globals()` as its single argument and is `None` by default so that it can update the custom exit handler with the default one. If this argument is missing, the `None` means that the custom exit handler will then not be updated. In both cases, the exit handler bound to SIGINT will be updated as well.
+This can be achieved by using the `exit_handler()` or `interrupt_handler()` decorator (see hereafter for an example). It takes `globals()` as its single argument (useful if the defined decorated function, e.g. `shutdown` or `abort` must be called from within the calling script) and is `None` by default (in this case, only updating the handler within `tinyscript`'s scope).
 
 
 ## Example
@@ -106,7 +106,11 @@ __doc__ = "This is an example tool"
 
 from tinyscript import *
 
-@exit_handler(globals())
+@interrupt_handler(globals())
+def abort():
+    logger.info("Interrupting execution...")
+
+@exit_handler
 def shutdown():
     logger.info("Shutting down...")
 
@@ -131,6 +135,14 @@ if __name__ == '__main__':
     )  # this will exit because of 'integer' whose default is -1
        # and will only give a warning for 'integer2' whose default is -1
     logger.info(args)
+    # this illustrates that a call to `interrupt_handler` will work as 
+    #  `globals()` is used as an argument to the decorator
+    if args.integer == 10:
+        interrupt_handler()
+    # this illustrates that a call to `exit_handler` will NOT work as 
+    #  `globals()` is NOT used as an argument to the decorator
+    if args.integer2 == 10:
+        exit_handler()  # will throw a NameError exception
     while True:
         pass  # Ctrl+C will use shutdown()
 
