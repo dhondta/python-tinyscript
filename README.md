@@ -25,9 +25,9 @@ sudo pip3 install tinyscript
 
 - Formats tool's help using ```argparse``` and script metadata
 - Creates a logger and enables colored logging
-- Reduce lines for defining input arguments and increase script lisibility
+- Reduce lines for defining input arguments and increase script readability
 - Pre-imports some common built-in modules
-- Customize exit handler for clean shutdown
+- Customize exit/interrupt/terminate handlers
 
 
 ## Usage
@@ -85,14 +85,30 @@ List of pre-imported built-in modules:
 - ```time```
 
 
-### Customizing the exit/interrupt handler
+### Customizing the exit/interrupt/terminate handler
 
-By default, an exit handler is bound to SIGTERM signal with namely the graceful shutdown of `logging`. Moreover, an interrupt handler is bound to SIGINT that does, by default, the exact same thing as the exit handler. In some cases, it could be useful to add some extra lines to these handler, e.g. when using a socket that should be closed for clean shutdown.
+Handlers are defined as follows:
 
-This can be achieved by using the `exit_handler()` or `interrupt_handler()` decorator (see hereafter for an example). It takes `globals()` as its single argument (useful if the defined decorated function, e.g. `shutdown` or `abort` must be called from within the calling script) and is `None` by default (in this case, only updating the handler within `tinyscript`'s scope).
+- `at_exit`: This is executed when the script ends, whatever the reason. This can be used e.g. for closing a socket.
+- `at_graceful_exit`: This only runs if the script completed successfully. `at_exit` is executed afterwards.
+- `at_interrupt`: This only runs when SIGINT signal is received, in other words, when Ctrl+C is hit. `at_exit` is executed afterwards.
+- `at_terminate`: This only runs when SIGTERM signal is received, in other words, when another process kills the script. `at_exit` is executed afterwards.
 
 
 ## Example
+
+Simple example with no documentation and no handlers:
+
+```py
+#!/usr/bin/env python
+from tinyscript import *
+
+if __name__ == '__main__':
+    initialize(globals())
+    logger.info("Hello world !")
+```
+
+Example with documentation and handlers:
 
 ```py
 #!/usr/bin/env python
@@ -106,13 +122,17 @@ __doc__ = "This is an example tool"
 
 from tinyscript import *
 
-@interrupt_handler(globals())
-def abort():
-    logger.info("Interrupting execution...")
-
-@exit_handler
-def shutdown():
+def at_exit():
     logger.info("Shutting down...")
+
+def at_graceful_exit():
+    logger.info("Execution successful")
+
+def at_interrupt():
+    logger.warn("Interrupted")
+
+def at_terminate():
+    logger.warn("Terminated")
 
 if __name__ == '__main__':
     global logger
@@ -135,16 +155,9 @@ if __name__ == '__main__':
     )  # this will exit because of 'integer' whose default is -1
        # and will only give a warning for 'integer2' whose default is -1
     logger.info(args)
-    # this illustrates that a call to `interrupt_handler` will work as 
-    #  `globals()` is used as an argument to the decorator
-    if args.integer == 10:
-        interrupt_handler()
-    # this illustrates that a call to `exit_handler` will NOT work as 
-    #  `globals()` is NOT used as an argument to the decorator
-    if args.integer2 == 10:
-        exit_handler()  # will throw a NameError exception
     while True:
-        pass  # Ctrl+C will use shutdown()
+        pass  # Ctrl+C will use at_interrupt()
+              # at_exit() will then execute
 
 # 'python example.py' will fail
 # 'python example.py -i 0' will give a warning for 'integer2'

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import argparse
+import atexit
 import logging
 import os
 import random
@@ -18,15 +19,35 @@ except:
 
 
 __all__ = [
-    'LOG_FORMAT', 'DATE_FORMAT',                              # constants
-    'parser',                                                 # instances
-    'exit_handler', 'initialize', 'validate',                 # functions
-    'logging', 'os', 'random', 're', 'signal','sys', 'time',  # modules
+    'LOG_FORMAT', 'DATE_FORMAT',                                   # constants
+    'parser',                                                      # instances
+    'at_exit', 'at_graceful_exit', 'at_interrupt', 'at_terminate', # handlers
+    'initialize', 'validate',                                      # functions
+    'logging', 'os', 'random', 're', 'signal','sys', 'time',       # modules
 ]
 
 
 LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
 DATE_FORMAT = '%H:%M:%S'
+
+
+class ExitHooks(object):
+    # inspired from: https://stackoverflow.com/questions/9741351/how-to-find-exit-code-or-reason-when-atexit-callback-is-called-in-python
+    def __init__(self):
+        self.code = None
+        self.exception = None
+        self.state = None
+
+    def hook(self):
+        self._orig_exit = sys.exit
+        sys.exit = self.exit
+
+    def exit(self, code=0):
+        self.code = code
+        self._orig_exit(code)
+
+__hooks = ExitHooks()
+__hooks.hook()
 
 
 def __descr_format(g):
@@ -47,23 +68,8 @@ def __descr_format(g):
             s += "\n%s: %s" % (v.strip('_').capitalize(), g[v])
             if v == '__author__' and '__email__' in g:
                 s += " ({})".format(g['__email__'])
-    return s + "\n\n" + g['__doc__'] if '__doc__' in g else s
-
-
-def __exit_handler(signal=None, frame=None, code=0):
-    """
-    Exit handler.
-
-    :param signal: signal number
-    :param stack: stack frame
-    :param code: exit code
-    """
-    logging.shutdown()
-    sys.exit(code)
-# bind interrupt signal (Ctrl+C) to the default exit handler
-signal.signal(signal.SIGINT, __exit_handler)
-# bind termination signal to the default exit handler
-signal.signal(signal.SIGTERM, __exit_handler)
+    d = g.get('__doc__')
+    return s + "\n\n" + d if d is not None else s
 
 
 def __get_calls_from_parser(proxy_parser, real_parser):
@@ -79,6 +85,20 @@ def __get_calls_from_parser(proxy_parser, real_parser):
         real_subparser = getattr(real_parser, method)(*args, **kwargs)
         if real_subparser is not None:
             __get_calls_from_parser(proxy_subparser, real_subparser)
+
+
+def __interrupt_handler(*args):
+    """
+    Exit handler.
+
+    :param signal: signal number
+    :param stack: stack frame
+    :param code: exit code
+    """
+    __hooks.state = "INTERRUPTED"
+    sys.exit(0)
+# bind to interrupt signal (Ctrl+C)
+signal.signal(signal.SIGINT, __interrupt_handler)
 
 
 def __proxy_to_real_parser(value):
@@ -106,29 +126,34 @@ def __proxy_to_real_parser(value):
     return value
 
 
-def __updated_exit_handler(signal=None, frame=None, code=0):
-    __exit_handler(signal, frame, code)
-
-
-def exit_handler(glob=None):
+def __terminate_handler(*args):
     """
-    Customized exit handler decorator.
+    Exit handler.
 
-    :param glob: globals() instance from the calling script
+    :param signal: signal number
+    :param stack: stack frame
+    :param code: exit code
     """
-    def __wrapper(f):
-        global __updated_exit_handler
-        def __new_exit_handler(s=None, f=None, c=0, *args, **kwargs):
-            f(*args, **kwargs)
-            __exit_handler(s, f, c)
-        if glob is not None:
-            glob[f] = __new_exit_handler
-        # overwrite __updated_exit_handler, used in "validate"
-        __updated_exit_handler = __new_exit_handler
-        # rebind termination signal to the new exit handler
-        signal.signal(signal.SIGTERM, __new_exit_handler)
-        return __new_exit_handler
-    return __wrapper
+    __hooks.state = "TERMINATED"
+    sys.exit(0)
+# bind to terminate signal
+signal.signal(signal.SIGTERM, __terminate_handler)
+
+
+def at_exit():
+    pass
+
+
+def at_graceful_exit():
+    pass
+
+
+def at_interrupt():
+    pass
+
+
+def at_terminate():
+    pass
 
 
 def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
@@ -141,10 +166,18 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
     :param sudo: if True, require sudo credentials and re-run script with sudo
     :param multi_debug_level: allow to use -v, -vv, -vvv (ajust logging level)
                                instead of just -v (only debug on/off)
+    :param exit_handler: bind a new exit handler to signal.SIGTERM
+    :param interrupt_handler: bind a new interrupt handler to signal.SIGINT
     :param add_help: set add_help in ArgumentParser
     """
     global parser, __parsers
-    # first, format help message's variables and create the real argument parser
+    # 1) if sudo required, restart the script
+    if sudo:
+        # if not root, restart the script in another process and jump to this
+        if os.geteuid() != 0:
+            python = [] if glob['__file__'].startswith("./") else ["python"]
+            os.execvp("sudo", ["sudo"] + python + sys.argv)
+    # 2) format help message's variables and create the real argument parser
     p = glob['__file__']
     p = p[2:] if p.startswith("./") else p
     e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
@@ -154,7 +187,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
     glob['parser'] = argparse.ArgumentParser(prog=p, epilog=e,
         description=__descr_format(glob), add_help=add_help,
         formatter_class=argparse.RawTextHelpFormatter)
-    # then populate the real parser
+    # 3) populate the real parser
     __parsers = {}
     __get_calls_from_parser(parser, glob['parser'])
     try:
@@ -165,13 +198,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
     except argparse.ArgumentError:
         pass  # if debug argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
-    # if sudo required, restart the script
-    if sudo:
-        # if not root, restart the script in another process and jump to this
-        if os.geteuid() != 0:
-            python = [] if glob['__file__'].startswith("./") else ["python"]
-            os.execvp("sudo", ["sudo"] + python + sys.argv)
-    # finally, configure logging and get the root logger
+    # 4) configure logging and get the root logger
     if multi_debug_level:
         glob['args']._debug_level = [logging.ERROR, logging.WARNING,
             logging.INFO, logging.DEBUG][min(glob['args'].verbose, 3)]
@@ -185,25 +212,17 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
         coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
         coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
         coloredlogs.install(glob['args']._debug_level)
-
-
-def interrupt_handler(glob=None):
-    """
-    Customized interrupt handler decorator.
-
-    :param glob: globals() instance from the calling script
-    """
-    def __wrapper(f):
-        global __updated_interrupt_handler
-        def __new_interrupt_handler(s=None, f=None, c=0, *args, **kwargs):
-            f(*args, **kwargs)
-            __exit_handler(s, f, c)
-        if glob is not None:
-            glob[f] = __new_interrupt_handler
-        # rebind interrupt signal (Ctrl+C) to the new exit handler
-        signal.signal(signal.SIGINT, __new_interrupt_handler)
-        return __new_interrupt_handler
-    return __wrapper
+    # 5) finally, bind the global exit handler
+    def __at_exit():
+        if __hooks.state == "INTERRUPTED":
+            glob['at_interrupt']()
+        elif __hooks.state == "TERMINATED":
+            glob['at_terminate']()
+        else:
+            glob['at_graceful_exit']()
+        glob['at_exit']()
+        logging.shutdown()
+    atexit.register(__at_exit)
 
 
 def validate(glob, *arg_checks):
