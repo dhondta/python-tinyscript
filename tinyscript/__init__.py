@@ -32,7 +32,8 @@ DATE_FORMAT = '%H:%M:%S'
 
 
 class ExitHooks(object):
-    # inspired from: https://stackoverflow.com/questions/9741351/how-to-find-exit-code-or-reason-when-atexit-callback-is-called-in-python
+    # inspired from: https://stackoverflow.com/questions/9741351/how-to-find-exi
+    #                 t-code-or-reason-when-atexit-callback-is-called-in-python
     def __init__(self):
         self.code = None
         self.exception = None
@@ -258,8 +259,7 @@ def validate(glob, *arg_checks):
             else:
                 glob['logger'].warn(message or "Validation failed")
                 setattr(glob['args'], param, default)
-    if exit_app:
-        __updated_exit_handler(code=2)
+    sys.exit(2)
 
 
 class ProxyArgumentParser(object):
