@@ -259,7 +259,8 @@ def validate(glob, *arg_checks):
             else:
                 glob['logger'].warn(message or "Validation failed")
                 setattr(glob['args'], param, default)
-    sys.exit(2)
+    if exit_app:
+        sys.exit(2)
 
 
 class ProxyArgumentParser(object):
