@@ -137,12 +137,13 @@ def at_terminate():
 if __name__ == '__main__':
     global logger
     parser.add_argument("-i", dest="integer", type=int, default=-1,
-                        help="an example integer (default: 1)")
+                        help="an example integer (default: -1)")
     parser.add_argument("-k", dest="integer2", type=int, default=-1,
-                        help="another example integer (default: 2)")
+                        help="another example integer (default: -1)")
     initialize(globals(),  # this appends 'args' and 'logger' to globals
                sudo=False, # this allows to require for sudo or not
-               multi_debug_level=True)  # this allows to use -v, -vv, -vvv
+               multi_debug_level=False) 
+               # if multi_debug_level=True, this allows to use -v, -vv, -vvv
                            #  no -v  => ERROR
                            #  -v     => WARNING
                            #  -vv    => INFO
@@ -155,11 +156,12 @@ if __name__ == '__main__':
     )  # this will exit because of 'integer' whose default is -1
        # and will only give a warning for 'integer2' whose default is -1
     logger.info(args)
+    logger.info("Hit Ctrl+C to leave...")
     while True:
         pass  # Ctrl+C will use at_interrupt()
               # at_exit() will then execute
 
 # 'python example.py' will fail
-# 'python example.py -i 0' will give a warning for 'integer2'
-# 'python example.py -i 0 -k 0' will work
+# 'python example.py -i 0 -v' will show a warning for 'integer2' (because of -v)
+# 'python example.py -i 0 -k 0' will work with no warning
 ```
