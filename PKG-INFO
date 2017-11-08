@@ -1,8 +1,8 @@
-Metadata-Version: 3.3
+Metadata-Version: 3.4
 Name: tinyscript
-Version: 0.3.3
+Version: 0.3.4
 Summary: A tiny library for easily building "self-contained" CLI Python tools with base features in a shortened way
-Home-page: https://github.com/jundongl/scikit-feature
+Home-page: https://github.com/dhondta/tinyscript
 Author: Alexandre D'Hondt
 Author-email: alexandre.dhondt@gmail.com
 License: GPLv3
