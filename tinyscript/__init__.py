@@ -23,7 +23,8 @@ __all__ = [
     'parser',                                                      # instances
     'at_exit', 'at_graceful_exit', 'at_interrupt', 'at_terminate', # handlers
     'initialize', 'validate',                                      # functions
-    'logging', 'os', 'random', 're', 'signal','sys', 'time',       # modules
+    'argparse', 'logging', 'os', 'random', 're', 'signal','sys',
+    'time',                                                        # modules
 ]
 
 
