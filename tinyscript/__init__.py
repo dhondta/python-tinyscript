@@ -2,6 +2,9 @@
 # -*- coding: UTF-8 -*-
 import argparse
 import atexit
+import binascii
+import codecs
+import itertools
 import logging
 import os
 import random
@@ -19,17 +22,24 @@ except:
 
 
 __all__ = [
-    'LOG_FORMAT', 'DATE_FORMAT',                                   # constants
+    'LOG_FORMAT', 'DATE_FORMAT', 'PYTHON3',                        # constants
     'parser',                                                      # instances
     'at_exit', 'at_graceful_exit', 'at_interrupt', 'at_terminate', # handlers
-    'initialize', 'validate',                                      # functions
-    'argparse', 'logging', 'os', 'random', 're', 'signal','sys',
-    'time',                                                        # modules
+    'initialize', 'validate', 'b', 'byteindex', 'iterbytes',       # functions
+    'argparse', 'binascii', 'itertools', 'logging', 'os',          # modules
+    'random', 're', 'signal','sys','time',
 ]
 
 
+PYTHON3 = sys.version_info > (3,)
 LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
 DATE_FORMAT = '%H:%M:%S'
+
+
+# see: http://python3porting.com/problems.html
+b = lambda s: codecs.latin_1_encode(s)[0] if PYTHON3 else s
+byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
+iterbytes = lambda d: iter(d) if PYTHON3 else [ord(c) for c in d]
 
 
 class ExitHooks(object):
