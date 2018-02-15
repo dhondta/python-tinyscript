@@ -200,20 +200,23 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
     except argparse.ArgumentError:
         pass  # if debug argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
-    # 4) configure logging and get the root logger
+    # 4) configure logging and get the main logger
     if multi_debug_level:
         glob['args']._debug_level = [logging.ERROR, logging.WARNING,
             logging.INFO, logging.DEBUG][min(glob['args'].verbose, 3)]
     else:
         glob['args']._debug_level = [logging.INFO, logging.DEBUG] \
                                     [glob['args'].verbose]
-    logging.basicConfig(format=glob['LOG_FORMAT'], datefmt=glob['DATE_FORMAT'],
-                        level=glob['args']._debug_level)
-    glob['logger'] = logging.getLogger()
+    glob['logger'] = logging.getLogger("main")
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(glob['LOG_FORMAT'], glob['DATE_FORMAT'])
+    handler.setFormatter(formatter)
+    glob['logger'].addHandler(handler)
+    glob['logger'].setLevel(glob['args']._debug_level)
     if colored_logs_present:
         coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
         coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
-        coloredlogs.install(glob['args']._debug_level)
+        coloredlogs.install(glob['args']._debug_level, logger=glob['logger'])
     # 5) finally, bind the global exit handler
     def __at_exit():
         if __hooks.state == "INTERRUPTED":
