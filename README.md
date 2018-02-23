@@ -97,16 +97,45 @@ Handlers are defined as follows:
 
 ## Example
 
-Simple example with no documentation and no handlers:
+Very simple example with no documentation and no handlers:
 
 ```py
+""" hello-world.py """
 #!/usr/bin/env python
 from tinyscript import *
+
+__author__ = "John Doe"
+__version__ = "1.0"
+__reference__ = "Tinyscript documentation"
+__examples__ = ["-h"]
 
 if __name__ == '__main__':
     initialize(globals())
     logger.info("Hello world !")
 ```
+
+In a terminal, it gives:
+
+```sh
+$ python hello-world.py 
+12:34:56 [INFO] Hello world !
+
+$ python hello-world.py -h
+usage: hello-world.py [-h] [-v]
+
+HelloWorld v1.0
+Author: John Doe
+Reference: Tinyscript documentation
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -v          debug verbose level (default: false)
+
+Usage examples:
+  python hello-world.py -h
+
+```
+
 
 Example with documentation and handlers:
 
