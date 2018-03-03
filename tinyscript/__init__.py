@@ -16,7 +16,7 @@ import time
 try:
     import coloredlogs
     colored_logs_present = True
-except:
+except ImportError:
     print("(Install 'coloredlogs' for colored logging)")
     colored_logs_present = False
 
