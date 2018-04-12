@@ -1,17 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import argparse
+# modules not to be pre-imported
 import atexit
-import binascii
 import codecs
-import itertools
-import logging
-import os
-import random
-import re
-import signal
-import sys
-import time
+import importlib
 # colorize logging
 try:
     import coloredlogs
@@ -20,15 +12,31 @@ except ImportError:
     print("(Install 'coloredlogs' for colored logging)")
     colored_logs_present = False
 
+# modules to be pre-imported in the main script using tinyscript
+PREIMPORTS = [
+    "argparse",
+    "binascii",
+    "itertools",
+    "logging",
+    "os",
+    "random",
+    "re",
+    "signal",
+    "sys",
+    "time",
+]
+
+
+for module in PREIMPORTS:
+    globals()[module] = importlib.import_module(module)
+
 
 __all__ = [
     'LOG_FORMAT', 'DATE_FORMAT', 'PYTHON3',                        # constants
     'parser',                                                      # instances
     'at_exit', 'at_graceful_exit', 'at_interrupt', 'at_terminate', # handlers
     'initialize', 'validate', 'b', 'byteindex', 'iterbytes',       # functions
-    'argparse', 'binascii', 'itertools', 'logging', 'os',          # modules
-    'random', 're', 'signal','sys','time',
-]
+] + PREIMPORTS                                                     # modules
 
 
 PYTHON3 = sys.version_info > (3,)
@@ -69,9 +77,7 @@ def __descr_format(g):
     :param g: globals() dictionary
     :return: the formatted help description
     """
-    p = g['__file__']
-    p = p[2:] if p.startswith("./") else p
-    p = p[:-3] if p.endswith(".py") else p
+    p, _ = os.path.splitext(os.path.basename(g['__file__']))
     s = ''.join([x.capitalize() for x in p.split('-')])
     if '__version__' in g:
         s += " v" + g['__version__']
@@ -101,7 +107,7 @@ def __get_calls_from_parser(proxy_parser, real_parser):
 
 def __interrupt_handler(*args):
     """
-    Exit handler.
+    Interruption handler.
 
     :param signal: signal number
     :param stack: stack frame
@@ -140,7 +146,7 @@ def __proxy_to_real_parser(value):
 
 def __terminate_handler(*args):
     """
-    Exit handler.
+    Termination handler.
 
     :param signal: signal number
     :param stack: stack frame
@@ -176,10 +182,8 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
 
     :param glob: globals() instance from the calling script
     :param sudo: if True, require sudo credentials and re-run script with sudo
-    :param multi_debug_level: allow to use -v, -vv, -vvv (ajust logging level)
+    :param multi_debug_level: allow to use -v, -vv, -vvv (adjust logging level)
                                instead of just -v (only debug on/off)
-    :param exit_handler: bind a new exit handler to signal.SIGTERM
-    :param interrupt_handler: bind a new interrupt handler to signal.SIGINT
     :param add_help: set add_help in ArgumentParser
     """
     global parser, __parsers
@@ -190,13 +194,13 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
             python = [] if glob['__file__'].startswith("./") else ["python"]
             os.execvp("sudo", ["sudo"] + python + sys.argv)
     # 2) format help message's variables and create the real argument parser
-    p = glob['__file__']
-    p = p[2:] if p.startswith("./") else p
+    p = os.path.basename(glob['__file__'])
+    pn, _ = os.path.splitext(p)
     e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
         else glob['__examples__']
     e = "Usage examples:\n" + '\n'.join(["  python {0} {1}".format(p, x) \
         for x in e]) if e is not None else e
-    glob['parser'] = argparse.ArgumentParser(prog=p, epilog=e,
+    glob['parser'] = argparse.ArgumentParser(prog=pn, epilog=e,
         description=__descr_format(glob), add_help=add_help,
         formatter_class=argparse.RawTextHelpFormatter)
     # 3) populate the real parser
