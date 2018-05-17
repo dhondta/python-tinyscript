@@ -231,6 +231,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
     else:
         glob['args']._debug_level = [logging.INFO, logging.DEBUG] \
                                     [glob['args'].verbose]
+    logger.handlers = []
     glob['logger'] = logger
     handler = logging.StreamHandler()
     formatter = logging.Formatter(glob['LOG_FORMAT'], glob['DATE_FORMAT'])
