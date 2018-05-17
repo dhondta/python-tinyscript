@@ -22,6 +22,7 @@ PREIMPORTS = [
     "random",
     "re",
     "signal",
+    "string",
     "sys",
     "time",
 ]
@@ -42,6 +43,14 @@ __all__ = [
 PYTHON3 = sys.version_info > (3,)
 LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
 DATE_FORMAT = '%H:%M:%S'
+
+
+# setup a default logger for allowing logging before initialize() is called
+logger = logging.getLogger("main")
+if colored_logs_present:
+    coloredlogs.DEFAULT_LOG_FORMAT = LOG_FORMAT
+    coloredlogs.DEFAULT_DATE_FORMAT = DATE_FORMAT
+    coloredlogs.install(logger=logger)
 
 
 # see: http://python3porting.com/problems.html
@@ -202,7 +211,8 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
         for x in e]) if e is not None else e
     glob['parser'] = argparse.ArgumentParser(prog=pn, epilog=e,
         description=__descr_format(glob), add_help=add_help,
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=argparse.RawTextHelpFormatter,
+        conflict_handler="resolve")
     # 3) populate the real parser
     __parsers = {}
     __get_calls_from_parser(parser, glob['parser'])
@@ -221,7 +231,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True):
     else:
         glob['args']._debug_level = [logging.INFO, logging.DEBUG] \
                                     [glob['args'].verbose]
-    glob['logger'] = logging.getLogger("main")
+    glob['logger'] = logger
     handler = logging.StreamHandler()
     formatter = logging.Formatter(glob['LOG_FORMAT'], glob['DATE_FORMAT'])
     handler.setFormatter(formatter)
@@ -270,7 +280,15 @@ def validate(glob, *arg_checks):
     for check in arg_checks:
         check = check + (None, ) * (4 - len(check))
         param, condition, message, default = check
-        if eval(condition.replace(" ? ", " glob['args'].{} ".format(param))):
+        assert re.match(r'^_?[a-zA-Z][a-zA-Z0-9_]*$', param) is not None, \
+               "Illegal argument name"
+        try:
+            result = eval(condition.replace(" ? ", " glob['args'].{} "
+                                                   .format(param)))
+        except AssertionError as e:
+            result = True
+            message = str(e)
+        if result:
             if default is None:
                 glob['logger'].error(message or "Validation failed")
                 exit_app = True
