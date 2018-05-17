@@ -34,7 +34,7 @@ for module in PREIMPORTS:
 
 __all__ = [
     'LOG_FORMAT', 'DATE_FORMAT', 'PYTHON3',                        # constants
-    'parser',                                                      # instances
+    'logger', 'parser',                                            # instances
     'at_exit', 'at_graceful_exit', 'at_interrupt', 'at_terminate', # handlers
     'initialize', 'validate', 'b', 'byteindex', 'iterbytes',       # functions
 ] + PREIMPORTS                                                     # modules
