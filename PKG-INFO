@@ -1,6 +1,6 @@
-Metadata-Version: 3.19
+Metadata-Version: 3.20
 Name: tinyscript
-Version: 0.3.19
+Version: 0.3.20
 Summary: A tiny library for easily building "self-contained" CLI Python tools with base features in a shortened way
 Home-page: https://github.com/dhondta/tinyscript
 Author: Alexandre D'Hondt
