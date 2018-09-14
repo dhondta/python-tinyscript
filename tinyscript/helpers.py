@@ -25,4 +25,5 @@ is_str = lambda s: isinstance(s, string_types)
 is_lst = lambda l: isinstance(l, (list, tuple))
 
 is_bin = lambda b: (is_str or is_lst) and all(str(_) in "01" for _ in b)
-is_hex = lambda h: is_str and all(_ in "0123456789abcdef" for _ in h.lower())
+is_hex = lambda h: is_str and len(h) % 2 == 0 and \
+                   all(_ in "0123456789abcdef" for _ in h.lower())
