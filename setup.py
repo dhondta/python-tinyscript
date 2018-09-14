@@ -6,14 +6,14 @@ from setuptools import setup
 setup(
   name = "tinyscript",
   packages = ["tinyscript"],
-  version = "0.3.18",
+  version = "0.3.19",
   license = "GPLv3",
   description = "A tiny library for easily building \"self-contained\" CLI "
                 "Python tools with base features in a shortened way",
   author = "Alexandre D\'Hondt",
   author_email = "alexandre.dhondt@gmail.com",
   url = "https://github.com/dhondta/tinyscript",
-  download_url = "https://github.com/dhondta/tinyscript/archive/0.3.18.tar.gz",
+  download_url = "https://github.com/dhondta/tinyscript/archive/0.3.19.tar.gz",
   keywords = ["CLI tool", "logging"],
   classifiers = [
     'Development Status :: 3 - Alpha',

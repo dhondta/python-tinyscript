@@ -8,7 +8,7 @@ __author__ = "Alexandre D'Hondt"
 __version__ = "1.0"
 __copyright__ = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
 __all__ = ["bin2int", "bin2txt", "int2bin", "txt2bin",
-           "is_bin", "is_str", "is_lst"]
+           "is_bin", "is_hex", "is_lst", "is_str"]
 
 
 from six import string_types
