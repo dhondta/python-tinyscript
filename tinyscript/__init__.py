@@ -19,7 +19,7 @@ from .parser import __features__ as _parser
 from .preimports import __features__ as _preimports
 
 
-__all__ = _handlers + _helpers + _loglib + _parser + _preimports + ["new"]
+__all__ = _handlers + _helpers + _loglib + _parser + _preimports
 
 
 def new():
