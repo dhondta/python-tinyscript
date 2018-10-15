@@ -1,19 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+from os.path import abspath, dirname, join
 from setuptools import setup
 
+
+currdir = abspath(dirname(__file__))
+with open(join(currdir, 'README.md')) as f:
+    long_descr = f.read()
 
 setup(
   name = "tinyscript",
   packages = ["tinyscript"],
-  version = "1.0.0",
-  license = "AGPLv3",
-  description = "A library for quickly building CLI Python-based tools with "
-                "basic features in a shortened way",
   author = "Alexandre D\'Hondt",
   author_email = "alexandre.dhondt@gmail.com",
+  version = "1.0.0",
+  license = "AGPLv3",
   url = "https://github.com/dhondta/tinyscript",
   download_url = "https://github.com/dhondta/tinyscript/archive/1.0.0.tar.gz",
+  description = "A library for quickly building CLI Python-based tools with "
+                "basic features in a shortened way",
+  long_description=long_descr,
+  long_description_content_type='text/markdown',
   keywords = ["CLI", "tool"],
   classifiers = [
     'Development Status :: 4 - Beta',
