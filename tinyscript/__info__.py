@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+"""Tinyscript package information.
+
+"""
+
+__author__ = "Alexandre D'Hondt"
+__version__ = "0.4.20"
+__copyright__ = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
+

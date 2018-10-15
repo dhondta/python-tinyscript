@@ -3,16 +3,25 @@
 """Common help utility functions.
 
 """
+from six import string_types
+from sys import version_info
 
-__author__ = "Alexandre D'Hondt"
-__version__ = "1.0"
-__copyright__ = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
+from .__info__ import __author__, __copyright__, __version__
+
+
+__features__ = ["PYTHON3", "b", "byteindex", "iterbytes"]
 __all__ = ["bin2int", "bin2txt", "int2bin", "txt2bin",
            "is_int", "is_lst", "is_str",
-           "is_bin", "is_hex"]
+           "is_bin", "is_hex"] + __features__
 
 
-from six import string_types
+PYTHON3 = version_info > (3,)
+
+
+# see: http://python3porting.com/problems.html
+b = lambda s: codecs.latin_1_encode(s)[0] if PYTHON3 else s
+byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
+iterbytes = lambda d: iter(d) if PYTHON3 else [ord(c) for c in d]
 
 
 bin2int = lambda b: int("0b" + b, 2)
