@@ -20,10 +20,3 @@ from .preimports import __features__ as _preimports
 
 
 __all__ = _handlers + _helpers + _loglib + _parser + _preimports
-
-
-def new():
-    from os.path import dirname, join
-    with open(join(dirname(__file__), "template.py")) as fin, \
-         open("template.py", 'w') as fout:
-        fout.write(fin.read())

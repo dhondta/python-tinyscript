@@ -121,7 +121,7 @@ def initialize(glob, sudo=False, multi_debug_level=False,
                  .format(["false", "error"][multi_debug_level]))
     except argparse.ArgumentError:
         pass  # if debug argument was already passed, just ignore
-    if e is not None:
+    if e is not None and add_demo:
         try:
             glob['parser'].add_argument("--demo", action="store_true",
                                         help="run a demo (default: false)")
@@ -129,7 +129,7 @@ def initialize(glob, sudo=False, multi_debug_level=False,
             pass  # if debug argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
     if hasattr(glob['args'], "demo") and glob['args'].demo:
-        argv = random.choice(__examples__).split()
+        argv = random.choice(glob['__examples__']).split()
         os.execvp(sys.executable, [sys.executable] + argv)
     # 4) configure logging and get the main logger
     if multi_debug_level:
