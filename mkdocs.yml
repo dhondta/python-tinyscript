@@ -1,0 +1,22 @@
+site_name: "Tinyscript - A library for quickly prototyping CLI Python-based tools"
+repo_url: https://github.com/dhondta/tinyscript
+site_author: dhondta
+docs_dir: doc
+pages:
+  - Introduction: index.md
+  - Setup: setup.md
+  - Features: features.md
+  - Usage: usage.md
+  - Examples:
+    - 'Simple script': examples/simple-script.md
+    - 'Simple tool': examples/simple-tool.md
+    - 'Script with demo': examples/script-with-demo.md
+    - 'Tool with sudo': examples/tool-with-sudo.md
+extra:
+  mailto: alexandre.dhondt@gmail.com
+theme: readthedocs
+use_directory_urls: false
+markdown_extensions:
+  - admonition
+  - codehilite:
+      linenums: true
