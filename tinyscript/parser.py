@@ -7,6 +7,7 @@ import argparse
 import atexit
 import os
 import random
+import re
 import sys
 from os.path import basename, splitext
 
