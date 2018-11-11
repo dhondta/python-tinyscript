@@ -152,7 +152,16 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     # 4) configure logging and get the main logger
     configure_logger(glob, multi_debug_level)
     # 5) finally, bind the global exit handler
-    atexit.register(_at_exit)
+    def __at_exit():
+        if _hooks.state == "INTERRUPTED":
+            glob['at_interrupt']()
+        elif _hooks.state == "TERMINATED":
+            glob['at_terminate']()
+        else:
+            glob['at_graceful_exit']()
+        glob['at_exit']()
+        logging.shutdown()
+    atexit.register(__at_exit)
 
 
 def validate(glob, *arg_checks):

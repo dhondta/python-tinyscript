@@ -10,6 +10,7 @@ try:
     colored_logs_present = True
 except ImportError:
     print("(Install 'coloredlogs' for colored logging)")
+    coloredlogs = None
     colored_logs_present = False
 
 from .__info__ import __author__, __copyright__, __version__
