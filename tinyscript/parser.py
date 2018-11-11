@@ -196,7 +196,7 @@ def validate(glob, *arg_checks):
         try:
             result = eval(condition.replace(" ? ", " glob['args'].{} "
                                                    .format(param)))
-        except AssertionError as e:
+        except (AssertionError, TypeError) as e:
             result = True
             message = str(e)
         if result:
