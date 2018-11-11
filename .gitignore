@@ -62,8 +62,9 @@ docs/_build/
 # PyBuilder
 target/
 
-# Project
+# Project artifacts
 .idea
 .vagrant
 .test
 tmp
+TODO
