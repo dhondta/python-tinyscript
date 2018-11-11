@@ -1,5 +1,5 @@
 [![PyPi](https://img.shields.io/pypi/v/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
-[![Read The Docs](https://readthedocs.org/projects/tinyscript/badge/?version=latest)](http://tinyscript.readthedocs.io/en/latest/?badge=latest)
+[![Read The Docs](https://readthedocs.org/projects/tinyscript/badge/?version=latest)](https://tinyscript.readthedocs.io/en/latest/?badge=latest)
 [![Python Versions](https://img.shields.io/pypi/pyversions/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 [![License](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 
