@@ -16,7 +16,7 @@ from .handlers import __features__ as _handlers
 from .helpers import __features__ as _helpers
 from .loglib import __features__ as _loglib
 from .parser import __features__ as _parser
-from .preimports import __features__ as _preimports
+from .preimports import __features__ as __preimports__
 
 
-__all__ = _handlers + _helpers + _loglib + _parser + _preimports
+__all__ = _handlers + _helpers + _loglib + _parser + __preimports__
