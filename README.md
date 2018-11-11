@@ -1,6 +1,7 @@
-[![pypi](https://img.shields.io/pypi/v/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
-[![python](https://img.shields.io/pypi/pyversions/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
-[![license](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
+[![PyPi](https://img.shields.io/pypi/v/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
+[![Read The Docs](https://readthedocs.org/projects/tinyscript/badge/?version=latest)](http://tinyscript.readthedocs.io/en/latest/?badge=latest)
+[![Python Versions](https://img.shields.io/pypi/pyversions/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
+[![License](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 
 # TinyScript
 
@@ -8,26 +9,12 @@ This library is currently a very minimalistic module aimed to shorten and format
 
 NB: By "self-contained", it is meant that the script does not rely on relative libraries or any configuration or other file, only on Python installed libraries. Such a tool is thus contained in a single file. This is because it is more convenient for deploying its into an executable path.
 
+
 ## Installation
 
 ```
 sudo pip install tinyscript
 ```
-
-or
-
-```
-sudo pip3 install tinyscript
-```
-
-
-## Features
-
-- Formats tool's help using ```argparse``` and script metadata
-- Creates a logger and enables colored logging
-- Reduce lines for defining input arguments and increase script readability
-- Pre-imports some common built-in modules
-- Customize exit/interrupt/terminate handlers
 
 
 ## Usage
