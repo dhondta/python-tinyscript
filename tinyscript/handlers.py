@@ -3,6 +3,7 @@
 """Module for defining handlers and exit hook.
 
 """
+import logging
 import signal
 import sys
 
@@ -10,7 +11,7 @@ from .__info__ import __author__, __copyright__, __version__
 
 
 __features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate"]
-__all__ = ["_hooks"] + __features__
+__all__ = ["_at_exit", "_hooks"] + __features__
 
 
 class ExitHooks(object):
@@ -59,6 +60,17 @@ def __terminate_handler(*args):
     sys.exit(0)
 # bind to terminate signal
 signal.signal(signal.SIGTERM, __terminate_handler)
+
+
+def _at_exit():
+    if _hooks.state == "INTERRUPTED":
+        glob['at_interrupt']()
+    elif _hooks.state == "TERMINATED":
+        glob['at_terminate']()
+    else:
+        glob['at_graceful_exit']()
+    glob['at_exit']()
+    logging.shutdown()
 
 
 def at_exit():
