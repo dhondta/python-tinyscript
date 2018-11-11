@@ -79,19 +79,23 @@ def __proxy_to_real_parser(value):
 
 
 def initialize(glob, sudo=False, multi_debug_level=False,
-                     add_help=True, add_demo=False):
+                     add_help=True, add_demo=False, add_wizard=False):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
      calling script.
 
-    :param glob: globals() instance from the calling script
-    :param sudo: if True, require sudo credentials and re-run script with sudo
+    :param glob:              globals() instance from the calling script
+    :param sudo:              if True, require sudo credentials and re-run
+                               script with sudo
     :param multi_debug_level: allow to use -v, -vv, -vvv (adjust logging level)
                                instead of just -v (only debug on/off)
-    :param add_help: set add_help in ArgumentParser
-    :param add_demo: attach a demo function to the args for demonstrating a 
-                      random entry from the __examples__
+    :param add_help:          set add_help in ArgumentParser
+    :param add_demo:          add an option to re-run the process using a random
+                               entry from the __examples__ (only works if this
+                               variable is populated)
+    :param add_wizard:        add an option to run a wizard, asking for each
+                               input argument
     """
     global parser, __parsers
     # 1) if sudo required, restart the script
@@ -120,46 +124,35 @@ def initialize(glob, sudo=False, multi_debug_level=False,
             help="debug verbose level (default: {})"
                  .format(["false", "error"][multi_debug_level]))
     except argparse.ArgumentError:
-        pass  # if debug argument was already passed, just ignore
+        pass  # if this argument was already passed, just ignore
     if e is not None and add_demo:
         try:
-            glob['parser'].add_argument("--demo", action="store_true",
-                                        help="run a demo (default: false)")
+            glob['parser'].add_argument("--play-demo", action="store_true",
+                                        help="play a demo (default: false)\n  "
+                                             "NB: this has the precedence on "
+                                             "any other option")
         except argparse.ArgumentError:
-            pass  # if debug argument was already passed, just ignore
+            pass # if this argument was already passed, just ignore
+    if add_wizard:
+        try:
+            glob['parser'].add_argument("--start-wizard", action="store_true",
+                                        help="start a wizard (default: false)")
+        except argparse.ArgumentError:
+            pass # if this argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
+    # now, handle the demo if relevant
     if hasattr(glob['args'], "demo") and glob['args'].demo:
-        argv = random.choice(glob['__examples__']).split()
-        os.execvp(sys.executable, [sys.executable] + argv)
+        argv = random.choice(glob['__examples__']).replace("--play-demo", "")
+        # now, replace the current process by a new and therefore, do not return
+        os.execvp(sys.executable, [sys.executable] + argv.split())
+    # then, handle the wizard if relevant
+    #TODO: parse each possible argument, using its default value if not set in
+    #       user input, using os.execvp once all new arguments have been entered
+    #       by the user
     # 4) configure logging and get the main logger
-    if multi_debug_level:
-        glob['args']._debug_level = [logging.ERROR, logging.WARNING,
-            logging.INFO, logging.DEBUG][min(glob['args'].verbose, 3)]
-    else:
-        glob['args']._debug_level = [logging.INFO, logging.DEBUG] \
-                                    [glob['args'].verbose]
-    logger.handlers = []
-    glob['logger'] = logger
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter(glob['LOG_FORMAT'], glob['DATE_FORMAT'])
-    handler.setFormatter(formatter)
-    glob['logger'].addHandler(handler)
-    glob['logger'].setLevel(glob['args']._debug_level)
-    if colored_logs_present:
-        coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
-        coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
-        coloredlogs.install(glob['args']._debug_level, logger=glob['logger'])
+    configure_logger(glob, multi_debug_level)
     # 5) finally, bind the global exit handler
-    def __at_exit():
-        if _hooks.state == "INTERRUPTED":
-            glob['at_interrupt']()
-        elif _hooks.state == "TERMINATED":
-            glob['at_terminate']()
-        else:
-            glob['at_graceful_exit']()
-        glob['at_exit']()
-        logging.shutdown()
-    atexit.register(__at_exit)
+    atexit.register(_at_exit)
 
 
 def validate(glob, *arg_checks):
