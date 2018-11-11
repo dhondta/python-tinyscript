@@ -52,11 +52,24 @@ MAIN = """if __name__ == '__main__':
     # TODO: write new arguments
     initialize(globals())
     # TODO: use validate(globals(), ...) if necessary
-    # TODO: write logic here
+    # TODO: write logic here{base}
 """
 
 TEMPLATES = ["script", "tool"]
-ITEMS = ["pybots.HTTPBot", "pybots.JSONBot", "pybots.TCPBot"]
+ITEMS = {
+    "pybots.HTTPBot": """
+    with HTTPBot("...", verbose=True) as bot:
+        bot.get()
+""",
+    "pybots.JSONBot": """
+    with JSONBot("...", verbose=True) as bot:
+        bot.get()
+""",
+    "pybots.TCPBot": """
+    with TCPBot("...", 1234, verbose=True) as bot:
+        bot.send_receive("...")
+"""
+}
 
 
 def new(target):
@@ -72,14 +85,17 @@ def new(target):
            "First target argument must be one of the followings: {}" \
            .format(TEMPLATES)
     item = target[1] if len(target) == 2 else None
-    assert item is None or item in ITEMS, \
+    items = ITEMS.keys()
+    assert item is None or item in items, \
            "Second target argument must be one of the followings: {}" \
-           .format(ITEMS)
+           .format(items)
     with open("{}.py".format(template), 'w') as f:
         item_import = "" if item is None else "from {} import {}\n" \
                                               .format(*item.split('.'))
+        base = ITEMS.get(item)
+        main = MAIN.format(base=base or "")
         if template == "script":
-            f.write(SHEBANG + IMPORTS.format(item=item_import) + "\n\n" + MAIN)
+            f.write(SHEBANG + IMPORTS.format(item=item_import) + "\n\n" + main)
         elif template == "tool":
             f.write(SHEBANG + TOOL_METADATA + TOOL_SECTIONS \
-                    .format(imports=IMPORTS.format(item=item_import)) + MAIN)
+                    .format(imports=IMPORTS.format(item=item_import)) + main)
