@@ -99,13 +99,20 @@ def initialize(glob, sudo=False, multi_debug_level=False,
                                input argument
     """
     global parser, __parsers
-    # 1) if sudo required, restart the script
+    # 1) handle the demo if relevant
+    if add_demo and "--play-demo" in sys.argv:
+        exe, script = sys.executable, glob['__file__']
+        argv = random.choice(glob['__examples__']).replace("--play-demo", "")
+        # now, replace the current process by a new and therefore, do not return
+        print([exe, script] + argv.split())
+        os.execvp(exe, [exe, script] + argv.split())
+    # 2) if sudo required, restart the script
     if sudo:
         # if not root, restart the script in another process and jump to this
         if os.geteuid() != 0:
             python = [] if glob['__file__'].startswith("./") else ["python"]
             os.execvp("sudo", ["sudo"] + python + sys.argv)
-    # 2) format help message's variables and create the real argument parser
+    # 3) format help message's variables and create the real argument parser
     p = basename(glob['__file__'])
     pn, _ = splitext(p)
     e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
@@ -116,7 +123,7 @@ def initialize(glob, sudo=False, multi_debug_level=False,
         description=__descr_format(glob), add_help=add_help,
         formatter_class=argparse.RawTextHelpFormatter,
         conflict_handler="resolve")
-    # 3) populate the real parser and add default options (if not used yet)
+    # 4) populate the real parser and add default options (if not used yet)
     __parsers = {}
     __get_calls_from_parser(parser, glob['parser'])
     try:
@@ -141,18 +148,13 @@ def initialize(glob, sudo=False, multi_debug_level=False,
         except argparse.ArgumentError:
             pass # if this argument was already passed, just ignore
     glob['args'] = glob['parser'].parse_args()
-    # now, handle the demo if relevant
-    if hasattr(glob['args'], "demo") and glob['args'].demo:
-        argv = random.choice(glob['__examples__']).replace("--play-demo", "")
-        # now, replace the current process by a new and therefore, do not return
-        os.execvp(sys.executable, [sys.executable] + argv.split())
     # then, handle the wizard if relevant
     #TODO: parse each possible argument, using its default value if not set in
     #       user input, using os.execvp once all new arguments have been entered
     #       by the user
-    # 4) configure logging and get the main logger
+    # 5) configure logging and get the main logger
     configure_logger(glob, multi_debug_level)
-    # 5) finally, bind the global exit handler
+    # 6) finally, bind the global exit handler
     def __at_exit():
         if _hooks.state == "INTERRUPTED":
             glob['at_interrupt']()
