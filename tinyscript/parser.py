@@ -103,9 +103,7 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     if add_demo and "--play-demo" in sys.argv:
         exe, script = sys.executable, glob['__file__']
         argv = random.choice(glob['__examples__']).replace("--play-demo", "")
-        # now, replace the current process by a new and therefore, do not return
-        print([exe, script] + argv.split())
-        os.execvp(exe, [exe, script] + argv.split())
+        sys.argv[1:] = argv.split()
     # 2) if sudo required, restart the script
     if sudo:
         # if not root, restart the script in another process and jump to this
