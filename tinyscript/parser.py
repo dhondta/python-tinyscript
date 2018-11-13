@@ -8,6 +8,7 @@ import atexit
 import os
 import random
 import re
+import shlex
 import sys
 from os.path import basename, splitext
 
@@ -101,9 +102,8 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     global parser, __parsers
     # 1) handle the demo if relevant
     if add_demo and "--play-demo" in sys.argv:
-        exe, script = sys.executable, glob['__file__']
         argv = random.choice(glob['__examples__']).replace("--play-demo", "")
-        sys.argv[1:] = argv.split()
+        sys.argv[1:] = shlex.split(argv)
     # 2) if sudo required, restart the script
     if sudo:
         # if not root, restart the script in another process and jump to this

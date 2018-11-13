@@ -1,6 +1,6 @@
-Metadata-Version: 2.6
+Metadata-Version: 2.7
 Name: tinyscript
-Version: 1.1.6
+Version: 1.1.7
 Summary: A library for quickly prototyping CLI Python-based tools
 Home-page: https://github.com/dhondta/tinyscript
 Author: Alexandre D'Hondt
