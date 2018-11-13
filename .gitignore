@@ -68,3 +68,5 @@ target/
 .test
 tmp
 TODO
+script.py
+tool.py
