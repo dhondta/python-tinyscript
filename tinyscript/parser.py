@@ -13,11 +13,14 @@ import sys
 from os.path import basename, splitext
 
 from .__info__ import __author__, __copyright__, __version__
+from .argreparse import *
 from .handlers import *
 from .loglib import *
 
 
 __all__ = __features__ = ["parser", "initialize", "validate"]
+
+NOARGS_ACTIONS = ["demo", "help", "version", "wizard"]
 
 
 def __descr_format(g):
@@ -80,8 +83,9 @@ def __proxy_to_real_parser(value):
     return value
 
 
-def initialize(glob, sudo=False, multi_debug_level=False,
-                     add_help=True, add_demo=False, add_wizard=False):
+def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
+                     add_demo=False, add_version=False, add_wizard=False,
+                     noargs_action=None):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
@@ -96,14 +100,37 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     :param add_demo:          add an option to re-run the process using a random
                                entry from the __examples__ (only works if this
                                variable is populated)
+    :param add_version:       add an option for displaying the version
     :param add_wizard:        add an option to run a wizard, asking for each
                                input argument
+    :param noargs_action:     action to be performed when no argument is input
     """
     global parser, __parsers
-    # 1) handle the demo if relevant
-    if add_demo and "--play-demo" in sys.argv:
-        argv = random.choice(glob['__examples__']).replace("--play-demo", "")
-        sys.argv[1:] = shlex.split(argv)
+    
+    def add_argument(parser, *args, **kwargs):
+        cancel = kwargs.pop('cancel', False)
+        try:
+            parser.add_argument(*args, **kwargs)
+        except ArgumentError:
+            l = len(args)  # e.g. args = ('-v', '--verbose')  =>  2
+            args = [a.startswith('--') for a in args]  # e.g. ('--verbose', )
+            if 0 < len(args) < l and not cancel:
+                add_argument(*args, **kwargs)
+    
+    # 1) handle action when no input argument is given
+    e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
+        else glob['__examples__']
+    add_demo = add_demo and e is not None
+    if len(sys.argv) == 1 and noargs_action is not None:
+        assert noargs_action in NOARGS_ACTIONS, \
+               "Bad action when no args (should be one of: {})" \
+               .format('|'.join(NOARGS_ACTIONS))
+        if noargs_action == "demo":
+            argv = random.choice(glob['__examples__']).replace("--demo", "")
+            sys.argv[1:] = shlex.split(argv)
+        else:
+            sys.argv[1:] = ["--{}".format(noargs_action)]
+        locals()['add_{}'.format(noargs_action)] = True
     # 2) if sudo required, restart the script
     if sudo:
         # if not root, restart the script in another process and jump to this
@@ -113,43 +140,49 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     # 3) format help message's variables and create the real argument parser
     p = basename(glob['__file__'])
     pn, _ = splitext(p)
-    e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
-        else glob['__examples__']
-    e = "Usage examples:\n" + '\n'.join(["  python {0} {1}".format(p, x) \
+    e = gt("Usage examples") + ":\n" + '\n'.join(["  python {0} {1}".format(p, x) \
         for x in e]) if e is not None else e
-    glob['parser'] = argparse.ArgumentParser(prog=pn, epilog=e,
-        description=__descr_format(glob), add_help=add_help,
-        formatter_class=argparse.RawTextHelpFormatter,
-        conflict_handler="resolve")
-    # 4) populate the real parser and add default options (if not used yet)
+    glob['parser'] = ArgumentParser(prog=pn, epilog=e,
+        description=__descr_format(glob), add_help=False,
+        formatter_class=HelpFormatter, conflict_handler="resolve")
+    # 4) populate the real parser and add information arguments
     __parsers = {}
-    __get_calls_from_parser(parser, glob['parser'])
-    try:
-        glob['parser'].add_argument("-v", dest="verbose", default=0,
-            action="count" if multi_debug_level else "store_true",
-            help="debug verbose level (default: {})"
-                 .format(["false", "error"][multi_debug_level]))
-    except argparse.ArgumentError:
-        pass  # if this argument was already passed, just ignore
-    if e is not None and add_demo:
-        try:
-            glob['parser'].add_argument("--play-demo", action="store_true",
-                                        help="play a demo (default: false)\n  "
-                                             "NB: this has the precedence on "
-                                             "any other option")
-        except argparse.ArgumentError:
-            pass # if this argument was already passed, just ignore
+    info = glob['parser'].add_argument_group(gt("information arguments"))
+    if add_demo:
+        add_argument(info, "-d", "--demo", action="store_true",
+                     help=gt("start a demo of a random example"),
+                     note=gt("this has the precedence on any other option"))
+    if add_help:
+        add_argument(info, "-h", "--help", action='help', default=SUPPRESS,
+                     help=gt("show this help message and exit"))
+    if add_version:
+        version = glob['__version__'] if '__version__' in glob else None
+        assert version is not None, "__version__ is not defined"
+        add_argument(info, "-v", "--version", action='version',
+                     default=SUPPRESS, version=version,
+                     help=gt("show program's version number and exit"))
+    if multi_debug_level:
+        add_argument(info, "-v", dest="verbose", default=0, action="count",
+                     help=gt("verbose level"), cancel=True,
+                     note=gt("-vvv corresponds to the lowest verbose level"))
+    else:
+        add_argument(info, "-v", "--verbose", action="store_true",
+                     help=gt("verbose mode"))
     if add_wizard:
-        try:
-            glob['parser'].add_argument("--start-wizard", action="store_true",
-                                        help="start a wizard (default: false)")
-        except argparse.ArgumentError:
-            pass # if this argument was already passed, just ignore
+        add_argument(info, "-w", "--wizard", action="store_true",
+                     help=gt("start a wizard"))
+    __get_calls_from_parser(parser, glob['parser'])
+    # now, handle the demo first if relevant
+    if add_demo and "--demo" in sys.argv:
+        argv = random.choice(glob['__examples__']).replace("--demo", "")
+        sys.argv[1:] = shlex.split(argv)
+    # otherwise, handle the wizard if relevant
+    elif add_wizard and args.wizard:
+        pass
+        #TODO: parse each possible argument, using its default value if not set   
+        #       in user input, using os.execvp once all new arguments have been
+        #       entered by the user
     glob['args'] = glob['parser'].parse_args()
-    # then, handle the wizard if relevant
-    #TODO: parse each possible argument, using its default value if not set in
-    #       user input, using os.execvp once all new arguments have been entered
-    #       by the user
     # 5) configure logging and get the main logger
     configure_logger(glob, multi_debug_level)
     # 6) finally, bind the global exit handler
@@ -185,7 +218,7 @@ def validate(glob, *arg_checks):
     :param arg_checks: list of 3/4-tuples
     """
     locals().update(glob)
-    if glob['args'] is None or glob['logger'] is None:
+    if args is None or logger is None:
         return
     exit_app = False
     for check in arg_checks:
@@ -194,17 +227,16 @@ def validate(glob, *arg_checks):
         assert re.match(r'^_?[a-zA-Z][a-zA-Z0-9_]*$', param) is not None, \
                "Illegal argument name"
         try:
-            result = eval(condition.replace(" ? ", " glob['args'].{} "
-                                                   .format(param)))
+            result = eval(condition.replace(" ? ", " args.{} ".format(param)))
         except (AssertionError, TypeError) as e:
             result = True
             message = str(e)
         if result:
             if default is None:
-                glob['logger'].error(message or "Validation failed")
+                logger.error(message or "Validation failed")
                 exit_app = True
             else:
-                glob['logger'].warn(message or "Validation failed")
+                logger.warn(message or "Validation failed")
                 setattr(glob['args'], param, default)
     if exit_app:
         sys.exit(2)
@@ -216,7 +248,7 @@ class ProxyArgumentParser(object):
     """
     def __init__(self):
         self.calls = []
-        self.__parser = argparse.ArgumentParser()
+        self.__parser = ArgumentParser()
 
     def __getattr__(self, name):
         self.__current_call = name
