@@ -41,20 +41,21 @@ def configure_logger(glob, multi_level):
     :param glob:        globals dictionary
     :param multi_level: boolean telling if multi-level debug is to be considered
     """
-    if multi_level:
-        glob['args']._debug_level = [logging.ERROR, logging.WARNING,
-            logging.INFO, logging.DEBUG][min(glob['args'].verbose, 3)]
-    else:
-        glob['args']._debug_level = [logging.INFO, logging.DEBUG] \
-                                    [glob['args'].verbose]
+    levels = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG] \
+             if multi_level else [logging.INFO, logging.DEBUG]
+    try:
+        verbose = min(int(glob['args'].verbose), 3)
+    except AttributeError:
+        verbose = 0
+    glob['args']._debug_level = dl = levels[verbose]
     logger.handlers = []
     glob['logger'] = logger
     handler = logging.StreamHandler()
     formatter = logging.Formatter(glob['LOG_FORMAT'], glob['DATE_FORMAT'])
     handler.setFormatter(formatter)
     glob['logger'].addHandler(handler)
-    glob['logger'].setLevel(glob['args']._debug_level)
+    glob['logger'].setLevel(dl)
     if colored_logs_present:
         coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
         coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
-        coloredlogs.install(glob['args']._debug_level, logger=glob['logger'])
+        coloredlogs.install(dl, logger=glob['logger'])
