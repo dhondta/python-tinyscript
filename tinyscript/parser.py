@@ -214,11 +214,12 @@ def validate(glob, *arg_checks):
                               implies that the script will not exit after the
                               validation (if no other blocking argument present)
 
-    :param glob: globals() instance from the calling script
+    :param glob:       globals() instance from the calling script
     :param arg_checks: list of 3/4-tuples
     """
-    locals().update(glob)
-    if args is None or logger is None:
+    locals().update(glob)  # allows to import user-defined objects from glob
+                           #  into the local scope
+    if glob['args'] is None or glob['logger'] is None:
         return
     exit_app = False
     for check in arg_checks:
@@ -227,16 +228,17 @@ def validate(glob, *arg_checks):
         assert re.match(r'^_?[a-zA-Z][a-zA-Z0-9_]*$', param) is not None, \
                "Illegal argument name"
         try:
-            result = eval(condition.replace(" ? ", " args.{} ".format(param)))
+            result = eval(condition.replace(" ? ", " glob['args'].{} "
+                                            .format(param)))
         except (AssertionError, TypeError) as e:
             result = True
             message = str(e)
         if result:
             if default is None:
-                logger.error(message or "Validation failed")
+                glob['logger'].error(message or "Validation failed")
                 exit_app = True
             else:
-                logger.warn(message or "Validation failed")
+                glob['logger'].warn(message or "Validation failed")
                 setattr(glob['args'], param, default)
     if exit_app:
         sys.exit(2)
