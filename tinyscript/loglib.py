@@ -3,22 +3,14 @@
 """Module for defining logging-related constants and objects.
 
 """
+import coloredlogs
 import logging
-# colorize logging
-try:
-    import coloredlogs
-    colored_logs_present = True
-except ImportError:
-    print("(Install 'coloredlogs' for colored logging)")
-    coloredlogs = None
-    colored_logs_present = False
 
 from .__info__ import __author__, __copyright__, __version__
 
 
 __features__ = ["LOG_FORMAT", "DATE_FORMAT", "logger", "logging"]
-__all__ = ["coloredlogs", "colored_logs_present", "configure_logger"] + \
-          __features__
+__all__ = ["coloredlogs", "configure_logger"] + __features__
 
 
 LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
@@ -27,10 +19,9 @@ DATE_FORMAT = '%H:%M:%S'
 
 # setup a default logger for allowing logging before initialize() is called
 logger = logging.getLogger("main")
-if colored_logs_present:
-    coloredlogs.DEFAULT_LOG_FORMAT = LOG_FORMAT
-    coloredlogs.DEFAULT_DATE_FORMAT = DATE_FORMAT
-    coloredlogs.install(logger=logger)
+coloredlogs.DEFAULT_LOG_FORMAT = LOG_FORMAT
+coloredlogs.DEFAULT_DATE_FORMAT = DATE_FORMAT
+coloredlogs.install(logger=logger)
 
 
 def configure_logger(glob, multi_level):
@@ -55,7 +46,6 @@ def configure_logger(glob, multi_level):
     handler.setFormatter(formatter)
     glob['logger'].addHandler(handler)
     glob['logger'].setLevel(dl)
-    if colored_logs_present:
-        coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
-        coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
-        coloredlogs.install(dl, logger=glob['logger'])
+    coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
+    coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
+    coloredlogs.install(dl, logger=glob['logger'])
