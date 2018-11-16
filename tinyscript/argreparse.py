@@ -64,7 +64,7 @@ class _NewSubParsersAction(_SubParsersAction):
         #  into an argument group
         parser = self._parser_class(formatter_class=HelpFormatter,
                                     add_help=False, **kwargs)
-        info = parser.add_argument_group("information arguments")
+        info = parser.add_argument_group("extra arguments")
         info.add_argument("-h", "--help", action='help', default=SUPPRESS,
                           help=gt('show this help message and exit'))
         # add it to the map
