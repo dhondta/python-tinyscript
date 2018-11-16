@@ -10,12 +10,14 @@ import random
 import re
 import shlex
 import sys
+from inspect import getmembers, isfunction, ismethod
 from os.path import basename, splitext
 
 from .__info__ import __author__, __copyright__, __version__
 from .argreparse import *
 from .handlers import *
 from .loglib import *
+from .report import Report
 
 
 __all__ = __features__ = ["parser", "initialize", "validate"]
@@ -85,7 +87,7 @@ def __proxy_to_real_parser(value):
 
 def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
                      add_demo=False, add_version=False, add_wizard=False,
-                     noargs_action=None):
+                     noargs_action=None, report_func=None):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
@@ -104,6 +106,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
     :param add_wizard:        add an option to run a wizard, asking for each
                                input argument
     :param noargs_action:     action to be performed when no argument is input
+    :param report_func:       report generation function
     """
     global parser, __parsers
     
@@ -111,11 +114,13 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
         cancel = kwargs.pop('cancel', False)
         try:
             parser.add_argument(*args, **kwargs)
+            return True
         except ArgumentError:
             l = len(args)  # e.g. args = ('-v', '--verbose')  =>  2
             args = [a.startswith('--') for a in args]  # e.g. ('--verbose', )
             if 0 < len(args) < l and not cancel:
-                add_argument(*args, **kwargs)
+                return add_argument(*args, **kwargs)
+        return False
     
     # 1) handle action when no input argument is given
     e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
@@ -147,7 +152,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
         formatter_class=HelpFormatter, conflict_handler="resolve")
     # 4) populate the real parser and add information arguments
     __parsers = {}
-    info = glob['parser'].add_argument_group(gt("information arguments"))
+    info = glob['parser'].add_argument_group(gt("extra arguments"))
     if add_demo:
         add_argument(info, "-d", "--demo", action="store_true",
                      help=gt("start a demo of a random example"),
@@ -171,6 +176,18 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
     if add_wizard:
         add_argument(info, "-w", "--wizard", action="store_true",
                      help=gt("start a wizard"))
+    if report_func is not None:
+        if not isfunction(report_func):
+            glob['logger'].error("Bad report generation function")
+            return
+        rpt = glob['parser'].add_argument_group(gt("report arguments"))
+        choices = map(lambda x: x[0],
+                      filter(lambda x: not x[0].startswith('_'),
+                             getmembers(Report, predicate=ismethod)))
+        if add_argument(rpt, "-o", "--output", choices=choices, default="pdf",
+                        help=gt("report output format")):
+            add_argument(rpt, "-t", "--title", help=gt("report title"))
+            add_argument(rpt, "-f", "--filename", help=gt("report filename"))
     __get_calls_from_parser(parser, glob['parser'])
     # now, handle the demo first if relevant
     if add_demo and "--demo" in sys.argv:
@@ -192,6 +209,13 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
         elif _hooks.state == "TERMINATED":
             glob['at_terminate']()
         else:
+            if report_func is not None:
+                # generate the report only when exiting gracefully, just before
+                #  the user-defined function at_graceful_exit
+                _ = glob['args']
+                r = Report(*report_func(), title=_.title, filename=_.filename,
+                           logger=glob['logger'])
+                getattr(r, _.output)(False)
             glob['at_graceful_exit']()
         glob['at_exit']()
         logging.shutdown()
