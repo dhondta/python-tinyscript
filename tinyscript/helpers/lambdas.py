@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common help utility functions.
+"""Common help utility help functions.
 
 """
 from six import string_types
 from sys import version_info
 
-from .__info__ import __author__, __copyright__, __version__
+from ..__info__ import __author__, __copyright__, __version__
 
 
 __features__ = ["PYTHON3", "b", "byteindex", "iterbytes"]
@@ -31,10 +31,14 @@ int2bin = lambda i, n=None: ("{}" if n is None else "{:0>" + str(n) + "}") \
                             .format(bin(i)[2:])
 txt2bin = lambda t: ''.join(map(lambda c: "{:0>8}".format(bin(ord(c))[2:]), t))
 
-is_int = lambda i: isinstance(i, int)
-is_lst = lambda l: isinstance(l, (list, tuple))
-is_str = lambda s: isinstance(s, string_types)
+is_int    = lambda i: isinstance(i, int)
+is_posint = lambda i: is_int(i) and i >= 0
+is_lst    = lambda l: isinstance(l, (list, tuple))
+is_str    = lambda s: isinstance(s, string_types)
 
 is_bin = lambda b: (is_str or is_lst) and all(str(_) in "01" for _ in b)
 is_hex = lambda h: is_str and len(h) % 2 == 0 and \
                    all(_ in "0123456789abcdef" for _ in h.lower())
+
+is_lambda = lambda l: isinstance(l, type(lambda:0)) and \
+                      l.__name__ == (lambda:0).__name__
