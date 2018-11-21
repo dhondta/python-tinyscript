@@ -9,48 +9,23 @@ import logging
 import markdown2
 import numpy as np
 import pandas as pd
-from os.path import exists, splitext
+from os import listdir
+from os.path import abspath, dirname, exists, isfile, join, splitext
 from six import string_types
 from weasyprint import CSS, HTML
 
-from .__info__ import __author__, __copyright__, __version__
+from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["Footer", "Header", "Report", "Section", "Table",
-                          "Text", "Title"]
+__features__ = ["Footer", "Header", "Section", "Table", "Text", "Title"]
+__all__ = ["Report"] + __features__
 
 HEAD_CSS = "@%(pos)s-left{%(left)s};@%(pos)s-center{%(center)s};@%(pos)s-righ" \
            "t{%(right)s};"
 PAGE_CSS = "@page{size:%(size)s;margin:%(margins)s;%(header)s%(footer)s}"
-PDF_CSS = "h1,h3{line-height:1}address,blockquote,dfn,em{font-style:italic}ht" \
-          "ml{font-size:100.01%}body{font-size:75%;color:#222;background:#fff" \
-          ";font-family:\"Helvetica Neue\",Arial,Helvetica,sans-serif}h1,h2,h" \
-          "3,h4,h5,h6{font-weight:400;color:#111}h1{font-size:3em;margin-bott" \
-          "om:.5em}h2{font-size:2em;margin-bottom:.75em}h3{font-size:1.5em;ma" \
-          "rgin-bottom:1em}h4{font-size:1.2em;line-height:1.25;margin-bottom:" \
-          "1.25em}h5,h6{font-size:1em;font-weight:700}h5{margin-bottom:1.5em}" \
-          "h1 img,h2 img,h3 img,h4 img,h5 img,h6 img{margin:0}p{margin:0 0 1." \
-          "5em}.left{float:left!important}p .left{margin:1.5em 1.5em 1.5em 0;" \
-          "padding:0}.right{float:right!important}p .right{margin:1.5em 0 1.5" \
-          "em 1.5em;padding:0}address,dl{margin:0 0 1.5em}a:focus,a:hover{col" \
-          "or:#09f}a{color:#06c;text-decoration:underline}.quiet,blockquote,d" \
-          "el{color:#666}blockquote{margin:1.5em}dfn,dl dt,strong,th{font-wei" \
-          "ght:700}sub,sup{line-height:0}abbr,acronym{border-bottom:1px dotte" \
-          "d #666}pre{margin:1.5em 0;white-space:pre}code,pre,tt{font:1em 'an" \
-          "dale mono','lucida console',monospace;line-height:1.5}li ol,li ul{" \
-          "margin:0}ol,ul{margin:0 1.5em 1.5em 0;padding-left:1.5em}ul{list-s" \
-          "tyle-type:disc}ol{list-style-type:decimal}dd{margin-left:1.5em}tab" \
-          "le{margin-bottom:1.4em;width:100%}thead th{background:#c3d9ff}capt" \
-          "ion,td,th{padding:4px 10px 4px 5px}tbody tr.even td,tbody tr:nth-c" \
-          "hild(even) td{background:#e5ecf9}tfoot{font-style:italic}caption{b" \
-          "ackground:#eee}.small{font-size:.8em;margin-bottom:1.875em;line-he" \
-          "ight:1.875em}.large{font-size:1.2em;line-height:2.5em;margin-botto" \
-          "m:1.25em}.hide{display:none}.loud{color:#000}.highlight{background" \
-          ":#ff0}.added{background:#060;color:#fff}.removed{background:#900;c" \
-          "olor:#fff}.first{margin-left:0;padding-left:0}.last{margin-right:0" \
-          ";padding-right:0}.top{margin-top:0;padding-top:0}.bottom{margin-bo" \
-          "ttom:0;padding-bottom:0}"
 TEXT = True
+THEMES = map(lambda f: splitext(f)[0], filter(lambda f: f.endswith(".css"),
+                                              listdir(dirname(__file__))))
 
 
 def output(f):
@@ -114,10 +89,18 @@ class Report(object):
     page_css = "@page{size:%(size)s;margin:%(margins)s;%(header)s%(footer)s}"
     
     def __init__(self, *pieces, **options):
+        self.css = options.get('css')
         self.filename = options.get('filename', "report") or "report"
         self.logger = options.get('logger', logging.getLogger("main"))
-        self.size = options.get('size', "a4 portrait")
         self.margins = options.get('margins', "10.0mm 20.0mm 20.0mm 20.0mm")
+        self.size = options.get('size', "a4 portrait")
+        self.theme = options.get('theme', "default")
+        assert self.theme in THEMES, "PDF report CSS theme does not exist"
+        if self.css:
+            if not isfile(self.css):
+                self.css = None
+            else:
+                self.css = abspath(self.css)
         self.header = ""
         self.footer = ""
         title = options.get('title') or ""
@@ -179,7 +162,9 @@ class Report(object):
         """ Generate a PDF file from the report data. """
         self.logger.debug("Generating the PDF report...")
         html = HTML(string=self.html())
-        css = [CSS(string=PDF_CSS), CSS(string=PAGE_CSS % self.__dict__)]
+        css_file = self.css or join(dirname(abspath(__file__)),
+                                    "{}.css".format(self.theme))
+        css = [css_file, CSS(string=PAGE_CSS % self.__dict__)]
         html.write_pdf("{}.pdf".format(self.filename), stylesheets=css)
     
     @output
