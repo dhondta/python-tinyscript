@@ -179,24 +179,27 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         for action in self._actions:
             if action.dest is SUPPRESS or action.default is SUPPRESS:
                 continue  # this prevents 'help' and 'version' actions
-            ostr = action.option_strings[0]
+            try:
+                ostr = action.option_strings[0]
+            except IndexError:  # occurs when positional argument
+                ostr = None
             prompt = (action.help or action.dest).capitalize()
             if is_action(action, ('store', 'append')):
                 value = user_input(prompt, action.choices, action.default)
                 if value:
-                    new_args.extend([ostr, value])
+                    new_args.extend([ostr, value] if ostr else [value])
             elif is_action(action, ('store_const', 'append_const')):
                 value = user_input(prompt, ("(A)dd", "(D)iscard"), "d")
                 if value == "add":
-                    new_args.append(action.option_strings[0])
+                    new_args.append(ostr)
             elif is_action(action, ('store_true', )):
                 value = user_input(prompt, ("(Y)es", "(N)o"), "n")
                 if value == "y":
-                    new_args.append(action.option_strings[0])
+                    new_args.append(ostr)
             elif is_action(action, ('store_false', )):
                 value = user_input(prompt, ("(Y)es", "(N)o"), "n")
                 if value == "n":
-                    new_args.append(action.option_strings[0])
+                    new_args.append(ostr)
             elif is_action(action, ('count', )):
                 value = user_input(prompt, is_posint, 0, "positive integer")
                 otype = ['A', 'O'][ostr.startswith("--")]
