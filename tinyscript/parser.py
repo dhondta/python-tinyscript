@@ -22,28 +22,6 @@ from .report import Report
 
 __all__ = __features__ = ["parser", "initialize", "validate"]
 
-NOARGS_ACTIONS = ["demo", "help", "version", "wizard"]
-
-
-def __descr_format(g):
-    """
-    Help description formatting function to add global documentation variables.
-
-    :param g: globals() dictionary
-    :return: the formatted help description
-    """
-    p, _ = splitext(basename(g['__file__']))
-    s = ''.join([x.capitalize() for x in p.split('-')])
-    if '__version__' in g:
-        s += " v" + g['__version__']
-    for v in ['__author__', '__reference__', '__source__', '__training__']:
-        if v in g:
-            s += "\n%s: %s" % (v.strip('_').capitalize(), g[v])
-            if v == '__author__' and '__email__' in g:
-                s += " ({})".format(g['__email__'])
-    d = g.get('__doc__')
-    return s + "\n\n" + d if d is not None else s
-
 
 def __get_calls_from_parser(proxy_parser, real_parser):
     """
@@ -85,9 +63,9 @@ def __proxy_to_real_parser(value):
     return value
 
 
-def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
-                     add_demo=False, add_version=False, add_wizard=False,
-                     noargs_action=None, report_func=None):
+def initialize(glob, sudo=False, multi_debug_level=False,
+               add_demo=False, add_version=False, add_wizard=False,
+               noargs_action=None, report_func=None):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
@@ -98,11 +76,10 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
                                script with sudo
     :param multi_debug_level: allow to use -v, -vv, -vvv (adjust logging level)
                                instead of just -v (only debug on/off)
-    :param add_help:          set add_help in ArgumentParser
     :param add_demo:          add an option to re-run the process using a random
                                entry from the __examples__ (only works if this
                                variable is populated)
-    :param add_version:       add an option for displaying the version
+    :param add_version:       add a version option
     :param add_wizard:        add an option to run a wizard, asking for each
                                input argument
     :param noargs_action:     action to be performed when no argument is input
@@ -110,99 +87,69 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
     """
     global parser, __parsers
     
-    def add_argument(parser, *args, **kwargs):
-        cancel = kwargs.pop('cancel', False)
-        try:
-            parser.add_argument(*args, **kwargs)
-            return True
-        except ArgumentError:
-            l = len(args)  # e.g. args = ('-v', '--verbose')  =>  2
-            args = [a.startswith('--') for a in args]  # e.g. ('--verbose', )
-            if 0 < len(args) < l and not cancel:
-                return add_argument(*args, **kwargs)
-        return False
-    
+    add = {'demo': add_demo, 'help': True, 'version': add_version,
+           'wizard': add_wizard}
+    glob['parser'] = p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
-    e = None if '__examples__' not in glob or len(glob['__examples__']) == 0 \
-        else glob['__examples__']
-    add_demo = add_demo and e is not None
-    if len(sys.argv) == 1 and noargs_action is not None:
-        assert noargs_action in NOARGS_ACTIONS, \
+    add['demo'] = add['demo'] and glob['parser'].examples
+    if len(sys.argv) == 1 and noargs_action:
+        assert noargs_action in add.keys(), \
                "Bad action when no args (should be one of: {})" \
-               .format('|'.join(NOARGS_ACTIONS))
-        if noargs_action == "demo":
-            argv = random.choice(glob['__examples__']).replace("--demo", "")
-            sys.argv[1:] = shlex.split(argv)
-        else:
-            sys.argv[1:] = ["--{}".format(noargs_action)]
-        locals()['add_{}'.format(noargs_action)] = True
+               .format('|'.join(add.keys()))
+        sys.argv[1:] = ["--{}".format(noargs_action)]
+        add[noargs_action] = True
     # 2) if sudo required, restart the script
     if sudo:
         # if not root, restart the script in another process and jump to this
         if os.geteuid() != 0:
             python = [] if glob['__file__'].startswith("./") else ["python"]
             os.execvp("sudo", ["sudo"] + python + sys.argv)
-    # 3) format help message's variables and create the real argument parser
-    p = basename(glob['__file__'])
-    pn, _ = splitext(p)
-    e = gt("Usage examples") + ":\n" + '\n'.join(["  python {0} {1}".format(p, x) \
-        for x in e]) if e is not None else e
-    glob['parser'] = ArgumentParser(prog=pn, epilog=e,
-        description=__descr_format(glob), add_help=False,
-        formatter_class=HelpFormatter, conflict_handler="resolve")
-    # 4) populate the real parser and add information arguments
+    # 3) populate the real parser and add information arguments
     __parsers = {}
-    info = glob['parser'].add_argument_group(gt("extra arguments"))
-    if add_demo:
-        add_argument(info, "-d", "--demo", action="store_true",
-                     help=gt("start a demo of a random example"),
-                     note=gt("this has the precedence on any other option"))
-    if add_help:
-        add_argument(info, "-h", "--help", action='help', default=SUPPRESS,
-                     help=gt("show this help message and exit"))
-    if add_version:
+    i = p.add_argument_group(gt("extra arguments"))
+    if add['demo']:
+        i.add_argument("-d", "--demo", action='demo', default=SUPPRESS,
+                       help=gt("start a demo of a random example"))
+    if add['help']:
+        i.add_argument("-h", "--help", action='help', default=SUPPRESS,
+                       help=gt("show this help message and exit"))
+    if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
-        assert version is not None, "__version__ is not defined"
-        add_argument(info, "-v", "--version", action='version',
-                     default=SUPPRESS, version=version,
-                     help=gt("show program's version number and exit"))
+        assert version, "__version__ is not defined"
+        i.add_argument("-v", "--version", action='version', default=SUPPRESS,
+                       version=version,
+                       help=gt("show program's version number and exit"))
     if multi_debug_level:
-        add_argument(info, "-v", dest="verbose", default=0, action="count",
-                     help=gt("verbose level"), cancel=True,
-                     note=gt("-vvv corresponds to the lowest verbose level"))
+        i.add_argument("-v", dest="verbose", default=0, action="count",
+                       help=gt("verbose level"), cancel=True,
+                       note=gt("-vvv corresponds to the highest verbose level"))
     else:
-        add_argument(info, "-v", "--verbose", action="store_true",
-                     help=gt("verbose mode"))
-    if add_wizard:
-        add_argument(info, "-w", "--wizard", action="store_true",
-                     help=gt("start a wizard"))
+        i.add_argument("-v", "--verbose", action="store_true",
+                       help=gt("verbose mode"))
+    if add['wizard']:
+        i.add_argument("-w", "--wizard", action='wizard', default=SUPPRESS,
+                       help=gt("start a wizard"))
     if report_func is not None:
         if not isfunction(report_func):
             glob['logger'].error("Bad report generation function")
             return
-        rpt = glob['parser'].add_argument_group(gt("report arguments"))
+        r = glob['parser'].add_argument_group(gt("report arguments"))
         choices = map(lambda x: x[0],
                       filter(lambda x: not x[0].startswith('_'),
                              getmembers(Report, predicate=ismethod)))
-        if add_argument(rpt, "-o", "--output", choices=choices, default="pdf",
-                        help=gt("report output format")):
-            add_argument(rpt, "-t", "--title", help=gt("report title"))
-            add_argument(rpt, "-f", "--filename", help=gt("report filename"))
+        if r.add_argument("--output", choices=choices, default="pdf",
+                          help=gt("report output format")):
+            r.add_argument("--title", help=gt("report title"))
+            r.add_argument("--css", help=gt("report stylesheet file"))
+            r.add_argument("--theme", default="default",
+                           help=gt("report stylesheet theme"),
+                           note=gt("--css overrides this setting"))
+            r.add_argument("--filename", help=gt("report filename"))
     __get_calls_from_parser(parser, glob['parser'])
-    # now, handle the demo first if relevant
-    if add_demo and "--demo" in sys.argv:
-        argv = random.choice(glob['__examples__']).replace("--demo", "")
-        sys.argv[1:] = shlex.split(argv)
-    # otherwise, handle the wizard if relevant
-    elif add_wizard and args.wizard:
-        pass
-        #TODO: parse each possible argument, using its default value if not set   
-        #       in user input, using os.execvp once all new arguments have been
-        #       entered by the user
     glob['args'] = glob['parser'].parse_args()
-    # 5) configure logging and get the main logger
+    # 4) configure logging and get the main logger
     configure_logger(glob, multi_debug_level)
-    # 6) finally, bind the global exit handler
+    # 5) finally, bind the global exit handler
     def __at_exit():
         if _hooks.state == "INTERRUPTED":
             glob['at_interrupt']()
@@ -214,7 +161,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_help=True,
                 #  the user-defined function at_graceful_exit
                 _ = glob['args']
                 r = Report(*report_func(), title=_.title, filename=_.filename,
-                           logger=glob['logger'])
+                           logger=glob['logger'], css=_.css)
                 getattr(r, _.output)(False)
             glob['at_graceful_exit']()
         glob['at_exit']()
