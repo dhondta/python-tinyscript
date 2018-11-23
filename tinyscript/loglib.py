@@ -9,12 +9,26 @@ import logging
 from .__info__ import __author__, __copyright__, __version__
 
 
-__features__ = ["LOG_FORMAT", "DATE_FORMAT", "logger", "logging"]
+__features__ = ["LOG_FORMAT", "DATE_FORMAT", "TIME_MILLISECONDS",
+                "logger", "logging"]
 __all__ = ["coloredlogs", "configure_logger"] + __features__
 
 
-LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
 DATE_FORMAT = '%H:%M:%S'
+LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+TIME_MILLISECONDS = False
+
+
+# add a custom log level for stepping
+STEP_COLOR = "cyan"
+logging.STEP = 100
+logging.addLevelName(logging.STEP, "STEP")
+def step(self, message, *args, **kwargs):
+    if self.isEnabledFor(logging.STEP):
+        self._log(logging.STEP, message, args, **kwargs) 
+logging.Logger.step = step
+coloredlogs.DEFAULT_LEVEL_STYLES['step'] = dict(color=STEP_COLOR,
+                                           bold=coloredlogs.CAN_USE_BOLD_FONT)
 
 
 # setup a default logger for allowing logging before initialize() is called
@@ -48,4 +62,5 @@ def configure_logger(glob, multi_level):
     glob['logger'].setLevel(dl)
     coloredlogs.DEFAULT_LOG_FORMAT = glob['LOG_FORMAT']
     coloredlogs.DEFAULT_DATE_FORMAT = glob['DATE_FORMAT']
-    coloredlogs.install(dl, logger=glob['logger'])
+    coloredlogs.install(dl, logger=glob['logger'],
+                        milliseconds=TIME_MILLISECONDS)

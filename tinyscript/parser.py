@@ -6,9 +6,7 @@
 import argparse
 import atexit
 import os
-import random
 import re
-import shlex
 import sys
 from inspect import getmembers, isfunction, ismethod
 from os.path import basename, splitext
@@ -18,6 +16,7 @@ from .argreparse import *
 from .handlers import *
 from .loglib import *
 from .report import Report
+from .step import set_step_items
 
 
 __all__ = __features__ = ["parser", "initialize", "validate"]
@@ -63,8 +62,8 @@ def __proxy_to_real_parser(value):
     return value
 
 
-def initialize(glob, sudo=False, multi_debug_level=False,
-               add_demo=False, add_version=False, add_wizard=False,
+def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
+               add_step=False, add_version=False, add_wizard=False,
                noargs_action=None, report_func=None):
     """
     Initialization function ; sets up the arguments for the parser and creates a
@@ -79,6 +78,7 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     :param add_demo:          add an option to re-run the process using a random
                                entry from the __examples__ (only works if this
                                variable is populated)
+    :param add_step:          add an execution stepping option
     :param add_version:       add a version option
     :param add_wizard:        add an option to run a wizard, asking for each
                                input argument
@@ -87,8 +87,8 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     """
     global parser, __parsers
     
-    add = {'demo': add_demo, 'help': True, 'version': add_version,
-           'wizard': add_wizard}
+    add = {'demo': add_demo, 'help': True, 'step': add_step,
+           'version': add_version, 'wizard': add_wizard}
     glob['parser'] = p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
     add['demo'] = add['demo'] and glob['parser'].examples
@@ -113,6 +113,9 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     if add['help']:
         i.add_argument("-h", "--help", action='help', default=SUPPRESS,
                        help=gt("show this help message and exit"))
+    if add['step']:
+        i.add_argument("-s", "--step", action="store_true",
+                       help=gt("stepping mode"))
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
         assert version, "__version__ is not defined"
@@ -149,7 +152,9 @@ def initialize(glob, sudo=False, multi_debug_level=False,
     glob['args'] = glob['parser'].parse_args()
     # 4) configure logging and get the main logger
     configure_logger(glob, multi_debug_level)
-    # 5) finally, bind the global exit handler
+    # 5) append stepping mode items
+    set_step_items(glob)
+    # 6) finally, bind the global exit handler
     def __at_exit():
         if _hooks.state == "INTERRUPTED":
             glob['at_interrupt']()
