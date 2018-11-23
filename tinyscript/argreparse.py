@@ -233,8 +233,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
          simply does not stop execution so that new arguments can be reparsed.
         """
         if self._reparse_args is None:  # normal behavior with argparse
-            self.print_usage(_sys.stderr)
-            self.exit(2, _('%s: error: %s\n') % (self.prog, message))
+            self.print_usage(sys.stderr)
+            self.exit(2, gt('%s: error: %s\n') % (self.prog, message))
 
 
 class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
