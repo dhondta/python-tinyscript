@@ -17,7 +17,10 @@ def set_step_items(glob):
     
     :param glob: main script's global scope dictionary reference
     """
-    enabled = glob['args'].step
+    try:
+        enabled = glob['args'].step
+    except AttributeError:
+        enabled = False
     
     class Step(object):
         def __init__(self, message=None, at_end=False):
