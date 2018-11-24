@@ -40,7 +40,7 @@ Usage examples:
 
 -----
 
-## Privileged escalation
+## Privilege escalation
 
 This is achieved by passing a keyword argument `sudo=[boolean]` to `initialize(...)`.
 
@@ -97,13 +97,40 @@ __examples__ = ["test", "-sv", "-d --test"]
 
 ## Stepping the execution
 
-This is achieved by passing a keyword argument `add_step=[boolean]` to `initialize(...)`. It will pause the script/tool where a `step()` function or `Step(...)` context manager has been used, if the user started the script/tool with `--step`.
+This is achieved by passing a keyword argument `add_step=[boolean]` to `initialize(...)`. It will pause the script/tool where a `step()` function or a `Step(...)` context manager is used, if the user started the script/tool with `--step`.
+
+```python hl_lines="4"
+...
+def my_function(...):
+    # do something
+    step()
+    with Step(at_end=True) as _:
+        # this will stop after the execution of the block
+...
+    ...
+    initalize(globals(),
+              ...
+              add_step=True,
+              ...)
+    ...
+    with Step("this is a first step") as step1:
+        # do something
+    with Step("this is a second step") as step2:
+        # do something else
+    ...
+```
+
+-----
+
+## Adding the version option
+
+This is achieved by passing a keyword argument `add_version=[boolean]` to `initialize(...)`. It provides an option to the script/tool for displaying the version from the metadata `__version__`.
 
 ```python hl_lines="4"
     ...
     initalize(globals(),
               ...
-              add_wizard=True,
+              add_version=True,
               ...)
     ...
 ```
@@ -123,27 +150,47 @@ This is achieved by passing a keyword argument `add_wizard=[boolean]` to `initia
     ...
 ```
 
+-----
 
+## Action when no argument given
 
+This is achieved by passing a keyword argument `noargs_action="[action]"` to `initialize(...)`. It currently supports "`demo`", "`help`", "`step`", "`version`" or "`wizard`" and triggers the related action when no argument is given by the user. It thus overrides the default behavior of argparse, which is to display an error message telling that too few arguments were given.
 
-- Add a wizard option (defaults to `False`)
+```python hl_lines="4"
+    ...
+    initalize(globals(),
+              ...
+              noargs_action="...",
+              ...)
+    ...
+```
 
-> This allows to interactively ask the user for arguments.
+-----
 
-    :param glob:              globals() instance from the calling script
-    :param sudo:              if True, require sudo credentials and re-run
-                               script with sudo
-    :param multi_debug_level: allow to use -v, -vv, -vvv (adjust logging level)
-                               instead of just -v (only debug on/off)
-    :param add_demo:          add an option to re-run the process using a random
-                               entry from the __examples__ (only works if this
-                               variable is populated)
-    :param add_step:          add an execution stepping option
-    :param add_version:       add a version option
-    :param add_wizard:        add an option to run a wizard, asking for each
-                               input argument
-    :param noargs_action:     action to be performed when no argument is input
-    :param report_func:       report generation function
+## Easy reporting
+
+This is achieved by passing a keyword argument `report_func=[function]` to `initialize(...)`. It allows to add arguments related to report generation (e.g. `output`, `title` or `filename`) and triggers the given function which must use Tinyscript's report objects.
+
+```python hl_lines="4"
+...
+def make_report():
+    # define a list of headers here
+    # process a list of data rows
+    return (
+        Title("Report title"),
+        Header("", "Center heading line", ""),
+        Footer(),  # will print the page number to the center of the footer
+        Table(headers, rows),
+    )
+...
+    ...
+    initalize(globals(),
+              ...
+              report_func=make_report,
+              ...)
+    ...
+```
+
 -----
 
 ## Customizable exit handlers
