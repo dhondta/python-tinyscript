@@ -99,7 +99,7 @@ __examples__ = ["test", "-sv", "-d --test"]
 
 This is achieved by passing a keyword argument `add_step=[boolean]` to `initialize(...)`. It will pause the script/tool where a `step()` function or a `Step(...)` context manager is used, if the user started the script/tool with `--step`.
 
-```python hl_lines="4"
+```python hl_lines="4 5 14 16"
 ...
 def my_function(...):
     # do something
@@ -171,7 +171,7 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
 
 This is achieved by passing a keyword argument `report_func=[function]` to `initialize(...)`. It allows to add arguments related to report generation (e.g. `output`, `title` or `filename`) and triggers the given function which must use Tinyscript's report objects.
 
-```python hl_lines="4"
+```python hl_lines="2 15"
 ...
 def make_report():
     # define a list of headers here
