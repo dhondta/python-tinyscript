@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+import re
 
 
 __all__ = ["new"]
@@ -46,7 +47,7 @@ except ImportError:
 
 # ---------------------- MAIN SECTION -----------------------
 """
-IMPORTS = "{item}from tinyscript import *\n"
+IMPORTS = "{target}from tinyscript import *\n"
 MAIN = """if __name__ == '__main__':
     parser.add_argument("", help="")
     # TODO: write new arguments
@@ -56,7 +57,7 @@ MAIN = """if __name__ == '__main__':
 """
 
 TEMPLATES = ["script", "tool"]
-ITEMS = {
+TARGETS = {
     "pybots.HTTPBot": """
     with HTTPBot("...", verbose=True) as bot:
         bot.get()
@@ -71,31 +72,32 @@ ITEMS = {
 """
 }
 
+NAME_REGEX = re.compile(r'^([0-9a-f]+[-_]+)?[0-9a-f]+$', re.I)
 
-def new(target):
+
+def new(template, target=None, name=None):
     """
     Function for creating a template script or tool.
     
-    :param target: type of script/tool to be created
+    :param template: template to be used ; one of TEMPLATES
+    :param target:   type of script/tool to be created
+    :param name:     name of the new script/tool
     """
-    assert len(target) <= 2, \
-           "Too many arguments"
-    template = target[0]
     assert template in TEMPLATES, \
-           "First target argument must be one of the followings: {}" \
-           .format(TEMPLATES)
-    item = target[1] if len(target) == 2 else None
-    items = ITEMS.keys()
-    assert item is None or item in items, \
-           "Second target argument must be one of the followings: {}" \
-           .format(items)
-    with open("{}.py".format(template), 'w') as f:
-        item_import = "" if item is None else "from {} import {}\n" \
-                                              .format(*item.split('.'))
-        base = ITEMS.get(item)
-        main = MAIN.format(base=base or "")
+           "Template argument must be one of the followings: {}" \
+           .format(", ".join(TEMPLATES))
+    assert target is None or target in TARGETS.keys(), \
+           "Target argument must be one of the followings: {}" \
+           .format(TARGETS.keys())
+    if not name or name == "template name":
+        name = template
+    assert not NAME_REGEX.match(name), "Invalid {} name".format(template)
+    with open("{}.py".format(name), 'w') as f:
+        target_imp = "" if target is None else "from {} import {}\n" \
+                                               .format(*target.split('.'))
+        main = MAIN.format(base=TARGETS.get(target) or "")
         if template == "script":
-            f.write(SHEBANG + IMPORTS.format(item=item_import) + "\n\n" + main)
+            f.write(SHEBANG + IMPORTS.format(target=target_imp) + "\n\n" + main)
         elif template == "tool":
             f.write(SHEBANG + TOOL_METADATA + TOOL_SECTIONS \
-                    .format(imports=IMPORTS.format(item=item_import)) + main)
+                    .format(imports=IMPORTS.format(target=target_imp)) + main)

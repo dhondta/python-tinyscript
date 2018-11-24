@@ -6,15 +6,23 @@ from tinyscript.__info__ import __author__, __copyright__
 
 
 __version__ = "1.0"
-__examples__ = ["script", "tool",
-                "script pybots.HTTPBot", "tool pybots.JSONBot"]
+__examples__ = [
+    "script",
+    "--name simple-script",
+    "tool",
+    "script pybots.HTTPBot",
+    "tool pybots.JSONBot",
+]
 __doc__ = """
 This tool allows to quickly create a new Tinyscript script/tool from a template.
 """
 
 
 if __name__ == '__main__':
-    parser.add_argument("target", default=["script"], nargs="*",
-                        help="target to be created (default: script)")
-    initialize(globals())
-    new(args.target)
+    parser.add_argument("template", default="script",
+                        help="template to be used")
+    parser.add_argument("-t", "--target", help="target to be created")
+    parser.add_argument("-n", "--name", default="template name",
+                        help="script/tool name")
+    initialize(globals(), noargs_action="wizard")
+    new(args.template, args.target, args.name)
