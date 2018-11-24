@@ -13,7 +13,7 @@ from argparse import _ActionsContainer, _ArgumentGroup, _AttributeHolder, \
 from gettext import gettext as gt
 from os.path import basename, splitext
 
-from tinyscript.helpers.lambdas import is_posint
+from tinyscript.helpers.lambdas import is_long_opt, is_pos_int, is_short_opt
 from tinyscript.helpers.utils import user_input
 
 
@@ -59,20 +59,47 @@ class _NewActionsContainer(_ActionsContainer):
         self.register('action', 'wizard', _WizardAction)
     
     def add_argument(self, *args, **kwargs):
-        cancel = kwargs.pop('cancel', False)
-        note = kwargs.pop('note', None)
-        last = kwargs.pop('last', False)
+        new_kw = {k: v for k, v in kwargs.items()}
+        # collect Tinyscript-added keyword-arguments
+        cancel = new_kw.pop('cancel', False)
+        note = new_kw.pop('note', None)
+        last = new_kw.pop('last', False)
+        prefix = new_kw.pop('prefix', None)
+        suffix = new_kw.pop('suffix', None)
         try:
+            # define the action based on argparse, with only argparse-known
+            #  keyword-arguments
             action = super(_NewActionsContainer, self).add_argument(*args,
-                                                                    **kwargs)
+                                                                    **new_kw)
+            # now set Tinyscript-added keyword-arguments
             action.note = note
             action.last = last
+            action.prefix = prefix
+            action.suffix = suffix
             return True
         except ArgumentError:
-            l = len(args)  # e.g. args = ('-v', '--verbose')  =>  2
-            args = [a.startswith('--') for a in args]  # e.g. ('--verbose', )
-            if 0 < len(args) < l and not cancel:
+            # drop the argument if conflict and cancel True
+            if cancel:
+                return False
+            # otherwise, retry after removing the short option string
+            short_opt = filter(is_short_opt, args)
+            if len(short_opt) > 0:
+                args.remove(sch_opt[0])
                 return self.add_argument(*args, **kwargs)
+            # otherwise, retry after modifying the long option string with the
+            #  precedence to the prefix (if set) then the suffix (if set)
+            long_opt = filter(is_long_opt, args)
+            if len(long_opt) > 0:
+                long_opt = args.pop(args.index(long_opt))
+                if action.prefix:
+                    long_opt = "--{}-{}".format(action.prefix,
+                                                long_opt.split("--", 1)[1])
+                    args.append(long_opt)
+                    return self.add_argument(*args, **kwargs)
+                elif action.suffix:
+                    long_opt = "{}-{}".format(long_opt, action.suffix)
+                    args.append(long_opt)
+                    return self.add_argument(*args, **kwargs)
         return False
 
     def add_argument_group(self, *args, **kwargs):
@@ -206,7 +233,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                     if value == "n":
                         new_args.append(ostr)
                 elif is_action(action, ('count', )):
-                    value = user_input(prompt, is_posint, 0, "positive integer")
+                    value = user_input(prompt, is_pos_int, 0,
+                                       "positive integer")
                     otype = ['A', 'O'][ostr.startswith("--")]
                     if otype == "A":
                         new_arg = ["-{}".format(int(value) * ostr.strip('-'))]
