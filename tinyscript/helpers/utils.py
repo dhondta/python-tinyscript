@@ -5,15 +5,24 @@
 """
 import re
 from humanfriendly.terminal import ansi_wrap
+from sys import version_info
 
 from .lambdas import is_lambda
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["std_input", "user_input"]
+__all__ = __features__ = ["PYTHON3", "b", "byteindex", "iterbytes",
+                          "std_input", "user_input"]
 
 
-REGEX = re.compile(r'^\(([a-z0-9])\).*$', re.I)
+PYTHON3      = version_info > (3,)
+CHOICE_REGEX = re.compile(r'^\(([a-z0-9])\).*$', re.I)
+
+
+# see: http://python3porting.com/problems.html
+b         = lambda s: codecs.latin_1_encode(s)[0] if PYTHON3 else s
+byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
+iterbytes = lambda d: iter(d) if PYTHON3 else [ord(c) for c in d]
 
 
 def std_input(prompt="", style=None):
@@ -48,7 +57,7 @@ def user_input(prompt="", choices=None, default=None, choices_str=""):
         # consider choices of the form ["(Y)es", "(N)o"] ;
         #  in this case, we want the choices to be ['y', 'n'] for the sake of
         #  simplicity for the user
-        m = list(map(lambda x: REGEX.match(x), choices))
+        m = list(map(lambda x: CHOICE_REGEX.match(x), choices))
         choices = [x.group(1).lower() if x else c for x, c in zip(m, choices)]
         # this way, if using ["Yes", "No"], choices will remain so
         _check = lambda v: v in choices
