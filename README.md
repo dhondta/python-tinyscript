@@ -6,3 +6,13 @@
 # TinyScript
 
 This library is aimed to provide useful features and to shorten required lines of code for writing nice-looking scripts or tools.
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/dhondta/tinyscript/master/docs/demos/simple-script.svg">
+</p>
+
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/dhondta/tinyscript/master/docs/demos/simple-script-with-demo.svg">
+</p>
+
