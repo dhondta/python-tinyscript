@@ -114,7 +114,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
         i.add_argument("-h", "--help", action='help', default=SUPPRESS,
                        help=gt("show this help message and exit"))
     if add['step']:
-        i.add_argument("-s", "--step", action="store_true",
+        i.add_argument("-s", "--step", action="store_true", last=True,
                        help=gt("stepping mode"))
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
@@ -124,10 +124,10 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
                        help=gt("show program's version number and exit"))
     if multi_debug_level:
         i.add_argument("-v", dest="verbose", default=0, action="count",
-                       help=gt("verbose level"), cancel=True,
+                       help=gt("verbose level"), cancel=True, last=True,
                        note=gt("-vvv corresponds to the highest verbose level"))
     else:
-        i.add_argument("-v", "--verbose", action="store_true",
+        i.add_argument("-v", "--verbose", action="store_true", last=True,
                        help=gt("verbose mode"))
     if add['wizard']:
         i.add_argument("-w", "--wizard", action='wizard', default=SUPPRESS,
@@ -140,14 +140,15 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
         choices = map(lambda x: x[0],
                       filter(lambda x: not x[0].startswith('_'),
                              getmembers(Report, predicate=ismethod)))
-        if r.add_argument("--output", choices=choices, default="pdf",
+        if r.add_argument("--output", choices=choices, default="pdf", last=True,
                           help=gt("report output format")):
-            r.add_argument("--title", help=gt("report title"))
-            r.add_argument("--css", help=gt("report stylesheet file"))
-            r.add_argument("--theme", default="default",
+            r.add_argument("--title", last=True, help=gt("report title"))
+            r.add_argument("--css", last=True,
+                           help=gt("report stylesheet file"))
+            r.add_argument("--theme", default="default", last=True,
                            help=gt("report stylesheet theme"),
                            note=gt("--css overrides this setting"))
-            r.add_argument("--filename", help=gt("report filename"))
+            r.add_argument("--filename", last=True, help=gt("report filename"))
     __get_calls_from_parser(parser, glob['parser'])
     glob['args'] = glob['parser'].parse_args()
     # 4) configure logging and get the main logger

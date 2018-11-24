@@ -60,11 +60,13 @@ class _NewActionsContainer(_ActionsContainer):
     
     def add_argument(self, *args, **kwargs):
         cancel = kwargs.pop('cancel', False)
-        note = kwargs.pop("note", None)
+        note = kwargs.pop('note', None)
+        last = kwargs.pop('last', False)
         try:
             action = super(_NewActionsContainer, self).add_argument(*args,
                                                                     **kwargs)
             action.note = note
+            action.last = last
             return True
         except ArgumentError:
             l = len(args)  # e.g. args = ('-v', '--verbose')  =>  2
@@ -176,40 +178,43 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         new_args = []
         is_action = lambda a, nl: any(type(a) is \
                                   self._registry_get('action', n) for n in nl)
-        for action in self._actions:
-            if action.dest is SUPPRESS or action.default is SUPPRESS:
-                continue  # this prevents 'help' and 'version' actions
-            try:
-                ostr = action.option_strings[0]
-            except IndexError:  # occurs when positional argument
-                ostr = None
-            prompt = (action.help or action.dest).capitalize()
-            if is_action(action, ('store', 'append')):
-                value = user_input(prompt, action.choices, action.default)
-                if value:
-                    new_args.extend([ostr, value] if ostr else [value])
-            elif is_action(action, ('store_const', 'append_const')):
-                value = user_input(prompt, ("(A)dd", "(D)iscard"), "d")
-                if value == "add":
-                    new_args.append(ostr)
-            elif is_action(action, ('store_true', )):
-                value = user_input(prompt, ("(Y)es", "(N)o"), "n")
-                if value == "y":
-                    new_args.append(ostr)
-            elif is_action(action, ('store_false', )):
-                value = user_input(prompt, ("(Y)es", "(N)o"), "n")
-                if value == "n":
-                    new_args.append(ostr)
-            elif is_action(action, ('count', )):
-                value = user_input(prompt, is_posint, 0, "positive integer")
-                otype = ['A', 'O'][ostr.startswith("--")]
-                if otype == "A":
-                    new_arg = ["-{}".format(int(value) * ostr.strip('-'))]
+        first_actions = filter(lambda a: not a.last, self._actions)
+        last_actions = filter(lambda a: a.last, self._actions)
+        for actions in [first_actions, last_actions]:
+            for action in actions:
+                if action.dest is SUPPRESS or action.default is SUPPRESS:
+                    continue  # this prevents 'help' and 'version' actions
+                try:
+                    ostr = action.option_strings[0]
+                except IndexError:  # occurs when positional argument
+                    ostr = None
+                prompt = (action.help or action.dest).capitalize()
+                if is_action(action, ('store', 'append')):
+                    value = user_input(prompt, action.choices, action.default)
+                    if value:
+                        new_args.extend([ostr, value] if ostr else [value])
+                elif is_action(action, ('store_const', 'append_const')):
+                    value = user_input(prompt, ("(A)dd", "(D)iscard"), "d")
+                    if value == "add":
+                        new_args.append(ostr)
+                elif is_action(action, ('store_true', )):
+                    value = user_input(prompt, ("(Y)es", "(N)o"), "n")
+                    if value == "y":
+                        new_args.append(ostr)
+                elif is_action(action, ('store_false', )):
+                    value = user_input(prompt, ("(Y)es", "(N)o"), "n")
+                    if value == "n":
+                        new_args.append(ostr)
+                elif is_action(action, ('count', )):
+                    value = user_input(prompt, is_posint, 0, "positive integer")
+                    otype = ['A', 'O'][ostr.startswith("--")]
+                    if otype == "A":
+                        new_arg = ["-{}".format(int(value) * ostr.strip('-'))]
+                    else:
+                        new_arg = [ostr for i in range(int(value))]
+                    new_args.extend(new_arg)
                 else:
-                    new_arg = [ostr for i in range(int(value))]
-                new_args.extend(new_arg)
-            else:
-                raise NotImplementedError("Unknown argparse action")
+                    raise NotImplementedError("Unknown argparse action")
         self._reparse_args = new_args
         
     def parse_args(self, args=None, namespace=None):
