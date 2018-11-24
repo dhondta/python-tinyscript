@@ -1,11 +1,11 @@
-## Script/tool creation
+## Creation
 
 A tiny tool is provided with the package to create a template instantly.
 
 - Create a script
 
 ```sh
-$ tinyscript-new
+$ tinyscript-new script
 ```
 
 By default, it creates a script named `script.py` with minimal code. This is the same as typing `tinyscript-new script`.
@@ -42,11 +42,17 @@ $ tinyscript-new tool pybots.JSONBot
 This creates a script/tool with an import of particular class from the [PyBots library](https://github.com/dhondta/pybots).
 
 
-## Initialization parameters
+## Customization
 
 
-## Arguments validation
+
+## Initialization
 
 
-## Customized exit handlers
+
+
+## Validation
+
+
+## Exit handlers
 
