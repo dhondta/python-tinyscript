@@ -1,5 +1,3 @@
-## Simple tool
-
 ### Description
 
 Very basic tool, using the demonstration feature when no argument is given. It also redefines a constant for tuning the logging.

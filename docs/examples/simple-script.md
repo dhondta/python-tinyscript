@@ -1,5 +1,3 @@
-## Simple script
-
 ### Description
 
 Very basic script, with no particular feature used.
