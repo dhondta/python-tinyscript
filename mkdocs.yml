@@ -5,13 +5,12 @@ docs_dir: docs
 pages:
   - Introduction: index.md
   - Setup: setup.md
+  - Internals: internals.md
   - Features: features.md
   - Usage: usage.md
   - Examples:
     - 'Simple script': examples/simple-script.md
     - 'Simple tool': examples/simple-tool.md
-    - 'Script with demo': examples/script-with-demo.md
-    - 'Tool with sudo': examples/tool-with-sudo.md
 extra:
   mailto: alexandre.dhondt@gmail.com
 theme: readthedocs

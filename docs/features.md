@@ -1,6 +1,6 @@
-## Script metadata and help formatting
+## Metadata
 
-Metadata can be defined at the beginning of the script and is used by Tinyscript to format the help message.
+Metadata can be defined at the very beginning of the script/tool and is used by Tinyscript to format the help message.
 
 ```python
 from tinyscript import *
@@ -40,63 +40,9 @@ Usage examples:
 
 -----
 
-## Proxy parser
+## Privileged escalation
 
-A parser that collects calls to an `argparse.ArgumentParser` so that, inside the tiny script/tool, a few lines of code can be spared by not redefining the `argparse.ArgumentParser` with its parameters (e.g. the epilog).
-
-```python hl_lines="3 5"
-# normal script
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog=..., epilog=..., ...)
-    parser.add_argument(...)
-    args = parser.parse_args()
-    ...
-```
-
-```python hl_lines="6"
-# tiny script
-from tinyscript import *
-...
-if __name__ == '__main__':
-    parser.add_argument(...)
-    initialize(globals())  # also does many other things than just parsing !
-    ...
-```
-
------
-
-## Pre-configured colored logger
-
-Tinyscript pre-configures a logger using the `logging` and [`coloredlogs`](https://github.com/xolox/python-coloredlogs) modules, immediately accessible in the global scope when `initialize` has been executed. If required, the logging format can be redefined.
-
-```python hl_lines="4 5"
-# normal script
-import logging
-
-logging.basicConfig(...)
-logger = logging.getLogger(...)
-...
-```
-
-```python hl_lines="9"
-# tiny script
-from tinyscript import *  # from this point, a logger is already setup
-...
-LOG_FORMAT  = "..."  # new format can be defined
-DATE_FORMAT = "..."  # new format can be defined
-...
-if __name__ == '__main__':
-    ...
-    initialize(globals())  # the logger is then reconfigured with the new formats
-```
-
------
-
-## Customized initialization
-
-This is achieved by passing arguments to `initialize(...)`.
-
-- Require `sudo`
+This is achieved by passing a keyword argument `sudo=[boolean]` to `initialize(...)`.
 
 ```python hl_lines="4"
     ...
@@ -107,7 +53,11 @@ This is achieved by passing arguments to `initialize(...)`.
     ...
 ```
 
-- Configure multi-level debugging:
+-----
+
+## Multi-level debugging
+
+This is achieved by passing a keyword argument `multi_debug_level=[boolean]` to `initialize(...)`.
 
 ```python hl_lines="4"
     ...
@@ -125,21 +75,78 @@ This is achieved by passing arguments to `initialize(...)`.
 >  - `-vv`: `logging.INFO`
 >  - `-vvv`: `logging.DEBUG`
 
-- Add a help message (defaults to `True`)
- 
-> This allows to format the help messages using the defined metadata variables.
+-----
 
-- Add a demo option (defaults to `False`)
+## Playing a demo
 
-> This allows to play a random set of arguments as defined in `__examples__`.
+This is achieved by passing a keyword argument `add_demo=[boolean]` to `initialize(...)` and requires that `__examples__` is set. Indeed, when using the `--demo` option, it will pick a random example and execute it.
+
+```python hl_lines="2 7"
+...
+__examples__ = ["test", "-sv", "-d --test"]
+...
+    ...
+    initalize(globals(),
+              ...
+              add_demo=True,
+              ...)
+    ...
+```
+
+-----
+
+## Stepping the execution
+
+This is achieved by passing a keyword argument `add_step=[boolean]` to `initialize(...)`. It will pause the script/tool where a `step()` function or `Step(...)` context manager has been used, if the user started the script/tool with `--step`.
+
+```python hl_lines="4"
+    ...
+    initalize(globals(),
+              ...
+              add_wizard=True,
+              ...)
+    ...
+```
+
+-----
+
+## Starting a wizard
+
+This is achieved by passing a keyword argument `add_wizard=[boolean]` to `initialize(...)`. It will interactively ask for prividing arguments to the script/tool.
+
+```python hl_lines="4"
+    ...
+    initalize(globals(),
+              ...
+              add_wizard=True,
+              ...)
+    ...
+```
+
+
+
 
 - Add a wizard option (defaults to `False`)
 
 > This allows to interactively ask the user for arguments.
 
+    :param glob:              globals() instance from the calling script
+    :param sudo:              if True, require sudo credentials and re-run
+                               script with sudo
+    :param multi_debug_level: allow to use -v, -vv, -vvv (adjust logging level)
+                               instead of just -v (only debug on/off)
+    :param add_demo:          add an option to re-run the process using a random
+                               entry from the __examples__ (only works if this
+                               variable is populated)
+    :param add_step:          add an execution stepping option
+    :param add_version:       add a version option
+    :param add_wizard:        add an option to run a wizard, asking for each
+                               input argument
+    :param noargs_action:     action to be performed when no argument is input
+    :param report_func:       report generation function
 -----
 
-## Customized exit handlers
+## Customizable exit handlers
 
 Customized handlers can be defined for multiple events:
 
@@ -179,18 +186,3 @@ def at_terminate():
 ...
 ```
 
------
-
-## Pre-imports
-
-Some common built-in modules are preimported.
-
-```sh
-$ python
-[...]
->>> from tinyscript import __preimports__
->>> __preimports__
-['argparse', 'base64', 'binascii', 'collections', 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string', 'sys', 'time']
-```
-
-In a script/tool, all these built-in modules are preimported with the line `from tinyscript import *`.
