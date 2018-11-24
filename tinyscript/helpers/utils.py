@@ -45,19 +45,22 @@ def user_input(prompt="", choices=None, default=None, choices_str=""):
     if type(choices) in [list, tuple, set]:
         choices_str = " {%s}" % (choices_str or \
                                  '|'.join(list(map(str, choices))))
+        # consider choices of the form ["(Y)es", "(N)o"] ;
+        #  in this case, we want the choices to be ['y', 'n'] for the sake of
+        #  simplicity for the user
         m = list(map(lambda x: REGEX.match(x), choices))
         choices = [x.group(1).lower() if x else c for x, c in zip(m, choices)]
+        # this way, if using ["Yes", "No"], choices will remain so
         _check = lambda v: v in choices
     elif is_lambda(choices):
         _check = choices
     else:
         _check = lambda v: True
-    default_str = " [{}]".format(default) if default else ""
-    prompt += "{}{}\n >> ".format(choices_str, default_str)
+    prompt += "{} [{}]\n >> ".format(choices_str, default)
     user_input = std_input(prompt)
     if type(choices) in [list, tuple, set]:
         user_input = user_input.lower()
     if user_input == "" and default is not None and _check(default):
         return default
-    if _check(user_input):
-        return user_input if len(user_input) > 0 else None
+    if user_input != "" and _check(user_input):
+        return user_input
