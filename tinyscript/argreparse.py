@@ -82,22 +82,27 @@ class _NewActionsContainer(_ActionsContainer):
             if cancel:
                 return False
             # otherwise, retry after removing the short option string
+            args = list(args)
             short_opt = filter(is_short_opt, args)
             if len(short_opt) > 0:
-                args.remove(sch_opt[0])
+                args.remove(short_opt[0])
                 return self.add_argument(*args, **kwargs)
             # otherwise, retry after modifying the long option string with the
             #  precedence to the prefix (if set) then the suffix (if set)
             long_opt = filter(is_long_opt, args)
             if len(long_opt) > 0:
-                long_opt = args.pop(args.index(long_opt))
-                if action.prefix:
-                    long_opt = "--{}-{}".format(action.prefix,
+                long_opt = args.pop(args.index(long_opt[0]))
+                if kwargs.get('action') in \
+                    [None, 'store', 'append', 'store_const', 'append_const']:
+                    kwargs['metavar'] = kwargs.get('metavar') or \
+                                        long_opt.lstrip('-').upper()
+                if prefix:
+                    long_opt = "--{}-{}".format(prefix,
                                                 long_opt.split("--", 1)[1])
                     args.append(long_opt)
                     return self.add_argument(*args, **kwargs)
-                elif action.suffix:
-                    long_opt = "{}-{}".format(long_opt, action.suffix)
+                elif suffix:
+                    long_opt = "{}-{}".format(long_opt, suffix)
                     args.append(long_opt)
                     return self.add_argument(*args, **kwargs)
         return False
@@ -160,7 +165,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         else:
             kwargs['prog'] = ""
         kwargs['add_help'] = False
-        kwargs['conflict_handler'] = "resolve"
+        kwargs['conflict_handler'] = "error"
         kwargs['formatter_class'] = HelpFormatter
         # format the epilog message
         if self.examples and script:

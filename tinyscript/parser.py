@@ -106,6 +106,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
             os.execvp("sudo", ["sudo"] + python + sys.argv)
     # 3) populate the real parser and add information arguments
     __parsers = {}
+    __get_calls_from_parser(parser, glob['parser'])
     i = p.add_argument_group(gt("extra arguments"))
     if add['demo']:
         i.add_argument("-d", "--demo", action='demo', default=SUPPRESS,
@@ -151,7 +152,6 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
                            note=gt("--css overrides this setting"))
             r.add_argument("--filename", last=True, prefix="report",
                            help=gt("report filename"))
-    __get_calls_from_parser(parser, glob['parser'])
     glob['args'] = glob['parser'].parse_args()
     # 4) configure logging and get the main logger
     configure_logger(glob, multi_debug_level)
