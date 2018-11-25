@@ -2,8 +2,10 @@
 
 A parser that collects calls to an `argparse.ArgumentParser` so that, inside the tiny script/tool, a few lines of code can be spared by not redefining the `argparse.ArgumentParser` with its (long) parameters (e.g. the epilog).
 
+Normal script :
+
 ```python hl_lines="3 5"
-# normal script
+...
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog=..., epilog=..., ...)
     parser.add_argument(...)
@@ -11,8 +13,9 @@ if __name__ == '__main__':
     ...
 ```
 
-```python hl_lines="6"
-# tiny script
+With Tinyscript :
+
+```python hl_lines="5"
 from tinyscript import *
 ...
 if __name__ == '__main__':
@@ -61,10 +64,11 @@ Various features are handled by this initialization and are explained in the rel
 
 ## Pre-configured colored logger
 
-Tinyscript pre-configures a logger using the `logging` and [`coloredlogs`](https://github.com/xolox/python-coloredlogs) modules, immediately accessible in the global scope when `initialize` has been executed. If required, the logging format can be redefined.
+Tinyscript pre-configures a logger using the [`logging`](https://docs.python.org/3/howto/logging-cookbook.html) and [`coloredlogs`](https://github.com/xolox/python-coloredlogs) modules, immediately accessible in the global scope when `initialize` has been executed. If required, the logging format can be redefined.
 
-```python hl_lines="4 5"
-# normal script
+Normal script :
+
+```python hl_lines="3 4"
 import logging
 
 logging.basicConfig(...)
@@ -72,8 +76,9 @@ logger = logging.getLogger(...)
 ...
 ```
 
-```python hl_lines="9"
-# tiny script
+With Tinyscript :
+
+```python hl_lines="8"
 from tinyscript import *  # from this point, a logger is already setup
 ...
 LOG_FORMAT  = "..."  # new format can be defined
@@ -108,18 +113,24 @@ When a developper writes a script/tool relying on Tyniscript, every argument or 
 
 > Beware that, if every option string of a given argument or option is already set by the developper, this may break some features. For example, setting the `--output` option will prevent this of the report feature to be added, therefore preventing the user from setting the format of output.
 
-List of default "*extra*" arguments and options:
+List of "*extra*" arguments and options:
 
-**Option strings** | **Description**
-:---: | :---:
-`-d`, `--demo` | start a demo of a random example
-`-h`, `--help` | show the help message
+**Option strings** | **Description** | **If strings clash**
+:---: | :---: | :---:
+`-d`, `--demo` | start a demo of a random example | `--play-demo`
+`-h`, `--help` | show the help message | `--show-help`
+`-s`, `--step` | stepping mode | `--step-mode`
+`-v`, `--version` | show program's version number `__version__` | `--show-version`
+`-v`, `--verbose` | verbose mode | `--verbose-mode`
+`-w`, `--wizard` | start a wizard | `--start-wizard`
 
-List of default "*report*" arguments and options:
+List of "*report*" arguments and options:
 
-**Option strings** | **Description**
-:---: | :---:
-`--output` | start a demo of a random example
-`--title` | show the help message
-
+**Option strings** | **Description** | **If strings clash**
+:---: | :---: | :---:
+`--output` | start a demo of a random example | `--report-output`
+`--title` | show the help message | `--report-title`
+`--css` | report stylesheet file | `--report-css`
+`--theme` | report stylesheet theme (overridden by `--css`) | `--report-theme`
+`--filename` | report filename | `--report-filename`
 
