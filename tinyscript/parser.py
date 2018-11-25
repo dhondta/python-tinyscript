@@ -113,7 +113,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
                        prefix="play", help=gt("demonstrate a random example"))
     if add['help']:
         i.add_argument("-h", "--help", action='help', default=SUPPRESS,
-                       help=gt("show this help message and exit"))
+                      prefix="show", help=gt("show this help message and exit"))
     if add['step']:
         i.add_argument("-s", "--step", action="store_true", last=True,
                        suffix="mode", help=gt("stepping mode"))
@@ -121,15 +121,16 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
         version = glob['__version__'] if '__version__' in glob else None
         assert version, "__version__ is not defined"
         i.add_argument("-v", "--version", action='version', default=SUPPRESS,
-                       version=version,
+                       prefix="show", version=version,
                        help=gt("show program's version number and exit"))
     if multi_debug_level:
         i.add_argument("-v", dest="verbose", default=0, action="count",
-                       help=gt("verbose level"), cancel=True, last=True,
+                       suffix="mode",  cancel=True, last=True,
+                       help=gt("verbose level"),
                        note=gt("-vvv corresponds to the highest verbose level"))
     else:
         i.add_argument("-v", "--verbose", action="store_true", last=True,
-                       help=gt("verbose mode"))
+                       suffix="mode", help=gt("verbose mode"))
     if add['wizard']:
         i.add_argument("-w", "--wizard", action='wizard', default=SUPPRESS,
                        prefix="start", help=gt("start a wizard"))
