@@ -5,8 +5,8 @@ Tinyscript aims to quickly prototype scripts or tools by sparing as much lines o
 The idea is to make creating scripts/tools as easy as this:
 
 ```sh
-$ tinyscript-new
-$ gedit script.py
+$ tinyscript-new script --name "my-script"
+$ gedit my-script.py
 ```
 
 Simply modifying the template to:
@@ -46,7 +46,7 @@ $ python script.py "Hello World!"
 
 ## Rationale
 
-This library is born from the need of quickly building efficient scripts and tools without caring for re-defining the same imports and variables (i.e. a parser with the `argparse` module or a logger with the `logging` module). The aim was also to provide standardly-formatted usage docstrings built from as few line codes as possible, i.e. by defining `__[...]__` metadata in the script/tool.
+This library is born from the need of quickly building efficient scripts and tools without caring for re-defining various things like the logging or parsing of input arguments.
 
 In the meantime, I personnally used this library many times to create scripts/tools for my job or during cybersecurity or programming competitions and it proved very useful when it comes to sparing time.
 
