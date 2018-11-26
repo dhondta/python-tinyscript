@@ -42,16 +42,19 @@ def std_input(prompt="", style=None):
         return input(prompt).strip()
 
 
-def user_input(prompt="", choices=None, default=None, choices_str=""):
+def user_input(prompt="", choices=None, default=None, choices_str="",
+               required=False):
     """
     Python2/3-compatible input method handling choices and default value.
     
-    :param prompt:  prompt message
-    :param choices: list of possible choices or lambda function
-    :param default: default value
-    :return:        handled user input
+    :param prompt:   prompt message
+    :param choices:  list of possible choices or lambda function
+    :param default:  default value
+    :param required: make non-null user input mandatory
+    :return:         handled user input
     """
     if type(choices) in [list, tuple, set]:
+        choices = list(map(str, choices))
         choices_str = " {%s}" % (choices_str or \
                                  '|'.join(list(map(str, choices))))
         # consider choices of the form ["(Y)es", "(N)o"] ;
@@ -65,11 +68,17 @@ def user_input(prompt="", choices=None, default=None, choices_str=""):
         _check = choices
     else:
         _check = lambda v: True
-    prompt += "{} [{}]\n >> ".format(choices_str, default)
-    user_input = std_input(prompt)
-    if type(choices) in [list, tuple, set]:
-        user_input = user_input.lower()
-    if user_input == "" and default is not None and _check(default):
-        return default
-    if user_input != "" and _check(user_input):
-        return user_input
+    prompt += "{}{}\n".format(choices_str, [" [{}]".format(default), ""]\
+                                           [default is None and required])
+    user_input, first = None, True
+    while not user_input:
+        user_input = std_input(["", prompt][first] + " >> ")
+        if type(choices) in [list, tuple, set]:
+            user_input = user_input.lower()
+        if user_input == "" and default is not None and _check(default):
+            return str(default)
+        if user_input != "" and _check(user_input):
+            return user_input
+        if not required:
+            return
+        first = False
