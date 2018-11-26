@@ -166,8 +166,6 @@ if __name__ == '__main__':
         subparser.add_argument("-d", default=','.join(map(str, range(1, 55))),
                                dest="deck", help="deck file or list of integers")
         subparser.add_argument("-p", dest="passphrase", help="passphrase")
-        subparser.add_argument("-v", dest="verbose", action="store_true",
-                               help="verbose mode")
     encrypt.add_argument("-o", dest="output", default="deck.txt",
                          help="save the encoded deck to")
     encrypt.add_argument("-s", dest="shuffle", action="store_true",
