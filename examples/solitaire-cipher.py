@@ -156,7 +156,6 @@ class Solitaire(object):
 
 # ---------------------- MAIN SECTION -----------------------
 if __name__ == '__main__':
-    #kw = {'formatter_class': argparse.RawTextHelpFormatter}
     subparsers = parser.add_subparsers(help="commands", dest="command")
     decrypt = subparsers.add_parser('decrypt', help="decrypt message")
     encrypt = subparsers.add_parser('encrypt', help="encrypt message")
