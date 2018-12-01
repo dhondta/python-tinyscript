@@ -18,7 +18,7 @@ __doc__       = "This tool ..."
 
 This gives the following help message:
 
-```sh
+```sh hl_lines="4 5 6 7 8 10 17"
 $ python tool.py -h
 usage: tool [-h] [-v]
 
