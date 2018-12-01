@@ -3,6 +3,7 @@
 __author__ = "Alexandre D'Hondt"
 __version__ = "1.0"
 __copyright__ = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
+__training__ = "ZSIS CTF - Trivia - Shining (4 points)"
 __doc__ = """
 This tool allows to recursively decompress an archive according to various
  formats relying on many Linux decompression tools.

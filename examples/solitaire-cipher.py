@@ -12,8 +12,10 @@ __examples__ = ["encrypt \"AAAAA AAAAA\" -s",
 
 # --------------------- IMPORTS SECTION ---------------------
 from itertools import cycle
-from string import uppercase
 from tinyscript import *
+
+
+UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 class Deck(object):
@@ -127,8 +129,8 @@ class Deck(object):
 
 
 class Solitaire(object):
-    chr2int = lambda s, c: uppercase.index(c) + 1
-    int2chr = lambda s, i: uppercase[i-1]
+    chr2int = lambda s, c: UPPERCASE.index(c) + 1
+    int2chr = lambda s, i: UPPERCASE[i-1]
 
     def __init__(self, deck, A=52, B=53):
         assert isinstance(deck, Deck)
