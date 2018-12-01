@@ -19,3 +19,4 @@ markdown_extensions:
   - admonition
   - codehilite:
       linenums: true
+  - pymdownx.details
