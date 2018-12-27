@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 __author__ = "Alexandre D'Hondt"
-__version__ = "1.0"
+__version__ = "1.1"
 __copyright__ = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
 __reference__ = "https://www.schneier.com/academic/solitaire/"
 __doc__ = """
@@ -12,10 +12,8 @@ __examples__ = ["encrypt \"AAAAA AAAAA\" -s",
 
 # --------------------- IMPORTS SECTION ---------------------
 from itertools import cycle
+from string import ascii_uppercase as uppercase
 from tinyscript import *
-
-
-UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 class Deck(object):
@@ -51,19 +49,19 @@ class Deck(object):
         # try to parse the deck as a comma-/whitespace-separated list
         if len(re.split(r',?\s*', self.cards)) == 54:
             d = self.cards.replace('A', str(self.A)).replace('B', str(self.B))
-            d = map(int, re.split(r',?\s*', d))
+            d = list(map(int, re.split(r',?\s*', d)))
             if 0 not in d:
-                d = map(lambda x: x - 1, d)
+                d = list(map(lambda x: x - 1, d))
         # try to interpret the deck as encoded
         elif os.path.exists(self.cards):
             mapping = Deck.encoding_scheme(False)
-            d = map(lambda x: x.strip(), open(self.cards).readlines())
+            d = list(map(lambda x: x.strip(), open(self.cards).readlines()))
             try:
                 d = [mapping[k] for k in d]
             except:
                 pass
         # then register the cards only if valid
-        assert all(map(self.iscard, d)) and set(range(54)) == set(d), \
+        assert all(list(map(self.iscard, d))) and set(range(54)) == set(d), \
                "Invalid deck"
         self.cards = d[:]
         del d
@@ -121,7 +119,7 @@ class Deck(object):
     def encoding_scheme(encode=True):
         bridge_suit = []
         for c in ['c', 'd', 'h', 's']:
-            for f in ['a'] + map(str, range(2, 11)) + ['j', 'q', 'k']:
+            for f in ['a'] + list(map(str, range(2, 11))) + ['j', 'q', 'k']:
                 bridge_suit.append(c + f)
         bridge_suit.extend(['jr', 'jb'])
         return {i: k for i, k in enumerate(bridge_suit)} if encode else \
@@ -129,8 +127,8 @@ class Deck(object):
 
 
 class Solitaire(object):
-    chr2int = lambda s, c: UPPERCASE.index(c) + 1
-    int2chr = lambda s, i: UPPERCASE[i-1]
+    chr2int = lambda s, c: uppercase.index(c) + 1
+    int2chr = lambda s, i: uppercase[i-1]
 
     def __init__(self, deck, A=52, B=53):
         assert isinstance(deck, Deck)
@@ -147,7 +145,7 @@ class Solitaire(object):
 
     def encrypt(self, plaintext):
         plaintext = plaintext.replace(' ', '').upper()
-        plaintext = filter(lambda x: x.isalnum(), plaintext)
+        plaintext = ''.join(list(filter(lambda x: x.isalnum(), plaintext)))
         ciphertext = ""
         for i, k in enumerate(self.deck.keystream()):
             if i >= len(plaintext):
@@ -167,12 +165,13 @@ if __name__ == '__main__':
         subparser.add_argument("-b", type=int, default=54, help="joker B")
         subparser.add_argument("-d", default=','.join(map(str, range(1, 55))),
                                dest="deck", help="deck file or list of integers")
-        subparser.add_argument("-p", dest="passphrase", help="passphrase")
+        subparser.add_argument("-p", dest="passphrase", required=True,
+                               help="passphrase")
     encrypt.add_argument("-o", dest="output", default="deck.txt",
                          help="save the encoded deck to")
     encrypt.add_argument("-s", dest="shuffle", action="store_true",
                          help="shuffle the deck")
-    initialize(globals(), noargs_action="demo")
+    initialize(globals(), noargs_action="config", add_config=True)
     validate(globals(),
         ('a', "not 0 < ? <= 54", "A must be an integer from 1 to 54"),
         ('b', "not 0 < ? <= 54", "B must be an integer from 1 to 54"),
