@@ -26,7 +26,8 @@ def __get_calls_from_parser(proxy_parser, real_parser):
     """
     This actually executes the calls registered in the ProxyArgumentParser.
 
-    :param parser: ProxyArgumentParser instance
+    :param proxy_parser: ProxyArgumentParser instance
+    :param real_parser:  ArgumentParser instance
     """
     __parsers[proxy_parser] = real_parser
     for method, safe, args, kwargs, proxy_subparser in proxy_parser.calls:
@@ -62,9 +63,9 @@ def __proxy_to_real_parser(value):
     return value
 
 
-def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
-               add_step=False, add_version=False, add_wizard=False,
-               noargs_action=None, report_func=None):
+def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
+               add_demo=False, add_step=False, add_version=False,
+               add_wizard=False, noargs_action=None, report_func=None):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
@@ -75,6 +76,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
                                script with sudo
     :param multi_debug_level: allow to use -v, -vv, -vvv (adjust logging level)
                                instead of just -v (only debug on/off)
+    :param add_config:        add an option to input an INI configuration file
     :param add_demo:          add an option to re-run the process using a random
                                entry from the __examples__ (only works if this
                                variable is populated)
@@ -87,17 +89,18 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
     """
     global parser, __parsers
     
-    add = {'demo': add_demo, 'help': True, 'step': add_step,
-           'version': add_version, 'wizard': add_wizard}
+    add = {'config': add_config, 'demo': add_demo, 'help': True,
+           'step': add_step, 'version': add_version, 'wizard': add_wizard}
     glob['parser'] = p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
     add['demo'] = add['demo'] and glob['parser'].examples
-    if len(sys.argv) == 1 and noargs_action:
+    noarg = len(sys.argv) == 1
+    if noarg and noargs_action:
         assert noargs_action in add.keys(), \
                "Bad action when no args (should be one of: {})" \
                .format('|'.join(add.keys()))
-        sys.argv[1:] = ["--{}".format(noargs_action)]
-        add[noargs_action] = True
+        add[noargs_action] = True  # ensure this action is enabled, even if it
+                                   #  is not given the passed arguments
     # 2) if sudo required, restart the script
     if sudo:
         # if not root, restart the script in another process and jump to this
@@ -107,22 +110,39 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
     # 3) populate the real parser and add information arguments
     __parsers = {}
     __get_calls_from_parser(parser, glob['parser'])
+    if add['config']:
+        c = p.add_argument_group(gt("config arguments"))
+        opt = c.add_argument("-r", "--read-config", action='config',
+                             help=gt("read args from a config file"),
+                             note=gt("this overrides other arguments"))
+        c.add_argument("-w", "--write-config", metavar="INI",
+                       help=gt("write args to a config file"))
+        if noarg and noargs_action == "config":
+            sys.argv[1:] = [opt, "config.ini"]
     i = p.add_argument_group(gt("extra arguments"))
     if add['demo']:
-        i.add_argument("-d", "--demo", action='demo', default=SUPPRESS,
-                       prefix="play", help=gt("demonstrate a random example"))
+        opt = i.add_argument("-d", "--demo", action='demo', prefix="play",
+                             help=gt("demonstrate a random example"))
+        if noarg and noargs_action == "demo":
+            sys.argv[1:] = [opt]
     if add['help']:
-        i.add_argument("-h", "--help", action='help', default=SUPPRESS,
-                      prefix="show", help=gt("show this help message and exit"))
+        opt = i.add_argument("-h", "--help", action='help', prefix="show",
+                             help=gt("show this help message and exit"))
+        if noarg and noargs_action == "help":
+            sys.argv[1:] = [opt]
     if add['step']:
-        i.add_argument("-s", "--step", action="store_true", last=True,
-                       suffix="mode", help=gt("stepping mode"))
+        opt = i.add_argument("-s", "--step", action="store_true", last=True,
+                             suffix="mode", help=gt("stepping mode"))
+        if noarg and noargs_action == "step":
+            sys.argv[1:] = [opt]
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
         assert version, "__version__ is not defined"
-        i.add_argument("-v", "--version", action='version', default=SUPPRESS,
-                       prefix="show", version=version,
-                       help=gt("show program's version number and exit"))
+        opt = i.add_argument("-v", "--version", action='version',
+                             default=SUPPRESS, prefix="show", version=version,
+                             help=gt("show program's version number and exit"))
+        if noarg and noargs_action == "version":
+            sys.argv[1:] = [opt]
     if multi_debug_level:
         i.add_argument("-v", dest="verbose", default=0, action="count",
                        suffix="mode",  cancel=True, last=True,
@@ -132,8 +152,10 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
         i.add_argument("-v", "--verbose", action="store_true", last=True,
                        suffix="mode", help=gt("verbose mode"))
     if add['wizard']:
-        i.add_argument("-w", "--wizard", action='wizard', default=SUPPRESS,
-                       prefix="start", help=gt("start a wizard"))
+        opt = i.add_argument("-w", "--wizard", action='wizard', default=SUPPRESS,
+                             prefix="start", help=gt("start a wizard"))
+        if noarg and noargs_action == "wizard":
+            sys.argv[1:] = [opt]
     if report_func is not None:
         if not isfunction(report_func):
             glob['logger'].error("Bad report generation function")
@@ -165,6 +187,13 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_demo=False,
         elif _hooks.state == "TERMINATED":
             glob['at_terminate']()
         else:
+            if add['config']:
+                cf = glob['args'].write_config
+                if cf:
+                    with open(cf, 'w') as f:
+                        glob['parser']._config.write(f)
+                    glob['logger'].debug("Input arguments written to file "
+                                         "'{}'".format(cf))
             if report_func is not None:
                 # generate the report only when exiting gracefully, just before
                 #  the user-defined function at_graceful_exit
