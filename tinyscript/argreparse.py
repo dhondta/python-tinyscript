@@ -9,7 +9,8 @@ import sys
 from argparse import _ActionsContainer, _ArgumentGroup, _AttributeHolder, \
                      _SubParsersAction, ArgumentDefaultsHelpFormatter, \
                      Action, ArgumentError, RawTextHelpFormatter, SUPPRESS, \
-                     Namespace, ArgumentParser as BaseArgumentParser
+                     _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, \
+                     ArgumentParser as BaseArgumentParser
 from gettext import gettext as gt
 from os.path import basename, splitext
 try:
@@ -42,7 +43,7 @@ class _ConfigAction(Action):
         if conf not in parser._config.read(conf):
             logger.error("Config file '{}' not found".format(conf))
             sys.exit(2)
-        parser.config_args(parser._config)
+        parser.config_args()
 
 
 class _DemoAction(Action):
@@ -288,13 +289,13 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         return args
     
-    def _set_arg(self, a, c=None, s="main"):
+    def _set_arg(self, a, s="main", c=False):
         """
         Set a single argument.
         
         :param a: argparse.Action instance
-        :param c: populated ConfigParser instance
         :param s: config section title
+        :param c: use class' ConfigParser instance to get parameters
         """
         # if action of an argument that suppresses any other, just return
         if a.dest is SUPPRESS or a.default is SUPPRESS:
@@ -307,7 +308,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         default = a.default if a.default is None else str(a.default)
         if c:
             try:
-                value = c.get(s, a.dest).lower()
+                value = ArgumentParser._config.get(s, a.dest).lower()
             except (NoOptionError, NoSectionError) as e:
                 item = "setting" if isinstance(e, NoOptionError) else "section"
                 # if the argument is required, just ask for the value
@@ -349,17 +350,13 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 value = self._input_arg(a)
             pmap = a._name_parser_map
             if c:
-                pmap[value].config_args(c, a.dest)
+                pmap[value].config_args(a.dest)
                 pmap[value]._reparse_args['pos'].insert(0, value)
             else:
                 pmap[value].input_args()
             self._reparse_args['sub'].append(pmap[value])
         else:
             raise NotImplementedError("Unknown argparse action")
-        if value:
-            if not self._config.has_section(self.name):
-                self._config.add_section(self.name)
-            self._config.set(self.name, a.dest, str(value))
     
     def _sorted_actions(self):
         """
@@ -376,11 +373,10 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             yield a
         
         
-    def config_args(self, config, section="main"):
+    def config_args(self, section="main"):
         """
         Additional method for feeding input arguments from a config file.
         
-        :param config:  configuration object
         :param section: current config section name
         """
         if self._config_parsed:
@@ -394,7 +390,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 except ValueError:
                     pass
         for a in self._sorted_actions():
-            self._set_arg(a, config, section)
+            self._set_arg(a, section, True)
         self._config_parsed = True
     
     def demo_args(self):
@@ -416,6 +412,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         Reparses new arguments when _DemoAction (triggering parser.demo_args())
          or _WizardAction (triggering input_args()) was called.
         """
+        if not namespace:  # use the new Namespace class for handling _config
+            namespace = Namespace(self)
         namespace = super(ArgumentParser, self).parse_args(args, namespace)
         if len(self._reparse_args['pos']) > 0 or \
            len(self._reparse_args['opt']) > 0 or \
@@ -436,6 +434,20 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             # normal behavior with argparse
             self.print_usage(sys.stderr)
             self.exit(2, gt('%s: error: %s\n') % (self.prog, message))
+    
+    @classmethod
+    def add_to_config(cls, section, name, value):
+        """
+        Add a parameter to the shared ConfigParser object.
+        
+        :param section: parameter's section
+        :param name:    parameter's name
+        :param value:   parameter's value
+        """
+        if value:
+            if not cls._config.has_section(section):
+                cls._config.add_section(section)
+            cls._config.set(section, name, str(value))
 
 
 class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
@@ -472,3 +484,22 @@ class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
             action.note is not None:
             help += '\n NB: %(note)s'
         return help
+
+
+class Namespace(BaseNamespace):
+    """
+    Modified Namespace class for handling ArgumentParser._config.
+    """
+    excludes = ["_current_parser", "_subparsers", "_debug_level",
+                "read_config", "write_config"]
+    
+    def __init__(self, parser):
+        self._current_parser = parser.name
+        self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
+    
+    def __setattr__(self, name, value):
+        super(Namespace, self).__setattr__(name, value)
+        if name not in self.excludes:
+            ArgumentParser.add_to_config(self._current_parser, name, value)
+        if hasattr(self, "_subparsers") and name in self._subparsers and value:
+            self._current_parser = name

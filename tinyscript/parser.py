@@ -182,18 +182,20 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
     set_step_items(glob)
     # 6) finally, bind the global exit handler
     def __at_exit():
+        # first, dump the config if required
+        if add['config']:
+            cf = glob['args'].write_config
+            if cf:
+                with open(cf, 'w') as f:
+                    glob['parser']._config.write(f)
+                glob['logger'].debug("Input arguments written to file "
+                                     "'{}'".format(cf))
+        # then handle the state
         if _hooks.state == "INTERRUPTED":
             glob['at_interrupt']()
         elif _hooks.state == "TERMINATED":
             glob['at_terminate']()
         else:
-            if add['config']:
-                cf = glob['args'].write_config
-                if cf:
-                    with open(cf, 'w') as f:
-                        glob['parser']._config.write(f)
-                    glob['logger'].debug("Input arguments written to file "
-                                         "'{}'".format(cf))
             if report_func is not None:
                 # generate the report only when exiting gracefully, just before
                 #  the user-defined function at_graceful_exit
