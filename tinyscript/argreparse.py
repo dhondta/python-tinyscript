@@ -490,7 +490,10 @@ class Namespace(BaseNamespace):
     """
     Modified Namespace class for handling ArgumentParser._config.
     """
+    # private __dict__, so that vars() can still be used with no "junk" variable
+    #  used for Tinyscript-related processing (e.g. _current_parser)
     __privdict__ = {}
+    # exclude list for saving options in a ConfigParser object
     excludes = ["_current_parser", "_subparsers", "_debug_level",
                 "read_config", "write_config"]
     
@@ -499,16 +502,23 @@ class Namespace(BaseNamespace):
         self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
 
     def __getattr__(self, name):
+        # handle __privdict__ entry first
         if name.startswith("_") and name in self.__privdict__:
             return self.__privdict__[name]
+        # then use the native __getattr__
         return super(Namespace, self).__getattr__(name)
           
     def __setattr__(self, name, value):
-        if name.startswith("_"):
+        # handle __privdict__ entry first
+        if name.startswith("_") and name != "_debug_level":
             self.__privdict__[name] = value
         else:
             super(Namespace, self).__setattr__(name, value)
+        # then save the entry to the ConfigParser object if not excluded
         if name not in self.excludes:
             ArgumentParser.add_to_config(self._current_parser, name, value)
+        # finally switch the current parser value if the option name is part of
+        #  a subparser's list of options ; this new name will allow to save new
+        #  options in a new section of the ConfigParser object
         if hasattr(self, "_subparsers") and name in self._subparsers and value:
             self._current_parser = name
