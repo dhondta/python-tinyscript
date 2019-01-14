@@ -137,13 +137,13 @@ class _NewActionsContainer(_ActionsContainer):
                 return
             # otherwise, retry after removing the short option string
             args = list(args)
-            short_opt = filter(is_short_opt, args)
+            short_opt = list(filter(is_short_opt, args))
             if len(short_opt) > 0:
                 args.remove(short_opt[0])
                 return self.add_argument(*args, **kwargs)
             # otherwise, retry after modifying the long option string with the
             #  precedence to the prefix (if set) then the suffix (if set)
-            long_opt = filter(is_long_opt, args)
+            long_opt = list(filter(is_long_opt, args))
             if len(long_opt) > 0:
                 long_opt = args.pop(args.index(long_opt[0]))
                 if kwargs.get('action') in \

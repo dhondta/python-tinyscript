@@ -5,6 +5,6 @@
 """
 
 __author__ = "Alexandre D'Hondt"
-__version__ = "1.6.1"
+__version__ = "1.6.2"
 __copyright__ = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
 
