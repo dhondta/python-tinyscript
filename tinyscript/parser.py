@@ -145,12 +145,12 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
             sys.argv[1:] = [opt]
     if multi_debug_level:
         i.add_argument("-v", dest="verbose", default=0, action="count",
-                       suffix="mode",  cancel=True, last=True,
+                       suffix="mode", cancel=True, last=True,
                        help=gt("verbose level"),
                        note=gt("-vvv corresponds to the highest verbose level"))
     else:
-        i.add_argument("-v", "--verbose", action="store_true", last=True,
-                       suffix="mode", help=gt("verbose mode"))
+        i.add_argument("-v", "--verbose", action="store_true", cancel=True,
+                       last=True, suffix="mode", help=gt("verbose mode"))
     if add['wizard']:
         opt = i.add_argument("-w", "--wizard", action='wizard', default=SUPPRESS,
                              prefix="start", help=gt("start a wizard"))
