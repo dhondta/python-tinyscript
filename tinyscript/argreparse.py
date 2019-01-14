@@ -490,15 +490,24 @@ class Namespace(BaseNamespace):
     """
     Modified Namespace class for handling ArgumentParser._config.
     """
+    __privdict__ = {}
     excludes = ["_current_parser", "_subparsers", "_debug_level",
                 "read_config", "write_config"]
     
     def __init__(self, parser):
         self._current_parser = parser.name
         self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
-    
+
+    def __getattr__(self, name):
+        if name.startswith("_") and name in self.__privdict__:
+            return self.__privdict__[name]
+        return super(Namespace, self).__getattr__(name)
+          
     def __setattr__(self, name, value):
-        super(Namespace, self).__setattr__(name, value)
+        if name.startswith("_"):
+            self.__privdict__[name] = value
+        else:
+            super(Namespace, self).__setattr__(name, value)
         if name not in self.excludes:
             ArgumentParser.add_to_config(self._current_parser, name, value)
         if hasattr(self, "_subparsers") and name in self._subparsers and value:
