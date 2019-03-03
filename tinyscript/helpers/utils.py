@@ -5,6 +5,7 @@
 """
 import re
 from humanfriendly.terminal import ansi_wrap
+from six import b as six_b, u
 from sys import version_info
 
 from .lambdas import is_lambda
@@ -12,7 +13,7 @@ from ..__info__ import __author__, __copyright__, __version__
 
 
 __all__ = __features__ = ["PYTHON3", "b", "byteindex", "iterbytes",
-                          "std_input", "user_input"]
+                          "std_input", "u", "user_input"]
 
 
 PYTHON3      = version_info > (3,)
@@ -20,9 +21,18 @@ CHOICE_REGEX = re.compile(r'^\(([a-z0-9])\).*$', re.I)
 
 
 # see: http://python3porting.com/problems.html
-b         = lambda s: codecs.latin_1_encode(s)[0] if PYTHON3 else s
 byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
 iterbytes = lambda d: iter(d) if PYTHON3 else [ord(c) for c in d]
+
+
+def b(text):
+    """
+    Overload for six.b function.
+    """
+    try:
+        return six_b(text)
+    except:
+        return text
 
 
 def std_input(prompt="", style=None):
