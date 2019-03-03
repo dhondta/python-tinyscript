@@ -14,8 +14,8 @@ from os.path import basename, splitext
 from .__info__ import __author__, __copyright__, __version__
 from .argreparse import *
 from .handlers import *
+from .helpers import PYTHON3
 from .loglib import *
-from .report import Report
 from .step import set_step_items
 
 
@@ -63,9 +63,16 @@ def __proxy_to_real_parser(value):
     return value
 
 
-def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
-               add_demo=False, add_step=False, add_version=False,
-               add_wizard=False, noargs_action=None, report_func=None):
+def initialize(glob,
+               sudo=False,
+               multi_level_debug=False,
+               add_config=False,
+               add_demo=False,
+               add_step=False,
+               add_version=False,
+               add_wizard=False,
+               noargs_action=None,
+               report_func=None):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
@@ -74,7 +81,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
     :param glob:              globals() instance from the calling script
     :param sudo:              if True, require sudo credentials and re-run
                                script with sudo
-    :param multi_debug_level: allow to use -v, -vv, -vvv (adjust logging level)
+    :param multi_level_debug: allow to use -v, -vv, -vvv (adjust logging level)
                                instead of just -v (only debug on/off)
     :param add_config:        add an option to input an INI configuration file
     :param add_demo:          add an option to re-run the process using a random
@@ -126,8 +133,13 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
         if noarg and noargs_action == "demo":
             sys.argv[1:] = [opt]
     if add['help']:
-        opt = i.add_argument("-h", "--help", action='help', prefix="show",
-                             help=gt("show this help message and exit"))
+        if glob.get('__details__'):
+            i.add_argument("-h", dest="help", default=0, action="count",
+                           help=gt("show extended help message and exit"),
+                           note=gt("-hhh is the highest help detail level"))
+        else:
+            opt = i.add_argument("-h", "--help", action='help', prefix="show",
+                                 help=gt("show this help message and exit"))
         if noarg and noargs_action == "help":
             sys.argv[1:] = [opt]
     if add['step']:
@@ -143,11 +155,11 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
                              help=gt("show program's version number and exit"))
         if noarg and noargs_action == "version":
             sys.argv[1:] = [opt]
-    if multi_debug_level:
+    if multi_level_debug:
         i.add_argument("-v", dest="verbose", default=0, action="count",
                        suffix="mode", cancel=True, last=True,
                        help=gt("verbose level"),
-                       note=gt("-vvv corresponds to the highest verbose level"))
+                       note=gt("-vvv is the highest verbose level"))
     else:
         i.add_argument("-v", "--verbose", action="store_true", cancel=True,
                        last=True, suffix="mode", help=gt("verbose mode"))
@@ -156,7 +168,7 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
                              prefix="start", help=gt("start a wizard"))
         if noarg and noargs_action == "wizard":
             sys.argv[1:] = [opt]
-    if report_func is not None:
+    if report_func is not None and PYTHON3:
         if not isfunction(report_func):
             glob['logger'].error("Bad report generation function")
             return
@@ -175,9 +187,11 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
                            note=gt("--css overrides this setting"))
             r.add_argument("--filename", last=True, prefix="report",
                            help=gt("report filename"))
+    elif report_func is not None and PYTHON3:
+        glob['logger'].warn("Report generation is only available with Python 3")
     glob['args'] = glob['parser'].parse_args()
     # 4) configure logging and get the main logger
-    configure_logger(glob, multi_debug_level)
+    configure_logger(glob, multi_level_debug)
     # 5) append stepping mode items
     set_step_items(glob)
     # 6) finally, bind the global exit handler
@@ -196,7 +210,8 @@ def initialize(glob, sudo=False, multi_debug_level=False, add_config=False,
         elif _hooks.state == "TERMINATED":
             glob['at_terminate']()
         else:
-            if report_func is not None:
+            if report_func is not None and PYTHON3:
+                from .report import Report
                 # generate the report only when exiting gracefully, just before
                 #  the user-defined function at_graceful_exit
                 _ = glob['args']
