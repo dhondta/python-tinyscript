@@ -1,76 +1,109 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 __author__ = "Alexandre D'Hondt"
-__version__ = "1.0"
+__version__ = "1.2"
 __copyright__ = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
 __training__ = "ZSIS CTF - Trivia - Shining (4 points)"
 __doc__ = """
-This tool allows to recursively decompress an archive according to various
- formats relying on many Linux decompression tools.
+This tool allows to recursively decompress an archive, using multiple Linux decompression
+ tools. It currently supports the following tools:
+- bzip2
+- tar
+- unrar
+- unxz
+- arj
+- lzma
+- gunzip
+- 7za
+- unzip
 """
+__examples__ = ["test.zip"]
 
-import glob
+
+# --------------------- IMPORTS SECTION ---------------------
 import shutil
+from collections import deque
 from subprocess import check_output, PIPE
 from tinyscript import *
 
 
-TMP_DIR = ".tmp"
+# -------------------- FUNCTIONS SECTION --------------------
+def _log_filetype(filename, magic=None):
+    try:
+        file_out = check_output(['file', filename]).strip()
+        logger.debug(filename if magic is None else \
+                     "{} ({})".format(file_out, magic))
+    except:
+        pass
 
 
-def decompress(f):
-    logger.info("Decompressing '{}'...".format(f))
-    ft = check_output(['file', f]).split(':', 1)[1].strip()
+def decompress(filename):
+    logger.info("Decompressing '{}'...".format(filename))
+    ft = check_output(['file', filename]).split(':', 1)[1].strip()
     logger.debug(ft)
     if ft.startswith("bzip2 compressed data"):
         old = set(os.listdir("."))
-        _ = check_output(["bzip2", "-df", f], stderr=PIPE)
-        return False, list(set(os.listdir(".")) - old)[0]
+        _ = check_output(["bzip2", "-df", filename], stderr=PIPE)
+        return list(set(os.listdir(".")) - old)[0]
     elif ft.startswith("POSIX tar archive"):
-        return False, check_output(["tar", "-xvf", f]).strip()
+        return check_output(["tar", "-xvf", filename]).strip()
     elif ft.startswith("RAR archive data"):
-        return False, check_output(["unrar", "e", f], stderr=PIPE) \
+        return check_output(["unrar", "e", filename], stderr=PIPE) \
                .split("Extracting  ", 1)[1].split("        ", 1)[0].strip()
     elif ft.startswith("XZ compressed data"):
-        if not f.endswith(".xz"):
-            shutil.move(f, f + ".xz")
-        _ = check_output(["unxz", "-df", f + ".xz"], stderr=PIPE)
-        return False, f
+        if not filename.endswith(".xz"):
+            shutil.move(filename, filename + ".xz")
+        _ = check_output(["unxz", "-df", filename + ".xz"], stderr=PIPE)
+        return filename
     elif ft.startswith("ARJ archive data"):
-        if not f.endswith(".arj"):
-            shutil.move(f, f + ".arj")
-        return False, check_output(["arj", "e", f + ".arj"], \
-                stderr=PIPE).split("Extracting ", 1)[1].split("   ", 1)[0].strip()
+        if not filename.endswith(".arj"):
+            shutil.move(filename, filename + ".arj")
+        return check_output(["arj", "e", filename + ".arj"], stderr=PIPE) \
+               .split("Extracting ", 1)[1].split("   ", 1)[0].strip()
     elif ft.startswith("LZMA compressed data"):
-        if not f.endswith(".lzma"):
-            shutil.move(f, f + ".lzma")
-        _ = check_output(["lzma", "-df", f + ".lzma"], stderr=PIPE)
-        return False, f
+        if not filename.endswith(".lzma"):
+            shutil.move(filename, filename + ".lzma")
+        _ = check_output(["lzma", "-df", filename + ".lzma"], stderr=PIPE)
+        return filename
     elif ft.startswith("gzip compressed data"):
-        if not f.endswith(".gz"):
-            shutil.move(f, f + ".gz")
-        _ = check_output(["gunzip", "-df", f + ".gz"], stderr=PIPE)
-        return False, f
+        if not filename.endswith(".gz"):
+            shutil.move(filename, filename + ".gz")
+        _ = check_output(["gunzip", "-df", filename + ".gz"], stderr=PIPE)
+        return filename
     elif ft.startswith("7-zip archive data"):
-        if not f.endswith(".7z"):
-            shutil.move(f, f + ".7z")
+        if not filename.endswith(".7z"):
+            shutil.move(filename, filename + ".7z")
         old = set(os.listdir("."))
-        _ = check_output(["7za", "e", f + ".7z", "-y"], stderr=PIPE)
-        return False, list(set(os.listdir(".")) - old)[0]
+        _ = check_output(["7za", "e", filename + ".7z"], stderr=PIPE)
+        return list(set(os.listdir(".")) - old)[0]
+    elif ft.startswith("Zip archive data"):
+        if not filename.endswith(".zip"):
+            shutil.move(filename, filename + ".zip")
+        _ = check_output(["unzip", filename], stderr=PIPE)
+        for l in _.split('\n'):
+            if "extracting" in l:
+                return l.split("extracting:", 1)[1].strip()
     logger.warn("Nothing more to decompress")
-    return True, f
 
 
+# ---------------------- MAIN SECTION -----------------------
 if __name__ == '__main__':
     parser.add_argument("archive", help="input archive")
     initialize(globals())
-    os.makedirs(TMP_DIR)
-    shutil.copy(args.archive, os.path.join(TMP_DIR, args.archive))
-    _ = os.getcwd()
-    os.chdir(TMP_DIR)
-    stop, f = False, args.archive
-    while not stop:
-        stop, f = decompress(f)
-    os.chdir(_)
-    shutil.move(os.path.join(TMP_DIR, f), ".")
-    shutil.rmtree(TMP_DIR)
+    filename = args.archive
+    cleanup = deque([], 2)
+    # start recursively decompressing the archive
+    while True:
+        filename = decompress(filename)
+        if filename is None:
+            try:  # do not cleanup last decompressed file
+                cleanup.pop()
+            except:
+                pass
+            break
+        cleanup.append(filename)
+        if len(cleanup) == 2:
+            os.remove(cleanup.popleft())
+    # remove all remaining files
+    for i in range(len(cleanup)):
+        os.remove(cleanup.pop())
