@@ -23,6 +23,7 @@ eggs/
 lib64/
 parts/
 sdist/
+reinstall.sh
 update.sh
 version.py
 
