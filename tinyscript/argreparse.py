@@ -238,6 +238,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         if doc:
             d += "\n\n" + doc
         kwargs['description'] = d
+        self.details = globals_dict.get('__details__', [])
         # now initialize argparse's ArgumentParser with the new arguments
         super(ArgumentParser, self).__init__(*args, **kwargs)
     
@@ -420,6 +421,12 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
            len(self._reparse_args['sub']) > 0:
             args = self._reset_args()
             namespace = super(ArgumentParser, self).parse_args(args, namespace)
+        # process "-hh..." here, after having parsed the arguments
+        help_level = getattr(namespace, "help", 0)
+        if help_level > 0:
+            self.print_help()
+            self.print_extended_help(help_level)
+            self.exit()
         return namespace
 
     def error(self, message):
@@ -435,6 +442,12 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             self.print_usage(sys.stderr)
             self.exit(2, gt('%s: error: %s\n') % (self.prog, message))
     
+    def print_extended_help(self, level=1, file=None):
+        if not isinstance(self.details, (tuple, list, set)):
+            self.details = [self.details]
+        for _, message in zip((level - 1) * [None], self.details):
+            self._print_message(message, file)
+
     @classmethod
     def add_to_config(cls, section, name, value):
         """
