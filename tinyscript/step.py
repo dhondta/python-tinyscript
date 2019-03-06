@@ -17,10 +17,8 @@ def set_step_items(glob):
     
     :param glob: main script's global scope dictionary reference
     """
-    try:
-        enabled = glob['args'].step
-    except AttributeError:
-        enabled = False
+    _ = glob['args']
+    enabled = getattr(_, _._collisions.get("step") or "step", False)
     
     class Step(object):
         def __init__(self, message=None, at_end=False):

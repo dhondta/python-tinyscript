@@ -116,6 +116,7 @@ class _NewActionsContainer(_ActionsContainer):
         new_kw = {k: v for k, v in kwargs.items()}
         # collect Tinyscript-added keyword-arguments
         cancel = new_kw.pop('cancel', False)
+        orig = new_kw.pop('orig', None)
         note = new_kw.pop('note', None)
         last = new_kw.pop('last', False)
         prefix = new_kw.pop('prefix', None)
@@ -128,11 +129,12 @@ class _NewActionsContainer(_ActionsContainer):
             # now set Tinyscript-added keyword-arguments
             action.note = note
             action.last = last
+            action.orig = orig
             action.prefix = prefix
             action.suffix = suffix
             return args[-1]
         except ArgumentError:
-            # drop the argument if conflict and cancel True
+            # drop the argument if conflict and cancel set to True
             if cancel:
                 return
             # otherwise, retry after removing the short option string
@@ -153,9 +155,10 @@ class _NewActionsContainer(_ActionsContainer):
                     kwargs['metavar'] = kwargs.get('metavar') or \
                                         (long_opt.lstrip('-').upper() \
                                          if not kwargs.get('choices') else None)
+                curr_opt = long_opt.lstrip("-")
+                kwargs['orig'] = curr_opt.replace("-", "_")
                 if prefix:
-                    long_opt = "--{}-{}".format(prefix,
-                                                long_opt.split("--", 1)[1])
+                    long_opt = "--{}-{}".format(prefix, curr_opt)
                     args.append(long_opt)
                     return self.add_argument(*args, **kwargs)
                 elif suffix:
@@ -510,11 +513,12 @@ class Namespace(BaseNamespace):
     #  used for Tinyscript-related processing (e.g. _current_parser)
     __privdict__ = {}
     # exclude list for saving options in a ConfigParser object
-    excludes = ["_current_parser", "_subparsers", "_debug_level",
-                "read_config", "write_config"]
+    excludes = ["_current_parser", "_debug_level", "_collisions",
+                "_subparsers", "read_config", "write_config"]
     
     def __init__(self, parser):
         self._current_parser = parser.name
+        self._collisions = {a.orig: a.dest for a in parser._actions if a.orig}
         self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
 
     def __getattr__(self, name):
