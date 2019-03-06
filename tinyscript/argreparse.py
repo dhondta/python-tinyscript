@@ -518,7 +518,8 @@ class Namespace(BaseNamespace):
     
     def __init__(self, parser):
         self._current_parser = parser.name
-        self._collisions = {a.orig: a.dest for a in parser._actions if a.orig}
+        self._collisions = {a.orig: a.dest for a in parser._actions \
+                            if getattr(a, "orig", None)}
         self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
 
     def __getattr__(self, name):
