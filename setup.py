@@ -16,6 +16,7 @@ requirements = parse_requirements("requirements.txt", session=False)
 setup(
   name = "tinyscript",
   packages = find_packages(),
+  include_package_data = True,
   author = "Alexandre D\'Hondt",
   author_email = "alexandre.dhondt@gmail.com",
   version = "1.6.5",
