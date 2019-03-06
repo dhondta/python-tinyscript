@@ -13,6 +13,7 @@ from os.path import basename, splitext
 
 from .__info__ import __author__, __copyright__, __version__
 from .argreparse import *
+from .timing import set_time_items
 from .handlers import *
 from .helpers import PYTHON3
 from .loglib import *
@@ -69,6 +70,7 @@ def initialize(glob,
                add_config=False,
                add_demo=False,
                add_step=False,
+               add_time=False,
                add_version=False,
                add_wizard=False,
                noargs_action=None,
@@ -88,6 +90,7 @@ def initialize(glob,
                                entry from the __examples__ (only works if this
                                variable is populated)
     :param add_step:          add an execution stepping option
+    :param add_time:          add an execution timing option
     :param add_version:       add a version option
     :param add_wizard:        add an option to run a wizard, asking for each
                                input argument
@@ -96,8 +99,9 @@ def initialize(glob,
     """
     global parser, __parsers
     
-    add = {'config': add_config, 'demo': add_demo, 'help': True,
-           'step': add_step, 'version': add_version, 'wizard': add_wizard}
+    add = {'config': add_config, 'demo': add_demo, 'step': add_step,
+           'time': add_time, 'version': add_version, 'wizard': add_wizard,
+           'help': True}
     glob['parser'] = p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
     add['demo'] = add['demo'] and glob['parser'].examples
@@ -146,6 +150,16 @@ def initialize(glob,
         opt = i.add_argument("-s", "--step", action="store_true", last=True,
                              suffix="mode", help=gt("stepping mode"))
         if noarg and noargs_action == "step":
+            sys.argv[1:] = [opt]
+    if add['time']:
+        b = p.add_argument_group(gt("timing arguments"))
+        opt = b.add_argument("--stats", action='store_true', last=True,
+                             prefix="time",
+                             help=gt("display execution time stats at exit"))
+        b.add_argument("--timings", action='store_true', last=True,
+                       suffix="mode",
+                       help=gt("display time stats during execution"))
+        if noarg and noargs_action == "time":
             sys.argv[1:] = [opt]
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
@@ -203,7 +217,9 @@ def initialize(glob,
     configure_logger(glob, multi_level_debug)
     # 5) append stepping mode items
     set_step_items(glob)
-    # 6) finally, bind the global exit handler
+    # 6) append timing mode items
+    set_time_items(glob)
+    # 7) finally, bind the global exit handler
     def __at_exit():
         # first, dump the config if required
         if add['config']:
@@ -226,6 +242,9 @@ def initialize(glob,
                 r = Report(*report_func(), title=_.title, filename=_.filename,
                            logger=glob['logger'], css=_.css)
                 getattr(r, _.output)(False)
+            t = glob['time_manager']
+            if add['time'] and t._stats:
+                t.stats()
             glob['at_graceful_exit']()
         glob['at_exit']()
         logging.shutdown()

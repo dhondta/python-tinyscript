@@ -31,6 +31,18 @@ coloredlogs.DEFAULT_LEVEL_STYLES['step'] = dict(color=STEP_COLOR,
                                            bold=coloredlogs.CAN_USE_BOLD_FONT)
 
 
+# add a custom log level for timing
+TIME_COLOR = "magenta"
+logging.TIME = 100
+logging.addLevelName(logging.TIME, "TIME")
+def time(self, message, *args, **kwargs):
+    if self.isEnabledFor(logging.TIME):
+        self._log(logging.TIME, message, args, **kwargs) 
+logging.Logger.time = time
+coloredlogs.DEFAULT_LEVEL_STYLES['time'] = dict(color=TIME_COLOR,
+                                           bold=coloredlogs.CAN_USE_BOLD_FONT)
+
+
 # setup a default logger for allowing logging before initialize() is called
 logger = logging.getLogger("main")
 coloredlogs.DEFAULT_LOG_FORMAT = LOG_FORMAT
