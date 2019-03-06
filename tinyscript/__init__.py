@@ -11,18 +11,12 @@ from .helpers import *
 from .loglib import *
 from .parser import *
 from .preimports import *
-if PYTHON3:
-    from .report import *
 
 from .handlers import __features__ as _handlers
 from .helpers import __features__ as _helpers
 from .loglib import __features__ as _loglib
 from .parser import __features__ as _parser
 from .preimports import __features__ as __preimports__
-if PYTHON3:
-    from .report import __features__ as _report
-else:
-    _report = []
 
 
-__all__ = _handlers + _helpers + _loglib + _parser + __preimports__ + _report
+__all__ = _handlers + _helpers + _loglib + _parser + __preimports__

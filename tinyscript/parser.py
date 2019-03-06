@@ -150,8 +150,8 @@ def initialize(glob,
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
         assert version, "__version__ is not defined"
-        opt = i.add_argument("-v", "--version", action='version',
-                             default=SUPPRESS, prefix="show", version=version,
+        opt = i.add_argument("--version", action='version',
+                             prefix="show", version=version,
                              help=gt("show program's version number and exit"))
         if noarg and noargs_action == "version":
             sys.argv[1:] = [opt]
@@ -164,7 +164,7 @@ def initialize(glob,
         i.add_argument("-v", "--verbose", action="store_true", cancel=True,
                        last=True, suffix="mode", help=gt("verbose mode"))
     if add['wizard']:
-        opt = i.add_argument("-w", "--wizard", action='wizard', default=SUPPRESS,
+        opt = i.add_argument("-w", "--wizard", action='wizard',
                              prefix="start", help=gt("start a wizard"))
         if noarg and noargs_action == "wizard":
             sys.argv[1:] = [opt]
@@ -172,10 +172,19 @@ def initialize(glob,
         if not isfunction(report_func):
             glob['logger'].error("Bad report generation function")
             return
+        # lazily import report features
+        #  -> reason: they rely on pandas and weasyprint, which take time to be
+        #              imported ; so, when report features are not used in a
+        #              script, report classes won't be loaded
+        all_list = __import__("tinyscript.report", fromlist=['__all__']).__all__
+        report = __import__("tinyscript.report", fromlist=all_list)
+        for f in all_list:
+            glob[f] = globals()[f] = getattr(report, f)
+        # now populate the parser with report-related arguments
         r = glob['parser'].add_argument_group(gt("report arguments"))
-        choices = map(lambda x: x[0],
-                      filter(lambda x: not x[0].startswith('_'),
-                             getmembers(Report, predicate=ismethod)))
+        output_func = list(filter(lambda x: not x[0].startswith('_'),
+                                  getmembers(Report, predicate=isfunction)))
+        choices = list(map(lambda x: x[0], output_func))
         if r.add_argument("--output", choices=choices, default="pdf", last=True,
                           prefix="report", help=gt("report output format")):
             r.add_argument("--title", last=True, prefix="report",
@@ -187,7 +196,7 @@ def initialize(glob,
                            note=gt("--css overrides this setting"))
             r.add_argument("--filename", last=True, prefix="report",
                            help=gt("report filename"))
-    elif report_func is not None and PYTHON3:
+    elif report_func is not None and not PYTHON3:
         glob['logger'].warn("Report generation is only available with Python 3")
     glob['args'] = glob['parser'].parse_args()
     # 4) configure logging and get the main logger
@@ -211,7 +220,6 @@ def initialize(glob,
             glob['at_terminate']()
         else:
             if report_func is not None and PYTHON3:
-                from .report import Report
                 # generate the report only when exiting gracefully, just before
                 #  the user-defined function at_graceful_exit
                 _ = glob['args']

@@ -24,8 +24,9 @@ HEAD_CSS = "@%(pos)s-left{%(left)s};@%(pos)s-center{%(center)s};@%(pos)s-righ" \
            "t{%(right)s};"
 PAGE_CSS = "@page{size:%(size)s;margin:%(margins)s;%(header)s%(footer)s}"
 TEXT = True
-THEMES = map(lambda f: splitext(f)[0], filter(lambda f: f.endswith(".css"),
-                                              listdir(dirname(__file__))))
+THEMES = list(map(lambda f: splitext(f)[0],
+                  filter(lambda f: f.endswith(".css"),
+                              listdir(dirname(__file__)))))
 
 
 def output(f):
