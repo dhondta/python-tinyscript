@@ -90,10 +90,10 @@ class _NewSubParsersAction(_SubParsersAction):
 
 
 class _WizardAction(Action):
-    def __init__(self, option_strings, help=None):
-        super(_DemoAction, self).__init__(option_strings=option_strings,
-                                          dest=SUPPRESS, default=SUPPRESS,
-                                          nargs=0, help=help)
+    def __init__(self, option_strings, dest=SUPPRESS, help=None):
+        super(_WizardAction, self).__init__(option_strings=option_strings,
+                                            dest=SUPPRESS, default=SUPPRESS,
+                                            nargs=0, help=help)
 
     def __call__(self, parser, namespace, values, option_string=None):
         parser.input_args()
@@ -148,8 +148,11 @@ class _NewActionsContainer(_ActionsContainer):
                 long_opt = args.pop(args.index(long_opt[0]))
                 if kwargs.get('action') in \
                     [None, 'store', 'append', 'store_const', 'append_const']:
+                    # set metavar only if no choices given ; otherwise, it
+                    #  takes the precedence on choices in the help message
                     kwargs['metavar'] = kwargs.get('metavar') or \
-                                        long_opt.lstrip('-').upper()
+                                        (long_opt.lstrip('-').upper() \
+                                         if not kwargs.get('choices') else None)
                 if prefix:
                     long_opt = "--{}-{}".format(prefix,
                                                 long_opt.split("--", 1)[1])
