@@ -2,3 +2,4 @@ coloredlogs
 markdown2
 numpy
 pandas
+pymdown-extensions
