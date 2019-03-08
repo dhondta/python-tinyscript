@@ -132,7 +132,7 @@ def initialize(glob,
             sys.argv[1:] = [opt, "config.ini"]
     i = p.add_argument_group(gt("extra arguments"))
     if add['demo']:
-        opt = i.add_argument("-d", "--demo", action='demo', prefix="play",
+        opt = i.add_argument("--demo", action='demo', prefix="play",
                              help=gt("demonstrate a random example"))
         if noarg and noargs_action == "demo":
             sys.argv[1:] = [opt]
@@ -147,7 +147,7 @@ def initialize(glob,
         if noarg and noargs_action == "help":
             sys.argv[1:] = [opt]
     if add['step']:
-        opt = i.add_argument("-s", "--step", action="store_true", last=True,
+        opt = i.add_argument("--step", action="store_true", last=True,
                              suffix="mode", help=gt("stepping mode"))
         if noarg and noargs_action == "step":
             sys.argv[1:] = [opt]

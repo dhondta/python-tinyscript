@@ -87,11 +87,11 @@ def set_time_items(glob):
     def get_time(message=None, start=manager.start):
         if manager._timings:
             l.time("> {}: {} seconds".format(message or "Time elapsed since "
-                                            "last measure", _take_time(start)))
+                                          "execution start", _take_time(start)))
     
     glob['get_time'] = get_time
     
     def get_time_since_last(message=None):
-        get_time(message, manager.last)
+        get_time(message or "Time elapsed since last measure", manager.last)
     
     glob['get_time_since_last'] = get_time_since_last
