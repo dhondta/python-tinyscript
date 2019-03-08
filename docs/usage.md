@@ -57,6 +57,8 @@ From there, the first thing to do can be to customize script/tool's metadata. Fo
 **Field** | **Comment**
 --- | ---
 ```__author__``` | self-explanatory
+```__details__``` | list of extra docstrings (for multi-level help)
+```__doc__``` | script's docstring
 ```__email__``` | self-explanatory
 ```__examples__``` | a list of strings providing example arguments and options (no need to mention the tool name)
 ```__reference__``` | field for referencing a book/course/...

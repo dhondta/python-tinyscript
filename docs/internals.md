@@ -1,6 +1,6 @@
 ## Proxy parser
 
-A parser that collects calls to an `argparse.ArgumentParser` so that, inside the tiny script/tool, a few lines of code can be spared by not redefining the `argparse.ArgumentParser` with its (long) parameters (e.g. the epilog).
+This is a parser that collects calls to a common `argparse.ArgumentParser` so that, inside the tiny script/tool, a few lines of code can be spared by not redefining the `argparse.ArgumentParser` with its (long) parameters (e.g. the epilog).
 
 Normal script :
 

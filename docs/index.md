@@ -1,6 +1,6 @@
 ## Introduction
 
-Tinyscript aims to quickly prototype scripts or tools by sparing as much lines of code as possible and providing useful base features like preimports and logging.
+Tinyscript aims to quickly prototype scripts or tools by sparing as much lines of code as possible and providing base features (especially useful for debugging or understanding the execution flow) like configured logging, preimports, stepping, timing and so forth.
 
 The idea is to make creating scripts/tools as easy as this:
 
@@ -46,9 +46,9 @@ $ python script.py "Hello World!"
 
 ## Rationale
 
-This library is born from the need of quickly building efficient scripts and tools without caring for re-defining various things like the logging or parsing of input arguments.
+This library is born from the need of quickly building efficient scripts and tools without caring for redefining various things or rewritting/setting the same functionalities like the logging or parsing of input arguments.
 
-In the meantime, I personnally used this library many times to create scripts/tools for my job or during cybersecurity or programming competitions and it proved very useful when it comes to sparing time.
+In the meantime, I personnally used this library many times to create scripts/tools for my job or during cybersecurity or programming competitions and it proved very useful when dealing with time constraints.
 
 -----
 
@@ -56,6 +56,6 @@ In the meantime, I personnally used this library many times to create scripts/to
 
 In the remainder of this documentation, the following terms are used:
 
-- **Script**: Simple code, as slight as possible.
+- **Script**: Simple code, as slight as possible, more suitable for a single or very specific use.
 
-- **Tool**: More complete code, with metadata and comments, heavier than a *Script*.
+- **Tool**: More complete code, with metadata and comments, heavier than a *Script*, also aimed at being installed on a system.
