@@ -72,12 +72,14 @@ This is achieved by passing a keyword argument `multi_debug_level=[boolean]` to 
     ...
 ```
 
-> This allows to change the behavior of the default argument `-v`/`--verbose` to:
-> 
->  - '': `logging.ERROR`
->  - `-v`: `logging.WARNING`
->  - `-vv`: `logging.INFO`
->  - `-vvv`: `logging.DEBUG`
+!!! note "Debug levels"
+
+    This allows to change the behavior of the default argument `-v`/`--verbose` to:
+    
+    - '': `logging.ERROR`
+    - `-v`: `logging.WARNING`
+    - `-vv`: `logging.INFO`
+    - `-vvv`: `logging.DEBUG`
 
 -----
 
@@ -96,13 +98,15 @@ This is achieved by setting the `__details__` metadata at the beginning of the s
     ...
 ```
 
-> This allows to change the behavior of the default argument `-h`/`--help` to:
-> 
->  - `-h`: classical help message
->  - `-hh`: classical help message + first string in __details__ list
->  - `-hhh`: classical help message + first and second strings in __details__ list
-> 
-> Note: Strings beyond the two first elements of `__details__` are not handled.
+!!! note "Help levels"
+
+    This allows to change the behavior of the default argument `-h`/`--help` to:
+    
+    - `-h`: classical help message
+    - `-hh`: classical help message + first string in __details__ list
+    - `-hhh`: classical help message + first and second strings in __details__ list
+    
+    Note: Strings beyond the two first elements of `__details__` are not handled.
 
 -----
 
@@ -227,15 +231,17 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
     ...
 ```
 
-> It currently supports the following actions:
-> 
-> - `config`
-> - `demo`
-> - `help`
-> - `step`
-> - `time`
-> - `version`
-> - `wizard`
+!!! note "Available actions"
+
+    It currently supports the following actions:
+    
+    - `config`
+    - `demo`
+    - `help`
+    - `step`
+    - `time`
+    - `version`
+    - `wizard`
 
 -----
 
