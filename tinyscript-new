@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from tinyscript import *
-from tinyscript.template import new
+from tinyscript.template import new, TARGETS
 
 from tinyscript.__info__ import __author__, __copyright__
 
@@ -19,9 +19,11 @@ This tool allows to quickly create a new Tinyscript script/tool from a template.
 
 
 if __name__ == '__main__':
-    parser.add_argument("template", default="script",
+    parser.add_argument("template", default="script", 
+                        choices=["script", "tool"],
                         help="template to be used")
-    parser.add_argument("-t", "--target", help="target to be created")
+    parser.add_argument("-t", "--target", choices=TARGETS.keys(),
+                        help="target to be created")
     parser.add_argument("-n", "--name", default="template name",
                         help="script/tool name")
     initialize(globals(), noargs_action="wizard")
