@@ -109,18 +109,19 @@ In a script/tool, all these built-in modules are preimported with the line `from
 
 ## Advanced option clash resolution
 
-When a developper writes a script/tool relying on Tyniscript, every argument or option defined will preceed the default arguments, e.g. `-h` or `--help`. Tinyscript will then add these after the developper-defined ones, then using argparse's conflict resolution first trying with full option strings (e.g. `-v` and `--verbose`), then with the long option string only (`--verbose`).
+When a developper writes a script/tool relying on Tyniscript, every argument or option defined will preceed the default arguments, e.g. `-h` or `--help`. Tinyscript will then add these after the developper-defined ones, then using `argparse`'s conflict resolution first trying with full option strings (e.g. `-v` and `--verbose`), then with the long option string only (`--verbose`). If a name collision occurs, some of the pre-defined arguments use prefixes or suffixes to resolve it so that they can still be parsed. The following lists give the mappings between pre-defined default option names and their resolved names if a collision occurs.
 
-> Beware that, if every option string of a given argument or option is already set by the developper, this may break some features. For example, setting the `--output` option will prevent this of the report feature to be added, therefore preventing the user from setting the format of output.
 
 List of "*extra*" arguments and options:
 
 **Option strings** | **Description** | **If strings clash**
 :---: | :---: | :---:
-`-d`, `--demo` | start a demo of a random example | `--play-demo`
+`--demo` | start a demo of a random example | `--play-demo`
 `-h`, `--help` | show the help message | `--show-help`
-`-s`, `--step` | stepping mode | `--step-mode`
-`-v`, `--version` | show program's version number `__version__` | `--show-version`
+`--stats` | time statistics display (at end) | `--time-stats`
+`--timings` | timing display mode | `--timings-mode`
+`--step` | stepping mode | `--step-mode`
+`--version` | show program's version number `__version__` | `--show-version`
 `-v`, `--verbose` | verbose mode | `--verbose-mode`
 `-w`, `--wizard` | start a wizard | `--start-wizard`
 
@@ -128,8 +129,8 @@ List of "*report*" arguments and options:
 
 **Option strings** | **Description** | **If strings clash**
 :---: | :---: | :---:
-`--output` | start a demo of a random example | `--report-output`
-`--title` | show the help message | `--report-title`
+`--output` | report output format | `--report-output`
+`--title` | report title | `--report-title`
 `--css` | report stylesheet file | `--report-css`
 `--theme` | report stylesheet theme (overridden by `--css`) | `--report-theme`
 `--filename` | report filename | `--report-filename`

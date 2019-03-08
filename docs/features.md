@@ -13,6 +13,10 @@ __source__    = "..."
 __training__  = "..."
 __examples__  = ["..."]
 __doc__       = "This tool ..."
+__details__   = [
+    """ ... """,
+    """ ... """
+]
 ...
 ```
 
@@ -77,6 +81,31 @@ This is achieved by passing a keyword argument `multi_debug_level=[boolean]` to 
 
 -----
 
+## Multi-level help
+
+This is achieved by setting the `__details__` metadata at the beginning of the script.
+
+```python hl_lines="2 3 4 5"
+    ...
+    __details__ = [
+    """Extra documentation, displayed when using -hh. """,
+    """Other extra documentation, displayed when using -hhh. """
+    ]
+    ...
+    initalize(globals(), ...)
+    ...
+```
+
+> This allows to change the behavior of the default argument `-h`/`--help` to:
+> 
+>  - `-h`: classical help message
+>  - `-hh`: classical help message + first string in __details__ list
+>  - `-hhh`: classical help message + first and second strings in __details__ list
+> 
+> Note: Strings beyond the two first elements of `__details__` are not handled.
+
+-----
+
 ## Playing a demo
 
 This is achieved by passing a keyword argument `add_demo=[boolean]` to `initialize(...)` and requires that `__examples__` is set. Indeed, when using the `--demo` option, it will pick a random example and execute it.
@@ -122,18 +151,36 @@ def my_function(...):
 
 -----
 
-## Adding the version option
+## Timing the execution
 
-This is achieved by passing a keyword argument `add_version=[boolean]` to `initialize(...)`. It provides an option to the script/tool for displaying the version from the metadata `__version__`.
+This is achieved by passing a keyword argument `add_time=[boolean]` to `initialize(...)`. It will measure time in the script/tool where a `get_time()` or `get_time_since_last()` function or a `Timer(...)` context manager is used. If the user started the script/tool with `--stats` (or `--time-stats` if name collision), the timing statistics will be displayed at the end of the execution and if `--timings` (or `--timings-mode` if name collision) is used, timing information will be displayed where during the execution.
 
-```python hl_lines="4"
+```python hl_lines="4 6 13 16 18"
+...
+def my_function(...):
+    # do something
+    get_time()
+    # do something else
+    with Timer(timeout=10) as timer:
+        # this will measure time for this block of instructions
+        # it will also stop block's execution after 10 seconds
+...
     ...
     initalize(globals(),
               ...
-              add_version=True,
+              add_time=True,
               ...)
     ...
+    with Timer("First block with time measure") as timer1:
+        # do something
+    with Timer("Second block with time measure") as timer2:
+        # do something else
+    ...
 ```
+
+> - `get_time(message, start)`: This will measure time since execution start if no `start` value is provided. The default message displayed can be overwritten by setting `message`.
+> - `get_time_since_last(message)`: This will measure time since the last measure (either through the use `Timer` or `get_time`/`get_time_since_last`). The default message displayed can be overwritten by setting `message`.
+> - `Timer(description, message, timeout, fail_on_timeout)`: This will define a block where the execution time will be measured. A description can be given for display at the beginning of the block. The message can also be overwritten (displayed if the `--timings` option is used at execution). A timeout can be defined to force block's end and a flag can be defined to force `Timeout` exception when a timeout is raised.
 
 -----
 
@@ -152,9 +199,24 @@ This is achieved by passing a keyword argument `add_wizard=[boolean]` to `initia
 
 -----
 
+## Adding the version option
+
+This is achieved by passing a keyword argument `add_version=[boolean]` to `initialize(...)`. It provides an option to the script/tool for displaying the version from the metadata `__version__`.
+
+```python hl_lines="4"
+    ...
+    initalize(globals(),
+              ...
+              add_version=True,
+              ...)
+    ...
+```
+
+-----
+
 ## Action when no argument given
 
-This is achieved by passing a keyword argument `noargs_action="[action]"` to `initialize(...)`. It currently supports "`demo`", "`help`", "`step`", "`version`" or "`wizard`" and triggers the related action when no argument is given by the user. It thus overrides the default behavior of argparse, which is to display an error message telling that too few arguments were given.
+This is achieved by passing a keyword argument `noargs_action="[action]"` to `initialize(...)`. It triggers the related action when no argument is given by the user. It thus overrides the default behavior of argparse, which is to display an error message telling that too few arguments were given.
 
 ```python hl_lines="4"
     ...
@@ -165,9 +227,19 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
     ...
 ```
 
+> It currently supports the following actions:
+> 
+> - `config`
+> - `demo`
+> - `help`
+> - `step`
+> - `time`
+> - `version`
+> - `wizard`
+
 -----
 
-## Easy reporting
+## Easy reporting (Python 3 only)
 
 This is achieved by passing a keyword argument `report_func=[function]` to `initialize(...)`. It allows to add arguments related to report generation (e.g. `output`, `title` or `filename`) and triggers the given function which must use Tinyscript's report objects.
 
