@@ -19,28 +19,31 @@ LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
 TIME_MILLISECONDS = False
 
 
+def create_log_level(name, color, level, bold=True):
+    setattr(logging, name.upper(), level)
+    globals()["{}_COLOR".format(name.upper())] = color
+    logging.addLevelName(level, name.upper())
+    def display(self, message, *args, **kwargs):
+        if self.isEnabledFor(level):
+            self._log(level, message, args, **kwargs)
+    display.__name__ = name
+    setattr(logging.Logger, name, display)
+    attrs = {'color': color}
+    if bold:
+        attrs['bold'] = coloredlogs.CAN_USE_BOLD_FONT
+    coloredlogs.DEFAULT_LEVEL_STYLES[name] = attrs
+
+
+# add a custom log level for interactive mode
+create_log_level("interact", "cyan", 100)
 # add a custom log level for stepping
-STEP_COLOR = "cyan"
-logging.STEP = 100
-logging.addLevelName(logging.STEP, "STEP")
-def step(self, message, *args, **kwargs):
-    if self.isEnabledFor(logging.STEP):
-        self._log(logging.STEP, message, args, **kwargs) 
-logging.Logger.step = step
-coloredlogs.DEFAULT_LEVEL_STYLES['step'] = dict(color=STEP_COLOR,
-                                           bold=coloredlogs.CAN_USE_BOLD_FONT)
-
-
+create_log_level("step", "cyan", 101)
 # add a custom log level for timing
-TIME_COLOR = "magenta"
-logging.TIME = 100
-logging.addLevelName(logging.TIME, "TIME")
-def time(self, message, *args, **kwargs):
-    if self.isEnabledFor(logging.TIME):
-        self._log(logging.TIME, message, args, **kwargs) 
-logging.Logger.time = time
-coloredlogs.DEFAULT_LEVEL_STYLES['time'] = dict(color=TIME_COLOR,
-                                           bold=coloredlogs.CAN_USE_BOLD_FONT)
+create_log_level("time", "magenta", 102)
+# add a custom success log level
+create_log_level("success", "green", 103)
+# add a custom failure log level
+create_log_level("failure", "red", 104)
 
 
 # setup a default logger for allowing logging before initialize() is called
