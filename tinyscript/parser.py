@@ -16,6 +16,8 @@ from .argreparse import *
 from .timing import set_time_items
 from .handlers import *
 from .helpers import PYTHON3
+from .helpers.types import ip_address, port_number
+from .interact import set_interact_items
 from .loglib import *
 from .step import set_step_items
 
@@ -69,6 +71,7 @@ def initialize(glob,
                multi_level_debug=False,
                add_config=False,
                add_demo=False,
+               add_interact=False,
                add_step=False,
                add_time=False,
                add_version=False,
@@ -89,6 +92,7 @@ def initialize(glob,
     :param add_demo:          add an option to re-run the process using a random
                                entry from the __examples__ (only works if this
                                variable is populated)
+    :param add_interact:      add an interaction option
     :param add_step:          add an execution stepping option
     :param add_time:          add an execution timing option
     :param add_version:       add a version option
@@ -99,9 +103,9 @@ def initialize(glob,
     """
     global parser, __parsers
     
-    add = {'config': add_config, 'demo': add_demo, 'step': add_step,
-           'time': add_time, 'version': add_version, 'wizard': add_wizard,
-           'help': True}
+    add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
+           'step': add_step, 'time': add_time, 'version': add_version,
+           'wizard': add_wizard, 'help': True}
     glob['parser'] = p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
     add['demo'] = add['demo'] and glob['parser'].examples
@@ -121,6 +125,8 @@ def initialize(glob,
     # 3) populate the real parser and add information arguments
     __parsers = {}
     __get_calls_from_parser(parser, glob['parser'])
+    #  config handling feature, for reading/writing an INI config file with the
+    #   input arguments, e.g. for future reuse
     if add['config']:
         c = p.add_argument_group(gt("config arguments"))
         opt = c.add_argument("-r", "--read-config", action='config',
@@ -131,11 +137,14 @@ def initialize(glob,
         if noarg and noargs_action == "config":
             sys.argv[1:] = [opt, "config.ini"]
     i = p.add_argument_group(gt("extra arguments"))
+    #  demonstration feature, for executing an example amongst these defined in
+    #   __examples__, useful for observing what the tool does
     if add['demo']:
         opt = i.add_argument("--demo", action='demo', prefix="play",
                              help=gt("demonstrate a random example"))
         if noarg and noargs_action == "demo":
             sys.argv[1:] = [opt]
+    #  help feature, for displaying classical or extended help about the tool
     if add['help']:
         if glob.get('__details__'):
             i.add_argument("-h", dest="help", default=0, action="count",
@@ -146,11 +155,27 @@ def initialize(glob,
                                  help=gt("show this help message and exit"))
         if noarg and noargs_action == "help":
             sys.argv[1:] = [opt]
+    #  interaction mode feature, for interacting with the tool during its
+    #   execution, useful for debugging when it is complex
+    if add['interact']:
+        j = p.add_argument_group(gt("interaction arguments"))
+        opt = j.add_argument("--interact", action="store_true",
+                             suffix="mode", help=gt("interaction mode"))
+        if opt:
+            j.add_argument("--host", default="127.0.0.1", type=ip_address,
+                           prefix="remote", help=gt("remote interacting host"))
+            j.add_argument("--port", default=12345, type=port_number,
+                           prefix="remote", help=gt("remote interacting port"))
+        if noarg and noargs_action == "interact":
+            sys.argv[1:] = [opt]
+    #  stepping mode feature, for stepping within the tool during its execution,
+    #   especially useful for debugging when it is complex
     if add['step']:
         opt = i.add_argument("--step", action="store_true", last=True,
                              suffix="mode", help=gt("stepping mode"))
         if noarg and noargs_action == "step":
             sys.argv[1:] = [opt]
+    #  timing mode feature, for measuring time along the execution of the tool
     if add['time']:
         b = p.add_argument_group(gt("timing arguments"))
         opt = b.add_argument("--stats", action='store_true', last=True,
@@ -161,6 +186,7 @@ def initialize(glob,
                        help=gt("display time stats during execution"))
         if noarg and noargs_action == "time":
             sys.argv[1:] = [opt]
+    #  version feature, for displaying the version from __version__
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
         assert version, "__version__ is not defined"
@@ -169,19 +195,24 @@ def initialize(glob,
                              help=gt("show program's version number and exit"))
         if noarg and noargs_action == "version":
             sys.argv[1:] = [opt]
+    #  verbosity feature, for displaying debugging messages, with the
+    #   possibility to handle multi-level verbosity
     if multi_level_debug:
         i.add_argument("-v", dest="verbose", default=0, action="count",
                        suffix="mode", cancel=True, last=True,
                        help=gt("verbose level"),
-                       note=gt("-vvv is the highest verbose level"))
+                       note=gt("-vvv is the highest verbosity level"))
     else:
         i.add_argument("-v", "--verbose", action="store_true", cancel=True,
                        last=True, suffix="mode", help=gt("verbose mode"))
+    #  wizard feature, for asking argument values to the user
     if add['wizard']:
         opt = i.add_argument("-w", "--wizard", action='wizard',
                              prefix="start", help=gt("start a wizard"))
         if noarg and noargs_action == "wizard":
             sys.argv[1:] = [opt]
+    #  reporting feature, for making a reporting with the results of the tool
+    #   at the end of its execution
     if report_func is not None and PYTHON3:
         if not isfunction(report_func):
             glob['logger'].error("Bad report generation function")
@@ -215,7 +246,8 @@ def initialize(glob,
     glob['args'] = glob['parser'].parse_args()
     # 4) configure logging and get the main logger
     configure_logger(glob, multi_level_debug)
-    # 5) append stepping mode items
+    # 5) append stepping and interactive mode items
+    set_interact_items(glob)
     set_step_items(glob)
     # 6) append timing mode items
     set_time_items(glob)
