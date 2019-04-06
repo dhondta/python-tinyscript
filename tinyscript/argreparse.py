@@ -32,6 +32,9 @@ DEFAULT_LST_MAX_LEN = 10
 
 # ------------------------------- CUSTOM ACTIONS -------------------------------
 class _ConfigAction(Action):
+    """
+    Custom action for handling an INI configuration file.
+    """
     def __init__(self, option_strings, dest=None, default=None, help=None):
         super(_ConfigAction, self).__init__(option_strings=option_strings,
                                             dest=SUPPRESS, default=default,
@@ -47,6 +50,9 @@ class _ConfigAction(Action):
 
 
 class _DemoAction(Action):
+    """
+    Custom action for triggering the execution of an example.
+    """
     def __init__(self, option_strings, dest=SUPPRESS, help=None):
         super(_DemoAction, self).__init__(option_strings=option_strings,
                                           dest=SUPPRESS, default=SUPPRESS,
@@ -54,7 +60,19 @@ class _DemoAction(Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         parser.demo_args()
-    
+
+
+class _ExtendAction(Action):
+    """
+    Custom action for extending a list of values.
+    """
+    def __call__(self, parser, namespace, values, option_string=None):
+        _ = getattr(namespace, self.dest, [])
+        if not isinstance(values, list):
+            values = [values]
+        _.extend(values)
+        setattr(namespace, self.dest, _)
+
 
 class _NewSubParsersAction(_SubParsersAction):
     """
@@ -78,8 +96,8 @@ class _NewSubParsersAction(_SubParsersAction):
             self._choices_actions.append(choice_action)
         # create the parser, but with another formatter and separating the help
         #  into an argument group
-        parser = self._parser_class(formatter_class=HelpFormatter,
-                                    add_help=False, **kwargs)
+        kwargs.setdefault('formatter_class', HelpFormatter)
+        parser = self._parser_class(add_help=False, **kwargs)
         parser.name = name
         i = parser.add_argument_group("extra arguments")
         i.add_argument("-h", "--help", action='help', default=SUPPRESS,
@@ -90,6 +108,9 @@ class _NewSubParsersAction(_SubParsersAction):
 
 
 class _WizardAction(Action):
+    """
+    Custom action for triggering the wizard, asking for argument values.
+    """
     def __init__(self, option_strings, dest=SUPPRESS, help=None):
         super(_WizardAction, self).__init__(option_strings=option_strings,
                                             dest=SUPPRESS, default=SUPPRESS,
@@ -110,6 +131,7 @@ class _NewActionsContainer(_ActionsContainer):
         self.register('action', 'parsers', _NewSubParsersAction)
         self.register('action', 'config', _ConfigAction)
         self.register('action', 'demo', _DemoAction)
+        self.register('action', 'extend', _ExtendAction)
         self.register('action', 'wizard', _WizardAction)
     
     def add_argument(self, *args, **kwargs):
@@ -213,7 +235,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         script = globals_dict.get('__file__')
         if script:
             script = basename(script)
-            kwargs['prog'], _ = splitext(script)
+            kwargs['prog'], ext = splitext(script)
         else:
             kwargs['prog'] = ""
         kwargs['add_help'] = False
@@ -222,8 +244,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         # format the epilog message
         if self.examples and script:
             kwargs['epilog'] = gt("Usage examples") + ":\n" + \
-                               '\n'.join("  python {0} {1}".format(script, e) \
-                                         for e in self.examples)
+                               '\n'.join("  {}{} {}".format(["", "python "] \
+                              [ext == ".py"], script, e) for e in self.examples)
         # format the description message
         d = ''.join(x.capitalize() for x in kwargs['prog'].split('-'))
         v = globals_dict.get('__version__')
