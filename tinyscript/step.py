@@ -19,7 +19,8 @@ def set_step_items(glob):
     """
     _ = glob['args']
     enabled = getattr(_, _._collisions.get("step") or "step", False)
-    
+    # Step context manager, for defining a block of code that can be paused at
+    #  its start and end
     class Step(object):
         def __init__(self, message=None, at_end=False):
             self.message = message
@@ -37,14 +38,13 @@ def set_step_items(glob):
             if enabled and self.at_end:
                 std_input("Press enter to continue", {'color': STEP_COLOR,
                                                       'bold': True})
-    
     glob['Step'] = Step
-    
+    # stepping function, for stopping the execution and displaying a message if
+    #  any defined
     def step(message=None):
         if enabled:
             if message:
                 glob['logger'].step(message)
             std_input("Press enter to continue", {'color': STEP_COLOR,
                                                   'bold': True})
-    
     glob['step'] = step
