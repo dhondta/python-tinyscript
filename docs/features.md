@@ -42,6 +42,8 @@ Usage examples:
   python tool.py ...
 ```
 
+[See example here](examples/metadata.md)
+
 -----
 
 ## Privilege escalation
@@ -57,17 +59,19 @@ This is achieved by passing a keyword argument `sudo=[boolean]` to `initialize(.
     ...
 ```
 
+[See example here](examples/sudo.md)
+
 -----
 
 ## Multi-level debugging
 
-This is achieved by passing a keyword argument `multi_debug_level=[boolean]` to `initialize(...)`.
+This is achieved by passing a keyword argument `multi_level_debug=[boolean]` to `initialize(...)`.
 
 ```python hl_lines="4"
     ...
     initalize(globals(),
               ...
-              multi_debug_level=True,
+              multi_level_debug=True,
               ...)
     ...
 ```
@@ -80,6 +84,8 @@ This is achieved by passing a keyword argument `multi_debug_level=[boolean]` to 
     - `-v`: `logging.WARNING`
     - `-vv`: `logging.INFO`
     - `-vvv`: `logging.DEBUG`
+
+[See example here](examples/multi-level-debug.md)
 
 -----
 
@@ -108,6 +114,8 @@ This is achieved by setting the `__details__` metadata at the beginning of the s
     
     Note: Strings beyond the two first elements of `__details__` are not handled.
 
+[See example here](examples/multi-level-help.md)
+
 -----
 
 ## Playing a demo
@@ -126,13 +134,15 @@ __examples__ = ["test", "-sv", "-d --test"]
     ...
 ```
 
+[See example here](examples/demo.md)
+
 -----
 
 ## Stepping the execution
 
 This is achieved by passing a keyword argument `add_step=[boolean]` to `initialize(...)`. It will pause the script/tool where a `step()` function or a `Step(...)` context manager is used, if the user started the script/tool with `--step`.
 
-```python hl_lines="4 5 14 16"
+```python hl_lines="4 5 11 14 16"
 ...
 def my_function(...):
     # do something

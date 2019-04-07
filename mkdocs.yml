@@ -11,6 +11,11 @@ pages:
   - Examples:
     - 'Simple script': examples/simple-script.md
     - 'Simple tool': examples/simple-tool.md
+    - 'Metadata': examples/metadata.md
+    - 'Privilege escalation': examples/sudo.md
+    - 'Multi-level debugging': examples/multi-level-debug.md
+    - 'Multi-level help': examples/multi-level-help.md
+    - 'Playing a demo': examples/demo.md
 extra:
   mailto: alexandre.dhondt@gmail.com
 theme: readthedocs
