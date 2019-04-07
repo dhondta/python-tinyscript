@@ -15,7 +15,7 @@ from .__info__ import __author__, __copyright__, __version__
 from .argreparse import *
 from .timing import set_time_items
 from .handlers import *
-from .helpers import PYTHON3
+from .helpers import LINUX, PYTHON3
 from .helpers.types import ip_address, port_number
 from .interact import set_interact_items
 from .loglib import *
@@ -76,6 +76,7 @@ def initialize(glob,
                add_time=False,
                add_version=False,
                add_wizard=False,
+               ext_logging=False,
                noargs_action=None,
                report_func=None):
     """
@@ -88,6 +89,7 @@ def initialize(glob,
                                script with sudo
     :param multi_level_debug: allow to use -v, -vv, -vvv (adjust logging level)
                                instead of just -v (only debug on/off)
+    :param relative_time:     use relative time for log messages
     :param add_config:        add an option to input an INI configuration file
     :param add_demo:          add an option to re-run the process using a random
                                entry from the __examples__ (only works if this
@@ -98,6 +100,7 @@ def initialize(glob,
     :param add_version:       add a version option
     :param add_wizard:        add an option to run a wizard, asking for each
                                input argument
+    :param ext_logging:       extended logging options
     :param noargs_action:     action to be performed when no argument is input
     :param report_func:       report generation function
     """
@@ -116,13 +119,7 @@ def initialize(glob,
                .format('|'.join(add.keys()))
         add[noargs_action] = True  # ensure this action is enabled, even if it
                                    #  is not given the passed arguments
-    # 2) if sudo required, restart the script
-    if sudo:
-        # if not root, restart the script in another process and jump to this
-        if os.geteuid() != 0:
-            python = [] if glob['__file__'].startswith("./") else ["python"]
-            os.execvp("sudo", ["sudo"] + python + sys.argv)
-    # 3) populate the real parser and add information arguments
+    # 2) populate the real parser and add information arguments
     __parsers = {}
     __get_calls_from_parser(parser, glob['parser'])
     #  config handling feature, for reading/writing an INI config file with the
@@ -243,15 +240,32 @@ def initialize(glob,
                            help=gt("report filename"))
     elif report_func is not None and not PYTHON3:
         glob['logger'].warn("Report generation is only available with Python 3")
+    # extended logging features
+    if ext_logging:
+        i.add_argument("-f", "--logfile", last=True,
+                       help=gt("destination log file"))
+        i.add_argument("-r", "--relative", action="store_true", last=True,
+                       suffix="time", help=gt("display relative time"))
+        if LINUX:
+            i.add_argument("-s", "--syslog", action="store_true", last=True,
+                           suffix="mode", help=gt("log to /var/log/syslog"))
     glob['args'] = glob['parser'].parse_args()
+    # 3) if sudo required, restart the script
+    if sudo:
+        # if not root, restart the script in another process and jump to this
+        if os.geteuid() != 0:
+            python = [] if glob['__file__'].startswith("./") else ["python"]
+            os.execvp("sudo", ["sudo"] + python + sys.argv)
     # 4) configure logging and get the main logger
-    configure_logger(glob, multi_level_debug)
-    # 5) append stepping and interactive mode items
+    configure_logger(glob, multi_level_debug,
+                     glob['args']._collisions.get("relative"),
+                     glob['args']._collisions.get("logfile"),
+                     glob['args']._collisions.get("syslog"))
+    # 5) append modes items
     set_interact_items(glob)
     set_step_items(glob)
-    # 6) append timing mode items
     set_time_items(glob)
-    # 7) finally, bind the global exit handler
+    # 6) finally, bind the global exit handler
     def __at_exit():
         # first, dump the config if required
         if add['config']:
