@@ -12,7 +12,9 @@ from argparse import _ActionsContainer, _ArgumentGroup, _AttributeHolder, \
                      _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, \
                      ArgumentParser as BaseArgumentParser
 from gettext import gettext as gt
-from os.path import basename, splitext
+from os import access, environ, X_OK
+from os.path import abspath, basename, dirname, splitext
+from stat import S_IXUSR
 try:
     from configparser import ConfigParser, NoOptionError, NoSectionError
 except ImportError:
@@ -232,22 +234,28 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self.examples = globals_dict.get('__examples__')
         if self.examples and len(self.examples) == 0:
             self.examples = None
-        script = globals_dict.get('__file__')
+        script = globals_dict.get('__file__') or ""
         if script:
+            path = abspath(script)
+            root = dirname(path)
             script = basename(script)
-            kwargs['prog'], ext = splitext(script)
-        else:
-            kwargs['prog'] = ""
+            if not access(path, X_OK):
+                kwargs['prog'] = "python " + script
+            elif root not in environ['PATH'].split(":"):
+                kwargs['prog'] = "./" + script
+            else:
+                kwargs['prog'] = script
+            script, _ = splitext(script)
         kwargs['add_help'] = False
         kwargs['conflict_handler'] = "error"
         kwargs['formatter_class'] = HelpFormatter
         # format the epilog message
         if self.examples and script:
             kwargs['epilog'] = gt("Usage examples") + ":\n" + \
-                               '\n'.join("  {}{} {}".format(["", "python "] \
-                              [ext == ".py"], script, e) for e in self.examples)
+                               '\n'.join("  {} {}".format(kwargs['prog'], e) \
+                                         for e in self.examples)
         # format the description message
-        d = ''.join(x.capitalize() for x in kwargs['prog'].split('-'))
+        d = ''.join(x.capitalize() for x in script.split('-'))
         v = globals_dict.get('__version__')
         if v:
             d += " v" + v
@@ -474,6 +482,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         if not isinstance(self.details, (tuple, list, set)):
             self.details = [self.details]
         for _, message in zip((level - 1) * [None], self.details):
+            message = "\n{}\n".format(message.strip())
             self._print_message(message, file)
 
     @classmethod
@@ -565,3 +574,9 @@ class Namespace(BaseNamespace):
         #  options in a new section of the ConfigParser object
         if hasattr(self, "_subparsers") and name in self._subparsers and value:
             self._current_parser = name
+    
+    def get(self, name):
+        try:
+            return self.__getattr__(name)
+        except NameError:
+            return
