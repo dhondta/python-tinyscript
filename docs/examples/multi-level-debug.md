@@ -12,7 +12,7 @@ $ gedit multi-level-debug.py
 
 ### Code
 
-```python
+```python hl_lines="7"
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 from tinyscript import *
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
 ### Help
 
-```sh
+```sh hl_lines="8 9"
 $ python multi-level-debug.py -h
 usage: python multi-level-debug.py [-h] [-v]
 
@@ -44,20 +44,20 @@ extra arguments:
 
 ### Execution
 
-```sh
+```sh hl_lines="1"
 $ python multi-level-debug.py
 12:34:56 [CRITICAL] This is always displayed
 12:34:56 [ERROR] This is always displayed
 ```
 
-```sh
+```sh hl_lines="1"
 $ python multi-level-debug.py -v
 12:34:56 [CRITICAL] This is always displayed
 12:34:56 [ERROR] This is always displayed
 12:34:56 [WARNING] This is displayed with -v
 ```
 
-```sh
+```sh hl_lines="1"
 $ python multi-level-debug.py -vv
 12:34:56 [CRITICAL] This is always displayed
 12:34:56 [ERROR] This is always displayed
@@ -65,7 +65,7 @@ $ python multi-level-debug.py -vv
 12:34:56 [INFO] This is displayed with -vv
 ```
 
-```sh
+```sh hl_lines="1"
 $ python multi-level-debug.py -vvv
 12:34:56 [CRITICAL] This is always displayed
 12:34:56 [ERROR] This is always displayed

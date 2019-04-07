@@ -12,7 +12,7 @@ $ gedit metadata.py
 
 ### Code
 
-```python
+```python hl_lines="6 7 8 9 10"
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 from tinyscript import *
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
 ### Help
 
-```sh
+```sh hl_lines="5 7"
 $ python metadata.py -h
 usage: metadata [-h] [-v]
 

@@ -16,7 +16,7 @@ $ gedit demo.py
 
 ### Code
 
-```python
+```python hl_lines="6 11"
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 from tinyscript import *
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
 ### Help
 
-```sh
+```sh hl_lines="10"
 $ python demo.py -h
 usage: python demo.py [--test] [--demo] [-h] [-v]
 
@@ -55,12 +55,12 @@ Usage examples:
 
 ### Execution
 
-```sh
+```sh hl_lines="1 2"
 $ python demo.py --demo
 12:34:56 [SUCCESS] First example
 ```
 
-```sh
+```sh hl_lines="1 2"
 $ python demo.py --demo
 12:34:56 [SUCCESS] Second example
 ```

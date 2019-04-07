@@ -12,7 +12,7 @@ $ gedit multi-level-help.py
 
 ### Code
 
-```python
+```python hl_lines="7 8 9 10"
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 from tinyscript import *
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
 ### Help
 
-```sh
+```sh hl_lines="1 9 10"
 $ python multi-level-help.py -h
 usage: python multi-level-help.py [-h] [-v]
 
@@ -46,7 +46,7 @@ extra arguments:
 
 ```
 
-```sh
+```sh hl_lines="1 13"
 $ python multi-level-help.py -hh
 usage: python multi-level-help.py [-h] [-v]
 
@@ -63,7 +63,7 @@ First level of details
 
 ```
 
-```sh
+```sh hl_lines="1 13 15"
 $ python multi-level-help.py -hh
 usage: python multi-level-help.py [-h] [-v]
 

@@ -12,7 +12,7 @@ $ gedit sudo.py
 
 ### Code
 
-```python
+```python hl_lines="7"
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 from tinyscript import *
@@ -39,9 +39,9 @@ extra arguments:
 
 ### Execution
 
-```sh
+```sh hl_lines="2"
 $ python sudo.py
-[sudo] password for morfal: 
+[sudo] password for user: 
 12:34:56 [SUCCESS] Do it as sudo !
 
 ```
