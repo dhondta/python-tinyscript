@@ -59,6 +59,8 @@ This is achieved by passing a keyword argument `sudo=[boolean]` to `initialize(.
     ...
 ```
 
+This will prompt the user for providing superuser credentials in case of insufficient privileges.
+
 [See example here](examples/sudo.md)
 
 -----
@@ -76,10 +78,10 @@ This is achieved by passing a keyword argument `multi_level_debug=[boolean]` to 
     ...
 ```
 
+This modifies the classical `-v`/`--verbose` option to `-v`/`-vv`/`-vvv`.
+
 !!! note "Debug levels"
 
-    This allows to change the behavior of the default argument `-v`/`--verbose` to:
-    
     - '': `logging.ERROR`
     - `-v`: `logging.WARNING`
     - `-vv`: `logging.INFO`
@@ -104,15 +106,15 @@ This is achieved by setting the `__details__` metadata at the beginning of the s
     ...
 ```
 
+This modifies the classical `-h`/`--help` option to `-h`/`-hh`/`-hhh`.
+
 !!! note "Help levels"
 
-    This allows to change the behavior of the default argument `-h`/`--help` to:
-    
     - `-h`: classical help message
     - `-hh`: classical help message + first string in __details__ list
     - `-hhh`: classical help message + first and second strings in __details__ list
     
-    Note: Strings beyond the two first elements of `__details__` are not handled.
+    Note: Strings beyond the two first elements of `__details__` are not handled by purpose.
 
 [See example here](examples/multi-level-help.md)
 
@@ -120,7 +122,7 @@ This is achieved by setting the `__details__` metadata at the beginning of the s
 
 ## Playing a demo
 
-This is achieved by passing a keyword argument `add_demo=[boolean]` to `initialize(...)` and requires that `__examples__` is set. Indeed, when using the `--demo` option, it will pick a random example and execute it.
+This is achieved by passing a keyword argument `add_demo=[boolean]` to `initialize(...)` and requires that `__examples__` is set as a non-empty list.
 
 ```python hl_lines="2 7"
 ...
@@ -134,13 +136,15 @@ __examples__ = ["test", "-sv", "-d --test"]
     ...
 ```
 
+This adds the `--demo` option to pick a random example and execute it.
+
 [See example here](examples/demo.md)
 
 -----
 
 ## Stepping the execution
 
-This is achieved by passing a keyword argument `add_step=[boolean]` to `initialize(...)`. It will pause the script/tool where a `step()` function or a `Step(...)` context manager is used, if the user started the script/tool with `--step`.
+This is achieved by passing a keyword argument `add_step=[boolean]` to `initialize(...)`. It will allow to pause the script/tool where a `step()` function or a `Step(...)` context manager is used when the step mode is enabled.
 
 ```python hl_lines="4 5 11 14 16"
 ...
@@ -163,11 +167,13 @@ def my_function(...):
     ...
 ```
 
+This adds the `--step` option to enable the step mode.
+
 -----
 
 ## Timing the execution
 
-This is achieved by passing a keyword argument `add_time=[boolean]` to `initialize(...)`. It will measure time in the script/tool where a `get_time()` or `get_time_since_last()` function or a `Timer(...)` context manager is used. If the user started the script/tool with `--stats` (or `--time-stats` if name collision), the timing statistics will be displayed at the end of the execution and if `--timings` (or `--timings-mode` if name collision) is used, timing information will be displayed where during the execution.
+This is achieved by passing a keyword argument `add_time=[boolean]` to `initialize(...)`. It will measure time in the script/tool where a `get_time()` or `get_time_since_last()` function or a `Timer(...)` context manager is used.
 
 ```python hl_lines="4 6 13 16 18"
 ...
@@ -192,9 +198,16 @@ def my_function(...):
     ...
 ```
 
-> - `get_time(message, start)`: This will measure time since execution start if no `start` value is provided. The default message displayed can be overwritten by setting `message`.
-> - `get_time_since_last(message)`: This will measure time since the last measure (either through the use `Timer` or `get_time`/`get_time_since_last`). The default message displayed can be overwritten by setting `message`.
-> - `Timer(description, message, timeout, fail_on_timeout)`: This will define a block where the execution time will be measured. A description can be given for display at the beginning of the block. The message can also be overwritten (displayed if the `--timings` option is used at execution). A timeout can be defined to force block's end and a flag can be defined to force `Timeout` exception when a timeout is raised.
+This adds two options:
+
+- `--stats`: The timing statistics will be displayed at the end of the execution.
+- `--timings`: Timing information will be displayed where a timing function is called during the execution.
+
+!!! note "Timing functions"
+    
+    - `get_time(message, start)`: This will measure time since execution start if no `start` value is provided. The default message displayed can be overwritten by setting `message`.
+    - `get_time_since_last(message)`: This will measure time since the last measure (either through the use `Timer` or `get_time`/`get_time_since_last`). The default message displayed can be overwritten by setting `message`.
+    - `Timer(description, message, timeout, fail_on_timeout)`: This will define a block where the execution time will be measured. A description can be given for display at the beginning of the block. The message can also be overwritten (displayed if the `--timings` option is used at execution). A timeout can be defined to force block's end and a flag can be defined to force `Timeout` exception when a timeout is raised.
 
 -----
 
@@ -211,6 +224,32 @@ This is achieved by passing a keyword argument `add_wizard=[boolean]` to `initia
     ...
 ```
 
+This adds the `--wizard` option for enabling the wizard mode.
+
+-----
+
+## Using a configuration INI file
+
+This is achieved by passing a keyword argument `add_config=[boolean]` to `initialize(...)`. It will allow to read/write a configuration INI file with the arguments of the script. This can be useful for passing the right bunch of arguments in a saved file to a colleague or simply if you don't remember how to use your script with a complex configuration.
+
+```python hl_lines="4"
+    ...
+    initalize(globals(),
+              ...
+              add_config=True,
+              ...)
+    ...
+```
+
+This adds two options:
+
+- `-r`, `--read-config`: Filename of the INI file to be read for the input arguments.
+- `-w`, `--write-config`: Filename of the INI file where the arguments of the current execution are to be written.
+
+!!! note "If used as a `noarg_action`"
+    
+    When using this feature as an action when no argument is passed, `config.ini` is used as the default INI filename.
+
 -----
 
 ## Adding the version option
@@ -225,6 +264,8 @@ This is achieved by passing a keyword argument `add_version=[boolean]` to `initi
               ...)
     ...
 ```
+
+This adds the `--version` option for displaying the version from `__version__`.
 
 -----
 
@@ -245,19 +286,19 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
 
     It currently supports the following actions:
     
-    - `config`
-    - `demo`
-    - `help`
-    - `step`
-    - `time`
-    - `version`
-    - `wizard`
+    - [`config`](#using-a-configuration-ini-file)
+    - [`demo`](#playing-a-demo)
+    - [`help`](#multi-level-help)
+    - [`step`](#stepping-the-execution)
+    - [`time`](#timing-the-execution)
+    - [`version`](#adding-the-version-option)
+    - [`wizard`](#starting-a-wizard)
 
 -----
 
 ## Easy reporting (Python 3 only)
 
-This is achieved by passing a keyword argument `report_func=[function]` to `initialize(...)`. It allows to add arguments related to report generation (e.g. `output`, `title` or `filename`) and triggers the given function which must use Tinyscript's report objects.
+This is achieved by passing a keyword argument `report_func=[function]` to `initialize(...)`. It allows to trigger a user-provided report generation function which must use Tinyscript's report objects.
 
 ```python hl_lines="2 15"
 ...
@@ -278,6 +319,14 @@ def make_report():
               ...)
     ...
 ```
+
+This adds multiple options:
+
+- `--output`: report output format (defaults to `pdf`)
+- `--title`: report title
+- `--css`: report stylesheet
+- `--theme`: report theme (overridden by `--css`)
+- `--filename`: report filename
 
 -----
 
