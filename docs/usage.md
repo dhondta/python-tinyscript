@@ -85,11 +85,15 @@ After customizing the metadata, the `initialize` function can be filled with the
 **Argument** | **Purpose**
 --- | ---
 ```sudo=[boolean]``` | Force privilege escalation at startup
-```multi_debug_level=[boolean]``` | Set the verbose mode with multiple levels of logging (as shown hereafter).
+```multi_level_debug=[boolean]``` | Set the verbose mode with multiple levels of logging (as shown hereafter).
+```add_config=[boolean]``` | Add an option to input an INI configuration file.
 ```add_demo=[boolean]``` | Add the demonstration option (randomly picking an example).
+```add_interact=[boolean]``` | Add an interaction option.
 ```add_step=[boolean]``` | Add a stepping mode option, for setting breakpoints into the code by using the `step` function or the `Step` context manager.
+```add_time=[boolean]``` | Add an execution timing option, for benchmarking the exeuction by using the `get\_time` and `get\_time\_since\_last` functions or the `Timer` context manager.
 ```add_version=[boolean]``` | Add the version option.
 ```add_wizard=[boolean]``` | Add a wizard option for asking the user to input each value.
+```ext_logging=[boolean]``` | Enable extended logging options.
 ```noargs_action="[string]"``` | Add a behavior when no argument is input by the user, a value amongst "`demo`", "`help`", "`step`", "`version`" or "`wizard`".
 ```report_func=[function]``` | Add report options (output format, title, stylesheet and filename) by setting a function (taking no argument) that will generate the report at the end of the execution of the script/tool.
 
@@ -102,17 +106,6 @@ After customizing the metadata, the `initialize` function can be filled with the
                    noargs_action="wizard",
                    report_func=make_report,
         )
-
-<br>
-
-When not setting the multi-level logging, the verbose mode, when enabled, sets the logging level to `DEBUG` while when setting it, the logging level is set as follows :
-
-**Option** | **Logging Level**
---- | ---
- | `ERROR`
-`-v` | `WARNING`
-`-vv` | `INFO`
-`-vvv` | `DEBUG`
 
 
 ## Validation

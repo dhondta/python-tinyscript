@@ -91,6 +91,27 @@ This modifies the classical `-v`/`--verbose` option to `-v`/`-vv`/`-vvv`.
 
 -----
 
+## Extended logging options
+
+This is achieved by passing a keyword argument `ext_logging=[boolean]` to `initialize(...)`.
+
+```python hl_lines="4"
+    ...
+    initalize(globals(),
+              ...
+              ext_logging=True,
+              ...)
+    ...
+```
+
+This adds multiple options:
+
+- `-f`, `--logfile`: This sets the log filename for saving logging messages.
+- `-r`, `--relative`: This sets the log timestamps to the time relative to the start of the execution.
+- `-s`, `--syslog`: This allows to save the log messages to `/var/log/syslog` (Linux only).
+
+-----
+
 ## Multi-level help
 
 This is achieved by setting the `__details__` metadata at the beginning of the script.
