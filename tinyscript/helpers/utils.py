@@ -5,6 +5,7 @@
 """
 import re
 from humanfriendly.terminal import ansi_wrap
+from platform import uname
 from six import b as six_b, u
 from sys import version_info
 
@@ -12,9 +13,12 @@ from .lambdas import is_lambda
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["PYTHON3", "b", "byteindex", "iterbytes",
-                          "std_input", "u", "user_input"]
+__all__ = __features__ = ["LINUX", "PYTHON3", "WINDOWS", "b", "byteindex",
+                          "iterbytes", "std_input", "u", "user_input"]
 
+
+LINUX   = uname()[0] == "Linux"
+WINDOWS = uname()[0] == "Windows"
 
 PYTHON3      = version_info > (3,)
 CHOICE_REGEX = re.compile(r'^\(([a-z0-9])\).*$', re.I)
