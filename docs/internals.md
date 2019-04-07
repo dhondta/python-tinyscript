@@ -118,12 +118,25 @@ List of "*extra*" arguments and options:
 :---: | :---: | :---:
 `--demo` | start a demo of a random example | `--play-demo`
 `-h`, `--help` | show the help message | `--show-help`
-`--stats` | time statistics display (at end) | `--time-stats`
-`--timings` | timing display mode | `--timings-mode`
 `--step` | stepping mode | `--step-mode`
 `--version` | show program's version number `__version__` | `--show-version`
 `-v`, `--verbose` | verbose mode | `--verbose-mode`
 `-w`, `--wizard` | start a wizard | `--start-wizard`
+
+List of "*interaction*" arguments and options:
+
+**Option strings** | **Description** | **If strings clash**
+:---: | :---: | :---:
+`--interact` | interaction mode | `--interact-mode`
+`--host` | remote interacting host | `--remote-host`
+`--port` | remote interacting host | `--remote-port`
+
+List of "*timing*" arguments and options:
+
+**Option strings** | **Description** | **If strings clash**
+:---: | :---: | :---:
+`--stats` | time statistics display (at end) | `--time-stats`
+`--timings` | timing display mode | `--timings-mode`
 
 List of "*report*" arguments and options:
 
