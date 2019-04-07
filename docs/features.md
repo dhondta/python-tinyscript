@@ -310,6 +310,7 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
     - [`config`](#using-a-configuration-ini-file)
     - [`demo`](#playing-a-demo)
     - [`help`](#multi-level-help)
+    - [`interact`](#interacting-during-the-execution)
     - [`step`](#stepping-the-execution)
     - [`time`](#timing-the-execution)
     - [`version`](#adding-the-version-option)
