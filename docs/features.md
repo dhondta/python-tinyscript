@@ -211,6 +211,27 @@ This adds two options:
 
 -----
 
+## Interacting during the execution
+
+This is achieved by passing a keyword argument `add_interact=[boolean]` to `initialize(...)`. It allows to interact with the program during its execution by spawning a Python interpreter. This feature relies on the built-in `code` module.
+
+```python hl_lines="4"
+    ...
+    initalize(globals(),
+              ...
+              add_wizard=True,
+              ...)
+    ...
+```
+
+This adds multiple options:
+
+- `--interact`: Enable interaction mode.
+- `--host`: Set a remote host for interacting. Defaults to 127.0.0.1.
+- `--port`: Set a remote port for interacting. Defaults to 12345.
+
+-----
+
 ## Starting a wizard
 
 This is achieved by passing a keyword argument `add_wizard=[boolean]` to `initialize(...)`. It will interactively ask for prividing arguments to the script/tool.
