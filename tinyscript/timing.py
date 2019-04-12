@@ -77,8 +77,7 @@ def set_time_items(glob):
                 if manager._timings:
                     l.time("> Time elapsed: {} seconds".format(d))
                 if self.timeout is not None:
-                    signal.alarm(0)
-                    if self.fail and exc_type is TimeoutError:
+                    if self.fail and exc_type is Timer.TimeoutError:
                         return True
 
         def _handler(self, signum, frame):
