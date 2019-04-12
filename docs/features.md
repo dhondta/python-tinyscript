@@ -1,12 +1,14 @@
 ## Metadata
 
-Metadata can be defined at the very beginning of the script/tool and is used by Tinyscript to format the help message.
+Metadata can be defined using *dunders* (double underscore variables) at the very beginning of the script/tool and is used by Tinyscript to format the help message.
 
 ```python
 from tinyscript import *
 
 __author__    = "John Doe"
+__copyright__ = "© 2019 John Doe Inc."
 __email__     = "john.doe@example.com"
+__license__   = "AGPLv3"
 __version__   = "1.0"
 __reference__ = "..."
 __source__    = "..."
