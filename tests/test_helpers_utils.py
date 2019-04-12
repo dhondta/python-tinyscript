@@ -35,3 +35,5 @@ class TestHelpersUtils(TestCase):
         self.assertEqual(user_input(default="test"), "test")
         temp_stdin(self, "test\n")
         self.assertEqual(user_input(choices=lambda v: v in ["test"]), "test")
+        temp_stdin(self, "bad\n")
+        self.assertIs(user_input(choices=["1", "2"]), None)

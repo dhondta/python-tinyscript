@@ -25,18 +25,20 @@ class TestTiming(TestCase):
         self.assertIn("Timer", g)
 
     def test_time_manager(self):
+        with Timer() as t:
+            pass
         self.assertFalse(time_manager.stats())
     
     def test_timer_object(self):
         temp_stdout(self)
-        with Timer() as timer:
-            self.assertFalse(timer.fail)
-            self.assertIs(timer.id, 0)
+        with Timer(timeout=1, fail_on_timeout=True) as timer:
+            self.assertTrue(timer.fail)
             self.assertTrue(timer.descr)
             self.assertTrue(timer.message)
             self.assertTrue(timer.start)
-            self.assertFalse(timer.timeout)
+            self.assertEqual(timer.timeout, 1)
             self.assertRaises(Timer.TimeoutError, timer._handler, None, None)
+            time.sleep(1)
         
         def timeout_test():
             with Timer(timeout=1) as t:

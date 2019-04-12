@@ -4,13 +4,17 @@
 
 """
 import pytest
+
 from tinyscript import *
 from tinyscript.parser import *
 from tinyscript.parser import _save_config, ProxyArgumentParser
-from utils import capture, remove, tmpf, TestCase
+
+from utils import capture, remove, tmpf, TestCase, temp_stdin, temp_stdout
 
 
+__details__  = ["first details", "second details"]
 __examples__ = ["-v"]
+__version__  = "1.2.3"
 
 INI = tmpf(ext="ini")
 INI_CONF = """[main]
@@ -36,18 +40,22 @@ class TestParser(TestCase):
     def tearDown(self):
         sys.argv[1:] = self.argv  # restore input arguments
     
-    def test_string_argument(self):
-        sys.argv[1:] = ["--arg1", "test"]
+    def test_input_arguments(self):
+        sys.argv[1:] = ["--arg1", "test", "-b"]
         parser.add_argument("-a", "--arg1")
-        initialize(globals())
-        self.assertRaises(AttributeError, getattr, args, "does_not_exist")
-        self.assertEqual(args.arg1, "test")
-    
-    def test_boolean_argument(self):
-        sys.argv[1:] = ["-b"]
         parser.add_argument("-b", "--boolean", action="store_true")
         initialize(globals())
         self.assertEqual(args.boolean, True)
+        self.assertRaises(AttributeError, getattr, args, "does_not_exist")
+        self.assertEqual(args.arg1, "test")
+    
+    def test_subparser(self):
+        temp_stdout(self)
+        sys.argv[1:] = ["subtest", "-b", "test"]
+        test = parser.add_subparsers().add_parser("subtest", parents=[parser])
+        test.add_argument("-b", "--arg2")
+        self.assertIsInstance(getattr(proxy_parser, "calls"), list)
+        initialize(globals())
     
     def test_arg_name_clash(self):
         sys.argv[1:] = []
@@ -56,11 +64,11 @@ class TestParser(TestCase):
         self.assertEqual(args.v_opt_overwritten, None)
     
     def test_initialization_flags(self):
-        sys.argv[1:] = []
+        sys.argv[1:] = ["--stats"]
         initialize(globals(), False, *([True] * 9))
         self.assertFalse(args.interact)
         self.assertFalse(args.relative)
-        self.assertFalse(args.stats)
+        self.assertTrue(args.stats)
         self.assertFalse(args.step)
         self.assertFalse(args.syslog)
         self.assertFalse(args.timings)
@@ -93,9 +101,71 @@ class TestParser(TestCase):
         self.assertTrue(args.arg2)
         remove(INI)
     
+    def test_noargs_empty_config(self):
+        temp_stdout(self)
+        sys.argv[1:] = []
+        self.assertRaises(SystemExit, initialize, globals(),
+                          noargs_action="config")
+    
+    def test_noargs_help(self):
+        temp_stdout(self)
+        sys.argv[1:] = []
+        self.assertRaises(SystemExit, initialize, globals(),
+                          noargs_action="help")
+    
+    def test_noargs_interact(self):
+        sys.argv[1:] = []
+        initialize(globals(), noargs_action="interact")
+    
+    def test_noargs_step(self):
+        sys.argv[1:] = []
+        initialize(globals(), noargs_action="step")
+    
+    def test_noargs_time(self):
+        sys.argv[1:] = []
+        initialize(globals(), noargs_action="time")
+    
+    def test_noargs_version(self):
+        temp_stdout(self)
+        sys.argv[1:] = []
+        self.assertRaises(SystemExit, initialize, globals(),
+                          noargs_action="version")
+    
+    def test_noargs_wizard(self):
+        temp_stdout(self)
+        temp_stdin(self, "\n")
+        sys.argv[1:] = []
+        self.assertRaises(EOFError, initialize, globals(),
+                          noargs_action="wizard")
+    
     def test_noargs_action(self):
         sys.argv[1:] = []
         initialize(globals(), noargs_action="demo")
         with capture() as (out, err):
-            logger.debug("test")
-        self.assertIn("test", err.getvalue())
+            logger.debug("123456789")
+        self.assertIn("123456789", err.getvalue())
+    
+    def test_bad_noargs_action(self):
+        sys.argv[1:] = []
+        self.assertRaises(ValueError, initialize, globals(),
+                          noargs_action="does_not_exist")
+    
+    def test_report_feature(self):
+        temp_stdout(self)
+        sys.argv[1:] = []
+        initialize(globals(), report_func=lambda: (Title("Test"), ))
+        initialize(globals(), report_func="bad report function")
+    
+    def test_validation(self):
+        temp_stdout(self)
+        sys.argv[1:] = []
+        parser.add_argument("-a", "--arg1")
+        parser.add_argument("-b", "--arg2", action="store_true")
+        initialize(globals())
+        validate(globals(), ('arg1', " ? is None", "Failed", "test"))
+        self.assertRaises(ValueError, validate, globals(), ('bad/arg', "True"))
+        self.assertRaises(SystemExit, validate, globals(),
+                          ('arg1', "bad condition"))
+        validate(globals(), ('arg1', "bad condition", "message", "default"))
+        globals()['args'] = None
+        validate(globals())

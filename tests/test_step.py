@@ -22,14 +22,14 @@ class TestStepping(TestCase):
     def test_step_object(self):
         temp_stdout(self)
         temp_stdin(self, "\n")
-        with Step():
-            self.assertTrue(Step())
+        with Step("test"):
+            pass
         temp_stdin(self, "\n")
         with Step():
-            self.assertTrue(Step("test"))
+            pass
         temp_stdin(self, "\n")
-        with Step():
-            self.assertTrue(Step("test", True))
+        with Step(at_end=True):
+            pass
     
     def test_step_function(self):
         temp_stdout(self)

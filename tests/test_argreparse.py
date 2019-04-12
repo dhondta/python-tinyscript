@@ -21,6 +21,7 @@ class TestArgreparse(TestCase):
         parser = ArgumentParser()
         parser.add_argument("test")
         parser.add_argument("--opt1")
+        parser.add_subparsers().add_parser("subtest", help="test")
         sys.argv += ["--opt1", "test"]
         parser.add_argument("--opt2", action="store_true")
         sys.argv += ["--opt2"]
@@ -40,6 +41,15 @@ class TestArgreparse(TestCase):
         parser = ArgumentParser()
         parser.add_argument("test")
         self.assertRaises(SystemExit, parser.parse_args)
+    
+    def test_parser_conflicts(self):
+        temp_stdout(self)
+        sys.argv[1:] = []
+        parser = ArgumentParser()
+        parser.add_argument("--test", dest="verbose")
+        parser.parse_args()
+        parser.add_argument("-v", "--verbose", cancel=True)
+        parser.parse_args()
     
     def test_namespace(self):
         ArgumentParser.reset()

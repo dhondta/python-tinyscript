@@ -25,9 +25,19 @@ class TestInteraction(TestCase):
         temp_stdout(self)
         temp_stdin(self, "\n")
         self.assertIs(interact(), None)
+        temp_stdin(self, "\n")
+        self.assertIs(interact("test"), None)
+        temp_stdin(self, "\n")
+        self.assertIs(interact(exitmsg="test"), None)
     
     def test_local_interactive_console(self):
         temp_stdout(self)
         temp_stdin(self, "\n")
+        with InteractiveConsole("test") as console:
+            pass
+        temp_stdin(self, "\n")
+        with InteractiveConsole(exitmsg="test") as console:
+            pass
+        temp_stdin(self, "\n")
         with InteractiveConsole() as console:
-            self.assertIs(console.interact(), None)
+            console.interact()

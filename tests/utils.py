@@ -17,7 +17,8 @@ from unittest import TestCase
 
 
 __all__ = ["args", "capture", "exists", "logger", "remove", "sys", "temp_stdin",
-           "temp_stdout", "tmpf", "TestCase", "PYTHON3"]
+           "temp_stdout", "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase",
+           "PYTHON3"]
 
 
 tmpf = lambda name="test", ext="py": ".tinyscript-{}.{}".format(name, ext)
@@ -51,6 +52,22 @@ def temp_stdout(tc):
 
     tc.addCleanup(clean)
     sys.stdout, sys.stderr = StringIO(), StringIO()
+
+
+class FakeLogRecord(object):
+    def __init__(self):
+        self.exc_info        = None
+        self.exc_text        = ""
+        self.levelname       = "INFO"
+        self.msecs           = 0
+        self.relativeCreated = 0
+        self.stack_info      = None
+
+    def __str__(self):
+        return ""
+
+    def getMessage(self):
+        return ""
 
 
 class FakeNamespace(object):

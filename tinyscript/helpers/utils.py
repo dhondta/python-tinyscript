@@ -85,6 +85,7 @@ def user_input(prompt="", choices=None, default=None, choices_str="",
     user_input, first = None, True
     while not user_input:
         user_input = std_input(["", prompt][first] + " >> ")
+        first = False
         if type(choices) in [list, tuple, set]:
             choices = list(map(lambda x: x.lower(), choices))
             user_input = user_input.lower()
@@ -94,4 +95,3 @@ def user_input(prompt="", choices=None, default=None, choices_str="",
             return user_input
         if not required:
             return
-        first = False
