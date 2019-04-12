@@ -15,7 +15,7 @@ with open(join(currdir, 'README.md')) as f:
 requirements = parse_requirements("requirements.txt", session=False)
 setup(
   name = "tinyscript",
-  packages = find_packages(),
+  packages = find_packages(exclude=("tests*", )),
   include_package_data = True,
   author = "Alexandre D\'Hondt",
   author_email = "alexandre.dhondt@gmail.com",
