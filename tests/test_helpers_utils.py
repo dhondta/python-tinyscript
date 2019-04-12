@@ -14,8 +14,11 @@ class TestHelpersUtils(TestCase):
     def test_utility_functions(self):
         temp_stdout(self)
         self.assertTrue(b("test"))
+        self.assertEqual(b(1), 1)
         temp_stdin(self, "test\n")
         self.assertEqual(std_input(), "test")
+        temp_stdin(self, "test\n")
+        self.assertEqual(std_input("test", {}), "test")
         temp_stdin(self, "test\n")
         self.assertEqual(user_input(), "test")
         temp_stdin(self, "1\n")
