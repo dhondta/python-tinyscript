@@ -1,5 +1,7 @@
 coloredlogs
+ipaddress
 markdown2
 numpy
 pandas
 pymdown-extensions
+six
