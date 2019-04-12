@@ -6,8 +6,9 @@
 from subprocess import Popen, PIPE
 
 from tinyscript import *
-from tinyscript.handlers import __interrupt_handler as ih, \
-                                __terminate_handler as th, ExitHooks
+from tinyscript.handlers import *
+from tinyscript.handlers import (signal, ExitHooks, SIGINT, SIGTERM,
+                           __interrupt_handler as ih, __terminate_handler as th)
 
 from utils import *
 
@@ -63,7 +64,7 @@ class TestHandlers(TestCase):
     
     def test_private_handlers(self):
         self.assertRaises(SystemExit, ih)
+        self.assertIsNot(signal(SIGINT, ih), None)
         self.assertRaises(SystemExit, th)
-        h = ExitHooks()
-        h.hook()
-        self.assertRaises(SystemExit, h.exit)
+        self.assertIsNot(signal(SIGTERM, th), None)
+        self.assertRaises(SystemExit, _hooks.exit)

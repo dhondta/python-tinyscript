@@ -14,9 +14,10 @@ set_step_items(globals())
 
 class TestStepping(TestCase):
     def test_step_setup(self):
+        g = globals().keys()
         self.assertTrue(args.step)
-        self.assertIn("step", globals().keys())
-        self.assertIn("Step", globals().keys())
+        self.assertIn("step", g)
+        self.assertIn("Step", g)
 
     def test_step_object(self):
         temp_stdout(self)

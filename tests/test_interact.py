@@ -14,11 +14,12 @@ set_interact_items(globals())
 
 class TestInteraction(TestCase):    
     def test_interact_setup(self):
+        g = globals().keys()
         self.assertTrue(args.interact)
-        self.assertIn("interact", globals().keys())
-        self.assertIn("compile_command", globals().keys())
-        self.assertIn("InteractiveConsole", globals().keys())
-        self.assertIn("RemoteInteractiveConsole", globals().keys())
+        self.assertIn("interact", g)
+        self.assertIn("compile_command", g)
+        self.assertIn("InteractiveConsole", g)
+        self.assertIn("RemoteInteractiveConsole", g)
 
     def test_local_interaction(self):
         temp_stdout(self)

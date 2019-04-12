@@ -28,6 +28,7 @@ class TestLogging(TestCase):
     
     def test_enhanced_logger(self):
         temp_stdout(self)
+        configure_logger(globals(), False, True)
         self.assertIs(logger.success("test"), None)
         self.assertIs(logger.failure("test"), None)
         self.assertIs(logger.time("test"), None)
@@ -39,3 +40,6 @@ class TestLogging(TestCase):
         args.verbose = 3
         configure_logger(globals(), True)
         self.assertIs(logger.debug("test"), None)
+        delattr(args, "verbose")
+        configure_logger(globals(), True)
+        self.assertIs(logger.critical("test"), None)
