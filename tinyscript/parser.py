@@ -153,9 +153,9 @@ def initialize(glob,
     #  help feature, for displaying classical or extended help about the tool
     if add['help']:
         if glob.get('__details__'):
-            i.add_argument("-h", dest="help", default=0, action="count",
-                           help=gt("show extended help message and exit"),
-                           note=gt("-hhh is the highest help detail level"))
+            opt = i.add_argument("-h", dest="help", default=0, action="count",
+                               help=gt("show extended help message and exit"),
+                               note=gt("-hhh is the highest help detail level"))
         else:
             opt = i.add_argument("-h", "--help", action='help', prefix="show",
                                  help=gt("show this help message and exit"))
@@ -248,7 +248,7 @@ def initialize(glob,
             r.add_argument("--filename", last=True, prefix="report",
                            help=gt("report filename"))
     elif report_func is not None and not PYTHON3:
-        glob['logger'].warn("Report generation is only available with Python 3")
+        glob['logger'].warning("Report generation is only for Python 3")
     # extended logging features
     if ext_logging:
         i.add_argument("-f", "--logfile", last=True,
@@ -333,7 +333,7 @@ def validate(glob, *arg_checks):
         try:
             result = eval(condition.replace(" ? ", " glob['args'].{} "
                                             .format(param)))
-        except TypeError as e:
+        except Exception as e:
             result = True
             message = str(e)
         if result:
@@ -341,7 +341,7 @@ def validate(glob, *arg_checks):
                 glob['logger'].error(message or "Validation failed")
                 exit_app = True
             else:
-                glob['logger'].warn(message or "Validation failed")
+                glob['logger'].warning(message or "Validation failed")
                 setattr(glob['args'], param, default)
     if exit_app:
         sys.exit(2)
@@ -356,8 +356,6 @@ class ProxyArgumentParser(object):
         self.__parser = ArgumentParser()
 
     def __getattr__(self, name):
-        if name == "calls":
-            return self.calls
         self.__current_call = name
         self.__call_exists = hasattr(self.__parser, name) and \
                              callable(getattr(self.__parser, name))
