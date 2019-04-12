@@ -44,9 +44,12 @@ setup(
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
   ],
-  install_requires=[str(r.req) for r in requirements],
+  install_requires=[str(r.req) for r in requirements]
+  extras_require={
+    ':python_version >= "3.4"': [
+        'weasyprint',
+    ],
+  },
   python_requires = '>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,<4',
 )
