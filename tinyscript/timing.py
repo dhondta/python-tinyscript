@@ -8,8 +8,6 @@ import time
 from errno import ETIME
 from os import strerror
 
-from .loglib import TIME_COLOR
-
 
 __all__ = ["set_time_items"]
 
@@ -51,6 +49,9 @@ def set_time_items(glob):
         return t - (start or 0)
 
     class Timer(object):
+        class TimeoutError(Exception):
+            pass  # TimeoutError is not handled in Python 2
+    
         def __init__(self, description=None, message=TO_MSG, timeout=None,
                      fail_on_timeout=False):
             self.fail = fail_on_timeout
@@ -81,7 +82,7 @@ def set_time_items(glob):
                         return True
 
         def _handler(self, signum, frame):
-            raise TimeoutError(self.message)
+            raise Timer.TimeoutError(self.message)
     
     glob['Timer'] = Timer
     
