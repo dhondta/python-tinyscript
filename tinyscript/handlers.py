@@ -4,8 +4,8 @@
 
 """
 import logging
-import signal
 import sys
+from signal import signal, SIGINT, SIGTERM
 
 from .__info__ import __author__, __copyright__, __version__
 
@@ -43,9 +43,9 @@ def __interrupt_handler(*args):
     :param code: exit code
     """
     _hooks.state = "INTERRUPTED"
-    sys.exit(0)
+    _hooks.exit(0)
 # bind to interrupt signal (Ctrl+C)
-signal.signal(signal.SIGINT, __interrupt_handler)
+signal(SIGINT, __interrupt_handler)
 
 
 def __terminate_handler(*args):
@@ -57,9 +57,9 @@ def __terminate_handler(*args):
     :param code: exit code
     """
     _hooks.state = "TERMINATED"
-    sys.exit(0)
+    _hooks.exit(0)
 # bind to terminate signal
-signal.signal(signal.SIGTERM, __terminate_handler)
+signal(SIGTERM, __terminate_handler)
 
 
 def at_exit():
