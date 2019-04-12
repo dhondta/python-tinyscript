@@ -42,7 +42,7 @@ def output(f):
             return _
         elif _ is not None and isinstance(_, string_types):
             filename = "{}.{}".format(self.filename, f.__name__)
-            if exists(filename):
+            while exists(filename):
                 name, ext = splitext(filename)
                 try:
                     name, i = name.split('-')
