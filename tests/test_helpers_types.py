@@ -10,7 +10,7 @@ from tinyscript.helpers.types import *
 
 
 class TestHelpersTypes(TestCase):
-    def test_custom_network_related_types(self):
+    def test_network_related_types(self):
         self.assertIsInstance(ip_address("127.0.0.1"), ipaddress.IPv4Address)
         self.assertIsInstance(ip_address("fe00::"), ipaddress.IPv6Address)
         self.assertRaises(ValueError, ip_address, "0.0.0.300")

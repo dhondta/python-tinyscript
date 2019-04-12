@@ -51,15 +51,19 @@ class TestHandlers(TestCase):
         remove(TEXT)
 
     def test_exit_handler(self):
+        self.assertIs(at_exit(), None)
         self._test_handler("exit")
     
     def test_graceful_exit_handler(self):
+        self.assertIs(at_graceful_exit(), None)
         self._test_handler("graceful_exit")
     
     def test_interrupt_handler(self):
+        self.assertIs(at_interrupt(), None)
         self._test_handler("interrupt")
     
     def test_terminate_handler(self):
+        self.assertIs(at_terminate(), None)
         self._test_handler("terminate")
     
     def test_private_handlers(self):
