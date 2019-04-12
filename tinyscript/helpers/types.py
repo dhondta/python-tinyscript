@@ -46,9 +46,13 @@ def ip_address_network(inet):
 
 def port_number(port):
     """ Port number validation. """
-    if not (port.isdigit() and 0 <= int(port) < 2 ** 16):
+    try:
+        port = int(port)
+    except ValueError:
         raise ValueError("Bad port number")
-    return int(port)
+    if not 0 <= port < 2 ** 16:
+        raise ValueError("Bad port number")
+    return port
 
 
 def port_number_range(prange):
@@ -63,6 +67,6 @@ def port_number_range(prange):
         bounds = list(map(int, re.match(r'^(\d+)\-(\d+)$', prange).groups()))
         if bounds[0] > bounds[1]:
             raise AttributeError()
-    except AttributeError:
+    except (AttributeError, TypeError):
         raise ValueError("Bad port number range")
     return list(range(bounds[0], bounds[1] + 1))
