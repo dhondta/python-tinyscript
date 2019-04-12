@@ -45,6 +45,15 @@ setup(
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
   ],
-  install_requires=[str(r.req) for r in requirements],
+  install_requires=[
+    "coloredlogs",
+    "ipaddress",
+    "markdown2",
+    "numpy",
+    "pandas",
+    "pymdown-extensions",
+    "six",
+    "weasyprint ; python_version>='3.4'",
+  ],
   python_requires = '>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,<4',
 )
