@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common help utility help functions' tests.
+"""Common utility lambdas' tests.
 
 """
-from unittest import main, TestCase
+from unittest import TestCase
 
 from tinyscript.helpers.lambdas import *
 
 
-class TestLambdas(TestCase):
-    def setUp(self):
-        pass
-    
+class TestHelpersLambdas(TestCase):
     def test_data_conversion(self):
         self.assertEqual(bin2int("1"), 1)
         self.assertEqual(int2bin(1), "00000001")
@@ -47,7 +44,3 @@ class TestLambdas(TestCase):
         self.assertFalse(is_long_opt("-t"))
         self.assertTrue(is_short_opt("-t"))
         self.assertFalse(is_short_opt("--test"))
-
-
-if __name__ == '__main__':
-    main()

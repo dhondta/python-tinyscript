@@ -9,10 +9,7 @@ from unittest import main, TestCase
 from tinyscript.helpers.types import *
 
 
-class TestTypes(TestCase):
-    def setUp(self):
-        pass
-    
+class TestHelpersTypes(TestCase):
     def test_custom_network_related_types(self):
         self.assertIsInstance(ip_address("127.0.0.1"), ipaddress.IPv4Address)
         self.assertIsInstance(ip_address("fe00::"), ipaddress.IPv6Address)
@@ -26,10 +23,8 @@ class TestTypes(TestCase):
         self.assertIsInstance(port_number(100), int)
         self.assertRaises(ValueError, port_number, -1)
         self.assertRaises(ValueError, port_number, 123456789)
+        self.assertIsInstance(port_number_range(100), int)
         self.assertIsInstance(port_number_range("20-40"), list)
         self.assertRaises(ValueError, port_number_range, -1)
         self.assertRaises(ValueError, port_number_range, 123456789)
-
-
-if __name__ == '__main__':
-    main()
+        self.assertRaises(ValueError, port_number_range, "40-20")

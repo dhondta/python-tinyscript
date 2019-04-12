@@ -3,6 +3,7 @@
 """Parser module assets' tests.
 
 """
+import pytest
 from tinyscript import *
 from tinyscript.parser import *
 from tinyscript.parser import _save_config, ProxyArgumentParser
@@ -63,6 +64,7 @@ class TestParser(TestCase):
         self.assertEqual(args.verbose, 0)
         self.assertIs(args.logfile, None)
     
+    @pytest.mark.run('second-to-last')
     def test_write_config(self):
         sys.argv[1:] = ["--arg1", "test", "--arg2", "-w", INI]
         parser.add_argument("-a", "--arg1")
@@ -74,6 +76,7 @@ class TestParser(TestCase):
         self.assertIn("arg1", ini)
         self.assertIn("arg2", ini)
     
+    @pytest.mark.run('last')
     def test_read_config(self):
         sys.argv[1:] = ["-r", INI]
         parser.add_argument("-a", "--arg1")

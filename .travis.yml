@@ -11,8 +11,9 @@ cache: pip
 install:
   - pip install pytest
   - pip install pytest-cov
+  - pip install pytest-ordering
   - pip install coveralls
-  - pip install -r requirements.txt
+  - python setup.py install
 script:
   - py.test --cov=tinyscript
 after_success:

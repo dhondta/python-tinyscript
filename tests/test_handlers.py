@@ -4,7 +4,11 @@
 
 """
 from subprocess import Popen, PIPE
+
 from tinyscript import *
+from tinyscript.handlers import __interrupt_handler as ih, \
+                                __terminate_handler as th
+
 from utils import *
 
 
@@ -32,7 +36,7 @@ def exec_script(handler):
         with open(TEXT) as f:
             out = f.read().strip()
         return out
-    except FileNotFoundError:
+    except IOError:
         pass
 
 
@@ -56,3 +60,7 @@ class TestHandlers(TestCase):
     
     def test_terminate_handler(self):
         self._test_handler("terminate")
+    
+    def test_private_handlers(self):
+        self.assertRaises(SystemExit, ih)
+        self.assertRaises(SystemExit, th)

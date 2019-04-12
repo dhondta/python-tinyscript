@@ -20,7 +20,7 @@ __all__ = ["args", "capture", "exists", "logger", "remove", "sys", "temp_stdin",
            "temp_stdout", "tmpf", "TestCase", "PYTHON3"]
 
 
-tmpf = lambda name="test", ext="py": "/tmp/tinyscript-{}.{}".format(name, ext)
+tmpf = lambda name="test", ext="py": ".tinyscript-{}.{}".format(name, ext)
 
 
 @contextmanager

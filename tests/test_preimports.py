@@ -4,13 +4,14 @@
 
 """
 from tinyscript.preimports import *
-from tinyscript.preimports import __features__
+from tinyscript.preimports import __features__, PREIMPORTS
 
 from utils import *
 
 
 class TestPreimports(TestCase):
     def test_preimports(self):
-        g = globals().keys()
         for f in __features__:
-            self.assertIn(f, g)
+            self.assertIn(f, globals().keys())
+        for m in PREIMPORTS:
+            self.assertIn(m, globals().keys())
