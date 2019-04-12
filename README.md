@@ -4,6 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/dhondta/tinyscript/badge.svg?branch=master)](https://coveralls.io/github/dhondta/tinyscript?branch=master)
 [![Python Versions](https://img.shields.io/pypi/pyversions/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 [![Requirements Status](https://requires.io/github/dhondta/tinyscript/requirements.svg?branch=master)](https://requires.io/github/dhondta/tinyscript/requirements/?branch=master)
+[![Known Vulnerabilities](https://snyk.io/test/github/dhondta/tinyscript/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/tinyscript?targetFile=requirements.txt)
 [![License](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 
 # TinyScript
