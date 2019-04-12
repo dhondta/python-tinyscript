@@ -72,7 +72,7 @@ TARGETS = {
 """
 }
 
-NAME_REGEX = re.compile(r'^([0-9a-f]+[-_]+)?[0-9a-f]+$', re.I)
+NAME_REGEX = re.compile(r'^([0-9a-z]+[-_]+)?[0-9a-z]+$', re.I)
 
 
 def new(template, target=None, name=None):
@@ -83,15 +83,15 @@ def new(template, target=None, name=None):
     :param target:   type of script/tool to be created
     :param name:     name of the new script/tool
     """
-    assert template in TEMPLATES, \
-           "Template argument must be one of the followings: {}" \
-           .format(", ".join(TEMPLATES))
-    assert target is None or target in TARGETS.keys(), \
-           "Target argument must be one of the followings: {}" \
-           .format(TARGETS.keys())
-    if not name or name == "template name":
-        name = template
-    assert not NAME_REGEX.match(name), "Invalid {} name".format(template)
+    if template not in TEMPLATES:
+        raise ValueError("Template argument must be one of the followings: {}"
+                         .format(", ".join(TEMPLATES)))
+    if target is not None and target not in TARGETS.keys():
+        raise ValueError("Target argument must be one of the followings: {}"
+                         .format(TARGETS.keys()))
+    name = name or template
+    if NAME_REGEX.match(name) is None:
+        raise ValueError("Invalid {} name".format(template))
     with open("{}.py".format(name), 'w') as f:
         target_imp = "" if target is None else "from {} import {}\n" \
                                                .format(*target.split('.'))
