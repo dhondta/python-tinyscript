@@ -14,6 +14,7 @@ PREIMPORTS = [
     "base64",
     "binascii",
     "collections",
+    "hashlib",
     "itertools",
     "logging",
     "os",
