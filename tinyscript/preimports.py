@@ -28,15 +28,16 @@ PREIMPORTS = [
 ]
 
 
-def _load_preimports()
-    preimports = []
-    for module in PREIMPORTS:
+def _load_preimports(*extras):
+    preimports, failures = [], []
+    for module in PREIMPORTS + list(extras):
         try:
             globals()[module] = importlib.import_module(module)
             preimports.append(module)
         except ImportError:
-            pass
-    return preimports
+            failures.append(module)
+    return preimports, failures
 
 
-__all__ = __features__ = _load_preimports()
+__all__ = __features__ = _load_preimports()[0]
+__all__ += ["PREIMPORTS"]
