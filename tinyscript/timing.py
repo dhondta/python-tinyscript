@@ -23,14 +23,14 @@ def set_time_items(glob):
     
     :param glob: main script's global scope dictionary reference
     """
-    _ = glob['args']
+    a = glob['args']
     l = glob['logger']
 
     class __TimeManager(object):
         def __init__(self):
-            c = _._collisions
-            self._stats = getattr(_, c.get("stats") or "stats", False)
-            self._timings = getattr(_, c.get("timings") or "timings", False)
+            c = a._collisions
+            self._stats = getattr(a, c.get("stats") or "stats", False)
+            self._timings = getattr(a, c.get("timings") or "timings", False)
             self.enabled = self._stats or self._timings
             self.last = self.start = time.time()
             self.times = []
@@ -45,10 +45,10 @@ def set_time_items(glob):
     glob['time_manager'] = manager = __TimeManager()
 
     def _take_time(start=None, descr=None):
-        _ = manager.last = time.time()
+        t = manager.last = time.time()
         if start is not None and descr is not None:
-            manager.times.append((descr, float(start), float(_)))
-        return _ - (start or 0)
+            manager.times.append((descr, float(start), float(t)))
+        return t - (start or 0)
 
     class Timer(object):
         def __init__(self, description=None, message=TO_MSG, timeout=None,
@@ -68,6 +68,7 @@ def set_time_items(glob):
                     signal.alarm(self.timeout)
                 if manager._timings and self.descr:
                     l.time(self.descr)
+                return self
         
         def __exit__(self, exc_type, exc_value, exc_traceback):
             if manager.enabled:
