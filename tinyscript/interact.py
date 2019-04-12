@@ -20,8 +20,8 @@ def set_interact_items(glob):
     
     :param glob: main script's global scope dictionary reference
     """
-    _ = glob['args']
-    enabled = getattr(_, _._collisions.get("interact") or "interact", False)
+    a, l = glob['args'], glob['logger']
+    enabled = getattr(a, a._collisions.get("interact") or "interact", False)
     if enabled:
         readline.parse_and_bind('tab: complete')
 
@@ -34,18 +34,18 @@ def set_interact_items(glob):
                 self.banner = banner
                 self.exitmsg = exitmsg
                 ns = glob
-                ns.update(namespace)
+                ns.update(namespace or {})
                 super(InteractiveConsole, self).__init__(locals=ns,
                                                          filename=filename)
             
         def __enter__(self):
             if enabled and self.banner is not None:
-                glob['logger'].interact(self.banner)
+                l.interact(self.banner)
             return self
         
         def __exit__(self, *args):
             if enabled and self.exitmsg is not None:
-                glob['logger'].interact(self.exitmsg)
+                l.interact(self.exitmsg)
         
         def interact(self, *args, **kwargs):
             if enabled:
@@ -56,12 +56,12 @@ def set_interact_items(glob):
     def interact(banner=None, readfunc=None, namespace=None, exitmsg=None):
         if enabled:
             if banner is not None:
-                glob['logger'].interact(banner)
+                l.interact(banner)
             ns = glob
-            ns.update(namespace)
+            ns.update(namespace or {})
             base_interact(readfunc=readfunc, local=ns)
             if exitmsg is not None:
-                glob['logger'].interact(exitmsg)
+                l.interact(exitmsg)
 
     glob['interact'] = interact
     
@@ -70,8 +70,8 @@ def set_interact_items(glob):
 
     # ConsoleSocket for handling duplicating std*** to a socket for the
     #  RemoteInteractiveConsole
-    host = getattr(_, _._collisions.get("host") or "host", None)
-    port = getattr(_, _._collisions.get("port") or "port", None)
+    host = getattr(a, a._collisions.get("host") or "host", None)
+    port = getattr(a, a._collisions.get("port") or "port", None)
 
     # custom socket, for handling the bindings of stdXXX through a socket
     class ConsoleSocket(socket.socket):
