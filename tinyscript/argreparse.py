@@ -21,6 +21,7 @@ except ImportError:
     from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
 from .helpers.lambdas import is_long_opt, is_pos_int, is_short_opt
+from .helpers.licenses import *
 from .helpers.utils import PYTHON3, user_input
 from .loglib import logger
 
@@ -69,7 +70,7 @@ class _ExtendAction(Action):
     Custom action for extending a list of values.
     """
     def __call__(self, parser, namespace, values, option_string=None):
-        _ = getattr(namespace, self.dest, [])
+        _ = getattr(namespace, self.dest) or []
         if not isinstance(values, list):
             values = [values]
         _.extend(values)
@@ -262,10 +263,17 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         v = globals_dict.get('__status__')
         if v:
             d += " (" + v + ")"
-        for k in ['__author__', '__reference__', '__source__', '__training__']:
+        dunders = ['__author__', '__copyright__', '__license__',
+                   '__reference__', '__source__', '__training__']
+        l = max(list(map(lambda x: len(x.strip('_')), dunders)))
+        for k in dunders:
             m = globals_dict.get(k)
             if m:
-                d += "\n%s: %s" % (k.strip('_').capitalize(), m)
+                if k == '__copyright__':
+                    m = copyright(m)
+                elif k == '__license__':
+                    m = license(m, True) or m
+                d += ("\n{: <%d}: {}" % l).format(k.strip('_').capitalize(), m)
                 if k == '__author__':
                     e = globals_dict.get('__email__')
                     if e:
@@ -377,11 +385,13 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             if value in ["n", "false"]:
                 self._reparse_args['opt'].append(ostr)
         elif self.is_action(a, ('count', )):
-            if ostr.startswith("--"):
-                new_arg = [ostr for i in range(int(value))]
-            else:
-                new_arg = ["-{}".format(int(value) * ostr.strip('-'))]
-            self._reparse_args['opt'].extend(new_arg)
+            v = int(value)
+            if v > 0:
+                if ostr.startswith("--"):
+                    new_arg = [ostr for i in range(v)]
+                else:
+                    new_arg = ["-{}".format(v * ostr.strip('-'))]
+                self._reparse_args['opt'].extend(new_arg)
         elif self.is_action(a, ('parsers', )):
             if not value:
                 value = self._input_arg(a)
@@ -498,6 +508,10 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             if not cls._config.has_section(section):
                 cls._config.add_section(section)
             cls._config.set(section, name, str(value))
+    
+    @classmethod
+    def reset(cls):
+        cls._config = ConfigParser()
 
 
 class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
@@ -555,14 +569,16 @@ class Namespace(BaseNamespace):
 
     def __getattr__(self, name):
         # handle __privdict__ entry first
-        if name.startswith("_") and name in self.__privdict__:
+        if (name.startswith("_") or name in self.excludes) and \
+            name in self.__privdict__:
             return self.__privdict__[name]
-        # then use the native __getattr__
-        return super(Namespace, self).__getattr__(name)
+        # then get the attribute the normal way
+        return self.__getattribute__(name)
           
     def __setattr__(self, name, value):
         # handle __privdict__ entry first
-        if name.startswith("_") and name != "_debug_level":
+        if (name.startswith("_") or name in self.excludes) and \
+            name != "_debug_level":
             self.__privdict__[name] = value
         else:
             super(Namespace, self).__setattr__(name, value)
