@@ -15,11 +15,11 @@ __features__ = []
 # various common data conversion one-liners
 __all__ += ["bin2int", "bin2txt", "int2bin", "txt2bin"]
 bin2int = lambda b: int("0b" + b, 2)
-bin2txt = lambda b: ''.join(chr(bin2int(''.join(map(str, b[i:i+8])))) \
-                    for i in range(0, len(b), 8))
-int2bin = lambda i, n=None: ("{}" if n is None else "{:0>" + str(n) + "}") \
-                            .format(bin(i)[2:])
-txt2bin = lambda t: ''.join(map(lambda c: "{:0>8}".format(bin(ord(c))[2:]), t))
+bin2txt = lambda b, n=8: ''.join(chr(bin2int(''.join(map(str, b[i:i+n])))) \
+                                 for i in range(0, len(b), n))
+int2bin = lambda i, n=8: ("{:0>%i}" % n).format(bin(i)[2:])
+txt2bin = lambda t, n=8: "".join(map(lambda c: ("{:0>%i}" % n) \
+                                              .format(bin(ord(c))[2:])[-n:], t))
 
 # various object type check functions
 __all__ += ["is_int", "is_pos_int", "is_lst", "is_str", "is_lambda"]
