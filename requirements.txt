@@ -5,4 +5,4 @@ numpy
 pandas
 pymdown-extensions
 six
-weasyprint
+weasyprint ; python_version>='3.4'
