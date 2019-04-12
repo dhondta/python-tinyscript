@@ -7,10 +7,9 @@ python:
   - "3.6"
 cache: pip
 install:
-  - pip install pytest pytest-cov pytest-ordering
   - pip install coveralls
   - python setup.py install
 script:
-  - python -m pytest --cov tinyscript tests
+  - nosetests -v --with-coverage --cover-tests --cover-package tinyscript tests
 after_success:
   - coveralls
