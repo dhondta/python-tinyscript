@@ -66,6 +66,15 @@ def __proxy_to_real_parser(value):
     return value
 
 
+def _save_config(glob):
+    cf = glob['args'].write_config
+    if cf:
+        with open(cf, 'w') as f:
+            glob['parser']._config.write(f)
+        glob['logger'].debug("Input arguments written to file "
+                             "'{}'".format(cf))
+
+
 def initialize(glob,
                sudo=False,
                multi_level_debug=False,
@@ -109,19 +118,19 @@ def initialize(glob,
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
            'step': add_step, 'time': add_time, 'version': add_version,
            'wizard': add_wizard, 'help': True}
-    glob['parser'] = p = ArgumentParser(glob)
+    p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
-    add['demo'] = add['demo'] and glob['parser'].examples
+    add['demo'] = add['demo'] and p.examples
     noarg = len(sys.argv) == 1
     if noarg and noargs_action:
-        assert noargs_action in add.keys(), \
-               "Bad action when no args (should be one of: {})" \
-               .format('|'.join(add.keys()))
+        if noargs_action not in add.keys():
+            raise ValueError("Bad action when no args (should be one of: {})"
+                             .format('|'.join(add.keys())))
         add[noargs_action] = True  # ensure this action is enabled, even if it
                                    #  is not given the passed arguments
     # 2) populate the real parser and add information arguments
     __parsers = {}
-    __get_calls_from_parser(parser, glob['parser'])
+    __get_calls_from_parser(parser, p)
     #  config handling feature, for reading/writing an INI config file with the
     #   input arguments, e.g. for future reuse
     if add['config']:
@@ -186,12 +195,12 @@ def initialize(glob,
     #  version feature, for displaying the version from __version__
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
-        assert version, "__version__ is not defined"
-        opt = i.add_argument("--version", action='version',
-                             prefix="show", version=version,
-                             help=gt("show program's version number and exit"))
-        if noarg and noargs_action == "version":
-            sys.argv[1:] = [opt]
+        if version is not None:
+            opt = i.add_argument("--version", action='version', prefix="show",
+                                 version=version, help=gt("show program's "
+                                                  "version number and exit"))
+            if noarg and noargs_action == "version":
+                sys.argv[1:] = [opt]
     #  verbosity feature, for displaying debugging messages, with the
     #   possibility to handle multi-level verbosity
     if multi_level_debug:
@@ -223,7 +232,7 @@ def initialize(glob,
         for f in all_list:
             glob[f] = globals()[f] = getattr(report, f)
         # now populate the parser with report-related arguments
-        r = glob['parser'].add_argument_group(gt("report arguments"))
+        r = p.add_argument_group(gt("report arguments"))
         output_func = list(filter(lambda x: not x[0].startswith('_'),
                                   getmembers(Report, predicate=isfunction)))
         choices = list(map(lambda x: x[0], output_func))
@@ -249,7 +258,7 @@ def initialize(glob,
         if LINUX:
             i.add_argument("-s", "--syslog", action="store_true", last=True,
                            suffix="mode", help=gt("log to /var/log/syslog"))
-    glob['args'] = glob['parser'].parse_args()
+    glob['args'], glob['parser'] = p.parse_args(), p
     # 3) if sudo required, restart the script
     if sudo:
         # if not root, restart the script in another process and jump to this
@@ -269,12 +278,7 @@ def initialize(glob,
     def __at_exit():
         # first, dump the config if required
         if add['config']:
-            cf = glob['args'].write_config
-            if cf:
-                with open(cf, 'w') as f:
-                    glob['parser']._config.write(f)
-                glob['logger'].debug("Input arguments written to file "
-                                     "'{}'".format(cf))
+            _save_config(glob)
         # then handle the state
         if _hooks.state == "INTERRUPTED":
             glob['at_interrupt']()
@@ -324,12 +328,12 @@ def validate(glob, *arg_checks):
     for check in arg_checks:
         check = check + (None, ) * (4 - len(check))
         param, condition, message, default = check
-        assert re.match(r'^_?[a-zA-Z][a-zA-Z0-9_]*$', param) is not None, \
-               "Illegal argument name"
+        if re.match(r'^_?[a-zA-Z][a-zA-Z0-9_]*$', param) is None:
+            raise ValueError("Illegal argument name")
         try:
             result = eval(condition.replace(" ? ", " glob['args'].{} "
                                             .format(param)))
-        except (AssertionError, TypeError) as e:
+        except TypeError as e:
             result = True
             message = str(e)
         if result:
@@ -352,6 +356,8 @@ class ProxyArgumentParser(object):
         self.__parser = ArgumentParser()
 
     def __getattr__(self, name):
+        if name == "calls":
+            return self.calls
         self.__current_call = name
         self.__call_exists = hasattr(self.__parser, name) and \
                              callable(getattr(self.__parser, name))
@@ -364,6 +370,10 @@ class ProxyArgumentParser(object):
         del self.__current_call
         del self.__call_exists
         return subparser
+    
+    def reset(self):
+        ArgumentParser.reset()
+        self.calls = []
 
 
 parser = ProxyArgumentParser()
