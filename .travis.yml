@@ -10,7 +10,8 @@ install:
   - pip install pytest
   - pip install pytest-cov
   - pip install pytest-ordering
-  - pip install coveralls
+  - pip3 install coveralls
+  - pip3 install pytest
   - python setup.py install
 script:
   - python3 -m pytest --cov tinyscript tests
