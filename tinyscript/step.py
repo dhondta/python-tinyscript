@@ -17,8 +17,9 @@ def set_step_items(glob):
     
     :param glob: main script's global scope dictionary reference
     """
-    _ = glob['args']
-    enabled = getattr(_, _._collisions.get("step") or "step", False)
+    a = glob['args']
+    l = glob['logger']
+    enabled = getattr(a, a._collisions.get("step") or "step", False)
     # Step context manager, for defining a block of code that can be paused at
     #  its start and end
     class Step(object):
@@ -29,7 +30,7 @@ def set_step_items(glob):
         def __enter__(self):
             if enabled:
                 if self.message:
-                    glob['logger'].step(self.message)
+                    l.step(self.message)
                 if not self.at_end:
                     std_input("Press enter to continue", {'color': STEP_COLOR,
                                                           'bold': True})
@@ -44,7 +45,7 @@ def set_step_items(glob):
     def step(message=None):
         if enabled:
             if message:
-                glob['logger'].step(message)
+                l.step(message)
             std_input("Press enter to continue", {'color': STEP_COLOR,
                                                   'bold': True})
     glob['step'] = step
