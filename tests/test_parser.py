@@ -13,6 +13,9 @@ from utils import capture, remove, tmpf, TestCase
 __examples__ = ["-v"]
 
 INI = tmpf(ext="ini")
+INI_CONF = """[main]
+arg1 = test
+arg2 = True"""
 
 
 class TestParser(TestCase):
@@ -75,9 +78,12 @@ class TestParser(TestCase):
             ini = f.read().strip()
         self.assertIn("arg1", ini)
         self.assertIn("arg2", ini)
+        remove(INI)
     
     @pytest.mark.run('last')
     def test_read_config(self):
+        with open(INI, 'w') as f:
+            f.write(INI_CONF)
         sys.argv[1:] = ["-r", INI]
         parser.add_argument("-a", "--arg1")
         parser.add_argument("-b", "--arg2", action="store_true")

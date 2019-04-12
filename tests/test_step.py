@@ -26,6 +26,9 @@ class TestStepping(TestCase):
             self.assertTrue(Step())
         temp_stdin(self, "\n")
         with Step():
+            self.assertTrue(Step("test"))
+        temp_stdin(self, "\n")
+        with Step():
             self.assertTrue(Step("test", True))
     
     def test_step_function(self):
