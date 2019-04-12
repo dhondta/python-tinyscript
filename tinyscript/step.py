@@ -34,6 +34,7 @@ def set_step_items(glob):
                 if not self.at_end:
                     std_input("Press enter to continue", {'color': STEP_COLOR,
                                                           'bold': True})
+                return self
         
         def __exit__(self, *args):
             if enabled and self.at_end:
