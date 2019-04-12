@@ -1,0 +1,18 @@
+language: python
+sudo: required
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.8"
+cache: pip
+install:
+  - pip install -r requirements.txt
+script:
+  - python2 -m unittest discover tests
+  - python3 -m unittest discover tests
+  - py.test --cov-report term-missing --cov app -v
+after_success:
+  - coveralls
