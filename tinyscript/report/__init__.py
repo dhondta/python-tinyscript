@@ -96,7 +96,8 @@ class Report(object):
         self.margins = options.get('margins', "10.0mm 20.0mm 20.0mm 20.0mm")
         self.size = options.get('size', "a4 portrait")
         self.theme = options.get('theme', "default")
-        assert self.theme in THEMES, "PDF report CSS theme does not exist"
+        if self.theme not in THEMES:
+            raise ValueError("PDF report CSS theme does not exist")
         if self.css:
             if not isfile(self.css):
                 self.css = None
