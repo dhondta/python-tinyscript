@@ -31,7 +31,8 @@ iterbytes = lambda d: iter(d) if PYTHON3 else [ord(c) for c in d]
 
 def b(text):
     """
-    Overload for six.b function.
+    Overload for six.b function, because the behavior of 'b' in Python2/3 is not
+     exactly the same. This makes 'b' behave in Python 3 like in Python 2.
     """
     try:
         return six_b(text)
@@ -46,14 +47,11 @@ def std_input(prompt="", style=None):
     :param prompt:  prompt message
     :param style:   dictionary of ansi_wrap keyword-arguments
     """
+    p = ansi_wrap(prompt, **(style or {}))
     try:
-        prompt = ansi_wrap(prompt, **style)
-    except:
-        pass
-    try:
-        return raw_input(prompt).strip()
+        return raw_input(p).strip()
     except NameError:
-        return input(prompt).strip()
+        return input(p).strip()
 
 
 def user_input(prompt="", choices=None, default=None, choices_str="",
