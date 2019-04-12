@@ -55,7 +55,10 @@ class TestParser(TestCase):
         test = parser.add_subparsers().add_parser("subtest", parents=[parser])
         test.add_argument("-b", "--arg2")
         self.assertIsInstance(getattr(proxy_parser, "calls"), list)
-        initialize(globals())
+        if PYTHON3:
+            initialize(globals())
+        else:
+            self.assertRaises(SystemExit, initialize, globals())
     
     def test_arg_name_clash(self):
         sys.argv[1:] = []
