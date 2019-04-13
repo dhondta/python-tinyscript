@@ -5,13 +5,15 @@ omit = tests/
 [report]
 exclude_lines=
     pragma: no cover
-    # Python2/3 incompatibilities
-    PYTHON3
-    from configparser import ConfigParser
-    from ConfigParser import ConfigParser
-    except\ ImportError:
+    if.*?__name__.*?==.*?.__main__.:
+    # Python2/3 incompatibilities if/elif/else blocks
+    (?s)if.*?PYTHON3.*?\:(.*?(else|elif).*?\:)*
+    import ConfigParser
+    except ImportError:
     # sudo when using 'initialize'
-    os\.geteuid\(\)\ \!\=\ 0
+    os\.geteuid\(\) \!\= 0
     # 'interact' module - remote interaction
-    class\ ConsoleSocket
-    class\ RemoteInteractiveConsole
+    class ConsoleSocket
+    class RemoteInteractiveConsole
+    # exit tasks
+    def __at_exit\(\)\:

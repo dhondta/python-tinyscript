@@ -3,8 +3,6 @@
 """Parser module assets' tests.
 
 """
-import pytest
-
 from tinyscript import *
 from tinyscript.parser import *
 from tinyscript.parser import _save_config, ProxyArgumentParser
@@ -30,16 +28,18 @@ class TestParser(TestCase):
         #  reference of a real parser each time initialize(...) is called)
         global proxy_parser
         proxy_parser = parser
+        cls.argv = sys.argv[1:]  # backup input arguments
+    
+    @classmethod
+    def tearDownClass(cls):
+        sys.argv[1:] = cls.argv  # restore input arguments
     
     def setUp(self):
         global parser
-        self.argv = sys.argv[1:]  # backup input arguments
         parser = proxy_parser     # reuse the original proxy parser reference
-        parser.reset()
-    
-    def tearDown(self):
-        sys.argv[1:] = self.argv  # restore input arguments
-    
+        parser.reset()            # reset the proxy parser, otherwise it will
+                                  #  hold the previous calls (add_argument, ...)
+
     def test_input_arguments(self):
         sys.argv[1:] = ["--arg1", "test", "-b"]
         parser.add_argument("-a", "--arg1")
@@ -54,17 +54,21 @@ class TestParser(TestCase):
         sys.argv[1:] = ["subtest", "-b", "test"]
         test = parser.add_subparsers().add_parser("subtest", parents=[parser])
         test.add_argument("-b", "--arg2")
-        self.assertIsInstance(getattr(proxy_parser, "calls"), list)
+        self.assertIsInstance(getattr(parser, "calls"), list)
         if PYTHON3:
             initialize(globals())
-        else:
+        else:  # with Python2, an error occurs with the overwritten sys.argv
+               #  and "subtest" is not parsed, hence throwing SystemExit with
+               #  code 2 as the subparser selection is missing
             self.assertRaises(SystemExit, initialize, globals())
     
-    def test_arg_name_clash(self):
+    def test_argument_conflicts(self):
         sys.argv[1:] = []
         parser.add_argument("-v", dest="v_opt_overwritten")
         initialize(globals())
         self.assertEqual(args.v_opt_overwritten, None)
+        # default verbose option still exists as only "-v" was overwritten
+        self.assertEqual(args.verbose, False)
     
     def test_initialization_flags(self):
         sys.argv[1:] = ["--stats"]
@@ -78,7 +82,6 @@ class TestParser(TestCase):
         self.assertEqual(args.verbose, 0)
         self.assertIs(args.logfile, None)
     
-    @pytest.mark.run('second-to-last')
     def test_write_config(self):
         sys.argv[1:] = ["--arg1", "test", "--arg2", "-w", INI]
         parser.add_argument("-a", "--arg1")
@@ -91,15 +94,14 @@ class TestParser(TestCase):
         self.assertIn("arg2", ini)
         remove(INI)
     
-    @pytest.mark.run('last')
     def test_read_config(self):
+        temp_stdout(self)
         with open(INI, 'w') as f:
             f.write(INI_CONF)
         sys.argv[1:] = ["-r", INI]
         parser.add_argument("-a", "--arg1")
         parser.add_argument("-b", "--arg2", action="store_true")
-        with capture() as (out, err):
-            initialize(globals(), add_config=True)
+        initialize(globals(), add_config=True)
         self.assertEqual(args.arg1, "test")
         self.assertTrue(args.arg2)
         remove(INI)
@@ -107,30 +109,41 @@ class TestParser(TestCase):
     def test_noargs_empty_config(self):
         temp_stdout(self)
         sys.argv[1:] = []
+        # SystemExit is raised as the default "config.ini" does not exist
         self.assertRaises(SystemExit, initialize, globals(),
                           noargs_action="config")
     
     def test_noargs_help(self):
         temp_stdout(self)
         sys.argv[1:] = []
+        # SystemExit is raised with code 0 as the help message is displayed then
+        #  it exits
         self.assertRaises(SystemExit, initialize, globals(),
                           noargs_action="help")
     
     def test_noargs_interact(self):
         sys.argv[1:] = []
         initialize(globals(), noargs_action="interact")
+        self.assertTrue(args.interact)
+        self.assertEqual(str(args.host), "127.0.0.1")
+        self.assertEqual(args.port, 12345)
     
     def test_noargs_step(self):
         sys.argv[1:] = []
         initialize(globals(), noargs_action="step")
+        self.assertTrue(args.step)
     
     def test_noargs_time(self):
         sys.argv[1:] = []
         initialize(globals(), noargs_action="time")
+        self.assertTrue(args.stats)
+        self.assertFalse(args.timings)
     
     def test_noargs_version(self):
         temp_stdout(self)
         sys.argv[1:] = []
+        # SystemExit is raised with code 0 as the version is displayed then it
+        #  exits
         self.assertRaises(SystemExit, initialize, globals(),
                           noargs_action="version")
     
@@ -138,6 +151,7 @@ class TestParser(TestCase):
         temp_stdout(self)
         temp_stdin(self, "\n")
         sys.argv[1:] = []
+        # EOFError is raised as the wizard stands with no input but a newline
         self.assertRaises(EOFError, initialize, globals(),
                           noargs_action="wizard")
     
@@ -153,11 +167,27 @@ class TestParser(TestCase):
         self.assertRaises(ValueError, initialize, globals(),
                           noargs_action="does_not_exist")
     
-    def test_report_feature(self):
-        temp_stdout(self)
-        sys.argv[1:] = []
-        initialize(globals(), report_func=lambda: (Title("Test"), ))
-        initialize(globals(), report_func="bad report function")
+    def test_report_good_function(self):
+        if PYTHON3:
+            temp_stdout(self)
+            sys.argv[1:] = []
+            initialize(globals(), report_func=lambda: (Title("Test"), ))
+            self.assertEqual(args.output, "pdf")
+            self.assertIs(args.title, None)
+            self.assertIs(args.css, None)
+            self.assertEqual(args.theme, "default")
+            self.assertIs(args.filename, None)
+    
+    def test_report_bad_function(self):
+        if PYTHON3:
+            temp_stdout(self)
+            sys.argv[1:] = []
+            initialize(globals(), report_func="bad report function")
+            self.assertFalse(hasattr(args, "output"))
+            self.assertFalse(hasattr(args, "title"))
+            self.assertFalse(hasattr(args, "css"))
+            self.assertFalse(hasattr(args, "theme"))
+            self.assertFalse(hasattr(args, "filename"))
     
     def test_validation(self):
         temp_stdout(self)

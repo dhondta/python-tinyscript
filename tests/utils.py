@@ -5,6 +5,7 @@
 """
 import logging
 import sys
+from argparse import Action
 from contextlib import contextmanager
 from os import remove
 from os.path import exists
@@ -18,7 +19,7 @@ from unittest import TestCase
 
 __all__ = ["args", "capture", "exists", "logger", "remove", "sys", "temp_stdin",
            "temp_stdout", "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase",
-           "PYTHON3"]
+           "PYTHON3", "_FakeParserAction"]
 
 
 tmpf = lambda name="test", ext="py": ".tinyscript-{}.{}".format(name, ext)
@@ -73,6 +74,13 @@ class FakeLogRecord(object):
 class FakeNamespace(object):
     _collisions = {}
 
+
+class _FakeParserAction(Action):
+    def __init__(self, *args, **kwargs):
+        super(_FakeParserAction, self).__init__(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        pass
 
 args = FakeNamespace()
 logger = logging.getLogger()
