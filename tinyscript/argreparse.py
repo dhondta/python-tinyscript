@@ -84,6 +84,10 @@ class _NewSubParsersAction(_SubParsersAction):
     """
     last = False
     
+    def __init__(self, *args, **kwargs):
+        kwargs.pop('required', True)
+        super(_NewSubParsersAction, self).__init__(*args, **kwargs)
+    
     def add_parser(self, name, **kwargs):
         # set prog from the existing prefix
         if kwargs.get('prog') is None:
@@ -91,11 +95,10 @@ class _NewSubParsersAction(_SubParsersAction):
         # create a pseudo-action to hold the choice help
         if 'help' in kwargs:
             help = kwargs.pop('help')
-            if PYTHON3:  # see argparse.py:1059
-                aliases = kwargs.pop('aliases', None)
-                choice_action = self._ChoicesPseudoAction(name, aliases, help)
-            else:        # see argparse.py:1029
-                choice_action = self._ChoicesPseudoAction(name, help)
+            # see [Python2] argparse.py:1029 and [Python3] argparse.py:1059
+            args = (name, kwargs.pop('aliases', None), help) if PYTHON3 else \
+                   (name, help)
+            choice_action = self._ChoicesPseudoAction(*args)
             self._choices_actions.append(choice_action)
         # create the parser, but with another formatter and separating the help
         #  into an argument group
@@ -224,8 +227,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                              'description' set to preformatted help message
     """
     _config = ConfigParser()
-    is_action = lambda s, a, nl: any(type(a) is s._registry_get('action', n) \
-                                     for n in nl)
+    is_action = lambda s, a, *l: any(type(a) is s._registry_get('action', n) \
+                                     for n in l)
     name = "main"
     
     def __init__(self, globals_dict=None, *args, **kwargs):
@@ -233,19 +236,16 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         globals_dict = globals_dict or {}
         self.examples = globals_dict.get('__examples__')
-        if self.examples and len(self.examples) == 0:
+        if self.examples == [] and len(self.examples) == 0:
             self.examples = None
         script = globals_dict.get('__file__') or ""
         if script:
             path = abspath(script)
             root = dirname(path)
             script = basename(script)
-            if not access(path, X_OK):
-                kwargs['prog'] = "python " + script
-            elif root not in environ['PATH'].split(":"):
-                kwargs['prog'] = "./" + script
-            else:
-                kwargs['prog'] = script
+            kwargs['prog'] = "python " + script if not access(path, X_OK) else \
+                "./" + script if root not in environ['PATH'].split(":") else \
+                script
             script, _ = splitext(script)
         kwargs['add_help'] = False
         kwargs['conflict_handler'] = "error"
@@ -292,7 +292,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         
         :param a_type: argparse.Action instance name (e.g. count, append)
         """
-        for a in filter(lambda _: self.is_action(_, a_types), self._actions):
+        for a in filter(lambda _: self.is_action(_, *a_types), self._actions):
             yield a
     
     def _input_arg(self, a):
@@ -303,28 +303,27 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         :return:  the user input, asked according to the action
         """
         # if action of an argument that suppresses any other, just return
-        if a.dest is SUPPRESS or a.default is SUPPRESS:
+        if a.dest == SUPPRESS or a.default == SUPPRESS:
             return
         # prepare the prompt
         prompt = (a.help or a.dest).capitalize()
         r = {'required': a.required}
         # now handle each different action
-        if self.is_action(a, ('store', 'append')):
+        if self.is_action(a, 'store', 'append'):
             return user_input(prompt, a.choices, a.default, **r)
-        elif self.is_action(a, ('store_const', 'append_const')):
+        elif self.is_action(a, 'store_const', 'append_const'):
             return user_input(prompt, ("(A)dd", "(D)iscard"), "d", **r)
-        elif self.is_action(a, ('store_true', )):
+        elif self.is_action(a, 'store_true'):
             return user_input(prompt, ("(Y)es", "(N)o"), "n", **r)
-        elif self.is_action(a, ('store_false', )):
+        elif self.is_action(a, 'store_false'):
             return user_input(prompt, ("(Y)es", "(N)o"), "n", **r)
-        elif self.is_action(a, ('count', )):
+        elif self.is_action(a, 'count'):
             return user_input(prompt, is_pos_int, 0, "positive integer", **r)
-        elif self.is_action(a, ('parsers', )):
+        elif self.is_action(a, 'parsers'):
             pmap = a._name_parser_map
-            _ = pmap.keys()
-            return user_input(prompt, _, _[0], **r)
-        else:
-            raise NotImplementedError("Unknown argparse action")
+            _ = list(pmap.keys())
+            return user_input(prompt, _, _[0], **r) if len(_) > 0 else None
+        raise NotImplementedError("Unknown argparse action")
     
     def _reset_args(self):
         args = [_ for _ in self._reparse_args['pos']] + \
@@ -353,7 +352,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         default = a.default if a.default is None else str(a.default)
         if c:
             try:
-                value = ArgumentParser._config.get(s, a.dest).lower()
+                value = ArgumentParser._config.get(s, a.dest)
             except (NoOptionError, NoSectionError) as e:
                 item = "setting" if isinstance(e, NoOptionError) else "section"
                 # if the argument is required, just ask for the value
@@ -369,30 +368,30 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         except IndexError:  # occurs when positional argument
             ostr = None
         # now handle arguments regarding the action
-        if self.is_action(a, ('store', 'append')):
+        if self.is_action(a, 'store', 'append'):
             if value:
                 if ostr:
                     self._reparse_args['opt'].extend([ostr, value])
                 else:
                     self._reparse_args['pos'].extend([value])
-        elif self.is_action(a, ('store_const', 'append_const')):
-            if value == "add" or value != default:
+        elif self.is_action(a, 'store_const', 'append_const'):
+            if value.lower() == "add" or value != default:
                 self._reparse_args['opt'].append(ostr)
-        elif self.is_action(a, ('store_true', )):
-            if value in ["y", "true"]:
+        elif self.is_action(a, 'store_true'):
+            if value.lower() in ["y", "true"]:
                 self._reparse_args['opt'].append(ostr)
-        elif self.is_action(a, ('store_false', )):
-            if value in ["n", "false"]:
+        elif self.is_action(a, 'store_false'):
+            if value.lower() in ["n", "false"]:
                 self._reparse_args['opt'].append(ostr)
-        elif self.is_action(a, ('count', )):
-            v = int(value)
+        elif self.is_action(a, 'count'):
+            v = int(value or 0)
             if v > 0:
                 if ostr.startswith("--"):
                     new_arg = [ostr for i in range(v)]
                 else:
                     new_arg = ["-{}".format(v * ostr.strip('-'))]
                 self._reparse_args['opt'].extend(new_arg)
-        elif self.is_action(a, ('parsers', )):
+        elif self.is_action(a, 'parsers'):
             if not value:
                 value = self._input_arg(a)
             pmap = a._name_parser_map
@@ -410,12 +409,12 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         Generate the sorted list of actions based on the "last" attribute.
         """
         for a in filter(lambda _: not _.last and \
-                        not self.is_action(_, ('parsers', )), self._actions):
+                        not self.is_action(_, 'parsers'), self._actions):
             yield a
         for a in filter(lambda _: _.last and \
-                        not self.is_action(_, ('parsers', )), self._actions):
+                        not self.is_action(_, 'parsers'), self._actions):
             yield a
-        for a in filter(lambda _: self.is_action(_, ('parsers', )),
+        for a in filter(lambda _: self.is_action(_, 'parsers'),
                         self._actions):
             yield a
         
@@ -594,5 +593,5 @@ class Namespace(BaseNamespace):
     def get(self, name):
         try:
             return self.__getattr__(name)
-        except NameError:
+        except AttributeError:
             return

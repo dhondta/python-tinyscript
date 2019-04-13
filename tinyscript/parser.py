@@ -209,8 +209,8 @@ def initialize(glob,
                        help=gt("verbose level"),
                        note=gt("-vvv is the highest verbosity level"))
     else:
-        i.add_argument("-v", "--verbose", action="store_true", cancel=True,
-                       last=True, suffix="mode", help=gt("verbose mode"))
+        i.add_argument("-v", "--verbose", action="store_true", last=True,
+                       suffix="mode", help=gt("verbose mode"))
     #  wizard feature, for asking argument values to the user
     if add['wizard']:
         opt = i.add_argument("-w", "--wizard", action='wizard',
@@ -221,6 +221,7 @@ def initialize(glob,
     #   at the end of its execution
     if report_func is not None and PYTHON3:
         if not isfunction(report_func):
+            report_func = None
             glob['logger'].error("Bad report generation function")
             return
         # lazily import report features
