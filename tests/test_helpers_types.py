@@ -10,6 +10,21 @@ from tinyscript.helpers.types import *
 
 
 class TestHelpersTypes(TestCase):
+    def test_general_purpose_types(self):
+        self.assertEqual(neg_int(0), 0)
+        self.assertEqual(neg_int(-1), -1)
+        self.assertEqual(negative_int(-1), -1)
+        self.assertRaises(ValueError, neg_int, 1)
+        self.assertRaises(ValueError, neg_int, -1.2)
+        self.assertRaises(ValueError, neg_int, "test")
+        self.assertEqual(pos_int(0), 0)
+        self.assertEqual(pos_int(1), 1)
+        self.assertEqual(positive_int(1), 1)
+        self.assertRaises(ValueError, pos_int, -1)
+        self.assertRaises(ValueError, pos_int, 1.2)
+        self.assertRaises(ValueError, pos_int, "test")
+        
+
     def test_network_related_types(self):
         self.assertIsInstance(ip_address("127.0.0.1"), ipaddress.IPv4Address)
         self.assertIsInstance(ip_address("fe00::"), ipaddress.IPv6Address)

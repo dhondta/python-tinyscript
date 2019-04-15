@@ -10,10 +10,29 @@ from six import u
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["ip_address", "ip_address_list", "ip_address_network",
+__all__ = __features__ = ["neg_int", "negative_int", "pos_int", "positive_int",
+                          "ip_address", "ip_address_list", "ip_address_network",
                           "port_number", "port_number_range"]
 
 
+# -------------------- GENERAL-PURPOSE TYPES --------------------
+def neg_int(i):
+    """ Simple negative integer validation. """
+    if not isinstance(i, int) or i > 0:
+        raise ValueError("Not a negative integer")
+    return i
+negative_int = neg_int
+
+
+def pos_int(i):
+    """ Simple positive integer validation. """
+    if not isinstance(i, int) or i < 0:
+        raise ValueError("Not a positive integer")
+    return i
+positive_int = pos_int
+
+
+# -------------------- NETWORK-RELATED TYPES --------------------
 def ip_address(ip):
     """ IP address validation. """
     # note: ipaddress already handles validation and raises a ValueError in case
