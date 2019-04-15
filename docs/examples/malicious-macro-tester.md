@@ -18,7 +18,8 @@ usage: malicious-macro-tester [-d] [-f] [-l] [-q] [-r] [-s] [-u]
 
 MaliciousMacroTester v2.4
 Author   : Alexandre D'Hondt
-Copyright: © 2019 AGPLv3 (http://www.gnu.org/licenses/agpl.html)
+Copyright: © 2019 A. D'Hondt
+License  : GNU Affero General Public License v3.0
 Reference: INFOM444 - Machine Learning - Hot Topic
 
 This tool uses MaliciousMacroBot to classify a list of samples as benign or

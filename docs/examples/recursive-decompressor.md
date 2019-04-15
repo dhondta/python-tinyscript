@@ -8,7 +8,7 @@ See [this GitHub repository](https://github.com/dhondta/recursive-decompressor).
 
 ### Help
 
-```session
+```sh
 $ recursive-decompressor --help
 usage: recursive-decompressor [-d] [-k N] [-h] [-v] archive
 
@@ -50,7 +50,7 @@ Usage examples:
 
 ### Execution
 
-```session
+```sh
 $ ./recursive-decompressor archive.zip -d
 12:34:56 [INFO] Decompressing 'archive.zip'...
 12:34:56 [INFO] Decompressing 'lbuj21a60q18.lzma'...

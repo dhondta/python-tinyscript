@@ -18,7 +18,8 @@ usage: app-mem-dumper [-a APPS] [-d DUMP_DIR] [-f] [-p PLUGINS_DIR]
 
 AppMemDumper v2.1.3
 Author   : Alexandre D'Hondt
-Copyright: © 2019 AGPLv3 (http://www.gnu.org/licenses/agpl.html)
+Copyright: © 2019 A. D'Hondt
+License  : AGPLv3 (http://www.gnu.org/licenses/agpl.html)
 
 This tool automates the research of some artifacts for forensics purpose in
  memory dumps based upon Volatility for a series of common Windows applications.
@@ -73,7 +74,7 @@ Usage examples:
 
 ### Execution
 
-```session
+```sh
 $ app-mem-dumper memory.dump -v -p plugins
 [appmemdumper] XX:XX:XX [DEBUG] Attempting to decompress 'memory.dump'...
 [appmemdumper] XX:XX:XX [DEBUG] Not an archive, continuing...
