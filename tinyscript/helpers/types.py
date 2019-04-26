@@ -5,12 +5,14 @@
 """
 import ipaddress
 import re
-from six import u
+from six import string_types, u
 
 from ..__info__ import __author__, __copyright__, __version__
 
 
 __all__ = __features__ = ["neg_int", "negative_int", "pos_int", "positive_int",
+                          "ints", "neg_ints", "negative_ints", "pos_ints",
+                          "positive_ints",
                           "ip_address", "ip_address_list", "ip_address_network",
                           "port_number", "port_number_range"]
 
@@ -18,7 +20,12 @@ __all__ = __features__ = ["neg_int", "negative_int", "pos_int", "positive_int",
 # -------------------- GENERAL-PURPOSE TYPES --------------------
 def neg_int(i):
     """ Simple negative integer validation. """
-    if not isinstance(i, int) or i > 0:
+    try:
+        if isinstance(i, string_types):
+            i = int(i)
+        if not isinstance(i, int) or i > 0:
+            raise Exception()
+    except:
         raise ValueError("Not a negative integer")
     return i
 negative_int = neg_int
@@ -26,10 +33,31 @@ negative_int = neg_int
 
 def pos_int(i):
     """ Simple positive integer validation. """
-    if not isinstance(i, int) or i < 0:
+    try:
+        if isinstance(i, string_types):
+            i = int(i)
+        if not isinstance(i, int) or i < 0:
+            raise Exception()
+    except:
         raise ValueError("Not a positive integer")
     return i
 positive_int = pos_int
+
+
+def ints(l, ifilter=lambda x: x, idescr=None):
+    """ Parses a comma-separated list of ints. """
+    if isinstance(l, string_types):
+        if l[0] == '[' and l[-1] == ']':
+            l = l[1:-1]
+        l = list(map(lambda x: x.strip(), l.split(',')))
+    try:
+        l = list(map(ifilter, list(map(int, l))))
+    except:
+        raise ValueError("Bad list of {}integers"
+                         .format("" if idescr is None else idescr + " "))
+    return l
+negative_ints = neg_ints = lambda l: ints(l, neg_int, "negative")
+positive_ints = pos_ints = lambda l: ints(l, pos_int, "positive")
 
 
 # -------------------- NETWORK-RELATED TYPES --------------------

@@ -23,6 +23,20 @@ class TestHelpersTypes(TestCase):
         self.assertRaises(ValueError, pos_int, -1)
         self.assertRaises(ValueError, pos_int, 1.2)
         self.assertRaises(ValueError, pos_int, "test")
+        self.assertEqual(ints("1,-1"), [1, -1])
+        self.assertEqual(ints("[1,-1]"), [1, -1])
+        self.assertRaises(ValueError, ints, "0,1]")
+        self.assertRaises(ValueError, ints, ["a", 1])
+        self.assertEqual(neg_ints("-1"), [-1])
+        self.assertEqual(negative_ints("[0,-2]"), [0, -2])
+        self.assertRaises(ValueError, neg_ints, "0,-2]")
+        self.assertRaises(ValueError, neg_ints, [-1, 1])
+        self.assertRaises(ValueError, neg_ints, "test,0")
+        self.assertEqual(pos_ints("1"), [1])
+        self.assertEqual(positive_ints("[1,2]"), [1, 2])
+        self.assertRaises(ValueError, pos_ints, "[1,2")
+        self.assertRaises(ValueError, pos_ints, [-1, 1])
+        self.assertRaises(ValueError, pos_ints, "test,0")
         
 
     def test_network_related_types(self):
