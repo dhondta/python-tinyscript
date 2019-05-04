@@ -6,12 +6,13 @@
 from unittest import TestCase
 
 from tinyscript.helpers.utils import *
+from tinyscript.loglib import logger as ts_logger
 
 from utils import *
 
 
 class TestHelpersUtils(TestCase):
-    def test_utility_functions(self):
+    def test_input_functions(self):
         temp_stdout(self)
         self.assertTrue(b("test"))
         self.assertEqual(b(1), 1)
@@ -37,3 +38,18 @@ class TestHelpersUtils(TestCase):
         self.assertEqual(user_input(choices=lambda v: v in ["test"]), "test")
         temp_stdin(self, "bad\n")
         self.assertIs(user_input(choices=["1", "2"]), None)
+    
+    def test_capture_functions(self):
+        with Capture() as (out, err):
+            print("987654321")
+            ts_logger.info("123456789")
+        self.assertEqual("987654321", out.text)
+        self.assertIn("123456789", err.text)
+        def dummy(): print("TEST")
+        silent_dummy = silent(dummy)
+        with Capture() as (out, err):
+            silent_dummy()
+        self.assertEqual(out.text, "")
+        captured_dummy = capture(dummy)
+        r, out, err = captured_dummy()
+        self.assertEqual(out, "TEST")

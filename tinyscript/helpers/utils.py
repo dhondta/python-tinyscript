@@ -4,9 +4,10 @@
 
 """
 import re
+import sys
 from humanfriendly.terminal import ansi_wrap
 from platform import uname
-from six import b as six_b, u
+from six import b as six_b, u, StringIO as SIO
 from sys import version_info
 
 from .lambdas import is_lambda
@@ -14,7 +15,8 @@ from ..__info__ import __author__, __copyright__, __version__
 
 
 __all__ = __features__ = ["LINUX", "PYTHON3", "WINDOWS", "b", "byteindex",
-                          "iterbytes", "std_input", "u", "user_input"]
+                          "capture", "iterbytes", "silent", "std_input", "u",
+                          "user_input", "Capture"]
 
 
 LINUX   = uname()[0] == "Linux"
@@ -38,6 +40,52 @@ def b(text):
         return six_b(text)
     except:
         return text
+
+
+class StringIO(SIO):
+    """
+    Tuned StringIO class.
+    """
+    def __str__(self):
+        return self.getvalue().strip()
+    
+    @property
+    def text(self):
+        return str(self)
+
+
+class Capture(object):
+    """
+    Context manager for capturing stdout and stderr.
+    """
+    def __enter__(self):
+        sys.stdout, sys.stderr = StringIO(), StringIO()
+        return sys.stdout, sys.stderr
+    
+    def __exit__(self, *args):
+        sys.stdout, sys.stderr = sys.__stdout__, sys.__stderr__
+
+
+def capture(f):
+    """
+    Decorator for capturing stdout and stderr.
+    """
+    def _wrapper(*a, **kw):
+        with Capture() as (out, err):
+            r = f(*a, **kw)
+        return r, out.text, err.text
+    return _wrapper
+
+
+def silent(f):
+    """
+    Decorator for silencing stdout and stderr.
+    """
+    def _wrapper(*a, **kw):
+        with Capture():
+            r = f(*a, **kw)
+        return r
+    return _wrapper
 
 
 def std_input(prompt="", style=None):

@@ -7,7 +7,7 @@ from tinyscript import *
 from tinyscript.parser import *
 from tinyscript.parser import _save_config, ProxyArgumentParser
 
-from utils import capture, remove, tmpf, TestCase, temp_stdin, temp_stdout
+from utils import remove, tmpf, TestCase, temp_stdin, temp_stdout
 
 
 __details__  = ["first details", "second details"]
@@ -158,9 +158,6 @@ class TestParser(TestCase):
     def test_noargs_action(self):
         sys.argv[1:] = []
         initialize(globals(), noargs_action="demo")
-        with capture() as (out, err):
-            logger.debug("123456789")
-        self.assertIn("123456789", err.getvalue())
     
     def test_bad_noargs_action(self):
         sys.argv[1:] = []

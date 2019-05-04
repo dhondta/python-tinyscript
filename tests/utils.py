@@ -6,33 +6,19 @@
 import logging
 import sys
 from argparse import Action
-from contextlib import contextmanager
 from os import remove
 from os.path import exists
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from six import StringIO
 from tinyscript.helpers import PYTHON3
 from unittest import TestCase
 
 
-__all__ = ["args", "capture", "exists", "logger", "remove", "sys", "temp_stdin",
+__all__ = ["args", "exists", "logger", "remove", "sys", "temp_stdin",
            "temp_stdout", "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase",
            "PYTHON3", "_FakeParserAction"]
 
 
 tmpf = lambda name="test", ext="py": ".tinyscript-{}.{}".format(name, ext)
-
-
-@contextmanager
-def capture():
-    stdout, stderr = sys.stdout, sys.stderr
-    try:
-        sys.stdout, sys.stderr = StringIO(), StringIO()
-        yield sys.stdout, sys.stderr
-    finally:
-        sys.stdout, sys.stderr = stdout, stderr
 
 
 def temp_stdin(tc, inputs):
