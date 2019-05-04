@@ -7,7 +7,7 @@ import re
 import sys
 from humanfriendly.terminal import ansi_wrap
 from platform import uname
-from six import b as six_b, u, StringIO as SIO
+from six import b as six_b, u, StringIO
 from sys import version_info
 
 from .lambdas import is_lambda
@@ -42,28 +42,43 @@ def b(text):
         return text
 
 
-class StringIO(SIO):
+class _Text(object):
     """
-    Tuned StringIO class.
+    Dummy Text class for storing StringIO's content before closing it.
     """
-    def __str__(self):
-        return self.getvalue().strip()
-    
-    @property
-    def text(self):
+    def __repr__(self):
         return str(self)
+
+    def __str__(self):
+        return self.text
 
 
 class Capture(object):
     """
     Context manager for capturing stdout and stderr.
     """
+    def __init__(self, out=sys.stdout, err=sys.stderr):
+        # backup original output file handles
+        self._stdout = sys.stdout
+        self._stderr = sys.stderr
+        
     def __enter__(self):
+        # create new file handles
         sys.stdout, sys.stderr = StringIO(), StringIO()
-        return sys.stdout, sys.stderr
+        self.stdout, self.stderr = _Text(), _Text()
+        # return references of the dummy objects
+        return self.stdout, self.stderr
     
     def __exit__(self, *args):
-        sys.stdout, sys.stderr = sys.__stdout__, sys.__stderr__
+        # freeze stdout and stderr contents before closing the file handles,
+        #  using the references previously returned by __enter__
+        self.stdout.text = sys.stdout.getvalue().strip() 
+        self.stderr.text = sys.stderr.getvalue().strip()
+        # close current file handles
+        sys.stdout.close()
+        sys.stderr.close()
+        # restore original output file handles
+        sys.stdout, sys.stderr = self._stdout, self._stderr
 
 
 def capture(f):
