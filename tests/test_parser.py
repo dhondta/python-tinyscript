@@ -158,6 +158,8 @@ class TestParser(TestCase):
     def test_noargs_action(self):
         sys.argv[1:] = []
         initialize(globals(), noargs_action="demo")
+        # __examples__ = ["-v"]
+        self.assertTrue(args.verbose)
     
     def test_bad_noargs_action(self):
         sys.argv[1:] = []

@@ -49,7 +49,7 @@ class TestHelpersUtils(TestCase):
         silent_dummy = silent(dummy)
         with Capture() as (out, err):
             silent_dummy()
-        self.assertEqual(out.text, "")
+        self.assertEqual(str(repr(out)), "")
         captured_dummy = capture(dummy)
         r, out, err = captured_dummy()
         self.assertEqual(out, "TEST")
