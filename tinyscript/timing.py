@@ -8,6 +8,8 @@ import time
 from errno import ETIME
 from os import strerror
 
+from .__info__ import __author__, __copyright__, __version__
+
 
 __all__ = ["set_time_items"]
 
@@ -23,8 +25,9 @@ def set_time_items(glob):
     """
     a = glob['args']
     l = glob['logger']
-
+    # Time manager, for keeping track of collected times
     class __TimeManager(object):
+        """ Simple time manager, using time module. """
         def __init__(self):
             c = a._collisions
             self._stats = getattr(a, c.get("stats") or "stats", False)
@@ -39,15 +42,14 @@ def set_time_items(glob):
             for d, s, e in self.times:
                 b += "\n{}\n> {} seconds".format(d, e - s)
             l.time("Total time: {} seconds{}".format(end - self.start, b))
-    
     glob['time_manager'] = manager = __TimeManager()
-
+    # private function to keep time measure in the time manager
     def _take_time(start=None, descr=None):
         t = manager.last = time.time()
         if start is not None and descr is not None:
             manager.times.append((descr, float(start), float(t)))
         return t - (start or 0)
-
+    # Time context manager, for easilly benchmarking a block of code
     class Timer(object):
         class TimeoutError(Exception):
             pass  # TimeoutError is not handled in Python 2
@@ -82,17 +84,14 @@ def set_time_items(glob):
 
         def _handler(self, signum, frame):
             raise Timer.TimeoutError(self.message)
-    
     glob['Timer'] = Timer
-    
+    # timing function for getting a measure from the start of the execution
     def get_time(message=None, start=manager.start):
         if manager._timings:
             l.time("> {}: {} seconds".format(message or "Time elapsed since "
                                           "execution start", _take_time(start)))
-    
     glob['get_time'] = get_time
-    
+    # timing function for getting a measure since the last one
     def get_time_since_last(message=None):
         get_time(message or "Time elapsed since last measure", manager.last)
-    
     glob['get_time_since_last'] = get_time_since_last
