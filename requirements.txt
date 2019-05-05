@@ -3,6 +3,8 @@ ipaddress
 markdown2
 numpy
 pandas
+patchy
 pymdown-extensions
 six
+tqdm
 weasyprint ; python_version>='3.4'

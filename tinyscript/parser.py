@@ -18,6 +18,7 @@ from .handlers import *
 from .helpers import LINUX, PYTHON3
 from .helpers.types import ip_address, port_number
 from .interact import set_interact_items
+from .progress import set_progress_items
 from .loglib import *
 from .step import set_step_items
 
@@ -81,6 +82,7 @@ def initialize(glob,
                add_config=False,
                add_demo=False,
                add_interact=False,
+               add_progress=False,
                add_step=False,
                add_time=False,
                add_version=False,
@@ -104,6 +106,7 @@ def initialize(glob,
                                entry from the __examples__ (only works if this
                                variable is populated)
     :param add_interact:      add an interaction option
+    :param add_progress:      add a progress management option
     :param add_step:          add an execution stepping option
     :param add_time:          add an execution timing option
     :param add_version:       add a version option
@@ -116,8 +119,8 @@ def initialize(glob,
     global parser, __parsers
     
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
-           'step': add_step, 'time': add_time, 'version': add_version,
-           'wizard': add_wizard, 'help': True}
+           'progress': add_progress, 'step': add_step, 'time': add_time,
+           'version': add_version, 'wizard': add_wizard, 'help': True}
     p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
     add['demo'] = add['demo'] and p.examples
@@ -173,6 +176,12 @@ def initialize(glob,
             j.add_argument("--port", default=12345, type=port_number,
                            prefix="remote", help=gt("remote interacting port"))
         if noarg and noargs_action == "interact":
+            sys.argv[1:] = [opt]
+    #  progress mode feature, for displaying a progress bar during the execution
+    if add['progress']:
+        opt = i.add_argument("-p", "--progress", action="store_true",
+                             suffix="mode", help=gt("progress mode"))
+        if noarg and noargs_action == "progress":
             sys.argv[1:] = [opt]
     #  stepping mode feature, for stepping within the tool during its execution,
     #   especially useful for debugging when it is complex
@@ -273,6 +282,7 @@ def initialize(glob,
                      glob['args']._collisions.get("syslog"))
     # 5) append modes items
     set_interact_items(glob)
+    set_progress_items(glob)
     set_step_items(glob)
     set_time_items(glob)
     # 6) finally, bind the global exit handler
@@ -280,6 +290,9 @@ def initialize(glob,
         # first, dump the config if required
         if add['config']:
             _save_config(glob)
+        # now, close the current progress bar (if any)
+        if add['progress']:
+            glob['progress_manager'].stop()
         # then handle the state
         if _hooks.state == "INTERRUPTED":
             glob['at_interrupt']()

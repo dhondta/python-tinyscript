@@ -72,8 +72,9 @@ class TestParser(TestCase):
     
     def test_initialization_flags(self):
         sys.argv[1:] = ["--stats"]
-        initialize(globals(), False, *([True] * 9))
+        initialize(globals(), False, *([True] * 10))
         self.assertFalse(args.interact)
+        self.assertFalse(args.progress)
         self.assertFalse(args.relative)
         self.assertTrue(args.stats)
         self.assertFalse(args.step)
@@ -127,6 +128,11 @@ class TestParser(TestCase):
         self.assertTrue(args.interact)
         self.assertEqual(str(args.host), "127.0.0.1")
         self.assertEqual(args.port, 12345)
+    
+    def test_noargs_progress(self):
+        sys.argv[1:] = []
+        initialize(globals(), noargs_action="progress")
+        self.assertTrue(args.progress)
     
     def test_noargs_step(self):
         sys.argv[1:] = []
