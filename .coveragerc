@@ -1,9 +1,11 @@
 [run]
 source = tinyscript
-omit = tests/
+omit =
+    tinyscript/helpers/termsize.py
+    tests/*
 
 [report]
-exclude_lines=
+exclude_lines =
     pragma: no cover
     if.*?__name__.*?==.*?.__main__.:
     # Python2/3 incompatibilities if/elif/else blocks
