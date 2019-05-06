@@ -8,29 +8,35 @@ String.prototype.format = function() {
 
 $(document).ready(function () {
   $('li.toctree-l1').each(function () {
-    var parent = $(this);
-    var a      = parent.find('a:first');
-    var next   = null;
+    var parent  = $(this);
+    var span    = parent.find('span:first');
+    var sibling = null;
+    var remove  = true;
     $('li.toctree-l1').each(function() {
-      var span = $(this).find('span:first');
+      var a = $(this).find('a:first');
       if (a.text() != '' && a.text() == span.text()) {
+        parent.prepend(a);
         span.remove();
-        next = $(this);
+        span = a;
+        if ($(this).hasClass('current')) parent.addClass('current');
+        sibling = $(this);
         return false
       }
     });
-    if (next !== null) {
-      var ul = next.find('ul.subnav:not(li.toctree-l2)');
-      next.prepend(a);
-      if ($(this).hasClass('current')) next.addClass('current');
+    if (sibling === null && parent.find('ul.subnav:not(li.toctree-l2)').children('li').length) {
+      sibling = parent;
+      remove  = false;
+    }
+    if (sibling !== null) {
+      var ul = parent.find('ul.subnav:not(li.toctree-l2)');
       var new_a = '<a class="fa fa-caret-{0} collapse-navbar" href="#" style="display: inline-block; position: absolute; width: auto; right: 0; margin-right: 2px; padding-left: 2px; padding-right: 2px; z-index: 1001;"></a>';
-      if (!ul.children('li.current').length) {
+      if (!ul.children('li.current').length && !parent.hasClass('current')) {
         ul.hide();
-        $(new_a.format("left")).insertBefore(a);
+        $(new_a.format("left")).insertBefore(span);
       } else {
-        $(new_a.format("down")).insertBefore(a);
+        $(new_a.format("down")).insertBefore(span);
       }
-      $(this).remove();
+      if (remove) sibling.remove();
     }
   });
   $('a.collapse-navbar').click(function () {
