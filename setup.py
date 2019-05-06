@@ -19,10 +19,10 @@ setup(
   include_package_data = True,
   author = "Alexandre D\'Hondt",
   author_email = "alexandre.dhondt@gmail.com",
-  version = "1.10.0",
+  version = "1.10.1",
   license = "AGPLv3",
   url = "https://github.com/dhondta/tinyscript",
-  download_url = "https://github.com/dhondta/tinyscript/archive/1.10.0.tar.gz",
+  download_url = "https://github.com/dhondta/tinyscript/archive/1.10.1.tar.gz",
   description = "A library for quickly building CLI Python-based tools with "
                 "basic features in a shortened way",
   long_description=long_descr,
