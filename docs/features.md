@@ -234,6 +234,26 @@ This adds two options:
 
 -----
 
+## Displaying progress
+
+This can be done by passing a keyword argument `add_progress=[boolean]` to `initialize(...)`. It will allow to display a progress bar where `progressbar` or `progress_manager` is used. This feature relies on the [`tqdm`](https://github.com/tqdm/tqdm) module.
+
+```python hl_lines="4 7"
+    ...
+    initalize(globals(),
+              ...
+              add_progress=True,
+              ...)
+    ...
+    for i in progressbar(10):
+        # do something
+    ...
+```
+
+This adds the `--progress` option to enable the progress mode.
+
+-----
+
 ## Interacting during the execution
 
 This is achieved by passing a keyword argument `add_interact=[boolean]` to `initialize(...)`. It allows to interact with the program during its execution by spawning a Python interpreter. This feature relies on the built-in `code` module.
@@ -372,6 +392,21 @@ This adds multiple options:
 - `--css`: report stylesheet
 - `--theme`: report theme (overridden by `--css`)
 - `--filename`: report filename
+
+-----
+
+## Patching code at runtime
+
+Code can be modified at runtime using multiple functions, depending on what should be patched and how. This feature relies on the [`patchy`](https://github.com/adamchainz/patchy) module.
+
+The functions for this purpose are:
+
+- `code_patch`: alias for `patchy.patch`, taking a function and a patch file's text as arguments.
+- `code_unpatch`: alias for `patchy.unpatch`, taking a function and a previous patch file's text as arguments in order to revert the function to its previous version.
+- `code_replace`: wrapper for `patchy.replace`, handling multiple replacements at a time, either replacing whole function (like in original `replace`) or only parts of the code.
+- `code_replace_lines`: for replacing specific lines in the code of a given function, specifying replacements as pairs of line index (starting from 0) and replacement text.
+- `code_restore`: for restoring a function to its original code.
+- `code_revert`: for reverting code to a previous version (up to 3 previous versions).
 
 -----
 
