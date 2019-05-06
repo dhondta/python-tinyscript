@@ -8,17 +8,23 @@ String.prototype.format = function() {
 
 $(document).ready(function () {
   $('li.toctree-l1').each(function () {
-    var next = $(this).next();
-    var a    = $(this).find('a:first');
-    var span = next.find('span:first');
-    var ul   = next.find('ul.subnav:not(li.toctree-l2)');
-    if (a.text() == span.text()) {
+    var parent = $(this);
+    var a      = parent.find('a:first');
+    var next   = null;
+    $('li.toctree-l1').each(function() {
+      var span = $(this).find('span:first');
+      if (a.text() != '' && a.text() == span.text()) {
+        span.remove();
+        next = $(this);
+        return false
+      }
+    });
+    if (next !== null) {
+      var ul = next.find('ul.subnav:not(li.toctree-l2)');
       next.prepend(a);
-      span.remove();
       if ($(this).hasClass('current')) next.addClass('current');
       var new_a = '<a class="fa fa-caret-{0} collapse-navbar" href="#" style="display: inline-block; position: absolute; width: auto; right: 0; margin-right: 2px; padding-left: 2px; padding-right: 2px; z-index: 1001;"></a>';
       if (!ul.children('li.current').length) {
-        console.log("caret left");
         ul.hide();
         $(new_a.format("left")).insertBefore(a);
       } else {

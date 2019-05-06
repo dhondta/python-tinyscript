@@ -17,6 +17,7 @@ nav:
     - 'Multi-level debugging': examples/multi-level-debug.md
     - 'Multi-level help': examples/multi-level-help.md
     - 'Playing a demo': examples/demo.md
+  - 'Real-life examples': real-examples.md
   - 'Real-life examples':
     - 'AppmemDumper': examples/appmemdumper.md
     - 'Malicious Macro Tester': examples/malicious-macro-tester.md
