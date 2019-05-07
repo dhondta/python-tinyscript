@@ -20,8 +20,18 @@ __all__ = __features__ = ["files_list", "files_filtered_list",
 
 
 # -------------------- GENERAL-PURPOSE TYPES --------------------
+def __str2list(l):
+    """ Convert string to list if input is effectively a string. """
+    if isinstance(l, string_types):
+        if l[0] == '[' and l[-1] == ']':
+            l = l[1:-1]
+        l = list(map(lambda x: x.strip(), l.split(',')))
+    return l
+
+
 def files_list(l, filter_bad=False):
     """ Check if the list contains valid files. """
+    l = __str2list(l)
     nl = []
     for f in l:
         if not isfile(f):
@@ -41,10 +51,7 @@ def files_filtered_list(l):
 
 def ints(l, ifilter=lambda x: x, idescr=None):
     """ Parses a comma-separated list of ints. """
-    if isinstance(l, string_types):
-        if l[0] == '[' and l[-1] == ']':
-            l = l[1:-1]
-        l = list(map(lambda x: x.strip(), l.split(',')))
+    l = __str2list(l)
     try:
         l = list(map(ifilter, list(map(int, l))))
     except:

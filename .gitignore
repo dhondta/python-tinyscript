@@ -69,6 +69,7 @@ target/
 .idea
 .vagrant
 .test
+.tinyscript-test.ini
 tmp
 TODO
 script.py
