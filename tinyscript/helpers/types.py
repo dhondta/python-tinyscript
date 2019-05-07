@@ -5,12 +5,14 @@
 """
 import ipaddress
 import re
+from os.path import isfile
 from six import string_types, u
 
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["neg_int", "negative_int", "pos_int", "positive_int",
+__all__ = __features__ = ["files_list", "files_filtered_list",
+                          "neg_int", "negative_int", "pos_int", "positive_int",
                           "ints", "neg_ints", "negative_ints", "pos_ints",
                           "positive_ints",
                           "ip_address", "ip_address_list", "ip_address_network",
@@ -18,6 +20,41 @@ __all__ = __features__ = ["neg_int", "negative_int", "pos_int", "positive_int",
 
 
 # -------------------- GENERAL-PURPOSE TYPES --------------------
+def files_list(l, filter_bad=False):
+    """ Check if the list contains valid files. """
+    nl = []
+    for f in l:
+        if not isfile(f):
+            if not filter_bad:
+                raise ValueError("A file from the given list does not exist")
+        else:
+            nl.append(f)
+    if filter_bad and len(nl) == 0:
+        raise ValueError("No valid file in the given list")
+    return nl
+
+
+def files_filtered_list(l):
+    """ Check if the list contains valid files and discard invalid ones. """
+    return files_list(l, True)
+
+
+def ints(l, ifilter=lambda x: x, idescr=None):
+    """ Parses a comma-separated list of ints. """
+    if isinstance(l, string_types):
+        if l[0] == '[' and l[-1] == ']':
+            l = l[1:-1]
+        l = list(map(lambda x: x.strip(), l.split(',')))
+    try:
+        l = list(map(ifilter, list(map(int, l))))
+    except:
+        raise ValueError("Bad list of {}integers"
+                         .format("" if idescr is None else idescr + " "))
+    return l
+negative_ints = neg_ints = lambda l: ints(l, neg_int, "negative")
+positive_ints = pos_ints = lambda l: ints(l, pos_int, "positive")
+
+
 def neg_int(i):
     """ Simple negative integer validation. """
     try:
@@ -42,22 +79,6 @@ def pos_int(i):
         raise ValueError("Not a positive integer")
     return i
 positive_int = pos_int
-
-
-def ints(l, ifilter=lambda x: x, idescr=None):
-    """ Parses a comma-separated list of ints. """
-    if isinstance(l, string_types):
-        if l[0] == '[' and l[-1] == ']':
-            l = l[1:-1]
-        l = list(map(lambda x: x.strip(), l.split(',')))
-    try:
-        l = list(map(ifilter, list(map(int, l))))
-    except:
-        raise ValueError("Bad list of {}integers"
-                         .format("" if idescr is None else idescr + " "))
-    return l
-negative_ints = neg_ints = lambda l: ints(l, neg_int, "negative")
-positive_ints = pos_ints = lambda l: ints(l, pos_int, "positive")
 
 
 # -------------------- NETWORK-RELATED TYPES --------------------

@@ -8,9 +8,21 @@ from unittest import main, TestCase
 
 from tinyscript.helpers.types import *
 
+from utils import remove, touch
+
 
 class TestHelpersTypes(TestCase):
     def test_general_purpose_types(self):
+        touch("test1.txt", "test2.txt")
+        l1 = ["test1.txt", "test2.txt"]
+        l2 = ["test1.txt", "test3.txt"]
+        l3 = ["test3.txt", "test4.txt"]
+        self.assertEqual(files_list(l1), l1)
+        self.assertRaises(ValueError, files_list, l2)
+        self.assertEqual(files_filtered_list(l2), [l2[0]])
+        self.assertRaises(ValueError, files_filtered_list, l3)
+        remove("test1.txt")
+        remove("test2.txt")
         self.assertEqual(neg_int(0), 0)
         self.assertEqual(neg_int(-1), -1)
         self.assertEqual(negative_int(-1), -1)
