@@ -17,6 +17,8 @@ class TestHelpersTypes(TestCase):
         l1 = ["test1.txt", "test2.txt"]
         l2 = ["test1.txt", "test3.txt"]
         l3 = ["test3.txt", "test4.txt"]
+        self.assertEqual(file_exists(l1[0]), l1[0])
+        self.assertRaises(ValueError, file_exists, l3[0])
         self.assertEqual(files_list(l1), l1)
         self.assertRaises(ValueError, files_list, l2)
         self.assertEqual(files_filtered_list(l2), [l2[0]])

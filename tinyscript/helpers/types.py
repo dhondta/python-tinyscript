@@ -11,7 +11,7 @@ from six import string_types, u
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["files_list", "files_filtered_list",
+__all__ = __features__ = ["file_exists", "files_list", "files_filtered_list",
                           "neg_int", "negative_int", "pos_int", "positive_int",
                           "ints", "neg_ints", "negative_ints", "pos_ints",
                           "positive_ints",
@@ -27,6 +27,13 @@ def __str2list(l):
             l = l[1:-1]
         l = list(map(lambda x: x.strip(), l.split(',')))
     return l
+
+
+def file_exists(f):
+    """ Check that the given file exists. """
+    if not isfile(f):
+        raise ValueError("File does not exist")
+    return f
 
 
 def files_list(l, filter_bad=False):
