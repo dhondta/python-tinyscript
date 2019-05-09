@@ -238,7 +238,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self.examples = globals_dict.get('__examples__')
         if self.examples == [] and len(self.examples) == 0:
             self.examples = None
-        script = globals_dict.get('__file__') or ""
+        script = sys.argv[0]
         if script:
             path = abspath(script)
             root = dirname(path)

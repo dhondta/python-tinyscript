@@ -17,3 +17,15 @@ class TestPreimports(TestCase):
         self.assertEqual(PREIMPORTS, _load_preimports()[0])
         for m in PREIMPORTS:
             self.assertIn(m, globals().keys())
+        # test the new hashlib function
+        touch("test-file.txt")
+        self.assertEqual(hashlib.hash_file("test-file.txt"),
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        with open("test-file.txt", 'w') as f:
+            f.write(100 * "A")
+        self.assertEqual(hashlib.hash_file("test-file.txt", "md5"),
+            "8adc5937e635f6c9af646f0b23560fae")
+        self.assertIsNone(hashlib.hash_file("does_not_exist"))
+        self.assertRaises(ValueError, hashlib.hash_file,
+                          "test-file.txt", "not_existing_hash")
+        remove("test-file.txt")
