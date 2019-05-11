@@ -11,6 +11,7 @@ from six import string_types
 __all__ = __features__ = ["code_patch", "code_unpatch", "CodePatch",
                           "code_add_line", "code_add_lines",
                           "code_delete_line", "code_delete_lines",
+                          "code_insert_line", "code_insert_lines",
                           "code_remove_line", "code_remove_lines",
                           "code_replace", "code_replace_line",
                           "code_replace_lines", "code_restore", "code_revert",
@@ -86,6 +87,7 @@ def code_add_line(func, index, addition, **kwargs):
     Alias for applying a single-line addition.
     """
     return code_add_lines(func, index, addition, **kwargs)
+code_insert_line = code_add_line
 
 
 @cache
@@ -125,6 +127,7 @@ def code_add_lines(func, *additions, **kwargs):
     new_code = "\n".join(new_code)
     patchy.api._set_source(func, new_code)
     return old_code != new_code
+code_insert_lines = code_add_lines
 
 
 def code_delete_line(func, index):
