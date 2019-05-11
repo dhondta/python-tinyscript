@@ -4,6 +4,7 @@
 
 """
 import importlib
+from six import b
 try:
     reload = reload
 except NameError:
@@ -33,6 +34,12 @@ PREIMPORTS = [
 
 
 def _load_preimports(*extras):
+    """
+    This loads the list of modules to be preimported in the global scope.
+    
+    :param extra: additional modules
+    :return:      list of successfully imported modules, list of failures
+    """
     preimports, failures = [], []
     for module in PREIMPORTS + list(extras):
         try:
@@ -52,25 +59,30 @@ def hash_file(filename, algo="sha256"):
     :param filename: name of the file to be hashed
     :return:         ALGO(file)
     """
-    try:
-        h = hashlib.new(algo)
-        with open(filename, 'rb') as f:
-            while True:
-                b = f.read(h.block_size)
-                if not b:
-                    break
-                h.update(b)
-        return h.hexdigest()
-    except (IOError, OSError):
-        return
+    h = hashlib.new(algo)
+    with open(filename, 'rb') as f:
+        while True:
+            b = f.read(h.block_size)
+            if not b:
+                break
+            h.update(b)
+    return h.hexdigest()
 hashlib.hash_file = hash_file
 
 
+# this binds new file hashing functions to the hashlib for each existing hash
+#  algorithm
 for algo in [x for x in hashlib.__dict__.keys()]:
     try:
-        hashlib.new(algo)
-        setattr(hashlib, "{}_file".format(algo), lambda f: hash_file(f, algo))
-    except ValueError:
+        h = hashlib.new(algo)  # this fails if the algo is not valid, then
+        h.update(b(""))        #  excluding module objects that aren't hash
+                               #  algorithm functions
+        def _hash_file(a):
+            def _wrapper(f):
+                return hash_file(f, a)
+            return _wrapper
+        setattr(hashlib, "{}_file".format(algo), _hash_file(algo))
+    except ValueError:  # triggered by h.update(b(""))
         pass
 
 
