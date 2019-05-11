@@ -20,7 +20,7 @@ pages:
     - 'AppmemDumper': examples/appmemdumper.md
     - 'Malicious Macro Tester': examples/malicious-macro-tester.md
     - 'Solitaire Cipher': examples/solitaire-cipher.md
-    - 'Recursive Decompressor': examples/recursive-decompressor.md
+    - 'Recursive Compression': examples/recursive-compression.md
 extra:
   mailto: alexandre.dhondt@gmail.com
 theme: readthedocs
