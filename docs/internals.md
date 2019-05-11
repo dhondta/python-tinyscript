@@ -78,7 +78,7 @@ logger = logging.getLogger(...)
 
 With Tinyscript :
 
-```python hl_lines="8"
+```python hl_lines="3 4 8"
 from tinyscript import *  # from this point, a logger is already setup
 ...
 LOG_FORMAT  = "..."  # new format can be defined
@@ -100,10 +100,35 @@ $ python
 [...]
 >>> from tinyscript import __preimports__
 >>> __preimports__
-['argparse', 'base64', 'binascii', 'collections', 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string', 'sys', 'time']
+['argparse', 'base64', 'binascii', 'collections', 'hashlib', 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string', 'sys', 'time']
 ```
 
 In a script/tool, all these built-in modules are preimported with the line `from tinyscript import *`.
+
+!!! note "Improvements to `hashlib`"
+    
+    `hashlib`, while imported with Tinyscript, is enhanced with additional functions so that these must not be rewritten in many applications, that is:
+    
+    - `hash_file`: this hashes a file per block.
+    - `[hash]_file` (e.g. `sha256_file`): each hash algorithm existing in the native `hashlib` has a bound function for hashing a file (e.g. `md5` is a native function of `hashlib` and will then have `md5_file`).
+
+-----
+
+## Helper types
+
+While adding `argparse` arguments to the parser, Tinyscript provides some useful type validation functions that can be used with the `type` keyword argument, namely (returning `ValueError` when the validation fails):
+
+- `file_exists`: existing file path
+- `files_list`: list of only existing file paths
+- `files_filtered_list`: list of at least one existing file path (bad paths are filtered)
+- `folder_exists`: existing folder
+- `ints`: list of integers
+- `neg_int`, `negative_int`, `neg_ints`, `negative_ints`: single negative integer or list of negative integers
+- `pos_int`, `positive_int`, `pos_ints`, `positive_ints`: single positive integer or list of positive integers
+- `ip_address`, `ip_address_list`: valid IP address (IPv4 or IPv6) or list of IP addresses ; returns the result of `ipaddress.ip_address`
+- `ip_address_network`: valid IP address network (e.g. `192.168.1.0/24`) ; returns the result of `ipaddress.ip_network`
+- `port_number`: valid port number
+- `port_number_range`: valid list of port numbers, ranging from and to the given bounds
 
 -----
 

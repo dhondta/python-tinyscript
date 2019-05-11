@@ -403,10 +403,14 @@ The functions for this purpose are:
 
 - `code_patch`: alias for `patchy.patch`, taking a function and a patch file's text as arguments.
 - `code_unpatch`: alias for `patchy.unpatch`, taking a function and a previous patch file's text as arguments in order to revert the function to its previous version.
+- `CodePatch`: context manager, alias for `patchy.temp_patch`, taking a function in argument and a patch ; it patches the function in the context of the open code block and then restores the function at the end of this block.
+- `code_add_line`, `code_add_lines`, `code_insert_line`, `code_insert_line`: it allows to add line(s) at specific indices (starting from 0), before or after (using `after=True`).
+- `code_delete_line`, `code_delete_lines`, `code_remove_line`, `code_remove_lines`: it allows to delete line(s) by index (starting from 0).
 - `code_replace`: wrapper for `patchy.replace`, handling multiple replacements at a time, either replacing whole function (like in original `replace`) or only parts of the code.
 - `code_replace_lines`: for replacing specific lines in the code of a given function, specifying replacements as pairs of line index (starting from 0) and replacement text.
 - `code_restore`: for restoring a function to its original code.
 - `code_revert`: for reverting code to a previous version (up to 3 previous versions).
+- `code_source`: for getting function's source code (shortcut for `patchy.api._get_source`).
 
 -----
 
