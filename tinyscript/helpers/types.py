@@ -5,18 +5,19 @@
 """
 import ipaddress
 import re
-from os.path import isfile
+from os.path import exists, isdir, isfile
 from six import string_types, u
 
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["file_exists", "files_list", "files_filtered_list",
-                          "neg_int", "negative_int", "pos_int", "positive_int",
-                          "ints", "neg_ints", "negative_ints", "pos_ints",
-                          "positive_ints",
-                          "ip_address", "ip_address_list", "ip_address_network",
-                          "port_number", "port_number_range"]
+__all__ = __features__ = [
+    "file_exists", "files_list", "files_filtered_list", "folder_exists",
+    "neg_int", "negative_int", "pos_int", "positive_int", "ints", "neg_ints",
+        "negative_ints", "pos_ints", "positive_ints",
+    "ip_address", "ip_address_list", "ip_address_network", "port_number",
+        "port_number_range"
+]
 
 
 # -------------------- GENERAL-PURPOSE TYPES --------------------
@@ -31,8 +32,10 @@ def __str2list(l):
 
 def file_exists(f):
     """ Check that the given file exists. """
-    if not isfile(f):
+    if not exists(f):
         raise ValueError("File does not exist")
+    if not isfile(f):
+        raise ValueError("Target exists and is not a file")
     return f
 
 
@@ -54,6 +57,15 @@ def files_list(l, filter_bad=False):
 def files_filtered_list(l):
     """ Check if the list contains valid files and discard invalid ones. """
     return files_list(l, True)
+
+
+def folder_exists(f):
+    """ Check that the given folder exists. """
+    if not exists(f):
+        raise ValueError("Folder does not exist")
+    if not isdir(f):
+        raise ValueError("Target exists and is not a folder")
+    return f
 
 
 def ints(l, ifilter=lambda x: x, idescr=None):

@@ -6,16 +6,16 @@
 import logging
 import sys
 from argparse import Action
-from os import remove
+from os import makedirs, remove, rmdir
 from os.path import exists
 from six import StringIO
 from tinyscript.helpers import PYTHON3
 from unittest import TestCase
 
 
-__all__ = ["args", "exists", "logger", "remove", "sys", "temp_stdin", "touch",
-           "temp_stdout", "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase",
-           "PYTHON3", "_FakeParserAction"]
+__all__ = ["args", "exists", "logger", "makedirs", "remove", "rmdir", "sys",
+           "temp_stdin", "touch", "temp_stdout", "tmpf", "FakeLogRecord",
+           "FakeNamespace", "TestCase", "PYTHON3", "_FakeParserAction"]
 
 
 tmpf = lambda name="test", ext="py": ".tinyscript-{}.{}".format(name, ext)

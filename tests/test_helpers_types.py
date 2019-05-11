@@ -8,23 +8,30 @@ from unittest import main, TestCase
 
 from tinyscript.helpers.types import *
 
-from utils import remove, touch
+from utils import *
 
 
 class TestHelpersTypes(TestCase):
     def test_general_purpose_types(self):
-        touch("test1.txt", "test2.txt")
+        tf = "test_folder"
         l1 = ["test1.txt", "test2.txt"]
         l2 = ["test1.txt", "test3.txt"]
         l3 = ["test3.txt", "test4.txt"]
+        touch("test1.txt", "test2.txt")
+        makedirs(tf)
         self.assertEqual(file_exists(l1[0]), l1[0])
         self.assertRaises(ValueError, file_exists, l3[0])
+        self.assertRaises(ValueError, file_exists, tf)
         self.assertEqual(files_list(l1), l1)
         self.assertRaises(ValueError, files_list, l2)
         self.assertEqual(files_filtered_list(l2), [l2[0]])
         self.assertRaises(ValueError, files_filtered_list, l3)
+        self.assertEqual(folder_exists(tf), tf)
+        self.assertRaises(ValueError, folder_exists, "test_folder_not_existing")
+        self.assertRaises(ValueError, folder_exists, l1[0])
         remove("test1.txt")
         remove("test2.txt")
+        rmdir(tf)
         self.assertEqual(neg_int(0), 0)
         self.assertEqual(neg_int(-1), -1)
         self.assertEqual(negative_int(-1), -1)
