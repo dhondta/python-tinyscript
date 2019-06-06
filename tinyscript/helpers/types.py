@@ -5,6 +5,7 @@
 """
 import ipaddress
 import re
+from os import makedirs
 from os.path import exists, isdir, isfile
 from six import string_types, u
 
@@ -12,7 +13,8 @@ from ..__info__ import __author__, __copyright__, __version__
 
 
 __all__ = __features__ = [
-    "file_exists", "files_list", "files_filtered_list", "folder_exists",
+    "file_exists", "files_list", "files_filtered_list", 
+    "folder_exists", "folder_exists_or_create",
     "neg_int", "negative_int", "pos_int", "positive_int", "ints", "neg_ints",
         "negative_ints", "pos_ints", "positive_ints",
     "ip_address", "ip_address_list", "ip_address_network", "port_number",
@@ -63,6 +65,15 @@ def folder_exists(f):
     """ Check that the given folder exists. """
     if not exists(f):
         raise ValueError("Folder does not exist")
+    if not isdir(f):
+        raise ValueError("Target exists and is not a folder")
+    return f
+
+
+def folder_exists_or_create(f):
+    """ Check that the given folder exists and create it if not existing. """
+    if not exists(f):
+        makedirs(f)
     if not isdir(f):
         raise ValueError("Target exists and is not a folder")
     return f

@@ -14,6 +14,7 @@ from utils import *
 class TestHelpersTypes(TestCase):
     def test_general_purpose_types(self):
         tf = "test_folder"
+        tfne = "test_folder_not_existing"
         l1 = ["test1.txt", "test2.txt"]
         l2 = ["test1.txt", "test3.txt"]
         l3 = ["test3.txt", "test4.txt"]
@@ -27,11 +28,15 @@ class TestHelpersTypes(TestCase):
         self.assertEqual(files_filtered_list(l2), [l2[0]])
         self.assertRaises(ValueError, files_filtered_list, l3)
         self.assertEqual(folder_exists(tf), tf)
-        self.assertRaises(ValueError, folder_exists, "test_folder_not_existing")
+        self.assertRaises(ValueError, folder_exists, tfne)
         self.assertRaises(ValueError, folder_exists, l1[0])
+        rmdir(tf)
+        self.assertEqual(folder_exists_or_create(tfne), tfne)
+        self.assertRaises(ValueError, folder_exists_or_create, l1[0])
+        self.assertEqual(folder_exists(tfne), tfne)
+        rmdir(tfne)
         remove("test1.txt")
         remove("test2.txt")
-        rmdir(tf)
         self.assertEqual(neg_int(0), 0)
         self.assertEqual(neg_int(-1), -1)
         self.assertEqual(negative_int(-1), -1)
