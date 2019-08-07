@@ -32,14 +32,12 @@ def set_step_items(glob):
                 if self.message:
                     l.step(self.message)
                 if not self.at_end:
-                    std_input("Press enter to continue", {'color': STEP_COLOR,
-                                                          'bold': True})
+                    std_input("Press enter to continue", ["bold", STEP_COLOR])
                 return self
         
         def __exit__(self, *args):
             if enabled and self.at_end:
-                std_input("Press enter to continue", {'color': STEP_COLOR,
-                                                      'bold': True})
+                std_input("Press enter to continue", ["bold", STEP_COLOR])
     glob['Step'] = Step
     # stepping function, for stopping the execution and displaying a message if
     #  any defined
@@ -47,6 +45,5 @@ def set_step_items(glob):
         if enabled:
             if message:
                 l.step(message)
-            std_input("Press enter to continue", {'color': STEP_COLOR,
-                                                  'bold': True})
+            std_input("Press enter to continue", ["bold", STEP_COLOR])
     glob['step'] = step
