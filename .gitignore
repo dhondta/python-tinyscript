@@ -24,6 +24,7 @@ lib64/
 parts/
 sdist/
 reinstall.sh
+test.sh
 update.sh
 version.py
 
