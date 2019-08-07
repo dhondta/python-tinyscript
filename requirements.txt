@@ -2,11 +2,11 @@ coloredlogs
 colorful
 ipaddress
 markdown2
-numpy
-pandas
+numpy; python_version>='3.4'
+pandas; python_version>='3.4'
 patchy
 pymdown-extensions
 python-slugify
 six
 tqdm
-weasyprint
+weasyprint; python_version>='3.4'
