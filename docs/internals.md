@@ -58,7 +58,7 @@ Usage examples:
 
 This is achieved by passing arguments to `initialize(...)`. The first argument must always be `globals()` so that Tinyscript can populate the global scope of the script/tool.
 
-Various features are handled by this initialization and are explained in the related section of this documentation.
+Various [features](../features/) are handled by this initialization and are explained in the related section of this documentation.
 
 -----
 
