@@ -3,24 +3,27 @@
 """Common utility functions.
 
 """
+import colorful
 import re
 import sys
-from humanfriendly.terminal import ansi_wrap
-from platform import uname
+from platform import system
 from six import b as six_b, u, StringIO
+from slugify import slugify
 from sys import version_info
 
 from .lambdas import is_lambda
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["LINUX", "PYTHON3", "WINDOWS", "b", "byteindex",
-                          "capture", "iterbytes", "silent", "std_input", "u",
-                          "user_input", "Capture"]
+__all__ = __features__ = ["LINUX", "MACOS", "PYTHON3", "WINDOWS", "b",
+                          "byteindex", "capture", "confirm", "iterbytes",
+                          "silent", "slugify", "std_input", "u", "user_input",
+                          "Capture"]
 
 
-LINUX   = uname()[0] == "Linux"
-WINDOWS = uname()[0] == "Windows"
+LINUX   = system() == "Linux"
+MACOS   = system() == "Darwin"
+WINDOWS = system() == "Windows"
 
 PYTHON3      = version_info > (3,)
 CHOICE_REGEX = re.compile(r'^\(([a-z0-9])\).*$', re.I)
@@ -92,6 +95,14 @@ def capture(f):
     return _wrapper
 
 
+def confirm(style="bold"):
+    """
+    Ask for confirmation.
+    """
+    return user_input("Are you sure ?", ["(Y)es", "(N)o"], "n", style=style) \
+           == "y"
+
+
 def silent(f):
     """
     Decorator for silencing stdout and stderr.
@@ -103,22 +114,28 @@ def silent(f):
     return _wrapper
 
 
-def std_input(prompt="", style=None):
+def std_input(prompt="", style=None, palette=None):
     """
-    Very simple Python2/3-compatible input method.
+    Very simple Python2/3-compatible input method handling prompt styling.
     
     :param prompt:  prompt message
-    :param style:   dictionary of ansi_wrap keyword-arguments
+    :param style:   colorful styling function, e.g. red_on_green (for green
+                     foreground and red background colors)
+    :param palette: dictionary for defining new styles
     """
-    p = ansi_wrap(prompt, **(style or {}))
+    colorful.update_palette(palette or {})
+    if style is not None:
+        if isinstance(style, (list, tuple, set)):
+            style = "_".join(style)
+        prompt = getattr(colorful, style)(prompt)
     try:
-        return raw_input(p).strip()
+        return raw_input(prompt).strip()
     except NameError:
-        return input(p).strip()
+        return input(prompt).strip()
 
 
 def user_input(prompt="", choices=None, default=None, choices_str="",
-               required=False):
+               required=False, **kwargs):
     """
     Python2/3-compatible input method handling choices and default value.
     
@@ -126,6 +143,7 @@ def user_input(prompt="", choices=None, default=None, choices_str="",
     :param choices:  list of possible choices or lambda function
     :param default:  default value
     :param required: make non-null user input mandatory
+    :param kwargs:   keyword-arguments to be passed to std_input for styling
     :return:         handled user input
     """
     if type(choices) in [list, tuple, set]:
@@ -147,7 +165,7 @@ def user_input(prompt="", choices=None, default=None, choices_str="",
                                            [default is None and required])
     user_input, first = None, True
     while not user_input:
-        user_input = std_input(["", prompt][first] + " >> ")
+        user_input = std_input(["", prompt][first] + " >> ", **kwargs)
         first = False
         if type(choices) in [list, tuple, set]:
             choices = list(map(lambda x: x.lower(), choices))
