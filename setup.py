@@ -2,17 +2,14 @@
 # -*- coding: UTF-8 -*-
 from os.path import abspath, dirname, join
 from setuptools import setup, find_packages
-try: # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError: # for pip <= 9.0.3
-    from pip.req import parse_requirements
 
 
 currdir = abspath(dirname(__file__))
 with open(join(currdir, 'README.md')) as f:
     long_descr = f.read()
+with open("requirements.txt") as f:
+    requirements = [l.strip() for l in f if not l.strip().startswith("#")]
 
-requirements = parse_requirements("requirements.txt", session=False)
 setup(
   name = "tinyscript",
   packages = find_packages(exclude=("tests*", )),
@@ -43,19 +40,8 @@ setup(
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
   ],
-  install_requires=[
-    "coloredlogs",
-    "ipaddress",
-    "markdown2",
-    "numpy ; python_version>='3.4'",
-    "pandas ; python_version>='3.4'",
-    "patchy",
-    "pymdown-extensions",
-    "python-slugify",
-    "six",
-    "tqdm",
-    "weasyprint ; python_version>='3.4'",
-  ],
+  install_requires=requirements,
   python_requires = '>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*!=3.4.*,<4',
 )
