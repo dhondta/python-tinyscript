@@ -42,20 +42,24 @@ class TestHelpersCode(TestCase):
         code_replace_line(dummy2, 1, "# useless modified comment")
         self.assertIn("useless modified comment", code_source(dummy2))
         code_add_line(dummy2, 1, "# another useless comment before first")
-        code_add_line(dummy2, 2, "# another comment after first", after=True)
+        code_add_line(dummy2, 2, "pass", after=True)
         self.assertEqual(len(code_source(dummy2).split("\n")), 5)
-        code_remove_line(dummy2, 1)
-        code_replace_lines(dummy2, 1, None, 2, "return 42")
+        code_remove_line(dummy2, -1)
+        self.assertIsNone(dummy2())
+        code_replace_lines(dummy2, 1, None, -1, "return 42")
         self.assertEqual(len(code_source(dummy2).split("\n")), 3)
         self.assertEqual(dummy2(), 42)
         # this will trigger an error as the replacement has a bad format
-        self.assertRaises(PatchError, code_add_lines, dummy2, 0)
+        self.assertRaises(PatchError, code_add_lines, dummy2, "test", "test")
+        self.assertRaises(PatchError, code_add_lines, dummy2, 0, 0)
+        self.assertRaises(PatchError, code_add_lines, dummy2, 15, "test")
+        self.assertRaises(PatchError, code_add_lines, dummy2, -12, "test")
         self.assertRaises(PatchError, code_add_lines, dummy2, 0, "test", 0, "")
         self.assertRaises(PatchError, code_replace_lines, dummy2, 0)
         self.assertRaises(PatchError, code_replace_lines, dummy2, 0, "t", 0, "")
         self.assertRaises(PatchError, code_delete_lines, dummy2, 0, 0)
         # this will add some non-indented lines and check the new function
-        code_add_line(dummy2, -2, "return 2*42")
+        code_add_line(dummy2, -1, "return 2*42")
         code_add_lines(dummy2, -1, "return 12345",
                                -2, "# this return will not execute")
         self.assertEqual(len(code_source(dummy2).split("\n")), 6)
@@ -67,6 +71,9 @@ class TestHelpersCode(TestCase):
         code_add_line(dummy2, 0, "# dummy function")
         self.assertEqual(len(code_source(dummy2).split("\n")), 9)
         code_delete_lines(dummy2, -1, -2, -3, -4)
+        self.assertEqual(len(code_source(dummy2).split("\n")), 5)
+        code_add_block(dummy2, 1, code_source(dummy3), after=True)
+        self.assertIn("# version: 1", code_source(dummy2))
     
     def test_function_code_restore(self):
         # no modification yet ; code_restore should return False
