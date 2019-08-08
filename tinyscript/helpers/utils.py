@@ -11,7 +11,7 @@ from six import b as six_b, u, StringIO
 from slugify import slugify
 from sys import version_info
 
-from .lambdas import is_lambda
+from .types import is_lambda
 from ..__info__ import __author__, __copyright__, __version__
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common custom type validations.
+"""Common custom type checking and validation functions.
 
 """
 import ipaddress
@@ -20,6 +20,33 @@ __all__ = __features__ = [
     "ip_address", "ip_address_list", "ip_address_network", "port_number",
         "port_number_range"
 ]
+
+
+# -------------------- TYPE/FORMAT CHECKING FUNCTIONS --------------------
+# various object type check functions
+__all__ += ["is_dict", "is_function", "is_int", "is_lambda", "is_list",
+            "is_neg_int", "is_pos_int", "is_str"]
+is_int      = lambda i: isinstance(i, int)
+is_pos_int  = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
+is_neg_int  = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
+is_dict     = lambda d: isinstance(d, dict)
+is_list     = lambda l: isinstance(l, (list, set, tuple))
+is_str      = lambda s: isinstance(s, string_types)
+is_lambda   = lambda l: isinstance(l, type(lambda:0)) and \
+                        l.__name__ == (lambda:0).__name__
+is_function = lambda f: hasattr(f, "__call__")
+
+# various data format check functions
+__all__ += ["is_bin", "is_hex"]
+is_bin = lambda b, sep=None: is_str(b) and \
+                             all(c in "01" + (sep or "") for c in set(b))
+is_hex = lambda h: is_str(h) and len(h) % 2 == 0 and \
+                   all(c in "0123456789abcdef" for c in set(h.lower()))
+
+# some other common check function
+__all__ += ["is_long_opt", "is_short_opt"]
+is_long_opt  = lambda o: is_str(o) and len(o) > 2 and o.startswith('--')
+is_short_opt = lambda o: is_str(o) and len(o) == 2 and o.startswith('-')
 
 
 # -------------------- GENERAL-PURPOSE TYPES --------------------
