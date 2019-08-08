@@ -20,8 +20,8 @@ try:
 except ImportError:
     from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
-from .helpers.lambdas import is_long_opt, is_pos_int, is_short_opt
 from .helpers.licenses import *
+from .helpers.types import is_long_opt, is_pos_int, is_short_opt
 from .helpers.utils import PYTHON3, user_input
 from .loglib import logger
 
