@@ -63,8 +63,7 @@ class TestHelpersTypes(TestCase):
         self.assertRaises(ValueError, pos_ints, "[1,2")
         self.assertRaises(ValueError, pos_ints, [-1, 1])
         self.assertRaises(ValueError, pos_ints, "test,0")
-        
-
+    
     def test_network_related_types(self):
         self.assertIsInstance(ip_address("127.0.0.1"), ipaddress.IPv4Address)
         self.assertIsInstance(ip_address("fe00::"), ipaddress.IPv6Address)
@@ -83,3 +82,41 @@ class TestHelpersTypes(TestCase):
         self.assertRaises(ValueError, port_number_range, -1)
         self.assertRaises(ValueError, port_number_range, 123456789)
         self.assertRaises(ValueError, port_number_range, "40-20")
+    
+    def test_data_type_check(self):
+        self.assertTrue(is_int(1))
+        self.assertFalse(is_int("a"))
+        self.assertTrue(is_pos_int(10))
+        self.assertTrue(is_pos_int(0, True))
+        self.assertFalse(is_pos_int(0, False))
+        self.assertFalse(is_pos_int(-10))
+        self.assertTrue(is_neg_int(-10))
+        self.assertFalse(is_neg_int(10))
+        self.assertTrue(is_dict({"key": "value"}))
+        self.assertFalse(is_dict("not_a_dict"))
+        self.assertFalse(is_dict(["not_a_dict"]))
+        self.assertTrue(is_list([0]))
+        self.assertTrue(is_list((0, )))
+        self.assertTrue(is_list({0}))
+        self.assertFalse(is_list("not_a_list"))
+        self.assertTrue(is_str("test"))
+        self.assertFalse(is_str(1))
+        self.assertTrue(is_lambda(dummy_lambda))
+        self.assertFalse(is_lambda(True))
+        self.assertTrue(is_function(dummy_lambda))
+        self.assertTrue(is_function(dummy_function))
+        self.assertFalse(is_function("not_a_function"))
+    
+    def test_data_format_check(self):
+        self.assertTrue(is_bin("01000111"))
+        self.assertFalse(is_bin("0123"))
+        self.assertTrue(is_hex("deadbeef"))
+        self.assertTrue(is_hex("c0ffee"))
+        self.assertFalse(is_hex("coffee"))
+        self.assertFalse(is_hex("00a"))
+    
+    def test_option_format_check(self):
+        self.assertTrue(is_long_opt("--test"))
+        self.assertFalse(is_long_opt("-t"))
+        self.assertTrue(is_short_opt("-t"))
+        self.assertFalse(is_short_opt("--test"))

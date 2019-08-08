@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Test utility functions.
 
@@ -13,12 +13,18 @@ from tinyscript.helpers import PYTHON3
 from unittest import TestCase
 
 
-__all__ = ["args", "exists", "logger", "makedirs", "remove", "rmdir", "sys",
-           "temp_stdin", "touch", "temp_stdout", "tmpf", "FakeLogRecord",
-           "FakeNamespace", "TestCase", "PYTHON3", "_FakeParserAction"]
+__all__ = ["args", "dummy_function", "dummy_lambda", "exists", "logger",
+           "makedirs", "remove", "rmdir", "sys", "temp_stdin", "touch",
+           "temp_stdout", "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase",
+           "PYTHON3", "_FakeParserAction"]
 
 
+dummy_lambda = lambda *a, **k: None
 tmpf = lambda name="test", ext="py": ".tinyscript-{}.{}".format(name, ext)
+
+
+def dummy_function(*a, **k):
+    pass
 
 
 def temp_stdin(tc, inputs):
