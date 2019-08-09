@@ -17,8 +17,8 @@ from ..__info__ import __author__, __copyright__, __version__
 
 __all__ = __features__ = ["LINUX", "MACOS", "PYTHON3", "WINDOWS", "b",
                           "byteindex", "capture", "confirm", "iterbytes",
-                          "silent", "slugify", "std_input", "u", "user_input",
-                          "Capture"]
+                          "pause", "silent", "slugify", "std_input", "u",
+                          "user_input", "Capture"]
 
 
 LINUX   = system() == "Linux"
@@ -32,6 +32,7 @@ CHOICE_REGEX = re.compile(r'^\(([a-z0-9])\).*$', re.I)
 # see: http://python3porting.com/problems.html
 byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
 iterbytes = lambda d: iter(d) if PYTHON3 else [ord(c) for c in d]
+pause = lambda *a, **kw: std_input("Press Enter to continue", *a, **kw) or None
 
 
 def b(text):
