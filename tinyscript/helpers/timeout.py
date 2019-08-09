@@ -7,7 +7,7 @@ import signal
 from contextlib import contextmanager
 
 
-__all__ = ["timeout", "Timeout", "TimeoutError"]
+__all__ = __features__ = ["timeout", "Timeout", "TimeoutError"]
 
 
 class TimeoutError(Exception):
