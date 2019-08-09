@@ -91,47 +91,6 @@ if __name__ == '__main__':
 
 -----
 
-## Pre-imports
-
-Some common built-in modules are preimported.
-
-```sh
-$ python
-[...]
->>> from tinyscript import __preimports__
->>> __preimports__
-['argparse', 'base64', 'binascii', 'collections', 'hashlib', 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string', 'sys', 'time']
-```
-
-In a script/tool, all these built-in modules are preimported with the line `from tinyscript import *`.
-
-!!! note "Improvements to `hashlib`"
-    
-    `hashlib`, while imported with Tinyscript, is enhanced with additional functions so that these must not be rewritten in many applications, that is:
-    
-    - `hash_file`: this hashes a file per block.
-    - `[hash]_file` (e.g. `sha256_file`): each hash algorithm existing in the native `hashlib` has a bound function for hashing a file (e.g. `md5` is a native function of `hashlib` and will then have `md5_file`).
-
------
-
-## Helper types
-
-While adding `argparse` arguments to the parser, Tinyscript provides some useful type validation functions that can be used with the `type` keyword argument, namely (returning `ValueError` when the validation fails):
-
-- `file_exists`: existing file path
-- `files_list`: list of only existing file paths
-- `files_filtered_list`: list of at least one existing file path (bad paths are filtered)
-- `folder_exists`: existing folder
-- `ints`: list of integers
-- `neg_int`, `negative_int`, `neg_ints`, `negative_ints`: single negative integer or list of negative integers
-- `pos_int`, `positive_int`, `pos_ints`, `positive_ints`: single positive integer or list of positive integers
-- `ip_address`, `ip_address_list`: valid IP address (IPv4 or IPv6) or list of IP addresses ; returns the result of `ipaddress.ip_address`
-- `ip_address_network`: valid IP address network (e.g. `192.168.1.0/24`) ; returns the result of `ipaddress.ip_network`
-- `port_number`: valid port number
-- `port_number_range`: valid list of port numbers, ranging from and to the given bounds
-
------
-
 ## Advanced option clash resolution
 
 When a developper writes a script/tool relying on Tyniscript, every argument or option defined will preceed the default arguments, e.g. `-h` or `--help`. Tinyscript will then add these after the developper-defined ones, then using `argparse`'s conflict resolution first trying with full option strings (e.g. `-v` and `--verbose`), then with the long option string only (`--verbose`). If a name collision occurs, some of the pre-defined arguments use prefixes or suffixes to resolve it so that they can still be parsed. The following lists give the mappings between pre-defined default option names and their resolved names if a collision occurs.
@@ -173,3 +132,31 @@ List of "*report*" arguments and options:
 `--theme` | report stylesheet theme (overridden by `--css`) | `--report-theme`
 `--filename` | report filename | `--report-filename`
 
+-----
+
+## Pre-imports
+
+Some common built-in modules are preimported.
+
+```sh
+$ python
+[...]
+>>> from tinyscript import __preimports__
+>>> __preimports__
+['argparse', 'base64', 'binascii', 'collections', 'hashlib', 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string', 'sys', 'time']
+```
+
+In a script/tool, all these built-in modules are preimported with the line `from tinyscript import *`.
+
+!!! note "Improvements to `hashlib`"
+    
+    `hashlib`, while imported with Tinyscript, is enhanced with additional functions so that these must not be rewritten in many applications, that is:
+    
+    - `hash_file`: this hashes a file per block.
+    - `[hash]_file` (e.g. `sha256_file`): each hash algorithm existing in the native `hashlib` has a bound function for hashing a file (e.g. `md5` is a native function of `hashlib` and will then have `md5_file`).
+
+-----
+
+## Helpers
+
+Multiple helper constants or functions are imported in the global scope when using `from tyniscript import *`. For a complete list of helpers, please see [this page](../helpers/).
