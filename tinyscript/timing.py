@@ -9,6 +9,7 @@ from errno import ETIME
 from os import strerror
 
 from .__info__ import __author__, __copyright__, __version__
+from .helpers.timeout import TimeoutError
 
 
 __all__ = ["set_time_items"]
@@ -51,9 +52,6 @@ def set_time_items(glob):
         return t - (start or 0)
     # Time context manager, for easilly benchmarking a block of code
     class Timer(object):
-        class TimeoutError(Exception):
-            pass  # TimeoutError is not handled in Python 2
-    
         def __init__(self, description=None, message=TO_MSG, timeout=None,
                      fail_on_timeout=False):
             self.fail = fail_on_timeout
@@ -79,11 +77,12 @@ def set_time_items(glob):
                 if manager._timings:
                     l.time("> Time elapsed: {} seconds".format(d))
                 if self.timeout is not None:
-                    if self.fail and exc_type is Timer.TimeoutError:
-                        return True
-
+                    if self.fail and exc_type is TimeoutError:
+                        return True  # this allows to let the execute continue
+            # implicitely returns None ; this lets the exception be raised
+        
         def _handler(self, signum, frame):
-            raise Timer.TimeoutError(self.message)
+            raise TimeoutError(self.message)
     glob['Timer'] = Timer
     # timing function for getting a measure from the start of the execution
     def get_time(message=None, start=manager.start):

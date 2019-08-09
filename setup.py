@@ -5,9 +5,9 @@ from setuptools import setup, find_packages
 
 
 currdir = abspath(dirname(__file__))
-with open(join(currdir, 'README.md')) as f:
+with open(join(currdir, "README.md")) as f:
     long_descr = f.read()
-with open("requirements.txt") as f:
+with open(join(currdir, "requirements.txt")) as f:
     requirements = [l.strip() for l in f if not l.strip().startswith("#")]
 
 setup(

@@ -5,6 +5,7 @@
 """
 import time
 
+from tinyscript.helpers.timeout import TimeoutError
 from tinyscript.timing import set_time_items
 
 from utils import *
@@ -37,14 +38,14 @@ class TestTiming(TestCase):
             self.assertTrue(timer.message)
             self.assertTrue(timer.start)
             self.assertEqual(timer.timeout, 1)
-            self.assertRaises(Timer.TimeoutError, timer._handler, None, None)
+            self.assertRaises(TimeoutError, timer._handler, None, None)
             time.sleep(1)
         
         def timeout_test():
             with Timer(timeout=1) as t:
                 time.sleep(2)
 
-        self.assertRaises(Timer.TimeoutError, timeout_test)
+        self.assertRaises(TimeoutError, timeout_test)
     
     def test_timing_functions(self):
         temp_stdout(self)

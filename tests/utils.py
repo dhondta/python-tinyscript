@@ -9,14 +9,15 @@ from argparse import Action
 from os import makedirs, remove, rmdir
 from os.path import exists
 from six import StringIO
+from time import sleep
 from tinyscript.helpers import PYTHON3
 from unittest import TestCase
 
 
-__all__ = ["args", "dummy_function", "dummy_lambda", "exists", "logger",
-           "makedirs", "remove", "rmdir", "sys", "temp_stdin", "touch",
-           "temp_stdout", "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase",
-           "PYTHON3", "_FakeParserAction"]
+__all__ = ["args", "dummy_function", "dummy_lambda", "dummy_sleep", "exists",
+           "logger", "makedirs", "remove", "rmdir", "sys", "temp_stdin",
+           "touch", "temp_stdout", "tmpf", "FakeLogRecord", "FakeNamespace",
+           "TestCase", "PYTHON3", "_FakeParserAction"]
 
 
 dummy_lambda = lambda *a, **k: None
@@ -25,6 +26,11 @@ tmpf = lambda name="test", ext="py": ".tinyscript-{}.{}".format(name, ext)
 
 def dummy_function(*a, **k):
     pass
+
+
+def dummy_sleep(*a, **k):
+    sleep(2)
+    return "TEST"
 
 
 def temp_stdin(tc, inputs):
