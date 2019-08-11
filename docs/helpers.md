@@ -87,7 +87,6 @@ The currently supported functions are:
         >>> bin2int("00000100 00000000", n_groups=2, order="big")
         4
 
-        :::python
         >>> int2bin(1024, sep=" ")
         '00000100 00000000'
         >>> int2bin(1024, n_groups=2, sep=" ", order="big")
@@ -117,7 +116,6 @@ The currently supported functions are:
         >>> str2bin("test", sep=" ")
         '01110100 01100101 01110011 01110100'
 
-        :::python
         >>> str2bin("test", 16, sep=" ")
         '0000000001110100 0000000001100101 0000000001110011 0000000001110100'
         >>> bin2str('1110100 1100101 1110011 1110100')
@@ -131,7 +129,6 @@ The currently supported functions are:
         >>> int2hex(3735928559)
         'deadbeef'
 
-        :::python
         >>> int2hex(3735928559, 8)
         '00000000deadbeef'
         >>> hex2int("00000000deadbeef")
@@ -145,13 +142,11 @@ The currently supported functions are:
         >>> int2str(1952805748)
         'test'
 
-        :::python
         >>> str2int("test string")
         140714483833450346658229863
         >>> int2str(140714483833450346658229863)
         'test string'
 
-        :::python
         >>> str2int("test string", 8)
         [8387236823645254770, 6909543]
         >>> int2str(8387236823645254770, 6909543)
