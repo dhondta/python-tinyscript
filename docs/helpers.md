@@ -46,6 +46,7 @@ According to the DRY philosophy, Tinyscript provides some type checking function
 While adding arguments to the parser (relying on `argparse`), Tinyscript provides some useful type validation functions that can be used with the `type` keyword argument, namely (returning `ValueError` when the validation fails):
 
 **Type** | **Output** | **Description**
+:---: | :---: | :---:
 `file_exists` | `str` | existing file path
 `files_list` | `lst(str)` | list of only existing file paths
 `files_filtered_list` | `lst(str)` | list of at least one existing file path (bad paths are filtered)
@@ -76,94 +77,94 @@ The currently supported functions are:
 
 - Binary <=> Integer: `bin2int` / `int2bin`
 
-    ```
-    >>> bin2int("0100")
-    4
-    >>> int2bin(4, 4)
-    '0100'
-    >>> int2bin(4)
-    '00000100'
-    >>> bin2int("00000100 00000000", n_groups=2, order="big")
-    4
+        ```
+        >>> bin2int("0100")
+        4
+        >>> int2bin(4, 4)
+        '0100'
+        >>> int2bin(4)
+        '00000100'
+        >>> bin2int("00000100 00000000", n_groups=2, order="big")
+        4
 
-    >>> int2bin(1024, sep=" ")
-    '00000100 00000000'
-    >>> int2bin(1024, n_groups=2, sep=" ", order="big")
-    '00000000 00000100'
-    >>> bin2int("0100 0000")
-    1024
-    >>> bin2int("00000100 00000000")
-    1024
-    >>> bin2int("0000010000000000", order="big")
-    1024
-    >>> bin2int("00000000 00000100", n_groups=2, order="big")
-    1024
-    ```
+        >>> int2bin(1024, sep=" ")
+        '00000100 00000000'
+        >>> int2bin(1024, n_groups=2, sep=" ", order="big")
+        '00000000 00000100'
+        >>> bin2int("0100 0000")
+        1024
+        >>> bin2int("00000100 00000000")
+        1024
+        >>> bin2int("0000010000000000", order="big")
+        1024
+        >>> bin2int("00000000 00000100", n_groups=2, order="big")
+        1024
+        ```
 
 - Binary <=> Hexadecimal: `bin2hex` / `hex2bin`
 
-    ```
-    >>> hex2bin("deadbeef", sep=" ")
-    '11011110 10101101 10111110 11101111'
-    >>> bin2hex("11011110 10101101 10111110 11101111")
-    'deadbeef'
-    ```
+        ```
+        >>> hex2bin("deadbeef", sep=" ")
+        '11011110 10101101 10111110 11101111'
+        >>> bin2hex("11011110 10101101 10111110 11101111")
+        'deadbeef'
+        ```
 
 - Binary <=> String: `bin2str` / `str2bin`
 
-    ```
-    >>> str2bin("test")
-    '01110100011001010111001101110100'
-    >>> str2bin("test", sep=" ")
-    '01110100 01100101 01110011 01110100'
-    
-    >>> str2bin("test", 16, sep=" ")
-    '0000000001110100 0000000001100101 0000000001110011 0000000001110100'
-    >>> bin2str('1110100 1100101 1110011 1110100')
-    'test'
-    ```
+        ```
+        >>> str2bin("test")
+        '01110100011001010111001101110100'
+        >>> str2bin("test", sep=" ")
+        '01110100 01100101 01110011 01110100'
+        
+        >>> str2bin("test", 16, sep=" ")
+        '0000000001110100 0000000001100101 0000000001110011 0000000001110100'
+        >>> bin2str('1110100 1100101 1110011 1110100')
+        'test'
+        ```
 
 - Integer <=> Hexadecimal: `int2hex` / `hex2int`
 
-    ```
-    >>> hex2int("deadbeef")
-    3735928559
-    >>> int2hex(3735928559)
-    'deadbeef'
+        ```
+        >>> hex2int("deadbeef")
+        3735928559
+        >>> int2hex(3735928559)
+        'deadbeef'
 
-    >>> int2hex(3735928559, 8)
-    '00000000deadbeef'
-    >>> hex2int("00000000deadbeef")
-    3735928559
-    ```
+        >>> int2hex(3735928559, 8)
+        '00000000deadbeef'
+        >>> hex2int("00000000deadbeef")
+        3735928559
+        ```
 
 - Integer <=> String: `int2str` / `str2int`
 
-    ```
-    >>> str2int("test")
-    1952805748
-    >>> int2str(1952805748)
-    'test'
+        ```
+        >>> str2int("test")
+        1952805748
+        >>> int2str(1952805748)
+        'test'
 
-    >>> str2int("test string")
-    140714483833450346658229863
-    >>> int2str(140714483833450346658229863)
-    'test string'
+        >>> str2int("test string")
+        140714483833450346658229863
+        >>> int2str(140714483833450346658229863)
+        'test string'
 
-    >>> str2int("test string", 8)
-    [8387236823645254770, 6909543]
-    >>> int2str(8387236823645254770, 6909543)
-    'test string'
-    ```
+        >>> str2int("test string", 8)
+        [8387236823645254770, 6909543]
+        >>> int2str(8387236823645254770, 6909543)
+        'test string'
+        ```
 
 - Hexadecimal <=> String: `hex2str` / `str2hex`
 
-    ```
-    >>> str2hex("test string")
-    '7465737420737472696e67'
-    >>> hex2str("7465737420737472696e67")
-    'test string'
-    ```
+        ```
+        >>> str2hex("test string")
+        '7465737420737472696e67'
+        >>> hex2str("7465737420737472696e67")
+        'test string'
+        ```
 
 -----
 
