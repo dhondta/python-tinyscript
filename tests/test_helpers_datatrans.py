@@ -27,7 +27,7 @@ class TestHelpersLambdas(TestCase):
         self.assertRaises(ValueError, bin2hex, STR)
         self.assertRaises(ValueError, bin2hex, BIN, -1)
         self.assertRaises(ValueError, bin2hex, BIN, 4, -1)
-        self.assertRaises(ValueError, bin2hex, BIN, 8, 1, "", "bad_order")
+        self.assertRaises(ValueError, bin2hex, BIN, 8, 1, "bad_order")
         self.assertRaises(ValueError, bin2hex, "000 01", 2, 1, " ")
         # bin -> int
         self.assertEqual(bin2int(BIN), INT)
@@ -37,8 +37,8 @@ class TestHelpersLambdas(TestCase):
         self.assertRaises(ValueError, bin2int, STR)
         self.assertRaises(ValueError, bin2int, BIN, -1)
         self.assertRaises(ValueError, bin2int, BIN, 4, -1)
-        self.assertRaises(ValueError, bin2int, BIN, 8, 1, "", "bad_order")
-        self.assertRaises(ValueError, bin2int, "000 01", 2, 1, " ")
+        self.assertRaises(ValueError, bin2int, BIN, 8, 1, "bad_order")
+        self.assertRaises(ValueError, bin2int, "000 01", 2, 1)
         # bin -> str
         self.assertEqual(bin2str(BIN), STR)
         self.assertEqual(bin2str(BIN, 2, 3), STR)
@@ -47,7 +47,7 @@ class TestHelpersLambdas(TestCase):
         self.assertRaises(ValueError, bin2str, STR)
         self.assertRaises(ValueError, bin2str, BIN, -1)
         self.assertRaises(ValueError, bin2str, BIN, 4, -1)
-        self.assertRaises(ValueError, bin2str, BIN, 8, 1, "", "bad_order")
+        self.assertRaises(ValueError, bin2str, BIN, 8, 1, "bad_order")
         self.assertRaises(ValueError, bin2str, "000 01", 2, 1, " ")
 
     def test_data_conversion_from_hex(self):
@@ -70,7 +70,7 @@ class TestHelpersLambdas(TestCase):
     def test_data_conversion_from_int(self):
         # int -> bin
         self.assertEqual(int2bin(INT), BIN)
-        self.assertEqual(int2bin(INT, order="big"), BIN_BE1)
+        self.assertEqual(int2bin(INT, n_groups=4, order="big"), BIN_BE1)
         self.assertEqual(int2bin(INT, 8, 5), "0" * 8 + BIN)
         self.assertEqual(int2bin(INT, 8, 2, order="big"), BIN_BE2)
         self.assertRaises(ValueError, int2bin, BIN)
@@ -107,3 +107,20 @@ class TestHelpersLambdas(TestCase):
         self.assertEqual(str2int(STR), INT)
         self.assertRaises(ValueError, str2int, INT)
         self.assertRaises(ValueError, str2int, STR, -1)
+    
+    def test_data_conversion_back_and_forth(self):
+        for kw in [{},
+                   {"n_bits": 4, "n_groups": 2},
+                   {"order": "big"}]:
+            self.assertEqual(hex2bin(bin2hex(BIN, **kw), **kw), BIN)
+            self.assertEqual(bin2hex(hex2bin(HEX, **kw), **kw), HEX)
+            self.assertEqual(int2bin(bin2int(BIN, **kw), **kw), BIN)
+            self.assertEqual(bin2int(int2bin(INT, **kw), **kw), INT)
+            self.assertEqual(str2bin(bin2str(BIN, **kw), **kw), BIN)
+            self.assertEqual(bin2str(str2bin(STR, **kw), **kw), STR)
+        self.assertEqual(hex2str(str2hex(STR)), STR)
+        self.assertEqual(str2hex(hex2str(HEX)), HEX)
+        self.assertEqual(hex2int(int2hex(INT)), INT)
+        self.assertEqual(int2hex(hex2int(HEX)), HEX)
+        self.assertEqual(str2int(int2str(INT)), INT)
+        self.assertEqual(int2str(str2int(STR)), STR)

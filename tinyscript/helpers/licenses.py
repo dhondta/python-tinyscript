@@ -53,4 +53,4 @@ Y = datetime.now().year
 copyright     = lambda t: "© {} {}".format(Y, t) if not t.startswith("©") else t
 license       = lambda l, n=False: LICENSES.get(str(l)) or \
                                    ["Invalid license", None][n]
-list_licenses = lambda: LICENSES.keys()
+list_licenses = lambda: list(LICENSES.keys())

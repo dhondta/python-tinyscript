@@ -3,9 +3,10 @@
 """Common help utility help functions.
 
 """
+import re
 from six import string_types
 
-from .types import is_bin, is_hex, is_int, is_neg_int, is_str
+from .types import is_bin, is_hex, is_int, is_pos_int, is_str
 from ..__info__ import __author__, __copyright__, __version__
 
 
@@ -20,31 +21,53 @@ __all__ = __features__ = [
 ]
 
 
+def __validation(**kwargs):
+    """ Private generic validation function for the whole data formats. """
+    for k, v in kwargs.items():
+        if k == "b":
+            if not is_bin(v):
+                raise ValueError("Bad input binary string")
+        elif k == "h":
+            if not is_hex(v):
+                raise ValueError("Bad input hexadecimal string")
+        elif k == "i":
+            if not is_int(v):
+                raise ValueError("Bad input integer")
+        elif k == "s":
+            if not is_str(v):
+                raise ValueError("Bad input string of 8-bits characaters")
+        elif k in ["n_b", "n_B", "n_c", "n_g"]:
+            if k in ["n_B", "n_c"] and v is None:
+                continue
+            if not is_pos_int(v, zero=False):
+                raise ValueError("Number of {} must be a positive integer"
+                                 .format({"n_b": "bits", "n_B": "bytes",
+                                      "n_c": "characters", "n_g": "groups"}[k]))
+        elif k == "o":
+            if v not in ["little", "big"]:
+                raise ValueError("Bad bits group order")
+
+
 # BINARY STRING <=> HEXADECIMAL STRING
-def bin2hex(binary_string, n_bits=8, n_groups=1, sep=None, order="little"):
+def bin2hex(binary_string, n_bits=8, n_groups=1, order="little"):
     """ Convert a binary string (eventually using a separator) to a hexadecimal
          string, using a given number of bits and in little or big endian. """
-    return int2hex(bin2int(binary_string, n_bits, n_groups, sep, order))
+    return int2hex(bin2int(binary_string, n_bits, n_groups, order))
 
 
 # BINARY STRING <=> INTEGER
-def bin2int(binary_string, n_bits=8, n_groups=1, sep=None, order="little"):
+def bin2int(binary_string, n_bits=8, n_groups=1, order="little"):
     """ Convert a binary string (eventually using a separator) to an integer,
          using a given number of bits and in little or big endian. """
     b, n, m = binary_string, n_bits, n_groups
-    # check for input arguments
-    if not is_bin(b, sep):
-        raise ValueError("Bad input binary string")
-    if is_neg_int(n, zero=True):
-        raise ValueError("Number of bits must be a positive integer")
-    if order not in ["little", "big"]:
-        raise ValueError("Bad bits group order")
-    # pad with zeros to the left of the binary string
-    if sep is None or sep == "":
+    __validation(b=b, n_b=n, n_g=m, o=order)
+    bits_groups = re.split(r"\W+", b)
+    if len(bits_groups) == 1:
+        b = bits_groups[0]
+        # pad with zeros to the left of the binary string
         b = (n - len(b) % n) % n * "0" + b
-    # split the binary string into groups
-    bits_groups = [b[i:i+n] for i in range(0, len(b), n)] if sep is None else \
-                  b.split(sep)
+        # split the binary string into groups
+        bits_groups = [b[i:i+n] for i in range(0, len(b), n)]
     # then process each block of n_groups groups according to the order
     r = []
     for i in range(0, len(bits_groups), m):
@@ -57,11 +80,11 @@ def bin2int(binary_string, n_bits=8, n_groups=1, sep=None, order="little"):
 
 
 # BINARY STRING <=> 8-BITS CHARACTERS
-def bin2str(binary_string, n_bits=8, n_groups=1, sep=None, order="little"):
+def bin2str(binary_string, n_bits=8, n_groups=1, order="little"):
     """ Convert a binary string (eventually using a separator) to string of
          8-bits characters, using a given number of bits and in little or big
          endian. """
-    return int2str(bin2int(binary_string, n_bits, n_groups, sep, order))
+    return int2str(bin2int(binary_string, n_bits, n_groups, order))
 
 
 def hex2bin(hex_string, n_bits=8, n_groups=1, sep=None, order="little"):
@@ -74,9 +97,7 @@ def hex2bin(hex_string, n_bits=8, n_groups=1, sep=None, order="little"):
 def hex2int(hex_string):
     """ Convert a hexadecimal string to a big integer. """
     h = hex_string
-    # check for input arguments
-    if not is_hex(h):
-        raise ValueError("Bad input hexadecimal string")
+    __validation(h=hex_string)
     return int(h, 16)
 
 
@@ -91,15 +112,7 @@ def int2bin(integer, n_bits=8, n_groups=1, sep=None, order="little"):
     """ Convert an integer to a binary string (eventually using a separator),
          using a given number of bits and in little or big endian. """
     n, m = n_bits, n_groups
-    # check for input arguments
-    if not is_int(integer):
-        raise ValueError("Bad input integer")
-    if not is_int(n) or is_neg_int(n, zero=True):
-        raise ValueError("Number of bits must be a positive integer")
-    if not is_int(n) or is_neg_int(m, zero=True):
-        raise ValueError("Number of groups must be a positive integer")
-    if order not in ["little", "big"]:
-        raise ValueError("Bad bits group order")
+    __validation(i=integer, n_b=n, n_g=m, o=order)
     r, b = [], bin(integer)[2:]
     # pad with zeros to the left of the binary string
     b = (n - len(b) % n) % n * "0" + b
@@ -110,22 +123,18 @@ def int2bin(integer, n_bits=8, n_groups=1, sep=None, order="little"):
         r.insert(0, "0" * n)
     # then reverse per n_groups if big endian
     if order == "big":
-        if m == 1:
-            r = r[::-1]
-        else:
-            r = [i for l in [r[i:i+m][::-1] for i in range(0, len(r), m)] \
-                 for i in l]
+#        if m == 1:
+#            r = r[::-1]
+#        else:
+        r = [i for l in [r[i:i+m][::-1] for i in range(0, len(r), m)] \
+             for i in l]
     return (sep or "").join(r)
 
 
 # INTEGER <=> HEXADECIMAL STRING
 def int2hex(integer, n_bytes=None):
     i, n = integer, n_bytes
-    # check for input arguments
-    if not is_int(i):
-        raise ValueError("Bad input integer")
-    if n is not None and (not is_int(n) or is_neg_int(n, zero=True)):
-        raise ValueError("Number of bytes must be a positive integer")
+    __validation(i=i, n_B=n)
     h = "".join("{:0>2}".join(c) for c in hex(i)[2:].rstrip("L"))
     # pad with zeros to the left of the binary string
     if n is not None:
@@ -140,6 +149,7 @@ def int2str(*integers):
          characters. """
     s = ""
     for i in integers:
+        __validation(i=i)
         _, n = "", 1
         while i > 0:
             r = i % (2 ** (8 * n))
@@ -169,12 +179,7 @@ def str2int(chars_string, n_chars=None):
     """ Convert a string of 8-bits characters to a big integer or, if using
          blocks of n_chars characters, a list of big integers. """
     r, s, n = [], chars_string, n_chars
-    # check for input arguments
-    if not is_str(s):
-        raise ValueError("Bad input string of 8-bits characaters")
-    if n is not None and (not is_int(n) or is_neg_int(n, zero=True)):
-        raise ValueError("Number of characters per block must be a positive "
-                         "integer")
+    __validation(s=s, n_c=n)
     if n is None:
         n = len(s)
     for i in range(0, len(s), n):

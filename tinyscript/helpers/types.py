@@ -3,8 +3,9 @@
 """Common custom type checking and validation functions.
 
 """
-import ipaddress
+import netaddr
 import re
+from itertools import chain
 from os import makedirs
 from os.path import exists, isdir, isfile
 from six import string_types, u
@@ -12,14 +13,7 @@ from six import string_types, u
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = [
-    "file_exists", "files_list", "files_filtered_list", 
-    "folder_exists", "folder_exists_or_create",
-    "neg_int", "negative_int", "pos_int", "positive_int", "ints", "neg_ints",
-        "negative_ints", "pos_ints", "positive_ints",
-    "ip_address", "ip_address_list", "ip_address_network", "port_number",
-        "port_number_range"
-]
+__all__ = __features__ = []
 
 
 # -------------------- TYPE/FORMAT CHECKING FUNCTIONS --------------------
@@ -38,31 +32,48 @@ is_function = lambda f: hasattr(f, "__call__")
 
 # various data format check functions
 __all__ += ["is_bin", "is_hex"]
-is_bin = lambda b, sep=None: is_str(b) and \
-                             all(c in "01" + (sep or "") for c in set(b))
+is_bin = lambda b: is_str(b) and all(set(_).difference(set("01")) == set() \
+                                     for _ in re.split(r"\W+", b))
 is_hex = lambda h: is_str(h) and len(h) % 2 == 0 and \
-                   all(c in "0123456789abcdef" for c in set(h.lower()))
+                   set(h.lower()).difference(set("0123456789abcdef")) == set()
 
-# some other common check function
+# some other common check functions
 __all__ += ["is_long_opt", "is_short_opt"]
-is_long_opt  = lambda o: is_str(o) and len(o) > 2 and o.startswith('--')
-is_short_opt = lambda o: is_str(o) and len(o) == 2 and o.startswith('-')
+is_long_opt  = lambda o: is_str(o) and \
+                         re.match(r"^--[a-z]+(-[a-z]+)*$", o, re.I)
+is_short_opt = lambda o: is_str(o) and re.match(r"^-[a-z]$", o, re.I)
+
+# some network-related check functions
+__all__ += ["is_ip", "is_ipv4", "is_ipv6", "is_mac", "is_port"]
+is_ip   = lambda ip:  __ip_address(ip, None, False) is not None
+is_ipv4 = lambda ip:  __ip_address(ip, 4, False) is not None
+is_ipv6 = lambda ip:  __ip_address(ip, 6, False) is not None
+is_mac  = lambda mac: __mac_address(mac, False) is not None
+is_port = lambda p:   is_int(p) and 0 < p < 2**16
+
+# dummy shortcuts, compliant with the is_* naming convention
+__all__ += ["is_dir", "is_file", "is_folder"]
+is_dir = is_folder = isdir
+is_file = isfile
 
 
-# -------------------- GENERAL-PURPOSE TYPES --------------------
 def __str2list(l):
     """ Convert string to list if input is effectively a string. """
-    if isinstance(l, string_types):
-        if l[0] == '[' and l[-1] == ']':
-            l = l[1:-1]
-        l = list(map(lambda x: x.strip(), l.split(',')))
-    return l
+    l = str(l)
+    if l[0] == '[' and l[-1] == ']':
+        l = l[1:-1]
+    return list(map(lambda x: x.strip(" '\""), l.split(',')))
+
+
+# -------------------- FILE/FOLDER-RELATED ARGUMENT TYPES --------------------
+__all__ += ["file_exists", "files_list", "files_filtered_list", "folder_exists",
+            "folder_exists_or_create"]
 
 
 def file_exists(f):
     """ Check that the given file exists. """
     if not exists(f):
-        raise ValueError("File does not exist")
+        raise ValueError("'{}' does not exist".format(f))
     if not isfile(f):
         raise ValueError("Target exists and is not a file")
     return f
@@ -91,7 +102,7 @@ def files_filtered_list(l):
 def folder_exists(f):
     """ Check that the given folder exists. """
     if not exists(f):
-        raise ValueError("Folder does not exist")
+        raise ValueError("'{}' does not exist".format(f))
     if not isdir(f):
         raise ValueError("Target exists and is not a folder")
     return f
@@ -106,74 +117,111 @@ def folder_exists_or_create(f):
     return f
 
 
-def ints(l, ifilter=lambda x: x, idescr=None):
+# -------------------- DATA FORMAT ARGUMENT TYPES --------------------
+__all__ += ["neg_int", "negative_int", "pos_int", "positive_int", "ints",
+            "neg_ints", "negative_ints", "pos_ints", "positive_ints"]
+
+
+def __ints(l, check_func=lambda x: False, idescr=None, **kwargs):
     """ Parses a comma-separated list of ints. """
     l = __str2list(l)
+    msg = "{} {}integer{}".format(["Bad list of", "Not a"][len(l) == 1],
+                                  "" if idescr is None else idescr + " ",
+                                  ["s", ""][len(l) == 1])
     try:
-        l = list(map(ifilter, list(map(int, l))))
-    except:
-        raise ValueError("Bad list of {}integers"
-                         .format("" if idescr is None else idescr + " "))
+        l = list(map(int, l))
+    except ValueError:
+        raise ValueError(msg)
+    if not all(check_func(_, **kwargs) for _ in l):
+        raise ValueError(msg)
     return l
-negative_ints = neg_ints = lambda l: ints(l, neg_int, "negative")
-positive_ints = pos_ints = lambda l: ints(l, pos_int, "positive")
+ints = lambda l: __ints(l, is_int)
+negative_int = neg_int = \
+    lambda i, zero=False: __ints(i, is_neg_int, "negative", zero=zero)[0]
+positive_int = pos_int = \
+    lambda i, zero=True: __ints(i, is_pos_int, "positive", zero=zero)[0]
+negative_ints = neg_ints = \
+    lambda l, zero=False: __ints(l, is_neg_int, "negative", zero=zero)
+positive_ints = pos_ints = \
+    lambda l, zero=True: __ints(l, is_pos_int, "positive", zero=zero)
 
 
-def neg_int(i):
-    """ Simple negative integer validation. """
-    try:
-        if isinstance(i, string_types):
-            i = int(i)
-        if not isinstance(i, int) or i > 0:
-            raise Exception()
-    except:
-        raise ValueError("Not a negative integer")
-    return i
-negative_int = neg_int
+# -------------------- NETWORK-RELATED ARGUMENT TYPES --------------------
+__all__ += ["ip_address", "ipv4_address", "ipv6_address",
+            "ip_address_list", "ipv4_address_list", "ipv6_address_list",
+            "ip_address_filtered_list", "ipv4_address_filtered_list",
+            "ipv6_address_filtered_list", "ip_address_network",
+            "ipv4_address_network", "ipv6_address_network", "mac_address",
+            "port_number", "port_number_range"]
 
 
-def pos_int(i):
-    """ Simple positive integer validation. """
-    try:
-        if isinstance(i, string_types):
-            i = int(i)
-        if not isinstance(i, int) or i < 0:
-            raise Exception()
-    except:
-        raise ValueError("Not a positive integer")
-    return i
-positive_int = pos_int
-
-
-# -------------------- NETWORK-RELATED TYPES --------------------
-def ip_address(ip):
+def __ip_address(ip, version=None, fail=True):
     """ IP address validation. """
-    # note: ipaddress already handles validation and raises a ValueError in case
+    # note: netaddr already handles validation and raises a ValueError in case
     #        of bad address ; we just ensure that the input is converted to
     #        unicode using six.u (otherwise, it fails in Python 2)
-    return ipaddress.ip_address(u(ip))
+    ip = int(ip) if str(ip).isdigit() else str(ip)
+    try:
+        return netaddr.IPAddress(ip, version=version)
+    except (ValueError, netaddr.core.AddrFormatError) as e:
+        if fail:
+            raise ValueError(str(e))
+ip_address = lambda ip: __ip_address(ip)
+ipv4_address = lambda ip: __ip_address(ip, 4)
+ipv6_address = lambda ip: __ip_address(ip, 6)
 
 
-def ip_address_list(ips):
+def __ip_address_list(ips, version=None, filter_bad=False):
     """ IP address range validation and expansion. """
-    # first, try it as a single IP address
-    try:
-        return ip_address(ips)
-    except ValueError:
-        pass
-    # then, consider it as an ipaddress.IPv[4|6]Network instance and expand it
-    return list(ipaddress.ip_network(u(ips)).hosts())
+    ips = __str2list(ips)
+    # consider it as an ipaddress.IPv[4|6]Network instance and expand it
+    l = []
+    for ip in ips:
+        # parse it as a single IP
+        _ = __ip_address(ip, version, False)
+        if _ is not None and _ not in l:
+            l.append([_])
+            continue
+        # parse it as a network
+        try:
+            l.append(netaddr.IPNetwork(ip, version=version))
+        except (ValueError, netaddr.core.AddrFormatError) as e:
+            if not filter_bad:
+                raise ValueError(str(e))
+    # make a generator with the parsed IP addresses/networks
+    def __generator():
+        _ = []
+        for ip in chain(*l):
+            if ip not in _:
+                yield str(ip)
+                _.append(ip)
+    if len(l) > 0:
+        return __generator()
+ip_address_list            = lambda ips: __ip_address_list(ips)
+ip_address_filtered_list   = lambda ips: __ip_address_list(ips, None, True)
+ipv4_address_list          = lambda ips: __ip_address_list(ips, 4)
+ipv4_address_filtered_list = lambda ips: __ip_address_list(ips, 4, True)
+ipv6_address_list          = lambda ips: __ip_address_list(ips, 6)()
+ipv6_address_filtered_list = lambda ips: __ip_address_list(ips, 6, True)
+ip_address_network         = lambda net: __ip_address_list([net], None)
+ipv4_address_network       = lambda net: __ip_address_list([net], 4)
+ipv6_address_network       = lambda net: __ip_address_list([net], 6)
 
 
-def ip_address_network(inet):
-    """ IP address network validation. """
-    # first, try it as a normal IP address
+def __mac_address(mac, fail=True):
+    """ MAC address validation. """
+    msg = "'{}' does not appear to be a MAC address".format(mac)
+    # check as an integer
+    if str(mac).isdigit():
+        mac = int(mac)
     try:
-        return ip_address(inet)
-    except ValueError:
-        pass
-    # then, consider it as an ipaddress.IPv[4|6]Network instance
-    return ipaddress.ip_network(u(inet))
+        return netaddr.EUI(mac)
+    except (ValueError, netaddr.core.AddrFormatError) as e:
+        if fail:
+            raise ValueError(str(e))
+        else:
+            return
+mac_address = lambda mac: __mac_address(mac)
 
 
 def port_number(port):

@@ -3,7 +3,7 @@
 """Common custom type validations' tests.
 
 """
-import ipaddress
+import netaddr
 from unittest import main, TestCase
 
 from tinyscript.helpers.types import *
@@ -19,7 +19,7 @@ class TestHelpersTypes(TestCase):
         l2 = ["test1.txt", "test3.txt"]
         l3 = ["test3.txt", "test4.txt"]
         touch("test1.txt", "test2.txt")
-        makedirs(tf)
+        self.assertEqual(folder_exists_or_create(tf), tf)
         self.assertEqual(file_exists(l1[0]), l1[0])
         self.assertRaises(ValueError, file_exists, l3[0])
         self.assertRaises(ValueError, file_exists, tf)
@@ -37,9 +37,9 @@ class TestHelpersTypes(TestCase):
         rmdir(tfne)
         remove("test1.txt")
         remove("test2.txt")
-        self.assertEqual(neg_int(0), 0)
         self.assertEqual(neg_int(-1), -1)
         self.assertEqual(negative_int(-1), -1)
+        self.assertRaises(ValueError, neg_int, 0)
         self.assertRaises(ValueError, neg_int, 1)
         self.assertRaises(ValueError, neg_int, -1.2)
         self.assertRaises(ValueError, neg_int, "test")
@@ -54,9 +54,10 @@ class TestHelpersTypes(TestCase):
         self.assertRaises(ValueError, ints, "0,1]")
         self.assertRaises(ValueError, ints, ["a", 1])
         self.assertEqual(neg_ints("-1"), [-1])
-        self.assertEqual(negative_ints("[0,-2]"), [0, -2])
-        self.assertRaises(ValueError, neg_ints, "0,-2]")
+        self.assertEqual(negative_ints("[-1,-2]"), [-1, -2])
+        self.assertRaises(ValueError, neg_ints, "-1,-2]")
         self.assertRaises(ValueError, neg_ints, [-1, 1])
+        self.assertRaises(ValueError, neg_ints, "-1,0")
         self.assertRaises(ValueError, neg_ints, "test,0")
         self.assertEqual(pos_ints("1"), [1])
         self.assertEqual(positive_ints("[1,2]"), [1, 2])
@@ -65,15 +66,22 @@ class TestHelpersTypes(TestCase):
         self.assertRaises(ValueError, pos_ints, "test,0")
     
     def test_network_related_types(self):
-        self.assertIsInstance(ip_address("127.0.0.1"), ipaddress.IPv4Address)
-        self.assertIsInstance(ip_address("fe00::"), ipaddress.IPv6Address)
+        self.assertIsInstance(ip_address("127.0.0.1"), netaddr.IPAddress)
+        self.assertIsInstance(ip_address("12345"), netaddr.IPAddress)
+        self.assertIsInstance(ip_address("12345678900"), netaddr.IPAddress)
+        self.assertRaises(ValueError, ipv4_address, "12345678900")
+        self.assertIsInstance(ip_address("fe00::"), netaddr.IPAddress)
         self.assertRaises(ValueError, ip_address, "0.0.0.300")
+        self.assertRaises(ValueError, ipv4_address, "0.0.0.300")
         self.assertRaises(ValueError, ip_address, "fe00:::")
-        self.assertIsInstance(ip_address_list("192.168.1.0/24"), list)
+        self.assertRaises(ValueError, ipv6_address, "fe00:::")
+        self.assertIsInstance(list(ip_address_list("192.168.1.0/30")), list)
         self.assertRaises(ValueError, ip_address_list, "192.168.1.0.0/24")
-        self.assertIsInstance(ip_address_network("192.168.1.0/24"),
-                              ipaddress.IPv4Network)
+        self.assertIsInstance(list(ip_address_network("192.168.1.0/30")), list)
         self.assertRaises(ValueError, ip_address_network, "192.168.1.0.0/24")
+        self.assertIsInstance(mac_address(12345), netaddr.EUI)
+        self.assertIsInstance(mac_address("01:02:03:04:05:06"), netaddr.EUI)
+        self.assertRaises(ValueError, mac_address, "01:02:03-04:05:06")
         self.assertIsInstance(port_number(100), int)
         self.assertRaises(ValueError, port_number, -1)
         self.assertRaises(ValueError, port_number, 123456789)
@@ -114,6 +122,35 @@ class TestHelpersTypes(TestCase):
         self.assertTrue(is_hex("c0ffee"))
         self.assertFalse(is_hex("coffee"))
         self.assertFalse(is_hex("00a"))
+    
+    def test_network_format_check(self):
+        self.assertTrue(is_ip("1234"))
+        self.assertTrue(is_ipv4("1234"))
+        self.assertTrue(is_ipv6("12345678900"))
+        self.assertFalse(is_ipv4("12345678900"))
+        self.assertFalse(is_ipv6("1234567890123456789012345678901234567890123"))
+        self.assertTrue(is_ipv6("123456789012345678901234567890123456789"))
+        self.assertTrue(is_ip("127.0.0.1"))
+        self.assertTrue(is_ipv4("127.0.0.1"))
+        self.assertTrue(is_ip("fe00::"))
+        self.assertTrue(is_ipv6("fe00::"))
+        GOOD = ["1.2.3.4", "fe00::", "127.0.0.0/30"]
+        BAD1 = ["1.2.3.300", "fe00::", "127.0.0.0/30"]
+        BAD2 = ["1.2.3.4", "fe00::", "127.0.0.0/40"]
+        self.assertTrue(all(is_ip(_) for _ in ip_address_list(GOOD)))
+        self.assertRaises(ValueError, ip_address_list, BAD1)
+        self.assertRaises(ValueError, ip_address_list, BAD2)
+        self.assertRaises(ValueError, ipv4_address_list, BAD1)
+        self.assertRaises(ValueError, ipv6_address_list, BAD2)
+        self.assertTrue(all(is_ip for _ in ip_address_filtered_list(BAD1)))
+        self.assertTrue(all(is_ip for _ in ip_address_filtered_list(BAD2)))
+        self.assertTrue(all(is_ip for _ in ipv4_address_filtered_list(BAD1)))
+        self.assertTrue(all(is_ip for _ in ipv6_address_filtered_list(BAD2)))
+        self.assertTrue(is_mac("12345"))
+        self.assertTrue(is_mac("01:02:03:04:05:06"))
+        self.assertTrue(is_mac("01-02-03-04-05-06"))
+        self.assertFalse(is_mac("01:02:03:04:05"))
+        self.assertFalse(is_mac("01|02|03|04|05|06"))
     
     def test_option_format_check(self):
         self.assertTrue(is_long_opt("--test"))
