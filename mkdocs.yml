@@ -7,6 +7,7 @@ pages:
   - Setup: setup.md
   - Internals: internals.md
   - Features: features.md
+  - Helpers: helpers.md
   - Usage: usage.md
   - Examples:
     - 'Simple script': examples/simple-script.md
