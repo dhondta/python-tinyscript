@@ -19,3 +19,6 @@ exclude_lines =
     class RemoteInteractiveConsole
     # exit tasks
     def __at_exit\(\)\:
+    if DARWIN:
+    if WINDOWS:
+    raise NotImplementedError

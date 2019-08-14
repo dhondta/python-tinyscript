@@ -70,6 +70,7 @@ target/
 .idea
 .vagrant
 .test
+.pytest_cache
 .tinyscript-test.ini
 tmp
 TODO
