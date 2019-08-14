@@ -15,18 +15,18 @@ from .types import is_lambda
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["LINUX", "MACOS", "PYTHON3", "WINDOWS", "b",
-                          "byteindex", "capture", "confirm", "iterbytes",
+__all__ = __features__ = ["b", "byteindex", "capture", "confirm", "iterbytes",
                           "pause", "silent", "slugify", "std_input", "u",
                           "user_input", "Capture"]
 
 
+__all__ += ["DARWIN", "LINUX", "WINDOWS"]
+DARWIN  = system() == "Darwin"
 LINUX   = system() == "Linux"
-MACOS   = system() == "Darwin"
 WINDOWS = system() == "Windows"
 
+__all__ += ["PYTHON3"]
 PYTHON3      = version_info > (3,)
-CHOICE_REGEX = re.compile(r'^\(([a-z0-9])\).*$', re.I)
 
 
 # see: http://python3porting.com/problems.html
@@ -101,7 +101,7 @@ def confirm(style="bold"):
     Ask for confirmation.
     """
     return user_input("Are you sure ?", ["(Y)es", "(N)o"], "n", style=style) \
-           == "y"
+           == "yes"
 
 
 def silent(f):
@@ -136,44 +136,56 @@ def std_input(prompt="", style=None, palette=None):
 
 
 def user_input(prompt="", choices=None, default=None, choices_str="",
-               required=False, **kwargs):
+               required=False, newline=False, **kwargs):
     """
     Python2/3-compatible input method handling choices and default value.
     
-    :param prompt:   prompt message
-    :param choices:  list of possible choices or lambda function
-    :param default:  default value
-    :param required: make non-null user input mandatory
-    :param kwargs:   keyword-arguments to be passed to std_input for styling
-    :return:         handled user input
+    :param prompt:      prompt message
+    :param choices:     list of possible choices or lambda function
+    :param default:     default value
+    :param choices_str: list of possible choices as a string (overrides the
+                         default composition from the list of choices)
+    :param required:    make non-null user input mandatory
+    :param newline:     insert a newline and '>>' after the prompt
+    :param kwargs:      keyword-arguments to be passed to std_input for styling
+    :return:            handled user input
     """
+    shortcuts = {}
     if type(choices) in [list, tuple, set]:
-        choices = list(map(str, choices))
+        choices = list(map(lambda x: str(x).lower(), choices))
         choices_str = " {%s}" % (choices_str or \
                                  '|'.join(list(map(str, choices))))
         # consider choices of the form ["(Y)es", "(N)o"] ;
-        #  in this case, we want the choices to be ['y', 'n'] for the sake of
-        #  simplicity for the user
-        m = list(map(lambda x: CHOICE_REGEX.match(x), choices))
-        choices = [x.group(1).lower() if x else c for x, c in zip(m, choices)]
+        #  in this case, we want the choices to be ['yes', 'no', 'y', 'n'] for
+        #  the sake of simplicity for the user
+        m = list(map(lambda x: re.match(r'\(([a-zA-Z0-9])\)', x), choices))
+        # then remove the parenthesis from the choices
+        choices = [re.sub(r"\(([a-zA-Z0-9])\)", 
+                          lambda x: x.group(1).lower(), c) for c in choices]
+        shortcuts = {x.group(1).lower(): c for x, c in zip(m, choices) \
+                     if x is not None}
         # this way, if using ["Yes", "No"], choices will remain so
-        _check = lambda v: v in choices
+        _check = lambda v: str(v).lower() in choices or \
+                           str(v).lower() in shortcuts.keys()
     elif is_lambda(choices):
         _check = choices
     else:
         _check = lambda v: True
-    prompt += "{}{}\n".format(choices_str, [" [{}]".format(default), ""]\
-                                           [default is None and required])
+    prompt += "{}{} ".format(choices_str, [" [{}]".format(default), ""] \
+                                          [default is None and required])
     user_input, first = None, True
     while not user_input:
-        user_input = std_input(["", prompt][first] + " >> ", **kwargs)
+        user_input = std_input(["", prompt][first] + ["", "\n >> "][newline],
+                               **kwargs)
         first = False
         if type(choices) in [list, tuple, set]:
             choices = list(map(lambda x: x.lower(), choices))
             user_input = user_input.lower()
         if user_input == "" and default is not None and _check(default):
-            return str(default)
+            _ = str(default)
+            return shortcuts.get(_) or _
         if user_input != "" and _check(user_input):
-            return user_input
+            _ = user_input
+            return shortcuts.get(_) or _
         if not required:
             return
