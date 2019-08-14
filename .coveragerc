@@ -12,6 +12,7 @@ exclude_lines =
     (?s)if.*?PYTHON3.*?\:(.*?(else|elif).*?\:)*
     import ConfigParser
     except ImportError:
+    except NameError:
     # sudo when using 'initialize'
     os\.geteuid\(\) \!\= 0
     # 'interact' module - remote interaction
