@@ -136,17 +136,25 @@ List of "*report*" arguments and options:
 
 ## Pre-imports
 
-Some common built-in modules are preimported.
+Some common built-in or popular modules are preimported.
 
 ```sh
 $ python
 [...]
->>> from tinyscript import __preimports__
+>>> from tinyscript import *
 >>> __preimports__
 ['argparse', 'base64', 'binascii', 'collections', 'hashlib', 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string', 'sys', 'time']
+>>> __optimports__
+['numpy', 'pandas']
+>>> __badimports__
+['fs']
 ```
 
-In a script/tool, all these built-in modules are preimported with the line `from tinyscript import *`.
+In a script/tool, all these modules are preimported within the global namespace using the line `from tinyscript import *`.
+
+Modules can be loaded within a script/tool using the `load(module, optional)` function. If setting `optional` to `False` (the default) and the module does not exist, the name will be appended to the `__badimports__` list.
+
+Modules can also be reloaded using `reload` (this of `importlib` for Python 3, and the native one in Python 2 as it does not exist in `importlib` for Python 2).
 
 !!! note "Improvements to `hashlib`"
     
