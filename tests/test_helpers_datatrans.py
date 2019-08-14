@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common utility lambdas' tests.
+"""Data transformation tests.
 
 """
 from unittest import TestCase

@@ -4,7 +4,7 @@
 
 """
 from tinyscript.argreparse import ArgumentParser, HelpFormatter, Namespace, \
-                                  _NewSubParsersAction, SUPPRESS as SUP
+                                  SUPPRESS as SUP, _NewSubParsersAction
 from utils import *
 
 
@@ -75,6 +75,21 @@ class TestArgreparse(TestCase):
         self.assertFalse(args.verb_mode)
         self.assertIs(args.version, None)
         self.assertFalse(args.show_version)
+    
+    def test_mutually_exclusive_arguments(self):
+        g = self.p.add_mutually_exclusive_group()
+        g.add_argument("-a", action="store_true")
+        g.add_argument("-b", action="store_true")
+        sys.argv[1:] = ["-a", "-b"]
+        self.assertRaises(SystemExit, self.p.parse_args)
+        sys.argv[1:] = ["-a"]
+        args = self.p.parse_args()
+        self.assertTrue(args.a)
+        self.assertFalse(args.b)
+        sys.argv[1:] = ["-b"]
+        args = self.p.parse_args()
+        self.assertFalse(args.a)
+        self.assertTrue(args.b)
 
     def test_input_common_actions(self):
         sys.argv[1:] = ["-a", "-b", "-c", "-d", "-e", "--fff", "--fff"]
@@ -128,7 +143,8 @@ class TestArgreparse(TestCase):
         
     def test_subparser_action(self):
         subparsers = self.p.add_subparsers(dest="command")
-        test = subparsers.add_parser("subtest", help="test", parents=[self.p])
+        test = subparsers.add_parser("subtest", aliases=["test2"], help="test",
+                                     parents=[self.p])
         test.add_argument("--test")
         a = self.p._actions[0]
         temp_stdin(self, "\n")

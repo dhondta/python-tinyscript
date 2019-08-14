@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Stepping module assets' tests.
+"""Timeout utility assets' tests.
 
 """
 from tinyscript.helpers.timeout import timeout, Timeout, TimeoutError

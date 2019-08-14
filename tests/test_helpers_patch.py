@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common utility help functions' tests.
+"""Code patching functions' tests.
 
 """
 from unittest import TestCase

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common custom type validations' tests.
+"""Custom type validations' tests.
 
 """
 import netaddr

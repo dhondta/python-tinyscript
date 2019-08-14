@@ -36,9 +36,7 @@ class TestParser(TestCase):
     
     def setUp(self):
         global parser
-        parser = proxy_parser     # reuse the original proxy parser reference
-        parser.reset()            # reset the proxy parser, otherwise it will
-                                  #  hold the previous calls (add_argument, ...)
+        parser = proxy_parser  # reuse the original proxy parser reference
 
     def test_input_arguments(self):
         sys.argv[1:] = ["--arg1", "test", "-b"]
@@ -54,7 +52,6 @@ class TestParser(TestCase):
         sys.argv[1:] = ["subtest", "-b", "test"]
         test = parser.add_subparsers().add_parser("subtest", parents=[parser])
         test.add_argument("-b", "--arg2")
-        self.assertIsInstance(getattr(parser, "calls"), list)
         if PYTHON3:
             initialize(globals())
         else:  # with Python2, an error occurs with the overwritten sys.argv

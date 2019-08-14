@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common help utility help functions' tests.
+"""License features' tests.
 
 """
 from unittest import TestCase
