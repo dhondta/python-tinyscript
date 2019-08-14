@@ -95,7 +95,7 @@ class _NewSubParsersAction(_SubParsersAction):
         if kwargs.get('prog') is None:
             kwargs['prog'] = "%s %s" % (self._prog_prefix, name)
         # create a pseudo-action to hold the choice help
-        aliases = kwargs.pop('aliases', []) if PYTHON3 else []
+        aliases = kwargs.pop('aliases', [])
         if 'help' in kwargs:
             help = kwargs.pop('help')
             # see [Python2] argparse.py:1029 and [Python3] argparse.py:1059
