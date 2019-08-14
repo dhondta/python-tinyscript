@@ -57,7 +57,7 @@ def load(module, optional=False):
         __features__.append(module)
         return m
     except ImportError:
-        if not optional:
+        if not optional and module not in __badimports__:
             __badimports__.append(module)
 
 
