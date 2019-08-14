@@ -6,6 +6,7 @@ netaddr
 numpy; python_version>='3.4'
 pandas; python_version>='3.4'
 patchy
+pathlib
 pymdown-extensions
 python-slugify
 six
