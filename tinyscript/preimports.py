@@ -8,7 +8,7 @@ from six import b
 try:  # will work in Python 3
     from importlib import reload
 except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
-    pass
+    reload = reload
 
 from .__info__ import __author__, __copyright__, __version__
 
