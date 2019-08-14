@@ -15,6 +15,8 @@ class TestPreimports(TestCase):
         _load_preimports(BAD)
         self.assertIn(BAD, __badimports__)
         for m in __optimports__ + __preimports__:
+            if m in __badimports__:
+                continue
             self.assertIn(m, globals().keys())
         for m in __badimports__:
             self.assertNotIn(m, globals().keys())
