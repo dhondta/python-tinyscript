@@ -162,9 +162,3 @@ Modules can also be reloaded using `reload` (this of `importlib` for Python 3, a
     
     - `hash_file`: this hashes a file per block.
     - `[hash]_file` (e.g. `sha256_file`): each hash algorithm existing in the native `hashlib` has a bound function for hashing a file (e.g. `md5` is a native function of `hashlib` and will then have `md5_file`).
-
------
-
-## Helpers
-
-Multiple helper constants or functions are imported in the global scope when using `from tyniscript import *`. For a complete list of helpers, please see [this page](../helpers/).
