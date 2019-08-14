@@ -1,6 +1,6 @@
 ## Useful general-purpose functions
 
-Tinyscript provides a few predefined utility functions:
+According to the DRY philosophy, Tinyscript provides a few predefined utility functions:
 
 **Name** | **Description**
 :---: | :---:
@@ -22,9 +22,48 @@ Tinyscript provides a few predefined utility functions:
 
 -----
 
+## Extended `pathlib` classes
+
+Tinyscript also provides 2 `pathlib`-related functions:
+
+- `Path`: Extended Python2/3-compatible path class
+
+    It fixes multiple compatibility issues between Python 2 and 3, namely `mkdir`'s `exist_ok` argument or methods `expanduser`, `read_text` and `write_text`.
+    
+    It also extends the class with multiple new useful methods like:
+    
+    - `append_bytes(data)`: appends bytes to the current file (complements `write_bytes`, which forces the `wb` mode)
+    - `append_line(line)`: appends a newline (if not the beginning of the file) and `line`
+    - `append_lines(*lines)`: appends multiple lines relying on `append_line(line)`
+    - `append_text(data)`: appends text to the current file (complements `write_text`, which forces the `w` mode)
+    - `choice(*filetypes)`: chooses a random file in the current folder among the given extensions (mentioning the dot ; e.g. `.py`)
+    - `generate(prefix, suffix, length, alphabet)`: generates a random folder name (guaranteed to be non-existent) using the given prefix, suffix, length and alphabet, and returns the joined path
+    - `is_hidden()`: checks whether the current file/folder is hidden
+    - `is_samepath(other_path)`: checks whether the given path is the same
+    - `iterfiles()`: iterates over files only
+    - `iterpubdir()`: iterates over visible directories only
+    - `reset()`: truncates the file
+    - `remove()`: removes the current file or recursively removes the current folder
+    
+    It also adds some properties:
+    
+    - `bytes`: returns file's content as raw bytes
+    - `child`: returns the relative child path
+    - `filename`: returns the complete filename (stem and suffix ; not natively present in `pathlib`)
+    - `size`: returns path's size (recursively computed if it is a folder)
+    - `text`: returns file's content as text
+
+- `TempPath`: additional class for handling temporary folder
+    
+    This automatically creates a folder with a randomly generated name in OS' temporary location using a prefix, suffix, length and alphabet (like for `Path.generate(...)`).
+    
+    - `tempfile(**kwargs)`: passes `kwargs` to `tempfile.NamedTemporaryFile` and returns a temporary file descriptor under the current `TempPath` folder
+
+-----
+
 ## Type checking functions
 
-According to the DRY philosophy, Tinyscript provides some type checking functions:
+Tinyscript provides some type checking functions:
 
 **Function** | **Description**
 :---: | :---:
@@ -168,8 +207,8 @@ Tinyscript also provides some predefined constants:
 
 **Name** | **Description**
 :---: | :---:
+`DARWIN` | `True` if Darwin platform
 `LINUX` | `True` if Linux platform
-`MACOS` | `True` if Mac OS platform
 `WINDOWS` | `True` if Windows platform
 `PYTHON3` | `True` if Python 3, `False` if Python 2
 
