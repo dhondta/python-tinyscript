@@ -3,18 +3,27 @@
 """Module for defining the list of preimports.
 
 """
-import importlib
+from importlib import import_module
 from six import b
-try:
-    reload = reload
-except NameError:
-    reload = importlib.reload
+try:  # will work in Python 3
+    from importlib import reload
+except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
+    pass
 
 from .__info__ import __author__, __copyright__, __version__
 
 
-# modules to be pre-imported in the main script using tinyscript
-PREIMPORTS = [
+__all__ = __features__ = []
+__all__ += ["__badimports__", "__optimports__", "__preimports__",
+            "load", "reload"]
+
+__badimports__ = []
+__optimports__ = [
+    "fs",
+    "numpy",
+    "pandas",
+]
+__preimports__ = [
     "argparse",
     "base64",
     "binascii",
@@ -33,6 +42,25 @@ PREIMPORTS = [
 ]
 
 
+def load(module, optional=False):
+    """
+    This loads a module and, in case of failure, appends it to a list of bad
+     imports or not if it is required or optional.
+    
+    :param module:   module name
+    :param optional: whether the module is optional or not
+    """
+    global __badimports__, __features__, __preimports__
+    try:
+        globals()[module] = m = import_module(module)
+        m.__name__ = module
+        __features__.append(module)
+        return m
+    except ImportError:
+        if not optional:
+            __badimports__.append(module)
+
+
 def _load_preimports(*extras):
     """
     This loads the list of modules to be preimported in the global scope.
@@ -40,15 +68,11 @@ def _load_preimports(*extras):
     :param extra: additional modules
     :return:      list of successfully imported modules, list of failures
     """
-    preimports, failures = [], []
-    for module in PREIMPORTS + list(extras):
-        try:
-            globals()[module] = importlib.import_module(module)
-            preimports.append(module)
-        except ImportError:
-            failures.append(module)
-    return preimports, failures
-__preimports = _load_preimports()[0]
+    for module in __preimports__ + list(extras):
+        load(module)
+    for module in __optimports__:
+        load(module, True)
+_load_preimports()
 
 
 # hashlib improvements
@@ -84,7 +108,3 @@ for algo in [x for x in hashlib.__dict__.keys()]:
         setattr(hashlib, "{}_file".format(algo), _hash_file(algo))
     except ValueError:  # triggered by h.update(b(""))
         pass
-
-
-__all__ = __features__ = __preimports
-__all__ += ["reload", "PREIMPORTS"]
