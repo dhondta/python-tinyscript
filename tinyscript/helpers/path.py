@@ -8,7 +8,7 @@ from shutil import rmtree
 from six import string_types
 from tempfile import gettempdir, NamedTemporaryFile as TempFile
 
-from .utils import LINUX, DARWIN, PYTHON3, WINDOWS
+from .utils import u, LINUX, DARWIN, PYTHON3, WINDOWS
 
 
 __all__ = __features__ = ["Path", "TempPath"]
@@ -72,7 +72,7 @@ class Path(BasePath):
             raise TypeError("data must be str, not %s" % 
                             data.__class__.__name__)
         with self.open(mode=mode, encoding=encoding, errors=errors) as f:
-            return f.write(data)
+            return f.write(u(data))
     
     def append_bytes(self, data):
         """ Allows to append bytes to the file, as only write_bytes is available
