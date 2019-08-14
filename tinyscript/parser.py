@@ -25,46 +25,7 @@ from .step import set_step_items
 
 __all__ = __features__ = ["parser", "initialize", "validate"]
 
-
-def __get_calls_from_parser(proxy_parser, real_parser):
-    """
-    This actually executes the calls registered in the ProxyArgumentParser.
-
-    :param proxy_parser: ProxyArgumentParser instance
-    :param real_parser:  ArgumentParser instance
-    """
-    __parsers[proxy_parser] = real_parser
-    for method, safe, args, kwargs, proxy_subparser in proxy_parser.calls:
-        args = (__proxy_to_real_parser(v) for v in args)
-        kwargs = {k: __proxy_to_real_parser(v) for k, v in kwargs.items()}
-        real_subparser = getattr(real_parser, method)(*args, **kwargs)
-        if real_subparser is not None:
-            __get_calls_from_parser(proxy_subparser, real_subparser)
-
-
-def __proxy_to_real_parser(value):
-    """
-    This recursively converts ProxyArgumentParser instances to actual parsers.
-
-    Use case: defining subparsers with a parent
-      >>> [...]
-      >>> parser.add_argument(...)  # argument common to all subparsers
-      >>> subparsers = parser.add_subparsers()
-      >>> subparsers.add_parser(..., parents=[parent])
-                                                ^
-                              this is an instance of ProxyArgumentParser
-                              and must be converted to an actual parser instance
-
-    :param value: a value coming from args or kwargs aimed to an actual parser
-    """
-    if isinstance(value, ProxyArgumentParser):
-        return __parsers[value]
-    elif any(isinstance(value, t) for t in [list, tuple]):
-        new_value = []
-        for subvalue in iter(value):
-            new_value.append(__proxy_to_real_parser(subvalue))
-        return new_value
-    return value
+parser_calls = []  # will be populated by calls to ProxyArgumentParser
 
 
 def _save_config(glob):
@@ -72,8 +33,8 @@ def _save_config(glob):
     if cf:
         with open(cf, 'w') as f:
             glob['parser']._config.write(f)
-        glob['logger'].debug("Input arguments written to file "
-                             "'{}'".format(cf))
+        glob['logger'].debug(gt("Input arguments written to file '{}'")
+                             .format(cf))
 
 
 def initialize(glob,
@@ -116,7 +77,7 @@ def initialize(glob,
     :param noargs_action:     action to be performed when no argument is input
     :param report_func:       report generation function
     """
-    global parser, __parsers
+    global parser, parser_calls
     
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
            'progress': add_progress, 'step': add_step, 'time': add_time,
@@ -127,13 +88,45 @@ def initialize(glob,
     noarg = len(sys.argv) == 1
     if noarg and noargs_action:
         if noargs_action not in add.keys():
-            raise ValueError("Bad action when no args (should be one of: {})"
-                             .format('|'.join(add.keys())))
+            raise ValueError(gt("Bad action when no args (should be one of: "
+                                "{})").format('|'.join(add.keys())))
         add[noargs_action] = True  # ensure this action is enabled, even if it
                                    #  is not given the passed arguments
     # 2) populate the real parser and add information arguments
-    __parsers = {}
-    __get_calls_from_parser(parser, p)
+    __parsers = {parser: p}
+    #  proxy parser to real parser recursive conversion function
+    def __proxy_to_real_parser(value):
+        """
+        This recursively converts ProxyArgumentParser instances to real parsers.
+
+        Use case: defining subparsers with a parent
+          >>> [...]
+          >>> parser.add_argument(...)  # argument common to all subparsers
+          >>> subparsers = parser.add_subparsers()
+          >>> subparsers.add_parser(..., parents=[parent])
+                                                    ^
+                              this is an instance of ProxyArgumentParser
+                              and must be converted to an actual parser instance
+
+        :param value: a value coming from args or kwargs aimed to a real parser
+        """
+        if isinstance(value, ProxyArgumentParser):
+            return __parsers[value]
+        elif isinstance(value, (list, tuple)):
+            return [__proxy_to_real_parser(_) for _ in value]
+        return value
+    #  now iterate over the registered calls
+    for proxy_parser, method, args, kwargs, proxy_subparser in parser_calls:
+        real_parser = __parsers[proxy_parser]
+        args = (__proxy_to_real_parser(v) for v in args)
+        kwargs = {k: __proxy_to_real_parser(v) for k, v in kwargs.items()}
+        real_subparser = getattr(real_parser, method)(*args, **kwargs)
+        if real_subparser is not None:
+            __parsers[proxy_subparser] = real_subparser
+    # this allows to ensure that another call to initialize(...) will have a
+    #  clean list of calls and an empty _config attribute
+    parser_calls = []
+    ArgumentParser.reset()
     #  config handling feature, for reading/writing an INI config file with the
     #   input arguments, e.g. for future reuse
     if add['config']:
@@ -231,7 +224,7 @@ def initialize(glob,
     if report_func is not None and PYTHON3:
         if not isfunction(report_func):
             report_func = None
-            glob['logger'].error("Bad report generation function")
+            glob['logger'].error(gt("Bad report generation function"))
             return
         # lazily import report features
         #  -> reason: they rely on pandas and weasyprint, which take time to be
@@ -258,7 +251,7 @@ def initialize(glob,
             r.add_argument("--filename", last=True, prefix="report",
                            help=gt("report filename"))
     elif report_func is not None and not PYTHON3:
-        glob['logger'].warning("Report generation is only for Python 3")
+        glob['logger'].warning(gt("Report generation is only for Python 3"))
     # extended logging features
     if ext_logging:
         i.add_argument("-f", "--logfile", last=True,
@@ -343,7 +336,7 @@ def validate(glob, *arg_checks):
         check = check + (None, ) * (4 - len(check))
         param, condition, message, default = check
         if re.match(r'^_?[a-zA-Z][a-zA-Z0-9_]*$', param) is None:
-            raise ValueError("Illegal argument name")
+            raise ValueError(gt("Illegal argument name"))
         try:
             result = eval(condition.replace(" ? ", " glob['args'].{} "
                                             .format(param)))
@@ -352,10 +345,10 @@ def validate(glob, *arg_checks):
             message = str(e)
         if result:
             if default is None:
-                glob['logger'].error(message or "Validation failed")
+                glob['logger'].error(gt(message or "Validation failed"))
                 exit_app = True
             else:
-                glob['logger'].warning(message or "Validation failed")
+                glob['logger'].warning(gt(message or "Validation failed"))
                 setattr(glob['args'], param, default)
     if exit_app:
         sys.exit(2)
@@ -365,27 +358,21 @@ class ProxyArgumentParser(object):
     """
     Proxy class for collecting added arguments before initialization.
     """
-    def __init__(self):
-        self.calls = []
-        self.__parser = ArgumentParser()
-
     def __getattr__(self, name):
-        self.__current_call = name
-        self.__call_exists = hasattr(self.__parser, name) and \
-                             callable(getattr(self.__parser, name))
+        """ Each time a method is called, return __collect to make it capture
+             the input arguments and keyword-arguments if it exists in the
+             original parser class. """
+        self.__call = name
         return self.__collect
 
     def __collect(self, *args, **kwargs):
+        """ Capture the input arguments and keyword-arguments of the currently
+             called method, appending a proxy subparser in case it should be
+             used for mutually exclusive groups or subparsers. """
         subparser = ProxyArgumentParser()
-        self.calls.append((self.__current_call, self.__call_exists,
-                           args, kwargs, subparser))
-        del self.__current_call
-        del self.__call_exists
+        parser_calls.append((self, self.__call, args, kwargs, subparser))
+        del self.__call
         return subparser
-    
-    def reset(self):
-        ArgumentParser.reset()
-        self.calls = []
 
 
 parser = ProxyArgumentParser()
