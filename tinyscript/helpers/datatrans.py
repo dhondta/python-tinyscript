@@ -111,6 +111,7 @@ def hex2str(hex_string):
 def int2bin(integer, n_bits=8, n_groups=1, sep=None, order="little"):
     """ Convert an integer to a binary string (eventually using a separator),
          using a given number of bits and in little or big endian. """
+    #FIXME: use format(int, "0Nb") with N the number of heading zeros
     n, m = n_bits, n_groups
     __validation(i=integer, n_b=n, n_g=m, o=order)
     r, b = [], bin(integer)[2:]
@@ -123,9 +124,6 @@ def int2bin(integer, n_bits=8, n_groups=1, sep=None, order="little"):
         r.insert(0, "0" * n)
     # then reverse per n_groups if big endian
     if order == "big":
-#        if m == 1:
-#            r = r[::-1]
-#        else:
         r = [i for l in [r[i:i+m][::-1] for i in range(0, len(r), m)] \
              for i in l]
     return (sep or "").join(r)
@@ -133,6 +131,8 @@ def int2bin(integer, n_bits=8, n_groups=1, sep=None, order="little"):
 
 # INTEGER <=> HEXADECIMAL STRING
 def int2hex(integer, n_bytes=None):
+    """ Convert an integer to a hexadecimal string. """
+    #FIXME: use format(int, "0Nx") with N the number of hex digits to be output
     i, n = integer, n_bytes
     __validation(i=i, n_B=n)
     h = "".join("{:0>2}".join(c) for c in hex(i)[2:].rstrip("L"))

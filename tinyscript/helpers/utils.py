@@ -130,9 +130,10 @@ def std_input(prompt="", style=None, palette=None):
             style = "_".join(style)
         prompt = getattr(colorful, style)(prompt)
     try:
-        return raw_input(prompt).strip()
+        input = raw_input
     except NameError:
-        return input(prompt).strip()
+        pass
+    return input(prompt).strip()
 
 
 def user_input(prompt="", choices=None, default=None, choices_str="",

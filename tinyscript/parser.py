@@ -264,10 +264,12 @@ def initialize(glob,
     glob['args'], glob['parser'] = p.parse_args(), p
     # 3) if sudo required, restart the script
     if sudo:
+        # FIXME: when prompting for sudo and restarting the script, some imports
+        #         fail (e.g. with DroneSploit ; import error with
+        #         FrameworkConsole)
         # if not root, restart the script in another process and jump to this
         if os.geteuid() != 0:
-            python = [] if glob['__file__'].startswith("./") else ["python"]
-            os.execvp("sudo", ["sudo"] + python + sys.argv)
+            os.execvp("sudo", ["sudo", sys.executable] + sys.argv)
     # 4) configure logging and get the main logger
     configure_logger(glob, multi_level_debug,
                      glob['args']._collisions.get("relative"),
