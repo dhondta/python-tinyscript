@@ -15,9 +15,9 @@ from .types import is_lambda
 from ..__info__ import __author__, __copyright__, __version__
 
 
-__all__ = __features__ = ["b", "byteindex", "capture", "confirm", "iterbytes",
-                          "pause", "silent", "slugify", "std_input", "u",
-                          "user_input", "Capture"]
+__all__ = __features__ = ["b", "byteindex", "capture", "clear", "confirm",
+                          "iterbytes", "pause", "silent", "slugify",
+                          "std_input", "u", "user_input", "Capture"]
 
 
 __all__ += ["DARWIN", "LINUX", "WINDOWS"]
@@ -44,6 +44,17 @@ def b(text):
         return six_b(text)
     except:
         return text
+
+
+def clear():
+    """
+    Dummy multi-platform screen clear function.
+    """
+    from os import system
+    if DARWIN or LINUX:
+        system("clear")
+    elif WINDOWS:
+        system("cls")
 
 
 class _Text(object):

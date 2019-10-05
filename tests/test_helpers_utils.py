@@ -13,6 +13,7 @@ from utils import *
 
 class TestHelpersUtils(TestCase):
     def test_input_functions(self):
+        clear()
         temp_stdout(self)
         self.assertTrue(b("test"))
         self.assertEqual(b(1), 1)
