@@ -4,19 +4,20 @@ According to the DRY philosophy, Tinyscript provides a few predefined utility fu
 
 **Name** | **Description**
 :---: | :---:
-`std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
-`user_input` | Python2/3-compatible enhanced input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful), choices, default value and 'required' option)
-`confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
-`pause` | Python2/3-compatible dummy input function, waiting for a key to be pressed (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
-`slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
 `b` / `u` | Python2/3-compatible functions to convert to bytes or unicode
 `byteindex` | Python2/3-compatible function to get the index of a byte
-`iterbytes` | Python2/3-compatible function to iterate bytes
 `capture` | decorator for capturing `stdout` and `stderr` of a function
-`Capture` | context manager for capturing `stdout` and `stderr` of a code block
-`silent` | decorator for silencing `stdout` and `stderr` of a function
+`clear` | multi-platform clear screen function
+`confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
 `get_terminal_size()` | cross-platform terminal size function
+`iterbytes` | Python2/3-compatible function to iterate bytes
+`pause` | Python2/3-compatible dummy input function, waiting for a key to be pressed (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
+`silent` | decorator for silencing `stdout` and `stderr` of a function
+`slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
+`std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
 `timeout` | decorator for applying a timeout to a function
+`user_input` | Python2/3-compatible enhanced input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful), choices, default value and 'required' option)
+`Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `Timeout` | context manager for applying a timeout to a code block
 `TimeoutError` | custom exception for handling a timeout (as it is natively available in Python 3 but not in Python 2)
 
@@ -63,7 +64,7 @@ Tinyscript also provides 2 `pathlib`-related functions:
 
 ## Type checking functions
 
-Tinyscript provides some type checking functions:
+Tinyscript provides some type checking functions, for common data:
 
 **Function** | **Description**
 :---: | :---:
@@ -76,13 +77,22 @@ Tinyscript provides some type checking functions:
 `is_hex` | hexadecimal string (case insensitive)
 `is_dir` / `is_folder` | dummy shortcuts to `os.path.isdir`
 `is_file` | dummy shortcut to `os.path.isfile`
+
+And for network-related data:
+
+**Function** | **Description**
+:---: | :---:
+`is_defgw` | default gateway
+`is_gw` | gateway
+`is_ifaddr` | interface address
 `is_ip` / `is_ipv4` / `is_ipv6` | IPv4 or IPv6 address
 `is_mac` | MAC address
+`is_netif` | network interface
 `is_port` | port number
 
 ## Common argument types
 
-While adding arguments to the parser (relying on `argparse`), Tinyscript provides some useful type validation functions that can be used with the `type` keyword argument, namely (returning `ValueError` when the validation fails):
+While adding arguments to the parser (relying on `argparse`), Tinyscript provides some useful common type validation functions that can be used with the `type` keyword argument, namely (returning `ValueError` when the validation fails):
 
 **Type** | **Output** | **Description**
 :---: | :---: | :---:
@@ -95,10 +105,22 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `neg_ints` / `negative_ints` | `lst(int)` | list of negative integers
 `pos_int` / `positive_int` | `int` | single positive integer
 `pos_ints` / `positive_ints` | `lst(int)` | list of positive integers
+
+
+And for network-related types:
+
+**Type** | **Output** | **Description**
+:---: | :---: | :---:
+`default_gateway_address` | valid default gateway address
+`gateway_address` | valid gateway address
+`interface_address` | assigned interface address
+`interface_address_list` | list of assigned interface addresses
+`interface_address_filtered_list` | list of assigned interface addresses, with non-assigned ones filtered
 `ip_address` / `ipv4_address` / `ipv6_address` | `IPAddress` | valid IP address (IPv4 or IPv6, in integer or string format)
 `ip_address_list` / `ipv4_address_list` / `ipv6_address_list` | `generator(netaddr.IPAddress)` | list of IP addresses or networks (IPv4 or IPv6, in integer or string format)
 `ip_address_network` / `ipv4_address_network` / `ipv6_address_network` | `generator(netaddr.IPAddress)` | valid IP address network in CIDR notation (e.g. `192.168.1.0/24`)
 `mac_address` | `netaddr.EUI` | valid MAC address (integer or string)
+`network_interface` | valid network interface on the current system
 `port_number` | `int` | valid port number
 `port_number_range` | `lst(int)` | valid list of port numbers, ranging from and to the given bounds
 
