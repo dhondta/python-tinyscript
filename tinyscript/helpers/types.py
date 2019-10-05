@@ -3,6 +3,7 @@
 """Common custom type checking and validation functions.
 
 """
+import ast
 import netaddr
 import netifaces
 import re
@@ -63,12 +64,25 @@ is_dir = is_folder = isdir
 is_file = isfile
 
 
-def __str2list(l):
+def __str2list(s):
     """ Convert string to list if input is effectively a string. """
-    l = str(l)
-    if l[0] == '[' and l[-1] == ']':
-        l = l[1:-1]
-    return list(map(lambda x: x.strip(" '\""), l.split(',')))
+    # if already a list, simply return it, otherwise ensure input is a string
+    if isinstance(s, list):
+        return s
+    else:
+        s = str(s)
+    # remove heading and trailing brackets
+    if s[0] == '[' and s[-1] == ']' or s[0] == '(' and s[-1] == ')':
+        s = s[1:-1]
+    # then parse list elements from the string
+    l = []
+    for i in s.split(","):
+        i = i.strip()
+        try:
+            l.append(ast.literal_eval(i))
+        except Exception:
+            l.append(i)
+    return l
 
 
 # -------------------- FILE/FOLDER-RELATED ARGUMENT TYPES --------------------
@@ -134,10 +148,6 @@ def __ints(l, check_func=lambda x: False, idescr=None, **kwargs):
     msg = "{} {}integer{}".format(["Bad list of", "Not a"][len(l) == 1],
                                   "" if idescr is None else idescr + " ",
                                   ["s", ""][len(l) == 1])
-    try:
-        l = list(map(int, l))
-    except ValueError:
-        raise ValueError(msg)
     if not all(check_func(_, **kwargs) for _ in l):
         raise ValueError(msg)
     return l
