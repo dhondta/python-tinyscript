@@ -9,14 +9,14 @@ from utils import *
 
 
 FIXTURES = {
+    '__author__':    "John Doe",
     '__copyright__': "test",
-    '__license__': "agpl-v3.0",
-    '__author__': "John Doe",
-    '__email__': "john.doe@example.com",
-    '__version__': "1.2.3",
-    '__status__': "beta",
-    '__examples__': [],
-    '__details__': "test",
+    '__details__':   "test",
+    '__email__':     "john.doe@example.com",
+    '__examples__':  [],
+    '__license__':   "agpl-v3.0",
+    '__status__':    "beta",
+    '__version__':   "1.2.3",
 }
 
 
@@ -210,3 +210,18 @@ class TestArgreparse(TestCase):
         self.assertIn("name", o)
         self.assertNotIn("_collisions", o)
         self.assertIs(ns.get("does_not_exist"), None)
+    
+    def test_custom_constants(self):
+        f = {k: v for k, v in FIXTURES.items()}
+        for fn, fmt, val in [
+                ("test.py", "acronym", "TEST"),
+                ("this-is_a_test.py", "acronym", "TIAT"),
+                ("this_is-a_test.py", "as_is", "this_is-a_test"),
+                ("this-is-a-test.py", "slugified", "ThisIsATest"),
+            ]:
+            f['__file__'] = fn
+            f['SCRIPTNAME_FORMAT'] = fmt
+            p = ArgumentParser(f)
+            self.assertEqual(p.description.split()[0], val)
+        f['SCRIPTNAME_FORMAT'] = "does_not_exist"
+        self.assertRaises(ValueError, ArgumentParser, f)

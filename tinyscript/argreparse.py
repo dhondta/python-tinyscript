@@ -4,6 +4,7 @@
 
 """
 import random
+import re
 import shlex
 import sys
 from argparse import _ActionsContainer, _ArgumentGroup, \
@@ -27,11 +28,21 @@ from .helpers.utils import PYTHON3, user_input
 from .loglib import logger
 
 
-__all__ = ["gt", "ArgumentParser", "SUPPRESS"]
+__all__ = ["gt", "ArgumentParser", "SCRIPTNAME_FORMAT", "SUPPRESS"]
 
 
 DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
+SCRIPTNAME_FORMAT   = "slugified"
+SCRIPTNAME_FORMATS  = {
+    'acronym':   lambda s: "".join(x.strip()[0].upper() for x in \
+                           re.split(r"[ -_]", s)) \
+                           if len(re.split(r"[ -_]", s)) > 1 else s.upper(),
+    'as_is':     lambda s: s,
+    'none':      lambda s: s,
+    'slugified': lambda s: "".join(x.strip().capitalize() \
+                                   for x in re.split(r"[ -_]", s)),
+}
 
 
 # ------------------------------- CUSTOM ACTIONS -------------------------------
@@ -256,7 +267,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self.examples = gd.get('__examples__')
         if self.examples == [] and len(self.examples) == 0:
             self.examples = None
-        script = sys.argv[0]
+        script = gd.get('__file__') or sys.argv[0]
         if script and kwargs.get('prog') is None:
             path = abspath(script)
             root = dirname(path)
@@ -277,9 +288,18 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 kwargs['epilog'] = gt("Usage example{}"
                                       .format(["", "s"][len(_) > 1])) + \
                                    ":\n" + '\n'.join("  " + e for e in _)
+        # adapt the script name according to the specified format
+        sname_fmt  = gd.get('SCRIPTNAME_FORMAT', SCRIPTNAME_FORMAT)
+        sname_func = SCRIPTNAME_FORMATS.get(sname_fmt)
+        if sname_func:
+            sname = sname_func(script)
+        else:
+            l = "\n- ".join(sorted(SCRIPTNAME_FORMATS.keys()))
+            raise ValueError("Bad script name format ; please use one of the "
+                             "followings:\n{}".format(l))
         # format the description message
-        d = ''.join(x.capitalize() for x in script.split('-'))
-        v = gd.get('__version__')
+        d = sname
+        v = str(gd.get('__version__'))
         if v:
             d += " v" + v
         v = gd.get('__status__')
