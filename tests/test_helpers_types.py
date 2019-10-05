@@ -4,6 +4,7 @@
 
 """
 import netaddr
+import netifaces
 from unittest import main, TestCase
 
 from tinyscript.helpers.types import *
@@ -90,6 +91,23 @@ class TestHelpersTypes(TestCase):
         self.assertRaises(ValueError, port_number_range, -1)
         self.assertRaises(ValueError, port_number_range, 123456789)
         self.assertRaises(ValueError, port_number_range, "40-20")
+        GOOD = netifaces.interfaces()[0]
+        BAD  = "THIS_INTERFACE_DOES_NOT_EXIST"
+        self.assertTrue(network_interface(GOOD))
+        self.assertRaises(ValueError, network_interface, BAD)
+        AGOOD = list(netifaces.ifaddresses(GOOD).values())[0][0]['addr']
+        ABAD  = "THIS_ADDRESS_IS_NOT_VALID"
+        self.assertTrue(interface_address(AGOOD))
+        self.assertRaises(ValueError, interface_address, BAD)
+        self.assertTrue(interface_address_list([AGOOD]))
+        self.assertRaises(ValueError, interface_address_list, [BAD])
+        self.assertEqual(interface_address_filtered_list([BAD]), [])
+        GGOOD = list(netifaces.gateways()['default'].values())[0][0]
+        GBAD  = "THIS_GATEWAY_ADDRESS_IS_NOT_VALID"
+        self.assertTrue(gateway_address(GGOOD))
+        self.assertRaises(ValueError, gateway_address, GBAD)
+        self.assertTrue(default_gateway_address(GGOOD))
+        self.assertRaises(ValueError, default_gateway_address, GBAD)
     
     def test_data_type_check(self):
         self.assertTrue(is_int(1))
@@ -151,6 +169,15 @@ class TestHelpersTypes(TestCase):
         self.assertTrue(is_mac("01-02-03-04-05-06"))
         self.assertFalse(is_mac("01:02:03:04:05"))
         self.assertFalse(is_mac("01|02|03|04|05|06"))
+        GOOD = netifaces.interfaces()[0]
+        BAD  = "THIS_INTERFACE_DOES_NOT_EXIST"
+        self.assertTrue(is_netif(GOOD))
+        self.assertFalse(is_netif(BAD))
+        AGOOD = list(netifaces.ifaddresses(GOOD).values())[0][0]['addr']
+        ABAD  = "THIS_ADDRESS_IS_NOT_VALID"
+        self.assertTrue(is_ifaddr(AGOOD))
+        self.assertFalse(is_ifaddr(ABAD))
+        
     
     def test_option_format_check(self):
         self.assertTrue(is_long_opt("--test"))

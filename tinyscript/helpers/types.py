@@ -4,6 +4,7 @@
 
 """
 import netaddr
+import netifaces
 import re
 from itertools import chain
 from os import makedirs
@@ -44,12 +45,17 @@ is_long_opt  = lambda o: is_str(o) and \
 is_short_opt = lambda o: is_str(o) and re.match(r"^-[a-z]$", o, re.I)
 
 # some network-related check functions
-__all__ += ["is_ip", "is_ipv4", "is_ipv6", "is_mac", "is_port"]
-is_ip   = lambda ip:  __ip_address(ip, None, False) is not None
-is_ipv4 = lambda ip:  __ip_address(ip, 4, False) is not None
-is_ipv6 = lambda ip:  __ip_address(ip, 6, False) is not None
-is_mac  = lambda mac: __mac_address(mac, False) is not None
-is_port = lambda p:   is_int(p) and 0 < p < 2**16
+__all__ += ["is_defgw", "is_gw", "is_ifaddr", "is_ip", "is_ipv4", "is_ipv6",
+            "is_mac", "is_netif", "is_port"]
+is_defgw  = lambda gw:  __gateway_address(gw, True, False) is not None
+is_gw     = lambda gw:  __gateway_address(gw, False, False) is not None
+is_ifaddr = lambda ip:  __interface_address(ip, False) is not None
+is_ip     = lambda ip:  __ip_address(ip, None, False) is not None
+is_ipv4   = lambda ip:  __ip_address(ip, 4, False) is not None
+is_ipv6   = lambda ip:  __ip_address(ip, 6, False) is not None
+is_mac    = lambda mac: __mac_address(mac, False) is not None
+is_netif  = lambda nif: __network_interface(nif, False) is not None
+is_port   = lambda p:   is_int(p) and 0 < p < 2**16
 
 # dummy shortcuts, compliant with the is_* naming convention
 __all__ += ["is_dir", "is_file", "is_folder"]
@@ -147,12 +153,59 @@ positive_ints = pos_ints = \
 
 
 # -------------------- NETWORK-RELATED ARGUMENT TYPES --------------------
-__all__ += ["ip_address", "ipv4_address", "ipv6_address",
-            "ip_address_list", "ipv4_address_list", "ipv6_address_list",
+__all__ += ["default_gateway_address", "gateway_address", "ip_address",
+            "ipv4_address", "ipv6_address", "ip_address_list",
+            "ipv4_address_list", "ipv6_address_list",
             "ip_address_filtered_list", "ipv4_address_filtered_list",
             "ipv6_address_filtered_list", "ip_address_network",
-            "ipv4_address_network", "ipv6_address_network", "mac_address",
-            "port_number", "port_number_range"]
+            "ipv4_address_network", "ipv6_address_network",
+            "interface_address", "interface_address_list",
+            "interface_address_filtered_list", "mac_address",
+            "network_interface", "port_number", "port_number_range"]
+
+
+def __gateway_address(gw, default=False, fail=True):
+    """ Gateway IP address validation. """
+    g = netifaces.gateways() if not default else netifaces.gateways()['default']
+    for k, v in g.items():
+        if k == "default":
+            continue
+        if isinstance(v, tuple):
+            v = [v]
+        for l in v:
+            if gw == l[0]:
+                return gw
+    if fail:
+        raise ValueError("Bad {}gateway".format(["", "default "][default]))
+default_gateway_address = lambda gw: __gateway_address(gw, True)
+gateway_address = lambda gw: __gateway_address(gw)
+
+
+def __interface_address(addr, fail=True):
+    """ Interface address validation. """
+    for iface in netifaces.interfaces():
+        for k, v in netifaces.ifaddresses(iface).items():
+            for d in v:
+                if addr in d.values():
+                    return addr
+    if fail:
+        raise ValueError("Bad interface address")
+interface_address = lambda a: __interface_address(a)
+
+
+def __interface_address_list(addrs, filter_bad=False):
+    """ Interface addresses validation and expansion. """
+    addrs = __str2list(addrs)
+    l = []
+    for addr in addrs:
+        try:
+            l.append(__interface_address(addr))
+        except ValueError as e:
+            if not filter_bad:
+                raise ValueError(str(e))
+    return l
+interface_address_list          = lambda a: __interface_address_list(a)
+interface_address_filtered_list = lambda a: __interface_address_list(a, True)
 
 
 def __ip_address(ip, version=None, fail=True):
@@ -222,6 +275,15 @@ def __mac_address(mac, fail=True):
         else:
             return
 mac_address = lambda mac: __mac_address(mac)
+
+
+def __network_interface(netif, fail=True):
+    """ Network interface validation. """
+    if netif in netifaces.interfaces():
+        return netif
+    if fail:
+        raise ValueError("Not an existing interface")
+network_interface = lambda nif: __network_interface(nif)
 
 
 def port_number(port):

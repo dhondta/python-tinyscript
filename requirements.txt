@@ -3,6 +3,7 @@ colorful
 ipaddress
 markdown2
 netaddr
+netifaces
 numpy; python_version>='3.4'
 pandas; python_version>='3.4'
 patchy
