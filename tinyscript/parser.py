@@ -50,6 +50,7 @@ def initialize(glob,
                add_wizard=False,
                ext_logging=False,
                noargs_action=None,
+               post_actions=True,
                report_func=None):
     """
     Initialization function ; sets up the arguments for the parser and creates a
@@ -75,6 +76,7 @@ def initialize(glob,
                                input argument
     :param ext_logging:       extended logging options
     :param noargs_action:     action to be performed when no argument is input
+    :param post_actions:      enable post-actions at interrupt
     :param report_func:       report generation function
     """
     global parser, parser_calls
@@ -289,11 +291,15 @@ def initialize(glob,
         if add['progress']:
             glob['progress_manager'].stop()
         # then handle the state
+        do_post_actions = True
         if _hooks.state == "INTERRUPTED":
             glob['at_interrupt']()
+            do_post_actions = post_actions
         elif _hooks.state == "TERMINATED":
             glob['at_terminate']()
-        else:
+            do_post_actions = False
+        # finally handle post-actions
+        if do_post_actions:
             if report_func is not None and PYTHON3:
                 # generate the report only when exiting gracefully, just before
                 #  the user-defined function at_graceful_exit
