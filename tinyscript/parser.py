@@ -8,8 +8,10 @@ import atexit
 import os
 import re
 import sys
+from asciistuff import AsciiFile, Banner
 from inspect import getmembers, isfunction, ismethod
 from os.path import basename, splitext
+from six import string_types
 
 from .__info__ import __author__, __copyright__, __version__
 from .argreparse import *
@@ -24,6 +26,9 @@ from .step import set_step_items
 
 
 __all__ = __features__ = ["parser", "initialize", "validate"]
+
+BANNER_FONT = None
+BANNER_STYLE = {}
 
 parser_calls = []  # will be populated by calls to ProxyArgumentParser
 
@@ -40,6 +45,7 @@ def _save_config(glob):
 def initialize(glob,
                sudo=False,
                multi_level_debug=False,
+               add_banner=False,
                add_config=False,
                add_demo=False,
                add_interact=False,
@@ -63,6 +69,7 @@ def initialize(glob,
     :param multi_level_debug: allow to use -v, -vv, -vvv (adjust logging level)
                                instead of just -v (only debug on/off)
     :param relative_time:     use relative time for log messages
+    :param add_banner:        add an ASCII banner when starting the tool
     :param add_config:        add an option to input an INI configuration file
     :param add_demo:          add an option to re-run the process using a random
                                entry from the __examples__ (only works if this
@@ -282,7 +289,15 @@ def initialize(glob,
     set_progress_items(glob)
     set_step_items(glob)
     set_time_items(glob)
-    # 6) finally, bind the global exit handler
+    # 6) display a banner if relevant
+    bf = glob.get('BANNER_FONT', BANNER_FONT)
+    if add_banner or isinstance(bf, string_types):
+        f = AsciiFile()
+        bs = BANNER_STYLE
+        bs = bs if isinstance(bs, dict) else {}
+        f['title', bs] = Banner(p.scriptname, font=bf)
+        print(f)
+    # 7) finally, bind the global exit handler
     def __at_exit():
         # first, dump the config if required
         if add['config']:

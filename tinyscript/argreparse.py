@@ -297,6 +297,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             l = "\n- ".join(sorted(SCRIPTNAME_FORMATS.keys()))
             raise ValueError("Bad script name format ; please use one of the "
                              "followings:\n{}".format(l))
+        self.scriptname = sname
         # format the description message
         d = sname
         v = str(gd.get('__version__'))

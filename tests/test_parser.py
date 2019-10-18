@@ -69,7 +69,7 @@ class TestParser(TestCase):
     
     def test_initialization_flags(self):
         sys.argv[1:] = ["--stats"]
-        initialize(globals(), False, *([True] * 10))
+        initialize(globals(), False, True, False, *([True] * 9))
         self.assertFalse(args.interact)
         self.assertFalse(args.progress)
         self.assertFalse(args.relative)
@@ -168,6 +168,13 @@ class TestParser(TestCase):
         sys.argv[1:] = []
         self.assertRaises(ValueError, initialize, globals(),
                           noargs_action="does_not_exist")
+    
+    def test_scriptname_banner(self):
+        sys.argv[1:] = []
+        initialize(globals(), add_banner=True)
+        gd = globals()
+        gd['BANNER_FONT'] = "standard"
+        initialize(gd)
     
     def test_report_good_function(self):
         if PYTHON3:
