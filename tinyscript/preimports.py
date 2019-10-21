@@ -32,6 +32,7 @@ __preimports__ = [
     "itertools",
     "logging",
     "os",
+    "pip",
     "random",
     "re",
     "shutil",
@@ -39,6 +40,7 @@ __preimports__ = [
     "string",
     "sys",
     "time",
+    "virtualenv",
 ]
 
 
@@ -92,6 +94,28 @@ def hash_file(filename, algo="sha256"):
             h.update(b)
     return h.hexdigest()
 hashlib.hash_file = hash_file
+
+
+# pip improvement (for Python2/3 compatibility)
+def install(package, *args, **kwargs):
+    _ = ["install"]
+    for v in args:
+        _.append(str(v))
+    for k, v in kwargs.items():
+        _.append("--" + k.replace("_", "-"))
+        _.append(str(v))
+    _.append(package)
+    try:
+        return pip.main(_)
+    except AttributeError:
+        pass
+    try:
+        return pip._internal.main(_)
+    except AttributeError:
+        pass
+    from subprocess import check_output
+    return check_output(["pip"] + _)
+pip.install = install
 
 
 # this binds new file hashing functions to the hashlib for each existing hash

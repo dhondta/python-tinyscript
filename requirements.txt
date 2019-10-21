@@ -9,7 +9,9 @@ numpy; python_version>='3.4'
 pandas; python_version>='3.4'
 patchy
 pathlib
+pip
 python-slugify
 six
 tqdm
+virtualenv
 weasyprint; python_version>='3.4'

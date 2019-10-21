@@ -34,3 +34,6 @@ class TestPreimports(TestCase):
         self.assertRaises(ValueError, hashlib.hash_file, FILE,
                           "not_existing_hash_algo")
         remove(FILE)
+    
+    def test_pip_improvement(self):
+        pip.install("virtualenv", "-v", retries=0)
