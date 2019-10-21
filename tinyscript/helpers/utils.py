@@ -16,7 +16,7 @@ from ..__info__ import __author__, __copyright__, __version__
 
 
 __all__ = __features__ = ["b", "byteindex", "capture", "clear", "confirm",
-                          "iterbytes", "pause", "silent", "slugify",
+                          "execfile", "iterbytes", "pause", "silent", "slugify",
                           "std_input", "u", "user_input", "Capture"]
 
 
@@ -113,6 +113,14 @@ def confirm(style="bold"):
     """
     return user_input("Are you sure ?", ["(Y)es", "(N)o"], "n", style=style) \
            == "yes"
+
+try:
+    execfile
+except NameError:
+    def execfile(source, globals=None, locals=None):
+        with open(source) as f:
+            content = f.read()
+        return exec(content, globals, locals)
 
 
 def silent(f):

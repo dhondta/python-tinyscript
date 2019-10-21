@@ -58,3 +58,11 @@ class TestHelpersUtils(TestCase):
         captured_dummy = capture(dummy)
         r, out, err = captured_dummy()
         self.assertEqual(out, "TEST")
+    
+    def test_other_functions(self):
+        CMD_PY = "print('hello')"
+        TEST_PY = "execfile-test.py"
+        with open(TEST_PY, 'w') as f:
+            f.write(CMD_PY)
+        execfile(TEST_PY)
+        remove(TEST_PY)
