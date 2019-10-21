@@ -4,7 +4,7 @@
 
 """
 
-from .__info__ import __author__, __copyright__, __version__
+from .__info__ import __author__, __copyright__, __license__, __version__
 
 from .handlers import *
 from .helpers import *
