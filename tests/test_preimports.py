@@ -44,10 +44,16 @@ class TestPreimports(TestCase):
     def test_virtualenv_improvements(self):
         with open(REQS, 'w') as f:
             f.write("os\nsys")
+        self.assertRaises(Exception, virtualenv.activate, "venv_does_not_exist")
         virtualenv.setup(VENV, REQS)
         remove(REQS)
         virtualenv.setup(VENV, ["os"])
-        virtualenv.install("sys", "-v", prefix=VENV)
+        virtualenv.install("re", progress_bar="off")
+        os.environ['PIP_REQ_TRACKER'] = "/tmp/does_not_exist"
+        virtualenv.setup(VENV2, ["sys"])
+        self.assertRaises(Exception, virtualenv.install, "sys", "-v")
         virtualenv.teardown()
+        self.assertRaises(Exception, virtualenv.install, "test")
         with VirtualEnv(VENV2, remove=True) as venv:
             venv.install("re")
+            self.assertTrue(venv.is_installed("setuptools"))

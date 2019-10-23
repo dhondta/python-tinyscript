@@ -8,11 +8,10 @@ import sys
 import virtualenv
 from shutil import rmtree
 from six import string_types
+from subprocess import Popen, PIPE
 from time import sleep
-try:  # will work in Python 3
-    from pip._internal.main import main as _pip_main
-except ImportError:
-    from pip._internal import main as _pip_main
+from pip._internal.cli.main_parser import parse_command
+from pip._internal.exceptions import PipError
 
 from ..helpers import JYTHON, PYPY, WINDOWS
 
@@ -28,6 +27,9 @@ def __activate(venv_dir):
     
     :param venv_dir: virtual environment's directory
     """
+    venv_dir = os.path.abspath(venv_dir)
+    if not os.path.isdir(venv_dir):
+        raise NotAVirtualEnv("Bad virtual environment")
     j = os.path.join
     bin_dir = j(venv_dir, "bin")
     _ = __ORIGINAL_PATH.split(os.pathsep)
@@ -46,6 +48,16 @@ def __activate(venv_dir):
     sys.prefix = venv_dir
 
 
+def __check_pip_req_tracker():
+    """
+    This checks if the temporary folder of the Pip requirements tracker still
+     exists and corrects the related environment variable accordingly.
+    """
+    pip_reqt = os.environ.get('PIP_REQ_TRACKER')
+    if pip_reqt is not None and not os.path.exists(pip_reqt):
+        os.environ['PIP_REQ_TRACKER'] = ""
+
+
 def __deactivate():
     """
     This deactivates a virtual environment.
@@ -55,10 +67,21 @@ def __deactivate():
     # reset all values modified by activate_this.py
     os.environ['PATH']            = __ORIGINAL_PATH
     os.environ['VIRTUAL_ENV']     = ""
-    os.environ['PIP_REQ_TRACKER'] = ""
     sys.path                      = __ORIGINAL_SPATH[:]
     sys.prefix                    = __ORIGINAL_SPREFIX
     # keep sys.real_prefix to avoid the error with virtualenv.create_environment
+    __check_pip_req_tracker()
+
+
+def __get_virtualenv():
+    """
+    This gets the currently defined virtual environment or raises an error if no
+     environment is defined.
+    """
+    venv = os.environ.get('VIRTUAL_ENV', "")
+    if venv == "":
+        raise NotAVirtualEnv("Not in a virtual environment")
+    return venv
 
 
 def __install(package, *args, **kwargs):
@@ -69,14 +92,81 @@ def __install(package, *args, **kwargs):
     :param args:    options to be used with the pip install command
     :param kwargs:  keyword-arguments to be used with the pip install command
     """
-    cmd = ["install", "-U"]
+    global pip_proc
+    __check_pip_req_tracker()
+    cmd = ["install", "-U"] + __parse_args(*args, **kwargs) + [package.strip()]
+    for line in __pip_run(cmd):
+        if "-v" in cmd or "--verbose" in cmd:
+            print(line)
+        if line.startswith("pip._internal.exceptions"):
+            pip_proc.kill()
+            raise PipError(line.split(": ", 1)[1])
+
+
+def __is_installed(package, *args, **kwargs):
+    """
+    This checks if a given package is installed in the virtual environment.
+    
+    :param package: package name
+    :param args:     options to be used with the pip list command
+    :param kwargs:   keyword-arguments to be used with the pip list command
+    """
+    found = False
+    for name, version in __list_packages(*args, **kwargs):
+        if isinstance(package, string_types) and package == name or \
+           isinstance(package, (list, tuple, set)) and package[0] == name and \
+           package[1] == version:
+            found = True
+    return found
+
+
+def __list_packages(*args, **kwargs):
+    """
+    This lists the packages installed in the currently activated or the given
+     virtual environment.
+    
+    :param venv_dir: virtual environment's directory
+    :param args:     options to be used with the pip list command
+    :param kwargs:   keyword-arguments to be used with the pip list command
+    """
+    cmd = ["list"] + __parse_args(*args, **kwargs)
+    for line in __pip_run(cmd):
+        if not ("Package" in line and "Version" in line or \
+           "-------" in line or line.strip() == ""):
+            yield tuple(_.strip() for _ in line.split(" ", 1))
+
+
+def __parse_args(*args, **kwargs):
+    """
+    This parses input args and kwargs in a format that suits pip._internal.main.
+    """
+    l = []
     for v in args:
-        cmd.append(str(v))
+        if v not in l:
+            l.append(str(v))
     for k, v in kwargs.items():
-        cmd.append("--" + k.replace("_", "-"))
-        cmd.append(str(v))
-    cmd.append(package.strip())
-    _pip_main(cmd)
+        k = "--" + k.replace("_", "-")
+        if k not in l:
+            l.append(k)
+            if v is not True:
+                l.append(str(v))
+    return l
+
+
+def __pip_run(cmd):
+    """
+    This runs a Pip command using the binary from the current virtual
+     environment.
+    
+    :param cmd: the Pip command and its parameters as a list
+    """
+    global pip_proc
+    venv = __get_virtualenv()
+    #parse_command(cmd)
+    cmd = [os.path.join(venv, "bin", "pip")] + cmd
+    pip_proc = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    for line in iter(pip_proc.stdout.readline, ""):
+        yield line
 
 
 def __setup(venv_dir, requirements=None):
@@ -142,9 +232,15 @@ class VirtualEnv(object):
                super().__getattr__(name)
 
 
-virtualenv.activate   = __activate
-virtualenv.deactivate = __deactivate
-virtualenv.install    = __install
-virtualenv.setup      = __setup
-virtualenv.teardown   = __teardown
+class NotAVirtualEnv(Exception):
+    pass
+
+
+virtualenv.activate      = __activate
+virtualenv.deactivate    = __deactivate
+virtualenv.install       = __install
+virtualenv.is_installed  = __is_installed
+virtualenv.list_packages = __list_packages
+virtualenv.setup         = __setup
+virtualenv.teardown      = __teardown
 virtualenv.VirtualEnv = VirtualEnv
