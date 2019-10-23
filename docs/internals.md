@@ -143,7 +143,9 @@ $ python
 [...]
 >>> from tinyscript import *
 >>> __preimports__
-['argparse', 'base64', 'binascii', 'collections', 'hashlib', 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string', 'sys', 'time']
+['argparse', 'base64', 'binascii', 'collections', 'hashlib', 'itertools',
+ 'logging', 'os', 'pip', 'random', 're', 'shutil', 'signal', 'string',
+  'sys', 'time', 'virtualenv']
 >>> __optimports__
 ['numpy', 'pandas']
 >>> __badimports__
@@ -162,3 +164,31 @@ Modules can also be reloaded using `reload` (this of `importlib` for Python 3, a
     
     - `hash_file`: this hashes a file per block.
     - `[hash]_file` (e.g. `sha256_file`): each hash algorithm existing in the native `hashlib` has a bound function for hashing a file (e.g. `md5` is a native function of `hashlib` and will then have `md5_file`).
+
+!!! note "Improvements to `virtualenv`"
+    
+    `virtualenv`, while imported with Tinyscript, is enhanced with convenient functions for setting up a virtual environment.
+    
+    - `activate(venv_dir)`: sets environment variables and globals as of `bin/activate_this.py` in order to activate the given environment
+    - `deactivate()`: unsets the current environment variables and globals
+    - `install(package, ...)`: uses Pip to install the given package ; "`...`" corresponds to the arguments and keyword-arguments that can be passed to Pip
+    - `is_installed(package)`: indicates if the given package is installed in the environment
+    - `list_packages()`: lists the packages installed in the environment
+    - `setup(venv_dir, requirements)`: sets up a virtual environment to the given directory and installs the given requirements (either a requirements file or a list of packages)
+    - `teardown(venv_dir)`: deactivates and removes the given environment ; if no directory given, the currently defined one is handled
+
+-----
+
+## Virtual environment context
+
+It is possible to manage a virtual environment from within the script using the `virtualenv` module or the `VirtualEnv` context manager. Each available function from the module can be accessed from a context manager instance.
+
+```python hl_lines="2 4 6"
+...
+with VirtualEnv("venv", "requirements.txt") as venv:
+    ...
+    for package, version in venv.list_packages():
+        ...
+    venv.install("my-package")
+    ...
+```
