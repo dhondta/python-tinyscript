@@ -17,12 +17,17 @@ from ..__info__ import __author__, __copyright__, __version__
 
 __all__ = __features__ = []
 
+try:
+    long
+except NameError:
+    long = int
+
 
 # -------------------- TYPE/FORMAT CHECKING FUNCTIONS --------------------
 # various object type check functions
 __all__ += ["is_dict", "is_function", "is_int", "is_lambda", "is_list",
             "is_neg_int", "is_pos_int", "is_str"]
-is_int      = lambda i: isinstance(i, int)
+is_int      = lambda i: isinstance(i, (int, long))
 is_pos_int  = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
 is_neg_int  = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
 is_dict     = lambda d: isinstance(d, dict)

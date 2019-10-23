@@ -17,7 +17,8 @@ from ..__info__ import __author__, __copyright__, __version__
 
 __all__ = __features__ = ["b", "byteindex", "capture", "clear", "confirm",
                           "iterbytes", "pause", "silent", "slugify",
-                          "std_input", "u", "user_input", "Capture"]
+                          "std_input", "stdin_pipe", "u", "user_input",
+                          "Capture"]
 
 
 __all__ += ["DARWIN", "LINUX", "WINDOWS"]
@@ -25,8 +26,10 @@ DARWIN  = system() == "Darwin"
 LINUX   = system() == "Linux"
 WINDOWS = system() == "Windows"
 
-__all__ += ["PYTHON3"]
-PYTHON3      = version_info > (3,)
+__all__ += ["JYTHON", "PYPY", "PYTHON3"]
+JYTHON  = sys.platform.startswith("java")
+PYPY    = hasattr(sys, "pypy_version_info")
+PYTHON3 = version_info > (3,)
 
 
 # see: http://python3porting.com/problems.html
@@ -152,6 +155,19 @@ def std_input(prompt="", style=None, palette=None):
     except NameError:
         _ = input(prompt)
     return _.strip()
+
+
+def stdin_pipe():
+    """
+    Python2/3-compatible stdin pipe read funtcion.
+    """
+    if PYTHON3:
+        with open(0, 'rb') as f:
+            for l in f:
+                yield l
+    else:
+        for l in sys.stdin:
+            yield l
 
 
 def user_input(prompt="", choices=None, default=None, choices_str="",
