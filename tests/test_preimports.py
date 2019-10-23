@@ -57,3 +57,4 @@ class TestPreimports(TestCase):
         with VirtualEnv(VENV2, remove=True) as venv:
             venv.install("re")
             self.assertTrue(venv.is_installed("setuptools"))
+        virtualenv.teardown(VENV)

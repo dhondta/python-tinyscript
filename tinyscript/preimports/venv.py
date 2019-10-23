@@ -17,8 +17,8 @@ from ..helpers import JYTHON, PYPY, WINDOWS
 
 
 __ORIGINAL_PATH     = os.environ['PATH']
-__ORIGINAL_SPATH    = sys.path[:]
-__ORIGINAL_SPREFIX  = sys.prefix
+__ORIGINAL_SYSPATH    = sys.path[:]
+__ORIGINAL_SYSPREFIX  = sys.prefix
 
 
 def __activate(venv_dir):
@@ -40,11 +40,11 @@ def __activate(venv_dir):
                     j(venv_dir, "Lib", "site-packages") if WINDOWS else \
                     j(venv_dir, "lib", "python{}.{}".format(*sys.version_info),
                       "site-packages")
-    old = set(__ORIGINAL_SPATH)
+    old = set(__ORIGINAL_SYSPATH)
     site.addsitedir(site_packages)
     new = list(sys.path)
     sys.path = [i for i in new if i not in old] + [i for i in new if i in old]
-    sys.real_prefix = __ORIGINAL_SPREFIX
+    sys.real_prefix = __ORIGINAL_SYSPREFIX
     sys.prefix = venv_dir
 
 
@@ -67,9 +67,12 @@ def __deactivate():
     # reset all values modified by activate_this.py
     os.environ['PATH']            = __ORIGINAL_PATH
     os.environ['VIRTUAL_ENV']     = ""
-    sys.path                      = __ORIGINAL_SPATH[:]
-    sys.prefix                    = __ORIGINAL_SPREFIX
-    # keep sys.real_prefix to avoid the error with virtualenv.create_environment
+    sys.path                      = __ORIGINAL_SYSPATH[:]
+    sys.prefix                    = __ORIGINAL_SYSPREFIX
+    try:
+        delattr(sys, "real_prefix")
+    except:
+        pass
     __check_pip_req_tracker()
 
 
@@ -199,10 +202,9 @@ def __teardown(venv_dir=None):
     :param venv_dir: virtual environment's directory
     """
     venv = venv_dir or os.environ.get('VIRTUAL_ENV', "")
-    if venv:
+    if venv != "":
         __deactivate()
         rmtree(venv, True)
-        while os.path.isdir(venv): sleep(1)
 
 
 class VirtualEnv(object):
