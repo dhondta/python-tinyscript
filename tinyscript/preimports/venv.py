@@ -16,9 +16,10 @@ from pip._internal.exceptions import PipError
 from ..helpers import JYTHON, PYPY, WINDOWS
 
 
-__ORIGINAL_PATH     = os.environ['PATH']
-__ORIGINAL_SYSPATH    = sys.path[:]
-__ORIGINAL_SYSPREFIX  = sys.prefix
+__ORIGINAL_PATH        = os.environ['PATH']
+__ORIGINAL_SYSPATH     = sys.path[:]
+__ORIGINAL_SYSPREFIX   = sys.prefix
+__ORIGINAL_SYSRPREFIX  = getattr(sys, "real_prefix", None)
 
 
 def __activate(venv_dir):
@@ -44,7 +45,7 @@ def __activate(venv_dir):
     site.addsitedir(site_packages)
     new = list(sys.path)
     sys.path = [i for i in new if i not in old] + [i for i in new if i in old]
-    sys.real_prefix = __ORIGINAL_SYSPREFIX
+    sys.real_prefix = __ORIGINAL_SYSRPREFIX or __ORIGINAL_SYSPREFIX
     sys.prefix = venv_dir
 
 
@@ -70,7 +71,12 @@ def __deactivate():
     sys.path                      = __ORIGINAL_SYSPATH[:]
     sys.prefix                    = __ORIGINAL_SYSPREFIX
     try:
+        # from a normal environment, this key should not exist
         delattr(sys, "real_prefix")
+        # but it is important to also reset it if the script was itself run from
+        #  a virtual environment
+        if __ORIGINAL_SYSRPREFIX is not None:
+            sys.real_prefix = __ORIGINAL_SYSRPREFIX
     except:
         pass
     __check_pip_req_tracker()
