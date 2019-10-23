@@ -7,17 +7,17 @@ import logging
 import sys
 from argparse import Action
 from os import makedirs, remove, rmdir
-from os.path import exists
+from os.path import dirname, exists, join
 from six import StringIO
 from time import sleep
 from tinyscript.helpers import PYTHON3
 from unittest import TestCase
 
 
-__all__ = ["args", "dummy_function", "dummy_lambda", "dummy_sleep", "exists",
-           "logger", "makedirs", "remove", "rmdir", "sys", "temp_stdin",
-           "touch", "temp_stdout", "tmpf", "FakeLogRecord", "FakeNamespace",
-           "TestCase", "PYTHON3", "_FakeParserAction"]
+__all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep",
+           "exists", "join", "logger", "makedirs", "remove", "rmdir", "sleep",
+           "sys", "temp_stdin", "touch", "temp_stdout", "tmpf", "FakeLogRecord",
+           "FakeNamespace", "TestCase", "PYTHON3", "_FakeParserAction"]
 
 
 dummy_lambda = lambda *a, **k: None

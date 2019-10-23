@@ -3,10 +3,17 @@
 """Preimports module assets' tests.
 
 """
+from shutil import rmtree
 from tinyscript.preimports import *
 from tinyscript.preimports import _load_preimports
 
 from utils import *
+
+
+FILE = "test-file.txt"
+REQS = "requirements-venv-test.txt"
+VENV = "venv"
+VENV2 = "venv2"
 
 
 class TestPreimports(TestCase):
@@ -20,7 +27,6 @@ class TestPreimports(TestCase):
             self.assertNotIn(m, globals().keys())
 
     def test_hashlib_improvements(self):
-        FILE = "test-file.txt"
         touch(FILE)
         self.assertEqual(hashlib.hash_file(FILE),
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -35,5 +41,14 @@ class TestPreimports(TestCase):
                           "not_existing_hash_algo")
         remove(FILE)
     
-    def test_pip_improvement(self):
-        pip.install("virtualenv", "-v", retries=0)
+    def test_virtualenv_improvements(self):
+        with open(REQS, 'w') as f:
+            f.write("os\nshutil")
+        virtualenv.setup(VENV, REQS)
+        remove(REQS)
+        virtualenv.setup(VENV, ["os"])
+        virtualenv.install("re", prefix=VENV)
+        virtualenv.install("shutil", "-v", prefix=VENV)
+        virtualenv.teardown()
+        with VirtualEnv(VENV2, remove=True) as venv:
+            venv.install("re")
