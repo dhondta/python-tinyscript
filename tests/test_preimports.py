@@ -43,12 +43,11 @@ class TestPreimports(TestCase):
     
     def test_virtualenv_improvements(self):
         with open(REQS, 'w') as f:
-            f.write("os\nshutil")
+            f.write("os\nsys")
         virtualenv.setup(VENV, REQS)
         remove(REQS)
         virtualenv.setup(VENV, ["os"])
-        virtualenv.install("re", prefix=VENV)
-        virtualenv.install("shutil", "-v", prefix=VENV)
+        virtualenv.install("sys", "-v", prefix=VENV)
         virtualenv.teardown()
         with VirtualEnv(VENV2, remove=True) as venv:
             venv.install("re")

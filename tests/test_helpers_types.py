@@ -102,11 +102,12 @@ class TestHelpersTypes(TestCase):
         self.assertTrue(interface_address_list([AGOOD]))
         self.assertRaises(ValueError, interface_address_list, [BAD])
         self.assertEqual(interface_address_filtered_list([BAD]), [])
-        GGOOD = list(netifaces.gateways()['default'].values())[0][0]
+        GGOOD = list(netifaces.gateways()['default'].values())
+        if len(GGOOD) > 0:
+            self.assertTrue(gateway_address(GGOOD[0][0]))
+            self.assertTrue(default_gateway_address(GGOOD[0][0]))
         GBAD  = "THIS_GATEWAY_ADDRESS_IS_NOT_VALID"
-        self.assertTrue(gateway_address(GGOOD))
         self.assertRaises(ValueError, gateway_address, GBAD)
-        self.assertTrue(default_gateway_address(GGOOD))
         self.assertRaises(ValueError, default_gateway_address, GBAD)
     
     def test_data_type_check(self):
