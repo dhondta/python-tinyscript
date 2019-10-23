@@ -7,9 +7,9 @@ omit =
 [report]
 exclude_lines =
     pragma: no cover
-    if.*?__name__.*?==.*?.__main__.:
     # Python2/3 incompatibilities if/elif/else blocks
-    (?s)if.*?PYTHON3.*?\:(.*?(else|elif).*?\:)*
+    (?s)(?m)(?P<indent>(?:\s+))if.*?PYTHON3.*?\:((?P=indent)\s+.*?)+(((?P=indent)else|elif).*?\:((?P=indent)\s+.*?)+)*$
+    if.*?__name__.*?==.*?.__main__.:
     import ConfigParser
     except ImportError:
     except NameError:
