@@ -107,7 +107,8 @@ def __install(package, *args, **kwargs):
     for line in __pip_run(cmd):
         if "-v" in cmd or "--verbose" in cmd:
             print(line)
-        if line.startswith("pip._internal.exceptions"):
+        if line.startswith("pip._internal.exceptions") or \
+           line.startswith("DistributionNotFound"):
             pip_proc.kill()
             raise PipError(line.split(": ", 1)[1])
 
