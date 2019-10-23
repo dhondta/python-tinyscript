@@ -17,9 +17,9 @@ except ImportError:
 from ..helpers import JYTHON, PYPY, WINDOWS
 
 
-__ORIGINAL_PATH    = os.environ['PATH']
-__ORIGINAL_SPATH   = sys.path[:]
-__ORIGINAL_SPREFIX = sys.prefix
+__ORIGINAL_PATH     = os.environ['PATH']
+__ORIGINAL_SPATH    = sys.path[:]
+__ORIGINAL_SPREFIX  = sys.prefix
 
 
 def __activate(venv_dir):
@@ -30,19 +30,19 @@ def __activate(venv_dir):
     """
     j = os.path.join
     bin_dir = j(venv_dir, "bin")
-    path = os.environ.get("PATH", "").split(os.pathsep)
-    os.environ["PATH"] = os.pathsep.join([bin_dir] + path)
+    _ = __ORIGINAL_PATH.split(os.pathsep)
+    os.environ["PATH"] = os.pathsep.join([bin_dir] + _)
     os.environ["VIRTUAL_ENV"] = venv_dir
     site_packages = j(venv_dir, "Lib", "site-packages") if JYTHON else \
                     j(venv_dir, "site-packages") if PYPY else \
                     j(venv_dir, "Lib", "site-packages") if WINDOWS else \
                     j(venv_dir, "lib", "python{}.{}".format(*sys.version_info),
                       "site-packages")
-    old = set(sys.path)
+    old = set(__ORIGINAL_SPATH)
     site.addsitedir(site_packages)
     new = list(sys.path)
     sys.path = [i for i in new if i not in old] + [i for i in new if i in old]
-    sys.real_prefix = sys.prefix
+    sys.real_prefix = __ORIGINAL_SPREFIX
     sys.prefix = venv_dir
 
 
@@ -58,10 +58,7 @@ def __deactivate():
     os.environ['PIP_REQ_TRACKER'] = ""
     sys.path                      = __ORIGINAL_SPATH[:]
     sys.prefix                    = __ORIGINAL_SPREFIX
-    try:
-        delattr(sys, "real_prefix")
-    except AttributeError:
-        pass
+    # keep sys.real_prefix to avoid the error with virtualenv.create_environment
 
 
 def __install(package, *args, **kwargs):
