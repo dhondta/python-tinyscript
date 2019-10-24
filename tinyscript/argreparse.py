@@ -288,15 +288,19 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 kwargs['epilog'] = gt("Usage example{}"
                                       .format(["", "s"][len(_) > 1])) + \
                                    ":\n" + '\n'.join("  " + e for e in _)
-        # adapt the script name according to the specified format
-        sname_fmt  = gd.get('SCRIPTNAME_FORMAT', SCRIPTNAME_FORMAT)
-        sname_func = SCRIPTNAME_FORMATS.get(sname_fmt)
-        if sname_func:
-            sname = sname_func(script)
-        else:
-            l = "\n- ".join(sorted(SCRIPTNAME_FORMATS.keys()))
-            raise ValueError("Bad script name format ; please use one of the "
-                             "followings:\n{}".format(l))
+        # adapt the script name ; if SCRIPTNAME is provided, it supersedes
+        #  SCRIPTNAME_FORMAT, otherwise compute the name according to the
+        #  format specified in SCRIPTNAME_FORMAT
+        sname = gd.get('__script__')
+        if sname is None:
+            sname_fmt  = gd.get('SCRIPTNAME_FORMAT', SCRIPTNAME_FORMAT)
+            sname_func = SCRIPTNAME_FORMATS.get(sname_fmt)
+            if sname_func:
+                sname = sname_func(script)
+            else:
+                l = "\n- ".join(sorted(SCRIPTNAME_FORMATS.keys()))
+                raise ValueError("Bad script name format ; please use one of "
+                                 "the followings:\n{}".format(l))
         self.scriptname = sname
         # format the description message
         d = sname
