@@ -20,9 +20,11 @@ __all__ += ["__badimports__", "__optimports__", "__preimports__",
 
 __badimports__ = []
 __optimports__ = [
+    "bs4",
     "fs",
     "numpy",
     "pandas",
+    "requests",
 ]
 __preimports__ = [
     "argparse",
