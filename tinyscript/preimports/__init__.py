@@ -4,15 +4,17 @@
 """
 from importlib import import_module
 try:  # will work in Python 3
+    import configparser
     from importlib import reload
 except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
+    import ConfigParser as configparser
     reload = reload
 
 from .hash import hashlib
 from .venv import virtualenv, VirtualEnv
 
 
-__all__ = __features__ = ["hashlib", "virtualenv", "VirtualEnv"]
+__all__ = __features__ = ["configparser", "hashlib", "virtualenv", "VirtualEnv"]
 __all__ += ["__badimports__", "__optimports__", "__preimports__",
             "load", "reload"]
 
@@ -77,4 +79,4 @@ def load(module, optional=False):
 
 
 _load_preimports()
-__preimports__ += ["hashlib", "virtualenv"]
+__preimports__ += ["configparser", "hashlib", "virtualenv"]

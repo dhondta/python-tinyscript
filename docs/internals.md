@@ -143,8 +143,8 @@ $ python
 [...]
 >>> from tinyscript import *
 >>> __preimports__
-['argparse', 'base64', 'binascii', 'collections', 'hashlib', 'itertools',
- 'logging', 'os', 'pip', 'random', 're', 'shutil', 'signal', 'string',
+['argparse', 'base64', 'binascii', 'collections', 'configparser', 'hashlib',
+ 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string',
   'sys', 'time', 'virtualenv']
 >>> __optimports__
 ['numpy', 'pandas']
