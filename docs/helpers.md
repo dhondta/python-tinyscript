@@ -54,6 +54,15 @@ Tinyscript also provides 2 `pathlib`-related functions:
     - `size`: returns path's size (recursively computed if it is a folder)
     - `text`: returns file's content as text
 
+- `MirrorPath`: additional class for handling mirrored files and folders
+    
+    This mirrors an item, that is, if the given source does not exist in the given destination, it creates a symbolic link and recurses if it is a folder.
+    
+    - `mirror(source)`: mirrors the given source
+    - `unmirror()`: removes the created symbolic links
+    
+    Basically, a path can be mirrored this way: `MirrorPath(destination, source)`. However, it can also be defined as `p = MirrorPath(destination)` and the `p.mirror(source)` method can then be used.
+
 - `TempPath`: additional class for handling temporary folder
     
     This automatically creates a folder with a randomly generated name in OS' temporary location using a prefix, suffix, length and alphabet (like for `Path.generate(...)`).
@@ -238,9 +247,9 @@ Tinyscript also provides some predefined boolean constants:
 
 -----
 
-## Runtime code patching functions
+## Runtime monkey-patching functions
 
-Code can be modified at runtime using multiple functions, depending on what should be patched and how. This feature relies on the [`patchy`](https://github.com/adamchainz/patchy) module.
+Code can be monkey-patched at runtime using multiple functions, depending on what should be patched and how. This feature relies on the [`patchy`](https://github.com/adamchainz/patchy) module.
 
 The functions for this purpose are:
 

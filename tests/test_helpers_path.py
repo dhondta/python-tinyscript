@@ -63,3 +63,15 @@ class TestHelpersPath(TestCase):
         self.assertNotEqual(str(TPATH2), gettempdir())
         with TPATH2.tempfile() as tf:
             self.assertTrue(Path(tf.name).exists())
+    
+    def test_pathlib_mirrorpath(self):
+        PATH2 = Path(TEST + "2", expand=True, create=True)
+        PATH2.joinpath("test.txt").touch()
+        PATH.joinpath("test2.txt").touch()
+        p = MirrorPath(TEST + "2", TEST)
+        self.assertTrue(p.joinpath("test").is_symlink())
+        self.assertTrue(p.joinpath("test2.txt").is_symlink())
+        p.unmirror()
+        self.assertFalse(p.joinpath("test").exists())
+        self.assertFalse(p.joinpath("test2.txt").exists())
+        PATH2.remove()

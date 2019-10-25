@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
+import ctypes
+import os
 from importlib import import_module
-from os import remove, stat, walk
-from os.path import expanduser
 from pathlib import Path as BasePath
 from random import choice
 from shutil import rmtree
@@ -11,7 +11,7 @@ from tempfile import gettempdir, NamedTemporaryFile as TempFile
 from .utils import u, LINUX, DARWIN, PYTHON3, WINDOWS
 
 
-__all__ = __features__ = ["Path", "TempPath"]
+__all__ = __features__ = ["Path", "MirrorPath", "TempPath"]
 
 
 class Path(BasePath):
@@ -55,10 +55,10 @@ class Path(BasePath):
             return self.stat().st_size
         elif self.is_dir():
             s = 4096  # include the size of the directory itself
-            for root, dirs, files in walk(str(self)):
+            for root, dirs, files in os.walk(str(self)):
                 s += 4096 * len(dirs)
                 for f in files:
-                    s += stat(str(Path(root).joinpath(f))).st_size
+                    s += os.stat(str(Path(root).joinpath(f))).st_size
             return s
     
     @property
@@ -108,7 +108,7 @@ class Path(BasePath):
     
     def expanduser(self):
         """ Fixed expanduser() method, working for both Python 2 and 3. """
-        return Path(expanduser(str(self)))
+        return Path(os.path.expanduser(str(self)))
     
     def generate(self, prefix="", suffix="", length=8,
                  alphabet="0123456789abcdef"):
@@ -173,11 +173,43 @@ class Path(BasePath):
         if self.is_dir():
             rmtree(str(self))
         else:
-            remove(str(self))
+            os.remove(str(self))
     
     def write_text(self, data, encoding=None, errors=None):
         """ Fix to non-existing method in Python 2. """
         return self.__add_text(data, 'w', encoding, errors)
+
+
+class MirrorPath(Path):
+    """ Extension of the class Path for handling a folder that can mirror
+         another one using symbolic links.
+    
+    :param destination: destination folder where the structure is mirrored
+    :param source:      source folder from which the structure is mirrored
+    """
+    def __new__(cls, destination, source=None, **kwargs):
+        self = super(MirrorPath, cls).__new__(cls, destination, **kwargs)
+        if source is not None:
+            self.mirror(source)
+        return self
+    
+    def mirror(self, source):
+        """ Mirror the source item. """
+        self._mirrored = []
+        source = Path(source)
+        if not self.exists():
+            self.symlink_to(str(source.absolute()), source.is_dir())
+        elif not self.is_symlink() and source.is_dir():
+            for item in os.listdir(str(source)):
+                dst, src = self.joinpath(item), source.joinpath(item)
+                self._mirrored.append(MirrorPath(dst, src))
+    
+    def unmirror(self):
+        """ Perform the reverse operation of mirror. """
+        while len(self._mirrored) > 0:
+            self._mirrored.pop(0).unmirror()
+        if self.is_symlink():
+            self.unlink()
 
 
 class TempPath(Path):

@@ -4,11 +4,11 @@
 """
 from importlib import import_module
 try:  # will work in Python 3
-    import configparser
     from importlib import reload
+    import configparser
 except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
-    import ConfigParser as configparser
     reload = reload
+    import ConfigParser as configparser
 
 from .hash import hashlib
 from .venv import virtualenv, VirtualEnv
@@ -33,6 +33,7 @@ __preimports__ = [
     "binascii",
     "codecs",
     "collections",
+    "ctypes",
     "fileinput",
     "itertools",
     "logging",
