@@ -14,7 +14,7 @@ from .hash import hashlib
 from .venv import virtualenv, VirtualEnv
 
 
-__all__ = __features__ = ["configparser", "hashlib", "virtualenv", "VirtualEnv"]
+__all__ = __features__ = ["VirtualEnv"]
 __all__ += ["__badimports__", "__optimports__", "__preimports__",
             "load", "reload"]
 
@@ -33,8 +33,10 @@ __preimports__ = [
     "binascii",
     "codecs",
     "collections",
+    "configparser",
     "ctypes",
     "fileinput",
+    "hashlib",
     "itertools",
     "logging",
     "os",
@@ -46,6 +48,7 @@ __preimports__ = [
     "subprocess",
     "sys",
     "time",
+    "virtualenv",
 ]
 
 
@@ -71,6 +74,10 @@ def load(module, optional=False):
     :param optional: whether the module is optional or not
     """
     global __badimports__, __features__, __preimports__
+    m = globals().get(module)
+    if m:  # already imported (e.g. configparser)
+        __features__.append(module)
+        return m
     try:
         globals()[module] = m = import_module(module)
         m.__name__ = module
@@ -82,4 +89,3 @@ def load(module, optional=False):
 
 
 _load_preimports()
-__preimports__ += ["configparser", "hashlib", "virtualenv"]
