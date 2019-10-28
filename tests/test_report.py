@@ -32,9 +32,13 @@ if PYTHON3:  # report module only available from Python3
                 Table([[1, 2]]),
                 Section("test section"),
                 Text("test text"),
+                Code("#test\nprint('hello')", language="python", hl_lines="1"),
                 Section("bad section", tag="a"),
                 "Free text",
+                noerror=False,
             )
+            self.assertRaises(ValueError, r.md)
+            r.noerror = True
             for fmt in ["csv", "html", "json", "md", "xml"]:
                 self.assertTrue(getattr(r, fmt)())
             r.pdf()
