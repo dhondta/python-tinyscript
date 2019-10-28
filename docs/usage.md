@@ -148,16 +148,61 @@ Some exit handlers can also be tuned to properly handle the end of the execution
 
 ## Reporting
 
-If using the `report_func` argument of `initialize`, a report generation function must also be defined. This function must take no argument and return a tuple of report objects in the order to be displayed in the final report. For this purpose, multiple classes are available :
+A `Report` and its elements can be used from within a script without using the `report_func` argument of `initialize`. With the `Report` class, multiple output formats are available:
+
+**Format** | **Description**
+--- | ---
+`csv` | CSV holding the data input from the `Table` elements
+`html` | HTML body gathering all report elements except `Footer` and `Header` ; note that no CSS is applied but styling can be tuned using the `style`, `size` and `color` arguments for some elements
+`json` | JSON holding the data input from the `Table` elements
+`md` | Markdown with all report elements except `Footer` and `Header`
+`pdf` | PDF (file only) with all report elements ; styling is applied according to the same arguments than for the `html` format but a CSS can also be provided to tune the PDF report
+`xml` | XML holding the data input from the `Table` elements
+
+The report can be generated as an output text (`report.[format]()`) or file (`report.[format](text=False)` ; in this case, the report is named `report.[format]`).
+
+Multiple report elements are available:
 
 **Class** | **Description**
 --- | ---
+`Code(c)` | Code block, taking 1 argument: the [c]ode
+`Table(d,c,r)` | Table with column and row headers, taking 3 arguments : a list of rows as the [d]ata, a list of [c]olumn headers and a list of [r]ow headers
+`Text(t)` | Text paragraph, takin 1 argument : the [t]ext to be displayed as a paragraph
 `Title(t)` | Big bold title line, taking 1 argument : title's [t]ext
 `Section(t)` | Bold section title line, taking 1 argument : section title's [t]ext
-`Header(l,c,r)` | For setting the heading line on every page, taking 3 arguments : the [l]eft, [c]enter and [r]ight headers
-`Footer(l,c,r)` | For setting the footer line, taking 3 arguments : the [l]eft, [c]enter and [r]ight footers ; center's default is the page numbering (format: `#page/#pages`)
-`Text(t)` | Text paragraph, takin 1 argument : the [t]ext to be displayed as a paragraph
-`Table(h,r)` | Simple table with headers, taking 2 arguments : a list of [h]eaders and a list of [r]ows with values
+
+!!! note "Element styling"
+    
+    All these elements, except `Table`, inherit from `Text` and can have styling arguments:
+    
+    - `Text`: font `size` (defaults to 12), font `style` (defaults to "`normal`"), font `color` (defaults to "`black`") and HTML `tag` (defaults to "`p`")
+    - `Title`: font `style`, font `color` and HTML `tag` (defaults to "`h1`") ; the font size is defined by the HTML tag
+    - `Section`: inherits from `Title` with another HTML `tag` (defaults to "`h2`")
+    - `Code`: font `size`, font `style`, font `color` (defaults to "`grey`"), highlighted `language` (used with both the Markdown and HTML output formats) and highlighted `hl_lines` (only used with the Markdown output format) ; the tag is always "`pre`"
+
+
+??? example 
+
+        :::python
+        from tinyscript.report import *
+        
+        report = Report(
+            Title("My title", tag="h2"),
+            Section("My first section", tag="h4"),
+            Code("#!/bin/bash\necho 'hello'",  language="bash"),
+            Section("My second section", tag="h4"),
+            Text("A paragraph", size=11, color="blue"),
+        )
+        print(report.md())
+
+<br>
+
+!!! note "Free text"
+
+    Note that free text can also be used. In this case, it will be handled as Markdown when outputing Markdown or HTML.
+
+
+If using the `report_func` argument of `initialize`, a report generation function must also be defined. This function must take no argument and return a tuple of report objects in the order to be displayed in the final report.
 
 ??? example 
 
@@ -166,12 +211,34 @@ If using the `report_func` argument of `initialize`, a report generation functio
             global headers, data
             return (
                 Title("My nice report"),
-                Header(center="Nice report"),
-                Footer(),
                 Section("A first section"),
                 Text("Some introduction text"),
                 Section("A second section"),
                 Table(headers, data),
+                "This is a free text",
+            )
+
+<br>
+
+Two other report elements can be used to tune a PDF report:
+
+**Class** | **Description**
+--- | ---
+`Header(l,c,r)` | For setting the heading line on every page, taking 3 arguments : the [l]eft, [c]enter and [r]ight headers
+`Footer(l,c,r)` | For setting the footer line, taking 3 arguments : the [l]eft, [c]enter and [r]ight footers ; center's default is the page numbering (format: `#page/#pages`)
+
+!!! note "Only applies to PDF output"
+
+    The `Header` and `Footer` elements only set `top` and `bottom` CSS properties for use with PDF generation. These have thus no effect on other output formats.
+
+??? example 
+
+        :::python
+        def make_report():
+            return (
+                Header(center="Nice report"),
+                Footer(),
+                "This is a free text",
             )
 
 <br>

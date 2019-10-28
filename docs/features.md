@@ -427,7 +427,7 @@ def make_report():
 
 This adds multiple options:
 
-- `--output`: report output format (defaults to `pdf`)
+- `--output`: report output format (defaults to `pdf`, see [available formats here](usage.md))
 - `--title`: report title
 - `--css`: report stylesheet
 - `--theme`: report theme (overridden by `--css`)
