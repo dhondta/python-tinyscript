@@ -14,7 +14,7 @@ from .hash import hashlib
 from .venv import virtualenv, VirtualEnv
 
 
-__all__ = __features__ = ["VirtualEnv"]
+__all__ = __features__ = ["VirtualEnv", "import_module"]
 __all__ += ["__badimports__", "__optimports__", "__preimports__",
             "load", "reload"]
 
@@ -45,6 +45,7 @@ __preimports__ = [
     "shutil",
     "signal",
     "string",
+    "struct",
     "subprocess",
     "sys",
     "time",

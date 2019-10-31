@@ -8,8 +8,9 @@ omit =
 exclude_lines =
     pragma: no cover
     # Python2/3 incompatibilities if/elif/else blocks
-    (?s)(?m)(?P<indent>(?:\s+))if.*?PYTHON3.*?\:((?P=indent)\s+.*?)+(((?P=indent)else|elif).*?\:((?P=indent)\s+.*?)+)*$
-    if.*?__name__.*?==.*?.__main__.:
+    (?m)(?P<indent>(?:\s+))if.*?PYTHON3.*?\:((?P=indent)\s+.*?)+(((?P=indent)else|elif).*?\:((?P=indent)\s+.*?)+)*$
+    # __main__ logics
+    if\s+__name__\s+==\s+(?P<q>(?:[\'\"]))__main__(?P=q)\s+:
     import ConfigParser
     except ImportError:
     except NameError:
@@ -23,3 +24,6 @@ exclude_lines =
     if DARWIN:
     if WINDOWS:
     raise NotImplementedError
+    # virtualenv package install
+    elif line.startswith\(\"Successfully installed\"\):
+    for top_level in __install

@@ -3,15 +3,17 @@
 
 """
 import os
+import re
 import site
 import sys
 import virtualenv
+from importlib import import_module
+from pip._internal.cli.main_parser import parse_command
+from pip._internal.exceptions import PipError
 from shutil import rmtree
 from six import string_types
 from subprocess import Popen, PIPE
 from time import sleep
-from pip._internal.cli.main_parser import parse_command
-from pip._internal.exceptions import PipError
 
 from ..helpers import JYTHON, PYPY, WINDOWS
 
@@ -20,6 +22,8 @@ __ORIGINAL_PATH        = os.environ['PATH']
 __ORIGINAL_SYSPATH     = sys.path[:]
 __ORIGINAL_SYSPREFIX   = sys.prefix
 __ORIGINAL_SYSRPREFIX  = getattr(sys, "real_prefix", None)
+# package regex for parsing a line with [package]-[version] format
+PREGEX = re.compile(r"\s?(.+?)\-((?:\d+)(?:\.?\d+)+)")
 
 
 def __activate(venv_dir):
@@ -66,10 +70,10 @@ def __deactivate():
     :param venv_dir: virtual environment's directory
     """
     # reset all values modified by activate_this.py
-    os.environ['PATH']            = __ORIGINAL_PATH
-    os.environ['VIRTUAL_ENV']     = ""
-    sys.path                      = __ORIGINAL_SYSPATH[:]
-    sys.prefix                    = __ORIGINAL_SYSPREFIX
+    os.environ['PATH']        = __ORIGINAL_PATH
+    os.environ['VIRTUAL_ENV'] = ""
+    sys.path                  = __ORIGINAL_SYSPATH[:]
+    sys.prefix                = __ORIGINAL_SYSPREFIX
     try:
         # from a normal environment, this key should not exist
         delattr(sys, "real_prefix")
@@ -104,6 +108,7 @@ def __install(package, *args, **kwargs):
     global pip_proc
     __check_pip_req_tracker()
     cmd = ["install", "-U"] + __parse_args(*args, **kwargs) + [package.strip()]
+    top_levels = []
     for line in __pip_run(cmd):
         if "-v" in cmd or "--verbose" in cmd:
             print(line)
@@ -111,6 +116,19 @@ def __install(package, *args, **kwargs):
            line.startswith("DistributionNotFound"):
             pip_proc.kill()
             raise PipError(line.split(": ", 1)[1])
+        elif line.startswith("Successfully installed"):
+            match = filter(lambda p, v: p == package, PREGEX.findall(line[23:]))
+            if len(match) == 1:
+                venv = __get_virtualenv()
+                name = "{}-{}*".format(*match)
+                try:
+                    tl = list(Path(venv).find(name))[0].find("top_level.txt")
+                    top_levels.extend(list(tl)[0].read_lines())
+                except IndexError:
+                    pass
+            else:
+                raise PipError("Installation of {} failed".format(package))
+    return top_levels
 
 
 def __is_installed(package, *args, **kwargs):
@@ -176,10 +194,10 @@ def __pip_run(cmd):
     cmd = [os.path.join(venv, "bin", "pip")] + cmd
     pip_proc = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     for line in iter(pip_proc.stdout.readline, ""):
-        yield line
+        yield line[:-1]
 
 
-def __setup(venv_dir, requirements=None):
+def __setup(venv_dir, requirements=None, verbose=False):
     """
     This creates (if relevant) and activates a virtual environment. It also
      allows to define requirements to be installed in this environment.
@@ -187,6 +205,7 @@ def __setup(venv_dir, requirements=None):
     :param venv_dir:     virtual environment's directory
     :param requirements: list of required package OR path of the requirements
                           file to be used
+    :param verbose:      displayed Pip output while installing packages
     """
     __deactivate()
     venv_dir = os.path.abspath(venv_dir)
@@ -197,8 +216,12 @@ def __setup(venv_dir, requirements=None):
         with open(requirements) as f:
             requirements = [l.strip() for l in f]
     if isinstance(requirements, (tuple, list, set)):
+        args = ["-v"] if verbose else []
+        kwargs = {'prefix': venv_dir}
         for req in requirements:
-            __install(req, prefix=venv_dir)
+            for top_level in __install(req, *args, **kwargs):
+                m = import_module(top_level)
+                setattr(virtualenv, top_level, m)
 
 
 def __teardown(venv_dir=None):
@@ -218,19 +241,21 @@ class VirtualEnv(object):
     """
     This context manager simplifies the use of a virtual environment.
     
-    :param venv_dir:     virtual environment's directory
+    :param venvdir:      virtual environment's directory
     :param requirements: list of required package OR path of the requirements
                           file to be used
     :param remove:       whether the virtual environment is to be removed after
                           the entered context
+    :param verbose:      displayed Pip output while installing packages
     """
-    def __init__(self, venv_dir, requirements=None, remove=False):
+    def __init__(self, venvdir, requirements=None, remove=False, verbose=False):
         self.__remove = remove
         self.__requirements = requirements
-        self.__venv_dir = venv_dir
+        self.__venv_dir = venvdir
+        self.__verbose = verbose
 
     def __enter__(self):
-        self.setup(self.__venv_dir, self.__requirements)
+        self.setup(self.__venv_dir, self.__requirements, self.__verbose)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -238,7 +263,7 @@ class VirtualEnv(object):
     
     def __getattr__(self, name):
         return getattr(virtualenv, name) if hasattr(virtualenv, name) else \
-               super().__getattr__(name)
+               super(VirtualEnv, self).__getattr__(name)
 
 
 class NotAVirtualEnv(Exception):
@@ -252,4 +277,4 @@ virtualenv.is_installed  = __is_installed
 virtualenv.list_packages = __list_packages
 virtualenv.setup         = __setup
 virtualenv.teardown      = __teardown
-virtualenv.VirtualEnv = VirtualEnv
+virtualenv.VirtualEnv    = VirtualEnv
