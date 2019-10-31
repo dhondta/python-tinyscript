@@ -4,6 +4,7 @@ import os
 from importlib import import_module
 from pathlib import Path as BasePath
 from random import choice
+from re import search
 from shutil import rmtree
 from six import string_types
 from tempfile import gettempdir, NamedTemporaryFile as TempFile
@@ -31,6 +32,11 @@ class Path(BasePath):
         if create and not _.exists():
             _.mkdir(parents=True)  # exist_ok does not work in Python 2
         return _
+    
+    @property
+    def basename(self):
+        """ Dummy alias for name attribute. """
+        return self.name
     
     @property
     def bytes(self):
@@ -68,7 +74,7 @@ class Path(BasePath):
     
     def __add_text(self, data, mode='w', encoding=None, errors=None):
         """ Allows to write/append text to the file, both in Python 2 and 3. """
-        if not isinstance(data, str if PYTHON3 else string_types):
+        if not isinstance(data, string_types):
             raise TypeError("data must be str, not %s" % 
                             data.__class__.__name__)
         with self.open(mode=mode, encoding=encoding, errors=errors) as f:
@@ -109,6 +115,26 @@ class Path(BasePath):
     def expanduser(self):
         """ Fixed expanduser() method, working for both Python 2 and 3. """
         return Path(os.path.expanduser(str(self)))
+    
+    def find(self, name=None, regex=False):
+        """ Find a folder or file from the current path. """
+        if name is None:
+            f = lambda p: True
+        elif not regex:
+            if "*" not in name:
+                f = lambda p: p.basename == name
+            else:
+                r = "^{}$".format(name.replace(".", "\\.").replace("?", "\\?")
+                                      .replace("-", "\\-").replace("+", "\\+")
+                                      .replace("[", "\\[").replace("]", "\\]")
+                                      .replace("(", "\\(").replace(")", "\\)")
+                                      .replace("{", "\\{").replace("}", "\\}")
+                                      .replace("*", ".*"))
+                f = lambda p: search(r, p.basename) is not None
+        else:
+            f = lambda p: search(name, p.basename) is not None
+        for item in self.walk(filter_func=f):
+            yield item
     
     def generate(self, prefix="", suffix="", length=8,
                  alphabet="0123456789abcdef"):
@@ -153,10 +179,25 @@ class Path(BasePath):
             if i.is_dir() and not i.is_hidden():
                 yield i
     
+    def listdir(self, filter_func=lambda p: True, sort=True):
+        """ List the current path using the given filter. """
+        l = os.listdir(str(self))
+        if sort:
+            l = sorted(l)
+        for item in l:
+            item = self.joinpath(item)
+            if filter_func(item):
+                yield item
+    
     def mkdir(self, mode=0o777, parents=False, exist_ok=False):
         """ Fix to non-existing argument exist_ok in Python 2. """
         arg = (exist_ok, ) if PYTHON3 else ()
         super(Path, self).mkdir(mode, parents, *arg)
+    
+    def read_lines(self, encoding=None, errors=None):
+        """ Extra method for reading a file as lines. """
+        for l in self.read_text(encoding, errors).splitlines():
+            yield l
     
     def read_text(self, encoding=None, errors=None):
         """ Fix to non-existing method in Python 2. """
@@ -174,6 +215,26 @@ class Path(BasePath):
             rmtree(str(self))
         else:
             os.remove(str(self))
+    
+    def walk(self, breadthfirst=True, filter_func=lambda p: True, sort=True):
+        """ Walk the current path for directories and files using os.listdir(),
+             breadth-first or depth-first, sorted or not, based on a filter
+             function. """
+        if breadthfirst:
+            for item in self.listdir(lambda p: not p.is_dir(), sort):
+                if filter_func(item):
+                    yield item
+        for item in self.listdir(lambda p: p.is_dir(), sort):
+            if breadthfirst and filter_func(item):
+                yield item
+            for subitem in item.walk(breadthfirst, filter_func):
+                yield subitem
+            if not breadthfirst and filter_func(item):
+                yield item
+        if not breadthfirst:
+            for item in self.listdir(lambda p: not p.is_dir(), sort):
+                if filter_func(item):
+                    yield item
     
     def write_text(self, data, encoding=None, errors=None):
         """ Fix to non-existing method in Python 2. """

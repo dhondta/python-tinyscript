@@ -33,21 +33,25 @@ Tinyscript also provides 2 `pathlib`-related functions:
     
     It also extends the class with multiple new useful methods like:
     
-    - `append_bytes(data)`: appends bytes to the current file (complements `write_bytes`, which forces the `wb` mode)
-    - `append_line(line)`: appends a newline (if not the beginning of the file) and `line`
-    - `append_lines(*lines)`: appends multiple lines relying on `append_line(line)`
-    - `append_text(data)`: appends text to the current file (complements `write_text`, which forces the `w` mode)
-    - `choice(*filetypes)`: chooses a random file in the current folder among the given extensions (mentioning the dot ; e.g. `.py`)
-    - `generate(prefix, suffix, length, alphabet)`: generates a random folder name (guaranteed to be non-existent) using the given prefix, suffix, length and alphabet, and returns the joined path
+    - `append_bytes(data:bytes)`: appends bytes to the current file (complements `write_bytes`, which forces the `wb` mode)
+    - `append_line(line:str)`: appends a newline (if not the beginning of the file) and `line`
+    - `append_lines(*lines:str)`: appends multiple lines relying on `append_line(line)`
+    - `append_text(data:str)`: appends text to the current file (complements `write_text`, which forces the `w` mode)
+    - `choice(*filetypes:str)`: chooses a random file in the current folder among the given extensions (mentioning the dot ; e.g. `.py`)
+    - `find(name:str, regex:bool)`: finds a file or folder, using `name` as a regex or not
+    - `generate(prefix:str, suffix:str, length:int, alphabet:str)`: generates a random folder name (guaranteed to be non-existent) using the given prefix, suffix, length and alphabet, and returns the joined path
     - `is_hidden()`: checks whether the current file/folder is hidden
-    - `is_samepath(other_path)`: checks whether the given path is the same
+    - `is_samepath(other_path:str|Path)`: checks whether the given path is the same
     - `iterfiles()`: iterates over files only
     - `iterpubdir()`: iterates over visible directories only
+    - `listdir(filter_func:lambda, sort:bool)`: list the current path based on a filter function, sorted or not
     - `reset()`: truncates the file
     - `remove()`: removes the current file or recursively removes the current folder
+    - `walk(breadthfirst:bool, filter_func:lambda, sort:bool)`: walk the current path breadth-first or depth-first using a filter function, sorted or not
     
     It also adds some properties:
     
+    - `basename`: dummy alias for `name`
     - `bytes`: returns file's content as raw bytes
     - `child`: returns the relative child path
     - `filename`: returns the complete filename (stem and suffix ; not natively present in `pathlib`)

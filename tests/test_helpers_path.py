@@ -21,8 +21,9 @@ class TestHelpersPath(TestCase):
         SPATH.mkdir(parents=True, exist_ok=True)
         TPATH1 = TempPath()
         TPATH2 = TempPath(prefix="tinyscript-test_", length=8)
-        FILE = Path(TEST).joinpath("test.txt")
+        FILE = PATH.joinpath("test.txt")
         FILE.touch()
+        SPATH.joinpath("test.txt").touch()
     
     @classmethod
     def tearDownClass(cls):
@@ -44,8 +45,10 @@ class TestHelpersPath(TestCase):
         self.assertFalse(FILE.exists())
         self.assertIsNone(FILE.touch())
         self.assertEqual(FILE.write_text("this is a test"), 14)
+        self.assertEqual(list(FILE.read_lines()), ["this is a test"])
         self.assertEqual(FILE.choice(), FILE)
         self.assertEqual(FILE.generate(), FILE)
+        self.assertRaises(TypeError, FILE.append_text, 0)
     
     def test_pathlib_folder_extensions(self):
         self.assertEqual(str(PATH), str(Path(TEST).absolute()))
@@ -63,6 +66,12 @@ class TestHelpersPath(TestCase):
         self.assertNotEqual(str(TPATH2), gettempdir())
         with TPATH2.tempfile() as tf:
             self.assertTrue(Path(tf.name).exists())
+        self.assertNotEqual(len(list(PATH.walk())), 0)
+        self.assertNotEqual(len(list(PATH.walk(False))), 0)
+        self.assertNotEqual(len(list(PATH.find())), 0)
+        self.assertNotEqual(len(list(PATH.find("test"))), 0)
+        self.assertNotEqual(len(list(PATH.find("te*"))), 0)
+        self.assertEqual(len(list(PATH.find("test2.+", True))), 0)
     
     def test_pathlib_mirrorpath(self):
         PATH2 = Path(TEST + "2", expand=True, create=True)
