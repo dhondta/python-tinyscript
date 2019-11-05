@@ -15,7 +15,7 @@ from six import string_types
 from subprocess import Popen, PIPE
 from time import sleep
 
-from ..helpers import JYTHON, PYPY, WINDOWS
+from ..helpers import Path, JYTHON, PYPY, WINDOWS
 
 
 __ORIGINAL_PATH        = os.environ['PATH']
@@ -23,7 +23,7 @@ __ORIGINAL_SYSPATH     = sys.path[:]
 __ORIGINAL_SYSPREFIX   = sys.prefix
 __ORIGINAL_SYSRPREFIX  = getattr(sys, "real_prefix", None)
 # package regex for parsing a line with [package]-[version] format
-PREGEX = re.compile(r"\s?(.+?)\-((?:\d+)(?:\.?\d+)+)")
+PREGEX = re.compile(r"\s?([a-zA-Z\-_]+?)\-((?:\d+)(?:\.?[a-z]*\d+)+)")
 
 
 def __activate(venv_dir):
@@ -109,18 +109,18 @@ def __install(package, *args, **kwargs):
     __check_pip_req_tracker()
     cmd = ["install", "-U"] + __parse_args(*args, **kwargs) + [package.strip()]
     top_levels = []
-    for line in __pip_run(cmd):
+    for l in __pip_run(cmd):
         if "-v" in cmd or "--verbose" in cmd:
-            print(line)
-        if line.startswith("pip._internal.exceptions") or \
-           line.startswith("DistributionNotFound"):
+            print(l)
+        if l.startswith("pip._internal.exceptions") or \
+           l.startswith("DistributionNotFound"):
             pip_proc.kill()
-            raise PipError(line.split(": ", 1)[1])
-        elif line.startswith("Successfully installed"):
-            match = filter(lambda p, v: p == package, PREGEX.findall(line[23:]))
-            if len(match) == 1:
+            raise PipError(l.split(": ", 1)[1])
+        elif l.startswith("Successfully installed"):
+            m = list(filter(lambda p: p[0] == package, PREGEX.findall(l[23:])))
+            if len(m) == 1:
                 venv = __get_virtualenv()
-                name = "{}-{}*".format(*match)
+                name = "{}-{}*".format(*m[0])
                 try:
                     tl = list(Path(venv).find(name))[0].find("top_level.txt")
                     top_levels.extend(list(tl)[0].read_lines())
@@ -248,10 +248,11 @@ class VirtualEnv(object):
                           the entered context
     :param verbose:      displayed Pip output while installing packages
     """
-    def __init__(self, venvdir, requirements=None, remove=False, verbose=False):
+    def __init__(self, venvdir=None, requirements=None, remove=False,
+                 verbose=False):
         self.__remove = remove
         self.__requirements = requirements
-        self.__venv_dir = venvdir
+        self.__venv_dir = venvdir or __get_virtualenv()
         self.__verbose = verbose
 
     def __enter__(self):

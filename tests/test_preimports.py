@@ -55,6 +55,8 @@ class TestPreimports(TestCase):
         virtualenv.teardown()
         self.assertRaises(Exception, virtualenv.install, "test")
         with VirtualEnv(VENV2, remove=True) as venv:
-            venv.install("re")
+            venv.install("asciistuff")
             self.assertTrue(venv.is_installed("setuptools"))
+            self.assertTrue(venv.is_installed("asciistuff"))
+            self.assertRaises(Exception, venv.install, "does_not_exist", "-v")
         virtualenv.teardown(VENV)
