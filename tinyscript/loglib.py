@@ -90,6 +90,8 @@ def configure_logger(glob, multi_level,
     except AttributeError:
         verbose = 0
     glob['args']._debug_level = dl = levels[verbose]
+    glob['args']._debug_syslog = syslog
+    glob['args']._debug_logfile = logfile
     logger.handlers = []
     glob['logger'] = logger
     handler = logging.StreamHandler()

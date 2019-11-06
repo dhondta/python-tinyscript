@@ -11,6 +11,7 @@ except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
     import ConfigParser as configparser
 
 from .hash import hashlib
+from .log import logging
 from .venv import virtualenv, PipPackage, VirtualEnv
 
 

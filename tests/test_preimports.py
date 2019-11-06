@@ -4,6 +4,7 @@
 
 """
 from shutil import rmtree
+from tinyscript import *
 from tinyscript.preimports import *
 from tinyscript.preimports import _load_preimports
 
@@ -40,6 +41,9 @@ class TestPreimports(TestCase):
         self.assertRaises(ValueError, hashlib.hash_file, FILE,
                           "not_existing_hash_algo")
         remove(FILE)
+    
+    def test_logging_improvements(self):
+        logging.setLogger(globals())
     
     def test_virtualenv_improvements(self):
         with open(REQS, 'w') as f:
