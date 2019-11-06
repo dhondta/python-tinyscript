@@ -11,10 +11,10 @@ except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
     import ConfigParser as configparser
 
 from .hash import hashlib
-from .venv import virtualenv, VirtualEnv
+from .venv import virtualenv, PipPackage, VirtualEnv
 
 
-__all__ = __features__ = ["VirtualEnv", "import_module"]
+__all__ = __features__ = ["PipPackage", "VirtualEnv", "import_module"]
 __all__ += ["__badimports__", "__optimports__", "__preimports__",
             "load", "reload"]
 

@@ -12,6 +12,7 @@ from pip._internal.cli.main_parser import parse_command
 from pip._internal.exceptions import PipError
 from shutil import rmtree
 from six import string_types
+from slugify import slugify
 from subprocess import Popen, PIPE
 from time import sleep
 
@@ -86,13 +87,13 @@ def __deactivate():
     __check_pip_req_tracker()
 
 
-def __get_virtualenv():
+def __get_virtualenv(error=True):
     """
     This gets the currently defined virtual environment or raises an error if no
      environment is defined.
     """
     venv = os.environ.get('VIRTUAL_ENV', "")
-    if venv == "":
+    if venv == "" and error:
         raise NotAVirtualEnv("Not in a virtual environment")
     return venv
 
@@ -107,28 +108,27 @@ def __install(package, *args, **kwargs):
     """
     global pip_proc
     __check_pip_req_tracker()
+    if "-v" in args or "--verbose" in args:
+        verbose = True
+    else:
+        verbose = False
+        args += ("-v", )
+    error = kwargs.pop("error", False)
     cmd = ["install", "-U"] + __parse_args(*args, **kwargs) + [package.strip()]
-    top_levels = []
     for l in __pip_run(cmd):
-        if "-v" in cmd or "--verbose" in cmd:
+        if verbose:
             print(l)
+        if not error:
+            continue
         if l.startswith("pip._internal.exceptions") or \
            l.startswith("DistributionNotFound"):
             pip_proc.kill()
             raise PipError(l.split(": ", 1)[1])
         elif l.startswith("Successfully installed"):
             m = list(filter(lambda p: p[0] == package, PREGEX.findall(l[23:])))
-            if len(m) == 1:
-                venv = __get_virtualenv()
-                name = "{}-{}*".format(*m[0])
-                try:
-                    tl = list(Path(venv).find(name))[0].find("top_level.txt")
-                    top_levels.extend(list(tl)[0].read_lines())
-                except IndexError:
-                    pass
-            else:
+            if len(m) == 0:
                 raise PipError("Installation of {} failed".format(package))
-    return top_levels
+    return PipPackage(package, error)
 
 
 def __is_installed(package, *args, **kwargs):
@@ -158,7 +158,7 @@ def __list_packages(*args, **kwargs):
     :param kwargs:   keyword-arguments to be used with the pip list command
     """
     cmd = ["list"] + __parse_args(*args, **kwargs)
-    for line in __pip_run(cmd):
+    for line in __pip_run(cmd, False):
         if not ("Package" in line and "Version" in line or \
            "-------" in line or line.strip() == ""):
             yield tuple(_.strip() for _ in line.split(" ", 1))
@@ -181,7 +181,7 @@ def __parse_args(*args, **kwargs):
     return l
 
 
-def __pip_run(cmd):
+def __pip_run(cmd, error=True):
     """
     This runs a Pip command using the binary from the current virtual
      environment.
@@ -189,9 +189,9 @@ def __pip_run(cmd):
     :param cmd: the Pip command and its parameters as a list
     """
     global pip_proc
-    venv = __get_virtualenv()
-    #parse_command(cmd)
-    cmd = [os.path.join(venv, "bin", "pip")] + cmd
+    venv = __get_virtualenv(error)
+    parse_command(cmd)
+    cmd = ["pip" if venv == "" else os.path.join(venv, "bin", "pip")] + cmd
     pip_proc = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     for line in iter(pip_proc.stdout.readline, ""):
         yield line[:-1]
@@ -219,9 +219,12 @@ def __setup(venv_dir, requirements=None, verbose=False):
         args = ["-v"] if verbose else []
         kwargs = {'prefix': venv_dir}
         for req in requirements:
-            for top_level in __install(req, *args, **kwargs):
-                m = import_module(top_level)
-                setattr(virtualenv, top_level, m)
+            pkg = __install(req, *args, **kwargs)
+            for tl in pkg.top_level:
+                if hasattr(virtualenv, tl):
+                    raise TopLevelAlreadyExists("{} ({})".format(tl, pkg.name))
+                m = import_module(tl)
+                setattr(virtualenv, tl, m)
 
 
 def __teardown(venv_dir=None):
@@ -235,6 +238,46 @@ def __teardown(venv_dir=None):
     if venv != "":
         __deactivate()
         rmtree(venv, True)
+
+
+class PipPackage(object):
+    """
+    This class is used to represent a Pip package and its attribute.
+    """
+    def __init__(self, name, error=True):
+        self.name = name
+        self.top_level = []
+        cmd = ["show", name]
+        venv = os.environ.get('VIRTUAL_ENV', "")
+        for i in range(2):
+            for line in globals()['__pip_run'](cmd, False):
+                try:
+                    k, v = line.strip().split(": ")
+                    k = slugify(k).replace("-", "_")
+                    if k.startswith("require"):
+                        v = v.split(", ")
+                    setattr(self, k, v)
+                except ValueError:
+                    continue
+            if hasattr(self, "version") or venv == "":
+                break
+            else: # after the first guess, if the package was not found in the
+                  #  virtual environment, deactivate it to retry with main Pip
+                globals()['__deactivate']()
+        # afterwards, re-enable the virtual environment if relevant
+        if venv != "":
+            globals()['__activate'](venv)
+        if not hasattr(self, "version"):
+            if error:
+                raise PipError("Pip package not found: {}".format(name))
+        else:
+            name = "{}-{}*".format(self.name, self.version)
+            try:
+                pkgloc = list(Path(self.location).find(name))[0]
+                tl = list(pkgloc.find("top_level.txt"))[0]
+                self.top_level = tl.read_lines()
+            except IndexError:
+                pass
 
 
 class VirtualEnv(object):
@@ -263,11 +306,18 @@ class VirtualEnv(object):
         getattr(self, ["deactivate", "teardown"][self.__remove])()
     
     def __getattr__(self, name):
-        return getattr(virtualenv, name) if hasattr(virtualenv, name) else \
-               super(VirtualEnv, self).__getattr__(name)
+        try:
+            return getattr(virtualenv, name)
+        except AttributeError:
+            raise AttributeError("object 'VirtualEnv' has no attribute '{}'"
+                                 .format(name))
 
 
 class NotAVirtualEnv(Exception):
+    pass
+
+
+class TopLevelAlreadyExists(Exception):
     pass
 
 
