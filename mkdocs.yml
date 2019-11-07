@@ -18,10 +18,11 @@ pages:
     - 'Multi-level help': examples/multi-level-help.md
     - 'Playing a demo': examples/demo.md
   - 'Real-life examples':
-    - 'AppmemDumper': examples/appmemdumper.md
-    - 'Malicious Macro Tester': examples/malicious-macro-tester.md
-    - 'Solitaire Cipher': examples/solitaire-cipher.md
-    - 'Recursive Compression': examples/recursive-compression.md
+    - 'AppmemDumper': examples-rl/appmemdumper.md
+    - 'Bots Scheduler': examples-rl/bots-scheduler.md
+    - 'Malicious Macro Tester': examples-rl/malicious-macro-tester.md
+    - 'Recursive Compression': examples-rl/recursive-compression.md
+    - 'Solitaire Cipher': examples-rl/solitaire-cipher.md
 extra:
   mailto: alexandre.dhondt@gmail.com
 theme: readthedocs
