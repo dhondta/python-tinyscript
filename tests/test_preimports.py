@@ -5,6 +5,7 @@
 """
 from shutil import rmtree
 from tinyscript import *
+from tinyscript.loglib import *
 from tinyscript.preimports import *
 from tinyscript.preimports import _load_preimports
 
@@ -43,7 +44,10 @@ class TestPreimports(TestCase):
         remove(FILE)
     
     def test_logging_improvements(self):
-        logging.setLogger(globals())
+        l = logging.getLogger("test")
+        l.addHandler(logging.StreamHandler())
+        logging.setLoggers(globals())
+        logging.setLogger(globals(), "test")
     
     def test_virtualenv_improvements(self):
         with open(REQS, 'w') as f:

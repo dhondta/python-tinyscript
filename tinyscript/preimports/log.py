@@ -6,7 +6,7 @@ import coloredlogs
 import logging
 
 
-def __set_logger(glob, *names):
+def __set_loggers(glob, *names):
     """
     Set up the loggers with the given names according to Tinyscript's logging
      configuration.
@@ -33,4 +33,5 @@ def __set_logger(glob, *names):
         main.parent = None
 
 
-logging.setLogger = __set_logger
+logging.setLogger  = lambda g, n: __set_loggers(g, n)
+logging.setLoggers = __set_loggers
