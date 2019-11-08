@@ -7,6 +7,7 @@ import ast
 import netaddr
 import netifaces
 import re
+from email.utils import parseaddr as parse_email
 from itertools import chain
 from os import makedirs
 from os.path import exists, isdir, isfile
@@ -51,9 +52,11 @@ is_long_opt  = lambda o: is_str(o) and \
 is_short_opt = lambda o: is_str(o) and re.match(r"^-[a-z]$", o, re.I)
 
 # some network-related check functions
-__all__ += ["is_defgw", "is_gw", "is_ifaddr", "is_ip", "is_ipv4", "is_ipv6",
-            "is_mac", "is_netif", "is_port"]
+__all__ += ["is_defgw", "is_domain", "is_email", "is_gw", "is_ifaddr", "is_ip",
+            "is_ipv4", "is_ipv6", "is_mac", "is_netif", "is_port"]
 is_defgw  = lambda gw:  __gateway_address(gw, True, False) is not None
+is_domain = lambda n:   __domain_name(n, False, False) is not None
+is_email  = lambda e:   __email_address(e, False) is not None
 is_gw     = lambda gw:  __gateway_address(gw, False, False) is not None
 is_ifaddr = lambda ip:  __interface_address(ip, False) is not None
 is_ip     = lambda ip:  __ip_address(ip, None, False) is not None
@@ -67,6 +70,17 @@ is_port   = lambda p:   is_int(p) and 0 < p < 2**16
 __all__ += ["is_dir", "is_file", "is_folder"]
 is_dir = is_folder = isdir
 is_file = isfile
+
+# hash check functions
+__all__ += ["is_hash", "is_md5", "is_sha1", "is_sha224", "is_sha256",
+            "is_sha512"]
+is_hash   = lambda h: any(__check_hash(h, a, False) is not None for a in \
+                          HASH_LEN.keys())
+is_md5    = lambda h: __check_hash(h, "md5", False) is not None
+is_sha1   = lambda h: __check_hash(h, "sha1", False) is not None
+is_sha224 = lambda h: __check_hash(h, "sha224", False) is not None
+is_sha256 = lambda h: __check_hash(h, "sha256", False) is not None
+is_sha512 = lambda h: __check_hash(h, "sha512", False) is not None
 
 
 def __str2list(s):
@@ -167,16 +181,67 @@ positive_ints = pos_ints = \
     lambda l, zero=True: __ints(l, is_pos_int, "positive", zero=zero)
 
 
+# ------------------------- HASH ARGUMENT TYPES --------------------------
+__all__ += ["any_hash", "md5_hash", "sha1_hash", "sha224_hash", "sha256_hash",
+            "sha512_hash"]
+HASH_LEN = {'md5': 32, 'sha1': 40, 'sha224': 56, 'sha256': 64, 'sha512': 128}
+
+
+def __check_hash(s, algo, fail=True):
+    l = HASH_LEN[algo]
+    if re.match(r"(?i)^[a-f0-9]{%d}$" % l, s) is None:
+        if fail:
+            raise ValueError("Bad {} hash".format(algo))
+        return
+    return s
+md5_hash    = lambda h: __check_hash(h, "md5")
+sha1_hash   = lambda h: __check_hash(h, "sha1")
+sha224_hash = lambda h: __check_hash(h, "sha224")
+sha256_hash = lambda h: __check_hash(h, "sha256")
+sha512_hash = lambda h: __check_hash(h, "sha512")
+
+
+def any_hash(h):
+    if not any(__check_hash(h, a, False) is not None for a in HASH_LEN.keys()):
+        raise ValueError("Bad hash")
+    return h
+
+
 # -------------------- NETWORK-RELATED ARGUMENT TYPES --------------------
-__all__ += ["default_gateway_address", "gateway_address", "ip_address",
-            "ipv4_address", "ipv6_address", "ip_address_list",
-            "ipv4_address_list", "ipv6_address_list",
+__all__ += ["default_gateway_address", "domain_name", "email_address", 
+            "gateway_address", "ip_address", "ipv4_address", "ipv6_address",
+            "ip_address_list", "ipv4_address_list", "ipv6_address_list",
             "ip_address_filtered_list", "ipv4_address_filtered_list",
             "ipv6_address_filtered_list", "ip_address_network",
             "ipv4_address_network", "ipv6_address_network",
             "interface_address", "interface_address_list",
             "interface_address_filtered_list", "mac_address",
             "network_interface", "port_number", "port_number_range"]
+
+
+def __domain_name(name, dotted=False, fail=True):
+    """ Domain name validation. """
+    _ = name
+    if not dotted and not name.endswith("."):
+        name += "."
+    # source: https://stackoverflow.com/questions/19705002/
+    if re.match(r"^(((([a-z0-9]+){1,63}\.)|(([a-z0-9]+(\-)+"
+                r"[a-z0-9]+){1,63}\.))+){1,255}$", name, re.I) is not None:
+        return _
+    if fail:
+        raise ValueError("Bad domain name")
+domain_name = lambda n: __domain_name(n)
+
+
+def __email_address(email, fail=True):
+    """ Email address validation. """
+    # reference: https://stackoverflow.com/questions/8022530/
+    if re.match(r"^[^@]+@[^@]+$", email) and is_domain(email.split("@")[1]) \
+        and parse_email(email)[1] != "":
+        return email
+    if fail:
+        raise ValueError("Bad email address")
+email_address = lambda e: __email_address(e)
 
 
 def __gateway_address(gw, default=False, fail=True):
@@ -193,7 +258,7 @@ def __gateway_address(gw, default=False, fail=True):
     if fail:
         raise ValueError("Bad {}gateway".format(["", "default "][default]))
 default_gateway_address = lambda gw: __gateway_address(gw, True)
-gateway_address = lambda gw: __gateway_address(gw)
+gateway_address         = lambda gw: __gateway_address(gw)
 
 
 def __interface_address(addr, fail=True):

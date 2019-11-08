@@ -81,21 +81,29 @@ Tinyscript provides some type checking functions, for common data:
 
 **Function** | **Description**
 :---: | :---:
-`is_int` / `is_pos_int` / `is_neg_int` | integer (positive / negative)
-`is_dict` | dictionary
-`is_list` | list, tuple, set
-`is_str` | str, bytes, unicode
-`is_lambda` / `is_function` | lazy or any function
 `is_bin` | binary string (with or without `\W` separators)
-`is_hex` | hexadecimal string (case insensitive)
+`is_dict` | dictionary
 `is_dir` / `is_folder` | dummy shortcuts to `os.path.isdir`
 `is_file` | dummy shortcut to `os.path.isfile`
+`is_hash` | hash string, among MD5/SHA1/SHA224/SHA256/SHA512
+`is_hex` | hexadecimal string (case insensitive)
+`is_int` / `is_pos_int` / `is_neg_int` | integer (positive / negative)
+`is_lambda` / `is_function` | lazy or any function
+`is_list` | list, tuple, set
+`is_md5` | MD5 hash
+`is_sha1` | SHA1 hash
+`is_sha224` | SHA224 hash
+`is_sha256` | SHA256 hash
+`is_sha512` | SHA512 hash
+`is_str` | str, bytes, unicode
 
 And for network-related data:
 
 **Function** | **Description**
 :---: | :---:
 `is_defgw` | default gateway
+`is_domain` | domain name
+`is_email` | email address
 `is_gw` | gateway
 `is_ifaddr` | interface address
 `is_ip` / `is_ipv4` / `is_ipv6` | IPv4 or IPv6 address
@@ -109,15 +117,21 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 
 **Type** | **Output** | **Description**
 :---: | :---: | :---:
+`any_hash` | `str` | any valid hash amongst MD5|SHA1|SHA224|SHA256|SHA512
 `file_exists` | `str` | existing file path
 `files_list` | `lst(str)` | list of only existing file paths
 `files_filtered_list` | `lst(str)` | list of at least one existing file path (bad paths are filtered)
 `folder_exists` / `folder_exists_or_create` | `str` | existing folder or folder to be created if it does not exist
 `ints` | `lst(int)` | list of integers
+`md5_hash` | MD5 hash
 `neg_int` / `negative_int` | `int` | single negative integer
 `neg_ints` / `negative_ints` | `lst(int)` | list of negative integers
 `pos_int` / `positive_int` | `int` | single positive integer
 `pos_ints` / `positive_ints` | `lst(int)` | list of positive integers
+`sha1_hash` | SHA1 hash
+`sha224_hash` | SHA224 hash
+`sha256_hash` | SHA256 hash
+`sha512_hash` | SHA512 hash
 
 
 And for network-related types:
@@ -125,6 +139,8 @@ And for network-related types:
 **Type** | **Output** | **Description**
 :---: | :---: | :---:
 `default_gateway_address` | valid default gateway address
+`domain_name` | valid domain name
+`email_address` | valid email address
 `gateway_address` | valid gateway address
 `interface_address` | assigned interface address
 `interface_address_list` | list of assigned interface addresses
