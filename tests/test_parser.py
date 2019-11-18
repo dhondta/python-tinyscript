@@ -42,7 +42,7 @@ class TestParser(TestCase):
         sys.argv[1:] = ["--arg1", "test", "-b"]
         parser.add_argument("-a", "--arg1")
         parser.add_argument("-b", "--boolean", action="store_true")
-        initialize(globals())
+        initialize()
         self.assertEqual(args.boolean, True)
         self.assertRaises(AttributeError, getattr, args, "does_not_exist")
         self.assertEqual(args.arg1, "test")
@@ -53,7 +53,7 @@ class TestParser(TestCase):
         test = parser.add_subparsers().add_parser("subtest", parents=[parser])
         test.add_argument("-b", "--arg2")
         if PYTHON3:
-            initialize(globals())
+            initialize()
         else:  # with Python2, an error occurs with the overwritten sys.argv
                #  and "subtest" is not parsed, hence throwing SystemExit with
                #  code 2 as the subparser selection is missing
@@ -62,14 +62,14 @@ class TestParser(TestCase):
     def test_argument_conflicts(self):
         sys.argv[1:] = []
         parser.add_argument("-v", dest="v_opt_overwritten")
-        initialize(globals())
+        initialize()
         self.assertEqual(args.v_opt_overwritten, None)
         # default verbose option still exists as only "-v" was overwritten
         self.assertEqual(args.verbose, False)
     
     def test_initialization_flags(self):
         sys.argv[1:] = ["--stats"]
-        initialize(globals(), False, True, False, *([True] * 9))
+        initialize(False, True, False, *([True] * 9))
         self.assertFalse(args.interact)
         self.assertFalse(args.progress)
         self.assertFalse(args.relative)
@@ -84,7 +84,7 @@ class TestParser(TestCase):
         sys.argv[1:] = ["--arg1", "test", "--arg2", "-w", INI]
         parser.add_argument("-a", "--arg1")
         parser.add_argument("-b", "--arg2", action="store_true")
-        initialize(globals(), add_config=True)
+        initialize(add_config=True)
         _save_config(globals())
         with open(INI) as f:
             ini = f.read().strip()
@@ -99,7 +99,7 @@ class TestParser(TestCase):
         sys.argv[1:] = ["-r", INI]
         parser.add_argument("-a", "--arg1")
         parser.add_argument("-b", "--arg2", action="store_true")
-        initialize(globals(), add_config=True)
+        initialize(add_config=True)
         self.assertEqual(args.arg1, "test")
         self.assertTrue(args.arg2)
         remove(INI)
@@ -121,24 +121,24 @@ class TestParser(TestCase):
     
     def test_noargs_interact(self):
         sys.argv[1:] = []
-        initialize(globals(), noargs_action="interact")
+        initialize(noargs_action="interact")
         self.assertTrue(args.interact)
         self.assertEqual(str(args.host), "127.0.0.1")
         self.assertEqual(args.port, 12345)
     
     def test_noargs_progress(self):
         sys.argv[1:] = []
-        initialize(globals(), noargs_action="progress")
+        initialize(noargs_action="progress")
         self.assertTrue(args.progress)
     
     def test_noargs_step(self):
         sys.argv[1:] = []
-        initialize(globals(), noargs_action="step")
+        initialize(noargs_action="step")
         self.assertTrue(args.step)
     
     def test_noargs_time(self):
         sys.argv[1:] = []
-        initialize(globals(), noargs_action="time")
+        initialize(noargs_action="time")
         self.assertTrue(args.stats)
         self.assertFalse(args.timings)
     
@@ -160,7 +160,7 @@ class TestParser(TestCase):
     
     def test_noargs_action(self):
         sys.argv[1:] = []
-        initialize(globals(), noargs_action="demo")
+        initialize(noargs_action="demo")
         # __examples__ = ["-v"]
         self.assertTrue(args.verbose)
     
@@ -171,7 +171,7 @@ class TestParser(TestCase):
     
     def test_scriptname_banner(self):
         sys.argv[1:] = []
-        initialize(globals(), add_banner=True)
+        initialize(add_banner=True)
         gd = globals()
         gd['BANNER_FONT'] = "standard"
         initialize(gd)
@@ -180,7 +180,7 @@ class TestParser(TestCase):
         if PYTHON3:
             temp_stdout(self)
             sys.argv[1:] = []
-            initialize(globals(), report_func=lambda: (Title("Test"), ))
+            initialize(report_func=lambda: (Title("Test"), ))
             self.assertEqual(args.output, "pdf")
             self.assertIs(args.title, None)
             self.assertIs(args.css, None)
@@ -191,7 +191,7 @@ class TestParser(TestCase):
         if PYTHON3:
             temp_stdout(self)
             sys.argv[1:] = []
-            initialize(globals(), report_func="bad report function")
+            initialize(report_func="bad report function")
             self.assertFalse(hasattr(args, "output"))
             self.assertFalse(hasattr(args, "title"))
             self.assertFalse(hasattr(args, "css"))
@@ -203,11 +203,11 @@ class TestParser(TestCase):
         sys.argv[1:] = []
         parser.add_argument("-a", "--arg1")
         parser.add_argument("-b", "--arg2", action="store_true")
-        initialize(globals())
-        validate(globals(), ('arg1', " ? is None", "Failed", "test"))
+        initialize()
+        validate(('arg1', " ? is None", "Failed", "test"))
         self.assertRaises(ValueError, validate, globals(), ('bad/arg', "True"))
         self.assertRaises(SystemExit, validate, globals(),
                           ('arg1', "bad condition"))
-        validate(globals(), ('arg1', "bad condition", "message", "default"))
+        validate(('arg1', "bad condition", "message", "default"))
         globals()['args'] = None
-        validate(globals())
+        validate()
