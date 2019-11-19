@@ -304,7 +304,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self.scriptname = sname
         # format the description message
         d = sname
-        v = str(gd.get('__version__'))
+        v = str(gd.get('__version__') or "")
         if v:
             d += " v" + v
         v = gd.get('__status__')
