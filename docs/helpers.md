@@ -1,6 +1,6 @@
 ## Useful general-purpose functions
 
-According to the DRY philosophy, Tinyscript provides a few predefined utility functions:
+According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) philosophy, Tinyscript provides a few predefined utility functions:
 
 **Name** | **Description**
 :---: | :---:
