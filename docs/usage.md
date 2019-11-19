@@ -26,8 +26,8 @@ This creates a script named `script.py` with minimal code.
         if __name__ == '__main__':
             parser.add_argument("", help="")
             # TODO: write new arguments
-            initialize(globals())
-            # TODO: use validate(globals(), ...) if necessary
+            initialize()
+            # TODO: use validate(...) if necessary
             # TODO: write logic here
 
 <br>
@@ -100,8 +100,7 @@ After customizing the metadata, the `initialize` function can be filled with the
 ??? example 
 
         :::python
-        initialize(globals(),
-                   add_demo=True,
+        initialize(add_demo=True,
                    add_step=True,
                    noargs_action="wizard",
                    report_func=make_report,
@@ -112,7 +111,7 @@ After customizing the metadata, the `initialize` function can be filled with the
 
 ## Validation
 
-Once the initialization is tuned, a validation can be set if necessary using the `validate` function. This also takes `globals()` as the first argument, like `initialize`, but then takes 3- or 4-tuples for defining the validation items.
+Once the initialization is tuned, a validation can be set if necessary using the `validate` function. This takes 3- or 4-tuples for defining the validation items.
 
     (argument_name, condition, error_message[, default_value])
 

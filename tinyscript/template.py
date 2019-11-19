@@ -49,10 +49,11 @@ except ImportError:
 """
 IMPORTS = "{target}from tinyscript import *\n"
 MAIN = """if __name__ == '__main__':
-    parser.add_argument("", help="")
     # TODO: write new arguments
-    initialize(globals())
-    # TODO: use validate(globals(), ...) if necessary
+    # Example:
+    # parser.add_argument("--option", help="Description")
+    initialize()
+    # TODO: use validate(...) if necessary
     # TODO: write logic here{base}
 """
 

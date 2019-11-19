@@ -18,7 +18,7 @@ SCRIPT = """from tinyscript import *
 def at_{}():
     with open("{}", 'w+') as f:
         f.write("{}")
-initialize(globals()){}"""
+initialize(){}"""
 SIGNALS = {
     'interrupt': "SIGINT",
     'terminate': "SIGTERM",

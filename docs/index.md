@@ -19,7 +19,7 @@ from tinyscript import *
 
 if __name__ == '__main__':
     parser.add_argument("string", help="string to be displayed")
-    initialize(globals())
+    initialize()
     logger.info(args.string)
 ```
 

@@ -8,6 +8,7 @@ import atexit
 import os
 import re
 import sys
+import inspect
 from asciistuff import AsciiFile, Banner
 from inspect import getmembers, isfunction, ismethod
 from os.path import basename, splitext
@@ -42,8 +43,7 @@ def _save_config(glob):
                              .format(cf))
 
 
-def initialize(glob,
-               sudo=False,
+def initialize(sudo=False,
                multi_level_debug=False,
                add_banner=False,
                add_config=False,
@@ -63,7 +63,6 @@ def initialize(glob,
      logger to be inserted in the input dictionary of global variables from the
      calling script.
 
-    :param glob:              globals() instance from the calling script
     :param sudo:              if True, require sudo credentials and re-run
                                script with sudo
     :param multi_level_debug: allow to use -v, -vv, -vvv (adjust logging level)
@@ -87,7 +86,8 @@ def initialize(glob,
     :param report_func:       report generation function
     """
     global parser, parser_calls
-    
+    glob = inspect.currentframe().f_back.f_globals
+
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
            'progress': add_progress, 'step': add_step, 'time': add_time,
            'version': add_version, 'wizard': add_wizard, 'help': True}
@@ -331,7 +331,7 @@ def initialize(glob,
     atexit.register(__at_exit)
 
 
-def validate(glob, *arg_checks):
+def validate(*arg_checks):
     """
     Function for validating group of arguments ; each argument is represented as
      a 4-tuple like follows:
@@ -347,9 +347,9 @@ def validate(glob, *arg_checks):
                               implies that the script will not exit after the
                               validation (if no other blocking argument present)
 
-    :param glob:       globals() instance from the calling script
     :param arg_checks: list of 3/4-tuples
     """
+    glob = inspect.currentframe().f_back.f_globals
     locals().update(glob)  # allows to import user-defined objects from glob
                            #  into the local scope
     if glob['args'] is None or glob['logger'] is None:
