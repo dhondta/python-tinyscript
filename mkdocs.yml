@@ -2,7 +2,7 @@ site_name: "Tinyscript - A library for quickly prototyping CLI Python-based tool
 repo_url: https://github.com/dhondta/tinyscript
 site_author: dhondta
 docs_dir: docs
-pages:
+nav:
   - Introduction: index.md
   - Setup: setup.md
   - Internals: internals.md
