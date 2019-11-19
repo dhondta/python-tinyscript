@@ -30,6 +30,8 @@ extra_javascript:
   - js/collapsible-navbar.js
 use_directory_urls: false
 markdown_extensions:
+  - toc:
+      permalink: true
   - admonition
   - codehilite:
       linenums: true
