@@ -76,3 +76,4 @@ tmp
 TODO
 script.py
 tool.py
+.mypy_cache
