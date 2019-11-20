@@ -108,16 +108,14 @@ class TestParser(TestCase):
         temp_stdout(self)
         sys.argv[1:] = []
         # SystemExit is raised as the default "config.ini" does not exist
-        self.assertRaises(SystemExit, initialize, globals(),
-                          noargs_action="config")
+        self.assertRaises(SystemExit, initialize, noargs_action="config")
     
     def test_noargs_help(self):
         temp_stdout(self)
         sys.argv[1:] = []
         # SystemExit is raised with code 0 as the help message is displayed then
         #  it exits
-        self.assertRaises(SystemExit, initialize, globals(),
-                          noargs_action="help")
+        self.assertRaises(SystemExit, initialize, noargs_action="help")
     
     def test_noargs_interact(self):
         sys.argv[1:] = []
@@ -147,16 +145,14 @@ class TestParser(TestCase):
         sys.argv[1:] = []
         # SystemExit is raised with code 0 as the version is displayed then it
         #  exits
-        self.assertRaises(SystemExit, initialize, globals(),
-                          noargs_action="version")
+        self.assertRaises(SystemExit, initialize, noargs_action="version")
     
     def test_noargs_wizard(self):
         temp_stdout(self)
         temp_stdin(self, "\n")
         sys.argv[1:] = []
         # EOFError is raised as the wizard stands with no input but a newline
-        self.assertRaises(EOFError, initialize, globals(),
-                          noargs_action="wizard")
+        self.assertRaises(EOFError, initialize, noargs_action="wizard")
     
     def test_noargs_action(self):
         sys.argv[1:] = []
@@ -166,15 +162,14 @@ class TestParser(TestCase):
     
     def test_bad_noargs_action(self):
         sys.argv[1:] = []
-        self.assertRaises(ValueError, initialize, globals(),
-                          noargs_action="does_not_exist")
+        self.assertRaises(ValueError, initialize, noargs_action="does_not_exist")
     
     def test_scriptname_banner(self):
         sys.argv[1:] = []
         initialize(add_banner=True)
         gd = globals()
         gd['BANNER_FONT'] = "standard"
-        initialize(gd)
+        initialize()
     
     def test_report_good_function(self):
         if PYTHON3:
@@ -205,8 +200,8 @@ class TestParser(TestCase):
         parser.add_argument("-b", "--arg2", action="store_true")
         initialize()
         validate(('arg1', " ? is None", "Failed", "test"))
-        self.assertRaises(ValueError, validate, globals(), ('bad/arg', "True"))
-        self.assertRaises(SystemExit, validate, globals(),
+        self.assertRaises(ValueError, validate, ('bad/arg', "True"))
+        self.assertRaises(SystemExit, validate,
                           ('arg1', "bad condition"))
         validate(('arg1', "bad condition", "message", "default"))
         globals()['args'] = None

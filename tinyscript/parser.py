@@ -86,7 +86,17 @@ def initialize(sudo=False,
     :param report_func:       report generation function
     """
     global parser, parser_calls
-    glob = inspect.currentframe().f_back.f_globals
+
+    # dynamically get caller's frame
+    prev_frame = inspect.currentframe().f_back
+    glob = {}
+
+    # walk the stack until a frame containing a known object is found
+    while prev_frame:
+        glob = prev_frame.f_globals
+        if 'ProxyArgumentParser' in glob and glob['ProxyArgumentParser'] is ProxyArgumentParser:
+            break
+        prev_frame = prev_frame.f_back
 
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
            'progress': add_progress, 'step': add_step, 'time': add_time,
@@ -349,7 +359,18 @@ def validate(*arg_checks):
 
     :param arg_checks: list of 3/4-tuples
     """
-    glob = inspect.currentframe().f_back.f_globals
+
+    # dynamically get caller's frame
+    prev_frame = inspect.currentframe().f_back
+    glob = {}
+
+    # walk the stack until a frame containing a known object is found
+    while prev_frame:
+        glob = prev_frame.f_globals
+        if 'ProxyArgumentParser' in glob and glob['ProxyArgumentParser'] is ProxyArgumentParser:
+            break
+        prev_frame = prev_frame.f_back
+
     locals().update(glob)  # allows to import user-defined objects from glob
                            #  into the local scope
     if glob['args'] is None or glob['logger'] is None:
