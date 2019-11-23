@@ -30,7 +30,7 @@ class ExitHooks(object):
         self._orig_exit(code)
     
     def quit(self, code=0):
-        if self.state != "INTERRUPTED" or self.exit:
+        if self.state != "INTERRUPTED" or self._exit:
             self.exit(code)
 
 _hooks = ExitHooks()
