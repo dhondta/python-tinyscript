@@ -54,6 +54,7 @@ def initialize(sudo=False,
                add_time=False,
                add_version=False,
                add_wizard=False,
+               exit_at_interrupt=True,
                ext_logging=False,
                noargs_action=None,
                post_actions=True,
@@ -80,24 +81,23 @@ def initialize(sudo=False,
     :param add_version:       add a version option
     :param add_wizard:        add an option to run a wizard, asking for each
                                input argument
+    :param exit_at_interrupt: enable exit at interrupt
     :param ext_logging:       extended logging options
     :param noargs_action:     action to be performed when no argument is input
     :param post_actions:      enable post-actions at interrupt
     :param report_func:       report generation function
     """
     global parser, parser_calls
-
     # dynamically get caller's frame
     prev_frame = inspect.currentframe().f_back
     glob = {}
-
     # walk the stack until a frame containing a known object is found
     while prev_frame:
         glob = prev_frame.f_globals
-        if 'ProxyArgumentParser' in glob and glob['ProxyArgumentParser'] is ProxyArgumentParser:
+        if "ProxyArgumentParser" in glob and \
+           glob['ProxyArgumentParser'] is ProxyArgumentParser:
             break
         prev_frame = prev_frame.f_back
-
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
            'progress': add_progress, 'step': add_step, 'time': add_time,
            'version': add_version, 'wizard': add_wizard, 'help': True}
@@ -308,6 +308,7 @@ def initialize(sudo=False,
         f['title', bs] = Banner(p.scriptname, font=bf)
         print(f)
     # 7) finally, bind the global exit handler
+    _hooks._exit = exit_at_interrupt
     def __at_exit():
         # first, dump the config if required
         if add['config']:

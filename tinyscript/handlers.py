@@ -18,20 +18,22 @@ class ExitHooks(object):
     # inspired from: https://stackoverflow.com/questions/9741351/how-to-find-exi
     #                 t-code-or-reason-when-atexit-callback-is-called-in-python
     def __init__(self):
+        self._exit = True
+        self._orig_exit = sys.exit
         self.code = None
         self.exception = None
         self.state = None
-
-    def hook(self):
-        self._orig_exit = sys.exit
         sys.exit = self.exit
 
     def exit(self, code=0):
         self.code = code
         self._orig_exit(code)
+    
+    def quit(self, code=0):
+        if self.state != "INTERRUPTED" or self.exit:
+            self.exit(code)
 
 _hooks = ExitHooks()
-_hooks.hook()
 
 
 def __interrupt_handler(*args):
@@ -43,7 +45,7 @@ def __interrupt_handler(*args):
     :param code: exit code
     """
     _hooks.state = "INTERRUPTED"
-    _hooks.exit(0)
+    _hooks.quit(0)
 # bind to interrupt signal (Ctrl+C)
 signal(SIGINT, __interrupt_handler)
 
@@ -57,22 +59,12 @@ def __terminate_handler(*args):
     :param code: exit code
     """
     _hooks.state = "TERMINATED"
-    _hooks.exit(0)
+    _hooks.quit(0)
 # bind to terminate signal
 signal(SIGTERM, __terminate_handler)
 
 
-def at_exit():
-    pass
-
-
-def at_graceful_exit():
-    pass
-
-
-def at_interrupt():
-    pass
-
-
-def at_terminate():
-    pass
+at_exit          = lambda: None
+at_graceful_exit = lambda: None
+at_interrupt     = lambda: None
+at_terminate     = lambda: None

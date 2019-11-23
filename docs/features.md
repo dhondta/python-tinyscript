@@ -451,7 +451,11 @@ def at_interrupt():
     # do something before at_exit() if the user interrupted execution
 ...
 ```
-      
+
+!!! note "Exit at interrupt"
+    
+    By default, when interrupting the execution, `sys.exit` is triggered therefore stopping the script. This behavior can be disabled by setting `exit_at_interrupt=False` when calling `initialize(...)`.
+
 - *terminate*: before *exit*, if the script was terminated from the OS or due to an error
     
 ```python hl_lines="2"

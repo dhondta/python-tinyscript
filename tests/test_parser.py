@@ -69,7 +69,7 @@ class TestParser(TestCase):
     
     def test_initialization_flags(self):
         sys.argv[1:] = ["--stats"]
-        initialize(False, True, False, *([True] * 9))
+        initialize(False, True, False, *([True] * 10))
         self.assertFalse(args.interact)
         self.assertFalse(args.progress)
         self.assertFalse(args.relative)
