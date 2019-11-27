@@ -101,10 +101,14 @@ def configure_logger(glob, multi_level,
     glob['logger'].setLevel(dl)
     if relative:
         coloredlogs.ColoredFormatter = RelativeTimeColoredFormatter
+
+    fmt = glob.get('LOG_FORMAT', LOG_FORMAT)
+    datefmt = glob.get('DATE_FORMAT', DATE_FORMAT)
+
     coloredlogs.install(dl,
                         logger=glob['logger'],
-                        fmt=glob['LOG_FORMAT'],
-                        datefmt=glob['DATE_FORMAT'], 
+                        fmt=fmt,
+                        datefmt=datefmt,
                         milliseconds=glob['TIME_MILLISECONDS'],
                         syslog=syslog,
                         stream=logfile)
