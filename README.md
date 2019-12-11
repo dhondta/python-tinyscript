@@ -14,3 +14,25 @@ This library is aimed to provide useful features and to shorten required lines o
 <p align="center">
     <img src="https://dhondta.github.io/tinyscript/docs/demos/simple-script.svg">
 </p>
+
+## Example tools
+
+### Security
+
+- [AppMemDumper](https://github.com/dhondta/AppmemDumper) (Windows forensics)
+- [Bots Scheduler](https://github.com/dhondta/bots-scheduler) (Web security services job scheduler)
+- [Malicious Macro Tester](https://github.com/dhondta/malicious-macro-tester) (malicious VB macro detection)
+- [Paddinganograph](https://gist.github.com/dhondta/90a07d9d106775b0cd29bb51ffe15954) (base32/64 padding-based steganography)
+- [Solitaire Cipher](https://github.com/dhondta/solitaire-cipher) (encryption)
+- [StegoPIT](https://gist.github.com/dhondta/30abb35bb8ee86109d17437b11a1477a) (Pixel Indicator Technique)
+- [STIX Report Generator](https://gist.github.com/dhondta/ca5fb748957b1ec6f13418ac41c94d5b)
+
+### Utils
+
+- [Audio Assembler](https://gist.github.com/dhondta/8b3c7d95b056cae3505df853a098fc4f)
+- [Documentation Text Masker](https://gist.github.com/dhondta/5cae9533240471eac155bd51593af2e0)
+- [Email Origin](https://gist.github.com/dhondta/9a8027062ff770b2aa5d8422ddd78b57)
+- [Loose Comparison Input Generator](https://gist.github.com/dhondta/8937374f087f708c608bcacac431969f) (PHP Type Juggling)
+- [PDF Preview Generator](https://gist.github.com/dhondta/f57dfde304905644ca5c43e48c249125)
+- [Recursive Compression](https://github.com/dhondta/recursive-compression)
+- [WebGrep](https://github.com/dhondta/webgrep) (Web text search)
