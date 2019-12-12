@@ -95,18 +95,16 @@ def configure_logger(glob, multi_level,
     logger.handlers = []
     glob['logger'] = logger
     handler = logging.StreamHandler()
-    formatter = logging.Formatter(glob['LOG_FORMAT'], glob['DATE_FORMAT'])
+    lfmt = glob.get('LOG_FORMAT', LOG_FORMAT)
+    dfmt = glob.get('DATE_FORMAT', DATE_FORMAT)
+    formatter = logging.Formatter(lfmt, dfmt)
     handler.setFormatter(formatter)
     glob['logger'].addHandler(handler)
     glob['logger'].setLevel(dl)
     if relative:
         coloredlogs.ColoredFormatter = RelativeTimeColoredFormatter
     coloredlogs.install(
-        dl,
-        logger=glob['logger'],
-        fmt=glob.get('LOG_FORMAT', LOG_FORMAT),
-        datefmt=glob.get('DATE_FORMAT', DATE_FORMAT),
+        dl, logger=glob['logger'], fmt=lfmt, datefmt=dfmt,
         milliseconds=glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS),
-        syslog=syslog,
-        stream=logfile,
+        syslog=syslog, stream=logfile,
     )
