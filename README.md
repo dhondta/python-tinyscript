@@ -21,6 +21,7 @@ This library is aimed to provide useful features and to shorten required lines o
 
 - [AppMemDumper](https://github.com/dhondta/AppmemDumper) (Windows forensics)
 - [Bots Scheduler](https://github.com/dhondta/bots-scheduler) (Web security services job scheduler)
+- [DroneSploit](https://github.com/dhondta/dronesploit) (startup script)
 - [Malicious Macro Tester](https://github.com/dhondta/malicious-macro-tester) (malicious VB macro detection)
 - [Paddinganograph](https://gist.github.com/dhondta/90a07d9d106775b0cd29bb51ffe15954) (base32/64 padding-based steganography)
 - [Solitaire Cipher](https://github.com/dhondta/solitaire-cipher) (encryption)
