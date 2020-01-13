@@ -1,55 +1,20 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common custom type checking and validation functions.
+"""Network-related checking functions and argument types.
 
 """
-import ast
 import netaddr
 import netifaces
 import re
 from email.utils import parseaddr as parse_email
 from itertools import chain
-from os import makedirs
-from os.path import exists, isdir, isfile
-from six import string_types, u
+
+from .common import _str2list
 
 
 __all__ = __features__ = []
 
-try:
-    long
-except NameError:
-    long = int
 
-
-# -------------------- TYPE/FORMAT CHECKING FUNCTIONS --------------------
-# various object type check functions
-__all__ += ["is_dict", "is_function", "is_int", "is_lambda", "is_list",
-            "is_neg_int", "is_pos_int", "is_str"]
-is_int      = lambda i: isinstance(i, (int, long))
-is_pos_int  = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
-is_neg_int  = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
-is_dict     = lambda d: isinstance(d, dict)
-is_list     = lambda l: isinstance(l, (list, set, tuple))
-is_str      = lambda s: isinstance(s, string_types)
-is_lambda   = lambda l: isinstance(l, type(lambda:0)) and \
-                        l.__name__ == (lambda:0).__name__
-is_function = lambda f: hasattr(f, "__call__")
-
-# various data format check functions
-__all__ += ["is_bin", "is_hex"]
-is_bin = lambda b: is_str(b) and all(set(_).difference(set("01")) == set() \
-                                     for _ in re.split(r"\W+", b))
-is_hex = lambda h: is_str(h) and len(h) % 2 == 0 and \
-                   set(h.lower()).difference(set("0123456789abcdef")) == set()
-
-# some other common check functions
-__all__ += ["is_long_opt", "is_short_opt"]
-is_long_opt  = lambda o: is_str(o) and \
-                         re.match(r"^--[a-z]+(-[a-z]+)*$", o, re.I)
-is_short_opt = lambda o: is_str(o) and re.match(r"^-[a-z]$", o, re.I)
-
-# some network-related check functions
+# network-related check functions
 __all__ += ["is_defgw", "is_domain", "is_email", "is_gw", "is_ifaddr", "is_ip",
             "is_ipv4", "is_ipv6", "is_mac", "is_netif", "is_port"]
 is_defgw  = lambda gw:  __gateway_address(gw, True, False) is not None
@@ -64,151 +29,8 @@ is_mac    = lambda mac: __mac_address(mac, False) is not None
 is_netif  = lambda nif: __network_interface(nif, False) is not None
 is_port   = lambda p:   is_int(p) and 0 < p < 2**16
 
-# dummy shortcuts, compliant with the is_* naming convention
-__all__ += ["is_dir", "is_file", "is_folder"]
-is_dir = is_folder = isdir
-is_file = isfile
 
-# hash check functions
-__all__ += ["is_hash", "is_md5", "is_sha1", "is_sha224", "is_sha256",
-            "is_sha384", "is_sha512"]
-is_hash   = lambda h: any(__check_hash(h, a, False) is not None for a in \
-                          HASH_LEN.keys())
-is_md5    = lambda h: __check_hash(h, "md5", False) is not None
-is_sha1   = lambda h: __check_hash(h, "sha1", False) is not None
-is_sha224 = lambda h: __check_hash(h, "sha224", False) is not None
-is_sha256 = lambda h: __check_hash(h, "sha256", False) is not None
-is_sha384 = lambda h: __check_hash(h, "sha384", False) is not None
-is_sha512 = lambda h: __check_hash(h, "sha512", False) is not None
-
-
-def __str2list(s):
-    """ Convert string to list if input is effectively a string. """
-    # if already a list, simply return it, otherwise ensure input is a string
-    if isinstance(s, list):
-        return s
-    else:
-        s = str(s)
-    # remove heading and trailing brackets
-    if s[0] == '[' and s[-1] == ']' or s[0] == '(' and s[-1] == ')':
-        s = s[1:-1]
-    # then parse list elements from the string
-    l = []
-    for i in s.split(","):
-        i = i.strip()
-        try:
-            l.append(ast.literal_eval(i))
-        except Exception:
-            l.append(i)
-    return l
-
-
-# -------------------- FILE/FOLDER-RELATED ARGUMENT TYPES --------------------
-__all__ += ["file_exists", "files_list", "files_filtered_list", "folder_exists",
-            "folder_exists_or_create"]
-
-
-def file_exists(f):
-    """ Check that the given file exists. """
-    if not exists(f):
-        raise ValueError("'{}' does not exist".format(f))
-    if not isfile(f):
-        raise ValueError("Target exists and is not a file")
-    return f
-
-
-def files_list(l, filter_bad=False):
-    """ Check if the list contains valid files. """
-    l = __str2list(l)
-    nl = []
-    for f in l:
-        if not isfile(f):
-            if not filter_bad:
-                raise ValueError("A file from the given list does not exist")
-        else:
-            nl.append(f)
-    if filter_bad and len(nl) == 0:
-        raise ValueError("No valid file in the given list")
-    return nl
-
-
-def files_filtered_list(l):
-    """ Check if the list contains valid files and discard invalid ones. """
-    return files_list(l, True)
-
-
-def folder_exists(f):
-    """ Check that the given folder exists. """
-    if not exists(f):
-        raise ValueError("'{}' does not exist".format(f))
-    if not isdir(f):
-        raise ValueError("Target exists and is not a folder")
-    return f
-
-
-def folder_exists_or_create(f):
-    """ Check that the given folder exists and create it if not existing. """
-    if not exists(f):
-        makedirs(f)
-    if not isdir(f):
-        raise ValueError("Target exists and is not a folder")
-    return f
-
-
-# -------------------- DATA FORMAT ARGUMENT TYPES --------------------
-__all__ += ["neg_int", "negative_int", "pos_int", "positive_int", "ints",
-            "neg_ints", "negative_ints", "pos_ints", "positive_ints"]
-
-
-def __ints(l, check_func=lambda x: False, idescr=None, **kwargs):
-    """ Parses a comma-separated list of ints. """
-    l = __str2list(l)
-    msg = "{} {}integer{}".format(["Bad list of", "Not a"][len(l) == 1],
-                                  "" if idescr is None else idescr + " ",
-                                  ["s", ""][len(l) == 1])
-    if not all(check_func(_, **kwargs) for _ in l):
-        raise ValueError(msg)
-    return l
-ints = lambda l: __ints(l, is_int)
-negative_int = neg_int = \
-    lambda i, zero=False: __ints(i, is_neg_int, "negative", zero=zero)[0]
-positive_int = pos_int = \
-    lambda i, zero=True: __ints(i, is_pos_int, "positive", zero=zero)[0]
-negative_ints = neg_ints = \
-    lambda l, zero=False: __ints(l, is_neg_int, "negative", zero=zero)
-positive_ints = pos_ints = \
-    lambda l, zero=True: __ints(l, is_pos_int, "positive", zero=zero)
-
-
-# ------------------------- HASH ARGUMENT TYPES --------------------------
-__all__ += ["any_hash", "md5_hash", "sha1_hash", "sha224_hash", "sha256_hash",
-            "sha512_hash"]
-HASH_LEN = {'md5': 32, 'sha1': 40, 'sha224': 56, 'sha256': 64, 'sha384': 96,
-            'sha512': 128}
-
-
-def __check_hash(s, algo, fail=True):
-    l = HASH_LEN[algo]
-    if re.match(r"(?i)^[a-f0-9]{%d}$" % l, s) is None:
-        if fail:
-            raise ValueError("Bad {} hash".format(algo))
-        return
-    return s
-md5_hash    = lambda h: __check_hash(h, "md5")
-sha1_hash   = lambda h: __check_hash(h, "sha1")
-sha224_hash = lambda h: __check_hash(h, "sha224")
-sha256_hash = lambda h: __check_hash(h, "sha256")
-sha384_hash = lambda h: __check_hash(h, "sha384")
-sha512_hash = lambda h: __check_hash(h, "sha512")
-
-
-def any_hash(h):
-    if not any(__check_hash(h, a, False) is not None for a in HASH_LEN.keys()):
-        raise ValueError("Bad hash")
-    return h
-
-
-# -------------------- NETWORK-RELATED ARGUMENT TYPES --------------------
+# network-related argument types
 __all__ += ["default_gateway_address", "domain_name", "email_address", 
             "gateway_address", "ip_address", "ipv4_address", "ipv6_address",
             "ip_address_list", "ipv4_address_list", "ipv6_address_list",
@@ -276,7 +98,7 @@ interface_address = lambda a: __interface_address(a)
 
 def __interface_address_list(addrs, filter_bad=False):
     """ Interface addresses validation and expansion. """
-    addrs = __str2list(addrs)
+    addrs = _str2list(addrs)
     l = []
     for addr in addrs:
         try:
@@ -307,7 +129,7 @@ ipv6_address = lambda ip: __ip_address(ip, 6)
 
 def __ip_address_list(ips, version=None, filter_bad=False):
     """ IP address range validation and expansion. """
-    ips = __str2list(ips)
+    ips = _str2list(ips)
     # consider it as an ipaddress.IPv[4|6]Network instance and expand it
     l = []
     for ip in ips:

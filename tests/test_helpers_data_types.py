@@ -18,8 +18,10 @@ class TestHelpersDataTypes(TestCase):
         l2 = ["test1.txt", "test3.txt"]
         l3 = ["test3.txt", "test4.txt"]
         touch("test1.txt", "test2.txt")
+        self.assertEqual(folder_does_not_exist(tf), tf)
         self.assertEqual(folder_exists_or_create(tf), tf)
         self.assertEqual(file_exists(l1[0]), l1[0])
+        self.assertRaises(ValueError, file_does_not_exist, l1[0])
         self.assertRaises(ValueError, file_exists, l3[0])
         self.assertRaises(ValueError, file_exists, tf)
         self.assertEqual(files_list(l1), l1)
@@ -27,6 +29,7 @@ class TestHelpersDataTypes(TestCase):
         self.assertEqual(files_filtered_list(l2), [l2[0]])
         self.assertRaises(ValueError, files_filtered_list, l3)
         self.assertEqual(folder_exists(tf), tf)
+        self.assertRaises(ValueError, folder_does_not_exist, tf)
         self.assertRaises(ValueError, folder_exists, tfne)
         self.assertRaises(ValueError, folder_exists, l1[0])
         rmdir(tf)
