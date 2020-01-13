@@ -159,10 +159,12 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 **Type** | **Output** | **Description**
 :---: | :---: | :---:
 `ts.any_hash` | `str` | any valid hash amongst MD5|SHA1|SHA224|SHA256|SHA512
+`ts.file_does_not_exist` | `str` | non-existing file path
 `ts.file_exists` | `str` | existing file path
 `ts.files_list` | `list(str)` | list of only existing file paths
 `ts.files_filtered_list` | `list(str)` | list of at least one existing file path (bad paths are filtered)
-`ts.folder_exists` / `folder_exists_or_create` | `str` | existing folder or folder to be created if it does not exist
+`ts.folder_does_not_exist` | `str` | non-existing folder
+`ts.folder_exists` / `ts.folder_exists_or_create` | `str` | existing folder or folder to be created if it does not exist
 `ts.ints` | `list(int)` | list of integers
 `ts.md5_hash` | `str` | MD5 hash
 `ts.neg_int` / `negative_int` | `int` | single negative integer
@@ -173,6 +175,7 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `ts.sha224_hash` | `str` | SHA224 hash
 `ts.sha256_hash` | `str` | SHA256 hash
 `ts.sha512_hash` | `str` | SHA512 hash
+`ts.str_matches(pattern, flags)` | `str` | string that matches the given pattern with the given flags
 
 
 And for network-related types:
