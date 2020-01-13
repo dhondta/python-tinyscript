@@ -65,7 +65,8 @@ def _str2list(s):
 
 # -------------------- DATA FORMAT ARGUMENT TYPES --------------------
 __all__ += ["neg_int", "negative_int", "pos_int", "positive_int", "ints",
-            "neg_ints", "negative_ints", "pos_ints", "positive_ints"]
+            "neg_ints", "negative_ints", "pos_ints", "positive_ints",
+            "str_matches"]
 
 
 def __ints(l, check_func=lambda x: False, idescr=None, **kwargs):
@@ -86,3 +87,12 @@ negative_ints = neg_ints = \
     lambda l, zero=False: __ints(l, is_neg_int, "negative", zero=zero)
 positive_ints = pos_ints = \
     lambda l, zero=True: __ints(l, is_pos_int, "positive", zero=zero)
+
+
+def str_matches(pattern, flags=0):
+    """ Applies the given regular expression to a string argument. """
+    def _validation(s):
+        if re.match(pattern, s, flags) is None:
+            raise ValueError("Input string does not match the given regex")
+        return s
+    return _validation

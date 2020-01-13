@@ -11,7 +11,7 @@ from utils import *
 
 
 class TestHelpersDataTypes(TestCase):
-    def test_general_purpose_types(self):
+    def test_file_related_types(self):
         tf = "test_folder"
         tfne = "test_folder_not_existing"
         l1 = ["test1.txt", "test2.txt"]
@@ -39,6 +39,8 @@ class TestHelpersDataTypes(TestCase):
         rmdir(tfne)
         remove("test1.txt")
         remove("test2.txt")
+
+    def test_general_purpose_types(self):
         self.assertEqual(neg_int(-1), -1)
         self.assertEqual(negative_int(-1), -1)
         self.assertRaises(ValueError, neg_int, 0)
@@ -66,6 +68,10 @@ class TestHelpersDataTypes(TestCase):
         self.assertRaises(ValueError, pos_ints, "[1,2")
         self.assertRaises(ValueError, pos_ints, [-1, 1])
         self.assertRaises(ValueError, pos_ints, "test,0")
+        self.assertEqual(str_matches(r"^[abc]$")("a"), "a")
+        self.assertRaises(ValueError, str_matches(r"^[abc]$"), "d")
+    
+    def test_hash_related_types(self):
         self.assertIsNotNone(any_hash("0" * 32))
         self.assertRaises(ValueError, any_hash, "bad_hash")
         self.assertRaises(ValueError, md5_hash, "bad_hash")
