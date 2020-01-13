@@ -27,6 +27,7 @@ This library is aimed to provide useful features and to shorten required lines o
 - [Solitaire Cipher](https://github.com/dhondta/solitaire-cipher) (encryption)
 - [StegoPIT](https://gist.github.com/dhondta/30abb35bb8ee86109d17437b11a1477a) (Pixel Indicator Technique)
 - [STIX Report Generator](https://gist.github.com/dhondta/ca5fb748957b1ec6f13418ac41c94d5b)
+- [WLF (Word List Filter)](https://gist.github.com/dhondta/82a7919f8aafc1393c37c2d0f06b77e8)
 
 ### Utils
 
