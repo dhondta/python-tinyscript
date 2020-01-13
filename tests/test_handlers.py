@@ -3,8 +3,6 @@
 """Handlers module assets' tests.
 
 """
-from subprocess import Popen, PIPE
-
 from tinyscript import *
 from tinyscript.handlers import *
 from tinyscript.handlers import (signal, ExitHooks, SIGINT, SIGTERM,
@@ -31,7 +29,7 @@ def exec_script(handler):
     s = ["\nos.kill(os.getpid(), signal.{})".format(s), ""][s is None]
     with open(FILE, 'w+') as f:
         f.write(SCRIPT.format(handler.lower(), TEXT, handler.upper(), s))
-    p = Popen(["python{}".format(["2", "3"][PYTHON3]), FILE])
+    p = subprocess.Popen(["python{}".format(["2", "3"][PYTHON3]), FILE])
     p.wait()
     try:
         with open(TEXT) as f:

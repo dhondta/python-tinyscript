@@ -18,8 +18,8 @@ from .__info__ import __author__, __copyright__, __version__
 from .argreparse import *
 from .timing import set_time_items
 from .handlers import *
-from .helpers import LINUX, PYTHON3
-from .helpers.types import ip_address, port_number
+from .helpers.constants import LINUX, PYTHON3
+from .helpers.data.types import ip_address, port_number
 from .interact import set_interact_items
 from .progress import set_progress_items
 from .loglib import *

@@ -6,8 +6,6 @@ Source: https://help.github.com/en/articles/licensing-a-repository
 """
 from datetime import datetime
 
-from ..__info__ import __author__, __copyright__, __version__
-
 
 __all__ = __features__ = ["copyright", "license", "list_licenses"]
 

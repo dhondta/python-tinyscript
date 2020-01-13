@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Common utility functions.
 
@@ -6,97 +5,17 @@
 import colorful
 import re
 import sys
-from platform import system
-from six import b as six_b, u, StringIO
-from slugify import slugify
-from sys import version_info
+from six import StringIO
 
-from .types import is_lambda
-from ..__info__ import __author__, __copyright__, __version__
+from .constants import *
+from .data.types import is_lambda
 
 
-__all__ = __features__ = ["b", "byteindex", "capture", "clear", "confirm",
-                          "iterbytes", "pause", "silent", "slugify",
-                          "std_input", "stdin_pipe", "u", "user_input",
-                          "Capture"]
+__all__ = __features__ = ["capture", "clear", "confirm", "pause", "silent",
+                          "std_input", "stdin_pipe", "user_input", "Capture"]
 
 
-__all__ += ["DARWIN", "LINUX", "WINDOWS"]
-DARWIN  = system() == "Darwin"
-LINUX   = system() == "Linux"
-WINDOWS = system() == "Windows"
-
-__all__ += ["JYTHON", "PYPY", "PYTHON3"]
-JYTHON  = sys.platform.startswith("java")
-PYPY    = hasattr(sys, "pypy_version_info")
-PYTHON3 = version_info > (3,)
-
-
-# see: http://python3porting.com/problems.html
-byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
-iterbytes = lambda d: iter(d) if PYTHON3 else [ord(c) for c in d]
 pause = lambda *a, **kw: std_input("Press Enter to continue", *a, **kw) or None
-
-
-def b(text):
-    """
-    Overload for six.b function, because the behavior of 'b' in Python2/3 is not
-     exactly the same. This makes 'b' behave in Python 3 like in Python 2.
-    """
-    try:
-        return six_b(text)
-    except:
-        return text
-
-
-def clear():
-    """
-    Dummy multi-platform screen clear function.
-    """
-    from os import system
-    if DARWIN or LINUX:
-        system("clear")
-    elif WINDOWS:
-        system("cls")
-
-
-class _Text(object):
-    """
-    Dummy Text class for storing StringIO's content before closing it.
-    """
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return self.text
-
-
-class Capture(object):
-    """
-    Context manager for capturing stdout and stderr.
-    """
-    def __init__(self, out=sys.stdout, err=sys.stderr):
-        # backup original output file handles
-        self._stdout = sys.stdout
-        self._stderr = sys.stderr
-        
-    def __enter__(self):
-        # create new file handles
-        sys.stdout, sys.stderr = StringIO(), StringIO()
-        self.stdout, self.stderr = _Text(), _Text()
-        # return references of the dummy objects
-        return self.stdout, self.stderr
-    
-    def __exit__(self, *args):
-        # freeze stdout and stderr contents before closing the file handles,
-        #  using the references previously returned by __enter__
-        self.stdout.text = sys.stdout.getvalue().strip() 
-        self.stderr.text = sys.stderr.getvalue().strip()
-        # close current file handles
-        sys.stdout.close()
-        sys.stderr.close()
-        # restore original output file handles
-        sys.stdout, sys.stderr = self._stdout, self._stderr
 
 
 def capture(f):
@@ -110,19 +29,23 @@ def capture(f):
     return _wrapper
 
 
+def clear():
+    """
+    Dummy multi-platform screen clear function.
+    """
+    from os import system
+    if DARWIN or LINUX:
+        system("clear")
+    elif WINDOWS:
+        system("cls")
+
+
 def confirm(style="bold"):
     """
     Ask for confirmation.
     """
     return user_input("Are you sure ?", ["(Y)es", "(N)o"], "n", style=style) \
            == "yes"
-
-def execfile(source, globals=None, locals=None):
-    with open(source) as f:
-        content = f.read()
-    exec(content, globals, locals)
-if PYTHON3:
-    __all__ += ["execfile"]
 
 
 def silent(f):
@@ -224,3 +147,42 @@ def user_input(prompt="", choices=None, default=None, choices_str="",
             return shortcuts.get(_) or _
         if not required:
             return
+
+
+class _Text(object):
+    """
+    Dummy Text class for storing StringIO's content before closing it.
+    """
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return self.text
+
+
+class Capture(object):
+    """
+    Context manager for capturing stdout and stderr.
+    """
+    def __init__(self, out=sys.stdout, err=sys.stderr):
+        # backup original output file handles
+        self._stdout = sys.stdout
+        self._stderr = sys.stderr
+        
+    def __enter__(self):
+        # create new file handles
+        sys.stdout, sys.stderr = StringIO(), StringIO()
+        self.stdout, self.stderr = _Text(), _Text()
+        # return references of the dummy objects
+        return self.stdout, self.stderr
+    
+    def __exit__(self, *args):
+        # freeze stdout and stderr contents before closing the file handles,
+        #  using the references previously returned by __enter__
+        self.stdout.text = sys.stdout.getvalue().strip() 
+        self.stderr.text = sys.stderr.getvalue().strip()
+        # close current file handles
+        sys.stdout.close()
+        sys.stderr.close()
+        # restore original output file handles
+        sys.stdout, sys.stderr = self._stdout, self._stderr

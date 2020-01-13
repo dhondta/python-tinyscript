@@ -3,7 +3,7 @@
 """Module for defining stepping mode logic.
 
 """
-from .helpers.utils import std_input
+from .helpers.inputs import std_input
 from .loglib import STEP_COLOR
 
 

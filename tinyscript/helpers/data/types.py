@@ -13,8 +13,6 @@ from os import makedirs
 from os.path import exists, isdir, isfile
 from six import string_types, u
 
-from ..__info__ import __author__, __copyright__, __version__
-
 
 __all__ = __features__ = []
 
@@ -73,13 +71,14 @@ is_file = isfile
 
 # hash check functions
 __all__ += ["is_hash", "is_md5", "is_sha1", "is_sha224", "is_sha256",
-            "is_sha512"]
+            "is_sha384", "is_sha512"]
 is_hash   = lambda h: any(__check_hash(h, a, False) is not None for a in \
                           HASH_LEN.keys())
 is_md5    = lambda h: __check_hash(h, "md5", False) is not None
 is_sha1   = lambda h: __check_hash(h, "sha1", False) is not None
 is_sha224 = lambda h: __check_hash(h, "sha224", False) is not None
 is_sha256 = lambda h: __check_hash(h, "sha256", False) is not None
+is_sha384 = lambda h: __check_hash(h, "sha384", False) is not None
 is_sha512 = lambda h: __check_hash(h, "sha512", False) is not None
 
 
@@ -184,7 +183,8 @@ positive_ints = pos_ints = \
 # ------------------------- HASH ARGUMENT TYPES --------------------------
 __all__ += ["any_hash", "md5_hash", "sha1_hash", "sha224_hash", "sha256_hash",
             "sha512_hash"]
-HASH_LEN = {'md5': 32, 'sha1': 40, 'sha224': 56, 'sha256': 64, 'sha512': 128}
+HASH_LEN = {'md5': 32, 'sha1': 40, 'sha224': 56, 'sha256': 64, 'sha384': 96,
+            'sha512': 128}
 
 
 def __check_hash(s, algo, fail=True):
@@ -198,6 +198,7 @@ md5_hash    = lambda h: __check_hash(h, "md5")
 sha1_hash   = lambda h: __check_hash(h, "sha1")
 sha224_hash = lambda h: __check_hash(h, "sha224")
 sha256_hash = lambda h: __check_hash(h, "sha256")
+sha384_hash = lambda h: __check_hash(h, "sha384")
 sha512_hash = lambda h: __check_hash(h, "sha512")
 
 

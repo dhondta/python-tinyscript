@@ -22,9 +22,10 @@ try:
 except ImportError:
     from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
+from .helpers.constants import PYTHON3
+from .helpers.inputs import user_input
 from .helpers.licenses import *
-from .helpers.types import is_long_opt, is_pos_int, is_short_opt
-from .helpers.utils import PYTHON3, user_input
+from .helpers.data.types import is_long_opt, is_pos_int, is_short_opt
 from .loglib import logger
 
 

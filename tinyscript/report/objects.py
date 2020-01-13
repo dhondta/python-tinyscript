@@ -90,6 +90,7 @@ class Table(Element):
 
 
 class Text(Element):
+    """ Text area report element. """
     def __init__(self, content, size="12", style="normal", color="black",
                  tag="p"):
         self.content = content
@@ -112,6 +113,7 @@ class Text(Element):
 
 
 class Code(Text):
+    """ Code block report element. """
     def __init__(self, code, size="10", style="normal", color="grey",
                  language=None, hl_lines=None):
         super(Code, self).__init__(code, size, style, color, "pre")
@@ -137,6 +139,7 @@ class Code(Text):
 
 
 class Title(Text):
+    """ Title report element. """
     def __init__(self, title, style="normal", color="black", tag="h1"):
         self.content = title
         self.tag = tag
@@ -152,5 +155,6 @@ class Title(Text):
 
 
 class Section(Title):
+    """ Section report element. """
     def __init__(self, title, style="normal", color="black", tag="h2"):
         super(Section, self).__init__(title, style, color, tag)

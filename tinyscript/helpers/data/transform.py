@@ -4,20 +4,14 @@
 
 """
 import re
-from six import string_types
+from six import b, string_types
 
 from .types import is_bin, is_hex, is_int, is_pos_int, is_str
-from ..__info__ import __author__, __copyright__, __version__
-
-
-__all__ = __features__ = []
 
 
 __all__ = __features__ = [
-    "bin2int", "bin2hex", "bin2str",
-    "hex2bin", "hex2int", "hex2str",
-    "int2bin", "int2hex", "int2str",
-    "str2bin", "str2int", "str2hex"
+    "bin2int", "bin2hex", "bin2str", "hex2bin", "hex2int", "hex2str",
+    "int2bin", "int2hex", "int2str", "int2uni", "str2bin", "str2int", "str2hex",
 ]
 
 
@@ -157,6 +151,16 @@ def int2str(*integers):
             _ += chr(r // (2 ** (8 * (n - 1))))
             n += 1
         s += _[::-1]
+    return s
+
+
+# INTEGERS ==> UNICODE CHARACTERS
+def int2uni(*integers):
+    """ Convert a big integer or a list of big integers to a unicode string. """
+    s = ""
+    for i in integers:
+        __validation(i=i)
+        s += b("\\u{:0>4}".format(hex(i)[2:])).decode('unicode-escape')
     return s
 
 

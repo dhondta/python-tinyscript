@@ -9,7 +9,8 @@ from shutil import rmtree
 from six import string_types
 from tempfile import gettempdir, NamedTemporaryFile as TempFile
 
-from .utils import u, LINUX, DARWIN, PYTHON3, WINDOWS
+from .constants import *
+from .compat import u
 
 
 __all__ = __features__ = ["Path", "MirrorPath", "TempPath"]
