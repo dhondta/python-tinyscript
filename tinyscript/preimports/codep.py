@@ -1,21 +1,11 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Useful functions for runtime code patching.
+"""Module for enhancing code preimport.
 
 """
+import code
 import patchy
 from collections import deque
 from six import string_types
-
-
-__all__ = __features__ = [
-    "code_patch", "code_unpatch", "CodePatch", "code_add_block",
-    "code_add_line", "code_add_lines", "code_delete_line", "code_delete_lines",
-    "code_insert_block", "code_insert_line", "code_insert_lines",
-    "code_remove_line", "code_remove_lines", "code_replace",
-    "code_replace_line", "code_replace_lines", "code_restore", "code_revert",
-    "code_source",
-]
 
 
 BLOCK_KW = ["class", "def", "elif", "else", "except", "finally", "for", "if",
@@ -23,9 +13,9 @@ BLOCK_KW = ["class", "def", "elif", "else", "except", "finally", "for", "if",
 N_MODIF  = 3
 
 
-code_patch   = patchy.patch
-code_unpatch = patchy.unpatch
-CodePatch    = patchy.temp_patch 
+code.patch   = patchy.patch
+code.unpatch = patchy.unpatch
+code.Patch   = patchy.temp_patch 
 
 
 __orig_code = {}
@@ -34,6 +24,7 @@ __old_code = {}
 
 class PatchError(ValueError):
     pass
+code.PatchError = PatchError
 
 
 def __apply_code(func, old_code, new_code):
@@ -109,7 +100,7 @@ def __sort_int_text_pairs(text, lst, item):
     return sorted(d.items(), reverse=True)
 
 
-def cache(f):
+def _cache(f):
     """ Decorator for caching code changes locally inside the module. """
     def _wrapper(*args, **kwargs):
         cache = kwargs.pop("cache", True)
@@ -149,7 +140,7 @@ def code_add_block(func, index, block, after=False):
     for line in block.splitlines()[::-1]:
         new_code.insert(index, indent + line)
     return __apply_code(func, old_code, new_code)
-code_insert_block = code_add_block
+code.add_block = code.insert_block = code_add_block
 
 
 def code_add_line(func, index, addition, **kwargs):
@@ -157,10 +148,10 @@ def code_add_line(func, index, addition, **kwargs):
     Alias for applying a single-line addition.
     """
     return code_add_lines(func, index, addition, **kwargs)
-code_insert_line = code_add_line
+code.add_line = code.insert_line = code_add_line
 
 
-@cache
+@_cache
 def code_add_lines(func, *additions, **kwargs):
     """
     Additional modification function to allow adding lines at specific places in
@@ -185,7 +176,7 @@ def code_add_lines(func, *additions, **kwargs):
                 a = __get_block_indent(new_code, n) + a
             new_code.insert(n, a)
     return __apply_code(func, old_code, new_code)
-code_insert_lines = code_add_lines
+code.add_lines = code.insert_lines = code_add_lines
 
 
 def code_delete_line(func, index):
@@ -193,7 +184,7 @@ def code_delete_line(func, index):
     Alias for applying a single-line removal.
     """
     return code_delete_lines(func, index)
-code_remove_line = code_delete_line
+code.delete_line = code.remove_line = code_delete_line
 
 
 def code_delete_lines(func, *indices):
@@ -209,10 +200,10 @@ def code_delete_lines(func, *indices):
     for i in indices:
         replacements.extend([i, None])
     return code_replace_lines(func, *replacements)
-code_remove_lines = code_delete_lines
+code.delete_lines = code.remove_lines = code_delete_lines
 
 
-@cache
+@_cache
 def code_replace(func, *replacements):
     """
     Slight modification to original replace function to allow replacing only
@@ -237,6 +228,7 @@ def code_replace(func, *replacements):
         patchy.replace(func, old_code, new_code)
     # report whether the code was changed or not
     return old_code != new_code
+code.replace = code_replace
 
 
 def code_replace_line(func, index, replacement):
@@ -244,9 +236,10 @@ def code_replace_line(func, index, replacement):
     Alias for applying a single-line replacement.
     """
     return code_replace_lines(func, index, replacement)
+code.replace_line = code_replace_line
 
 
-@cache
+@_cache
 def code_replace_lines(func, *replacements):
     """
     Additional replace function to allow replacing only specific lines in the
@@ -267,6 +260,7 @@ def code_replace_lines(func, *replacements):
             indent = l[:len(l)-len(l.lstrip())]
             new_code[n] = indent + r.lstrip()
     return __apply_code(func, old_code, new_code)
+code.replace_lines = code_replace_lines
 
 
 def code_restore(func):
@@ -282,6 +276,7 @@ def code_restore(func):
         __old_code[func] = deque([], N_MODIF)
         return True
     return False
+code.restore = code_restore
 
 
 def code_revert(func):
@@ -298,6 +293,7 @@ def code_revert(func):
             return True
     except:
         return False
+code.revert = code_revert
 
 
 def code_source(func):
@@ -308,6 +304,7 @@ def code_source(func):
     :return:     function's source code
     """
     return patchy.api._get_source(func)
+code.source = code_source
 
 
 # disable source AST check to avoid Python compatibility errors

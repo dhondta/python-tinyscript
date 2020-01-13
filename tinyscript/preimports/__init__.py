@@ -10,48 +10,53 @@ except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
     reload = reload
     import ConfigParser as configparser
 
+from .codep import code
 from .hash import hashlib
 from .log import logging
 from .venv import virtualenv, PipPackage, VirtualEnv
 
 
 __all__ = __features__ = ["PipPackage", "VirtualEnv", "import_module"]
-__all__ += ["__badimports__", "__optimports__", "__preimports__",
-            "load", "reload"]
+__all__ += ["__imports__", "load", "reload"]
 
-__badimports__ = []
-__optimports__ = [
-    "bs4",
-    "fs",
-    "numpy",
-    "pandas",
-    "requests",
-]
-__preimports__ = [
-    "argparse",
-    "ast",
-    "base64",
-    "binascii",
-    "codecs",
-    "collections",
-    "configparser",
-    "ctypes",
-    "fileinput",
-    "hashlib",
-    "itertools",
-    "logging",
-    "os",
-    "random",
-    "re",
-    "shutil",
-    "signal",
-    "string",
-    "struct",
-    "subprocess",
-    "sys",
-    "time",
-    "virtualenv",
-]
+__imports__ = {
+    'bad': [],
+    'enhanced': [
+        "code",
+        "hashlib",
+        "logging",
+        "virtualenv",
+    ],
+    'standard': [
+        "argparse",
+        "ast",
+        "base64",
+        "binascii",
+        "codecs",
+        "collections",
+        "configparser",
+        "ctypes",
+        "fileinput",
+        "itertools",
+        "os",
+        "random",
+        "re",
+        "shutil",
+        "signal",
+        "string",
+        "struct",
+        "subprocess",
+        "sys",
+        "time",
+    ],
+    'optional': [
+        "bs4",
+        "fs",
+        "numpy",
+        "pandas",
+        "requests",
+    ]
+}
 
 
 def _load_preimports(*extras):
@@ -61,9 +66,10 @@ def _load_preimports(*extras):
     :param extra: additional modules
     :return:      list of successfully imported modules, list of failures
     """
-    for module in __preimports__ + list(extras):
+    i = __imports__
+    for module in i['standard'] + i['enhanced'] + list(extras):
         load(module)
-    for module in __optimports__:
+    for module in i['optional']:
         load(module, True)
 
 
@@ -75,9 +81,9 @@ def load(module, optional=False):
     :param module:   module name
     :param optional: whether the module is optional or not
     """
-    global __badimports__, __features__, __preimports__
+    global __features__, __imports__
     m = globals().get(module)
-    if m:  # already imported (e.g. configparser)
+    if m is not None:  # already imported (e.g. configparser)
         __features__.append(module)
         return m
     try:
@@ -86,8 +92,11 @@ def load(module, optional=False):
         __features__.append(module)
         return m
     except ImportError:
-        if not optional and module not in __badimports__:
-            __badimports__.append(module)
+        if not optional and module not in __imports__['bad']:
+            __imports__['bad'].append(module)
+            for k, l in __imports__.items():
+                if k != 'bad' and module in l:
+                    l.remove(module)
 
 
 _load_preimports()

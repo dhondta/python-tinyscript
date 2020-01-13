@@ -328,4 +328,5 @@ virtualenv.is_installed  = __is_installed
 virtualenv.list_packages = __list_packages
 virtualenv.setup         = __setup
 virtualenv.teardown      = __teardown
+virtualenv.PipPackage    = PipPackage
 virtualenv.VirtualEnv    = VirtualEnv
