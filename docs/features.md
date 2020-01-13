@@ -22,7 +22,7 @@ initialize()
 
 This gives the following help message:
 
-```sh hl_lines="4 5 6 7 8 9 10 12 20"
+```sh hl_lines="4 5 6 7 8 9 10 12 19"
 $ python tool.py -h
 usage: tool [-h] [-v]
 
