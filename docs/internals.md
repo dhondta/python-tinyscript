@@ -58,7 +58,7 @@ Usage examples:
 
 This is achieved by passing arguments to `initialize(...)`.
 
-Various [features](../features/) are handled by this initialization and are explained in the related section of this documentation.
+Various [features](features.md) are handled by this initialization and are explained in the related section of this documentation.
 
 -----
 
@@ -136,20 +136,36 @@ List of "*report*" arguments and options:
 
 ## Pre-imports
 
-Some common built-in or popular modules are preimported.
+Some common built-in or popular modules are preimported. Some others are enhanced to provide additional features. This can be inspected using the `__imports__` dunder.
 
 ```sh
 $ python
 [...]
 >>> from tinyscript import *
->>> __preimports__
-['argparse', 'base64', 'binascii', 'collections', 'configparser', 'hashlib',
- 'itertools', 'logging', 'os', 'random', 're', 'shutil', 'signal', 'string',
-  'sys', 'time', 'virtualenv']
->>> __optimports__
-['numpy', 'pandas']
->>> __badimports__
-['fs']
+>>> pprint(__imports__)
+{'bad': [],
+ 'enhanced': ['code', 'hashlib', 'logging', 'virtualenv'],
+ 'optional': ['bs4', 'fs', 'numpy', 'pandas', 'requests'],
+ 'standard': ['argparse',
+              'ast',
+              'base64',
+              'binascii',
+              'codecs',
+              'collections',
+              'configparser',
+              'ctypes',
+              'fileinput',
+              'itertools',
+              'os',
+              'random',
+              're',
+              'shutil',
+              'signal',
+              'string',
+              'struct',
+              'subprocess',
+              'sys',
+              'time']}
 ```
 
 In a script/tool, all these modules are preimported within the global namespace using the line `from tinyscript import *`.
@@ -157,6 +173,26 @@ In a script/tool, all these modules are preimported within the global namespace 
 Modules can be loaded within a script/tool using the `load(module, optional)` function. If setting `optional` to `False` (the default) and the module does not exist, the name will be appended to the `__badimports__` list.
 
 Modules can also be reloaded using `reload` (this of `importlib` for Python 3, and the native one in Python 2 as it does not exist in `importlib` for Python 2).
+
+!!! note "Improvements to `code`"
+    
+    Formerly a set of [helper functions](helpers.md), the followings have been attached to the `code` module, which is now preimported.
+    
+    Code can be monkey-patched at runtime using multiple functions, depending on what should be patched and how. Note that some of the functions rely on the [`patchy`](https://github.com/adamchainz/patchy) module.
+    
+    - `add_line`, `add_lines`, `insert_line`, `insert_line`: it allows to add line(s) at specific indices (starting from 0), before or after (using `after=True`).
+    - `delete_line`, `delete_lines`, `remove_line`, `remove_lines`: it allows to delete line(s) by index (starting from 0).
+    - `patch`: alias for `patchy.patch`, taking a function and a patch file's text as arguments.
+    - `replace`: wrapper for `patchy.replace`, handling multiple replacements at a time, either replacing whole function (like in original `replace`) or only parts of the code.
+    - `replace_lines`: for replacing specific lines in the code of a given function, specifying replacements as pairs of line index (starting from 0) and replacement text.
+    - `restore`: for restoring a function to its original code.
+    - `revert`: for reverting code to a previous version (up to 3 previous versions).
+    - `source`: for getting function's source code (shortcut for `patchy.api._get_source`).
+    - `unpatch`: alias for `patchy.unpatch`, taking a function and a previous patch file's text as arguments in order to revert the function to its previous version.
+    
+    A context manager is also available:
+    
+    - `Patch`: alias for `patchy.temp_patch`, taking a function in argument and a patch ; it patches the function in the context of the open code block and then restores the function at the end of this block.
 
 !!! note "Improvements to `hashlib`"
     

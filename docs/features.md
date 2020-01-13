@@ -7,39 +7,38 @@ from tinyscript import *
 
 __script__    = "MyScript"
 __author__    = "John Doe"
-__copyright__ = "© 2019 John Doe Inc."
+__copyright__ = "John Doe Inc."
 __email__     = "john.doe@example.com"
-__license__   = "AGPLv3"
+__license__   = "agpl-3.0"
 __version__   = "1.0"
 __reference__ = "..."
 __source__    = "..."
 __training__  = "..."
 __examples__  = ["..."]
 __doc__       = "This tool ..."
-__details__   = [
-    """ ... """,
-    """ ... """
-]
-...
+
+initialize()
 ```
 
 This gives the following help message:
 
-```sh hl_lines="4 5 6 7 8 10 17"
+```sh hl_lines="4 5 6 7 8 9 10 12 20"
 $ python tool.py -h
 usage: tool [-h] [-v]
 
 MyScript v1.0
-Author: John Doe (john.doe@example.com)
+Author   : John Doe (john.doe@example.com)
+Copyright: © 2020 John Doe Inc.
+License  : GNU Affero General Public License v3.0
 Reference: ...
-Source: ...
-Training: ...
+Source   : ...
+Training : ...
 
 This tool ...
 
-optional arguments:
-  -h, --help  show this help message and exit
-  -v          debug verbose level (default: false)
+extra arguments:
+  -h, --help     show this help message and exit
+  -v, --verbose  verbose mode (default: False)
 
 Usage examples:
   python tool.py ...

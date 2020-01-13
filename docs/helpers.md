@@ -1,25 +1,66 @@
-## Useful general-purpose functions
+## Useful constants and compatibility functions
 
-According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) philosophy, Tinyscript provides a few predefined utility functions:
+Tinyscript provides some predefined boolean constants, handy in some use cases:
 
 **Name** | **Description**
 :---: | :---:
-`b` / `u` | Python2/3-compatible functions to convert to bytes or unicode
-`byteindex` | Python2/3-compatible function to get the index of a byte
-`capture` | decorator for capturing `stdout` and `stderr` of a function
-`clear` | multi-platform clear screen function
-`confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
-`get_terminal_size()` | cross-platform terminal size function
-`iterbytes` | Python2/3-compatible function to iterate bytes
-`pause` | Python2/3-compatible dummy input function, waiting for a key to be pressed (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
-`silent` | decorator for silencing `stdout` and `stderr` of a function
-`slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
-`std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
-`timeout` | decorator for applying a timeout to a function
-`user_input` | Python2/3-compatible enhanced input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful), choices, default value and 'required' option)
-`Capture` | context manager for capturing `stdout` and `stderr` of a code block
-`Timeout` | context manager for applying a timeout to a code block
-`TimeoutError` | custom exception for handling a timeout (as it is natively available in Python 3 but not in Python 2)
+`DARWIN` | Darwin platform
+`JYTHON` | Java implementation of Python
+`LINUX` | `Linux platform
+`PYPY` | PyPy implementation of Python
+`PYTHON3` | `True` if Python 3, `False` if Python 2
+`WINDOWS` | Windows platform
+
+It also defines a few compatibility/utility functions for working with the same code either in Python 2 or 3.
+
+**Name** | **Description**
+:---: | :---:
+`b` | bytes conversion function, overloading `six.b` for a better compatibility
+`byteindex` | selects the byte value from a string at the given index
+`execfile` | added in Python3 for backward-compatibility
+`iterbytes` | iterates over the bytes of a string (trivial in Python3 but
+`u` | alias for `six.u`
+
+!!! warning "Global scope and the `ts` module"
+    
+    On the contrary of the other helpers presented on this page, these are imported **in the global scope** while the others are attached to a dynamic module called "`ts`" (for the sake of not flooding the scope) when using `from tinyscript import *`.
+    
+    However, the helpers hereafter can still be imported granularly by using a specific import, e.g.:
+    
+        :::python
+        >>> from tinyscript.helpers.termsize import get_terminal_size
+        >>> get_terminal_size()
+        [...]
+
+-----
+
+## Useful general-purpose functions
+
+According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) philosophy, Tinyscript provides a few predefined user interaction functions:
+
+**Name** | **Description**
+:---: | :---:
+`ts.clear` | multi-platform clear screen function
+`ts.confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
+`ts.pause` | Python2/3-compatible dummy input function, waiting for a key to be pressed (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
+`ts.std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
+`ts.user_input` | Python2/3-compatible enhanced input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful), choices, default value and 'required' option)
+
+It also provides some other utility functions:
+
+**Name** | **Description**
+:---: | :---:
+`ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
+`ts.capture` | decorator for capturing `stdout` and `stderr` of a function
+`ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
+`ts.get_terminal_size` | cross-platform terminal size function
+`ts.silent` | decorator for silencing `stdout` and `stderr` of a function
+`ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
+`ts.stdin_pipe` | Python2/3-compatible iterator of STDIN lines
+`ts.timeout` | decorator for applying a timeout to a function
+`ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
+`ts.Timeout` | context manager for applying a timeout to a code block
+`ts.TimeoutError` | custom exception for handling a timeout (as it is natively available in Python 3 but not in Python 2)
 
 -----
 
@@ -27,7 +68,7 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 
 Tinyscript also provides 2 `pathlib`-related functions:
 
-- `Path`: Extended Python2/3-compatible path class
+- `ts.Path`: Extended Python2/3-compatible path class
 
     It fixes multiple compatibility issues between Python 2 and 3, namely `mkdir`'s `exist_ok` argument or methods `expanduser`, `read_text` and `write_text`.
     
@@ -58,7 +99,7 @@ Tinyscript also provides 2 `pathlib`-related functions:
     - `size`: returns path's size (recursively computed if it is a folder)
     - `text`: returns file's content as text
 
-- `MirrorPath`: additional class for handling mirrored files and folders
+- `ts.MirrorPath`: additional class for handling mirrored files and folders
     
     This mirrors an item, that is, if the given source does not exist in the given destination, it creates a symbolic link and recurses if it is a folder.
     
@@ -67,7 +108,7 @@ Tinyscript also provides 2 `pathlib`-related functions:
     
     Basically, a path can be mirrored this way: `MirrorPath(destination, source)`. However, it can also be defined as `p = MirrorPath(destination)` and the `p.mirror(source)` method can then be used.
 
-- `TempPath`: additional class for handling temporary folder
+- `ts.TempPath`: additional class for handling temporary folder
     
     This automatically creates a folder with a randomly generated name in OS' temporary location using a prefix, suffix, length and alphabet (like for `Path.generate(...)`).
     
@@ -81,35 +122,35 @@ Tinyscript provides some type checking functions, for common data:
 
 **Function** | **Description**
 :---: | :---:
-`is_bin` | binary string (with or without `\W` separators)
-`is_dict` | dictionary
-`is_dir` / `is_folder` | dummy shortcuts to `os.path.isdir`
-`is_file` | dummy shortcut to `os.path.isfile`
-`is_hash` | hash string, among MD5/SHA1/SHA224/SHA256/SHA512
-`is_hex` | hexadecimal string (case insensitive)
-`is_int` / `is_pos_int` / `is_neg_int` | integer (positive / negative)
-`is_lambda` / `is_function` | lazy or any function
-`is_list` | list, tuple, set
-`is_md5` | MD5 hash
-`is_sha1` | SHA1 hash
-`is_sha224` | SHA224 hash
-`is_sha256` | SHA256 hash
-`is_sha512` | SHA512 hash
-`is_str` | str, bytes, unicode
+`ts.is_bin` | binary string (with or without `\W` separators)
+`ts.is_dict` | dictionary
+`ts.is_dir` / `ts.is_folder` | dummy shortcuts to `os.path.isdir`
+`ts.is_file` | dummy shortcut to `os.path.isfile`
+`ts.is_hash` | hash string, among MD5/SHA1/SHA224/SHA256/SHA512
+`ts.is_hex` | hexadecimal string (case insensitive)
+`ts.is_int` / `ts.is_pos_int` / `ts.is_neg_int` | integer (positive / negative)
+`ts.is_lambda` / `ts.is_function` | lazy or any function
+`ts.is_list` | list, tuple, set
+`ts.is_md5` | MD5 hash
+`ts.is_sha1` | SHA1 hash
+`ts.is_sha224` | SHA224 hash
+`ts.is_sha256` | SHA256 hash
+`ts.is_sha512` | SHA512 hash
+`ts.is_str` | str, bytes, unicode
 
 And for network-related data:
 
 **Function** | **Description**
 :---: | :---:
-`is_defgw` | default gateway
-`is_domain` | domain name
-`is_email` | email address
-`is_gw` | gateway
-`is_ifaddr` | interface address
-`is_ip` / `is_ipv4` / `is_ipv6` | IPv4 or IPv6 address
-`is_mac` | MAC address
-`is_netif` | network interface
-`is_port` | port number
+`ts.is_defgw` | default gateway
+`ts.is_domain` | domain name
+`ts.is_email` | email address
+`ts.is_gw` | gateway
+`ts.is_ifaddr` | interface address
+`ts.is_ip` / `ts.is_ipv4` / `ts.is_ipv6` | IPv4 or IPv6 address
+`ts.is_mac` | MAC address
+`ts.is_netif` | network interface
+`ts.is_port` | port number
 
 ## Common argument types
 
@@ -117,41 +158,41 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 
 **Type** | **Output** | **Description**
 :---: | :---: | :---:
-`any_hash` | `str` | any valid hash amongst MD5|SHA1|SHA224|SHA256|SHA512
-`file_exists` | `str` | existing file path
-`files_list` | `lst(str)` | list of only existing file paths
-`files_filtered_list` | `lst(str)` | list of at least one existing file path (bad paths are filtered)
-`folder_exists` / `folder_exists_or_create` | `str` | existing folder or folder to be created if it does not exist
-`ints` | `lst(int)` | list of integers
-`md5_hash` | MD5 hash
-`neg_int` / `negative_int` | `int` | single negative integer
-`neg_ints` / `negative_ints` | `lst(int)` | list of negative integers
-`pos_int` / `positive_int` | `int` | single positive integer
-`pos_ints` / `positive_ints` | `lst(int)` | list of positive integers
-`sha1_hash` | SHA1 hash
-`sha224_hash` | SHA224 hash
-`sha256_hash` | SHA256 hash
-`sha512_hash` | SHA512 hash
+`ts.any_hash` | `str` | any valid hash amongst MD5|SHA1|SHA224|SHA256|SHA512
+`ts.file_exists` | `str` | existing file path
+`ts.files_list` | `list(str)` | list of only existing file paths
+`ts.files_filtered_list` | `list(str)` | list of at least one existing file path (bad paths are filtered)
+`ts.folder_exists` / `folder_exists_or_create` | `str` | existing folder or folder to be created if it does not exist
+`ts.ints` | `list(int)` | list of integers
+`ts.md5_hash` | `str` | MD5 hash
+`ts.neg_int` / `negative_int` | `int` | single negative integer
+`ts.neg_ints` / `negative_ints` | `list(int)` | list of negative integers
+`ts.pos_int` / `positive_int` | `int` | single positive integer
+`ts.pos_ints` / `positive_ints` | `list(int)` | list of positive integers
+`ts.sha1_hash` | `str` | SHA1 hash
+`ts.sha224_hash` | `str` | SHA224 hash
+`ts.sha256_hash` | `str` | SHA256 hash
+`ts.sha512_hash` | `str` | SHA512 hash
 
 
 And for network-related types:
 
 **Type** | **Output** | **Description**
 :---: | :---: | :---:
-`default_gateway_address` | valid default gateway address
-`domain_name` | valid domain name
-`email_address` | valid email address
-`gateway_address` | valid gateway address
-`interface_address` | assigned interface address
-`interface_address_list` | list of assigned interface addresses
-`interface_address_filtered_list` | list of assigned interface addresses, with non-assigned ones filtered
-`ip_address` / `ipv4_address` / `ipv6_address` | `IPAddress` | valid IP address (IPv4 or IPv6, in integer or string format)
-`ip_address_list` / `ipv4_address_list` / `ipv6_address_list` | `generator(netaddr.IPAddress)` | list of IP addresses or networks (IPv4 or IPv6, in integer or string format)
-`ip_address_network` / `ipv4_address_network` / `ipv6_address_network` | `generator(netaddr.IPAddress)` | valid IP address network in CIDR notation (e.g. `192.168.1.0/24`)
-`mac_address` | `netaddr.EUI` | valid MAC address (integer or string)
-`network_interface` | valid network interface on the current system
-`port_number` | `int` | valid port number
-`port_number_range` | `lst(int)` | valid list of port numbers, ranging from and to the given bounds
+`ts.default_gateway_address` | `str` | valid default gateway address
+`ts.domain_name` | `str`  | valid domain name
+`ts.email_address` | `str`  | valid email address
+`ts.gateway_address` | `str`  | valid gateway address
+`ts.interface_address` | `str`  | assigned interface address
+`ts.interface_address_list` | `list(str)`  | list of assigned interface addresses
+`ts.interface_address_filtered_list` | `list(str)` | list of assigned interface addresses, with non-assigned ones filtered
+`ts.ip_address` / `ts.ipv4_address` / `ts.ipv6_address` | `netaddr.IPAddress` | valid IP address (IPv4 or IPv6, in integer or string format)
+`ts.ip_address_list` / `ts.ipv4_address_list` / `ts.ipv6_address_list` | `generator(netaddr.IPAddress)` | list of IP addresses or networks (IPv4 or IPv6, in integer or string format)
+`ts.ip_address_network` / `ts.ipv4_address_network` / `ts.ipv6_address_network` | `generator(netaddr.IPAddress)` | valid IP address network in CIDR notation (e.g. `192.168.1.0/24`)
+`ts.mac_address` | `netaddr.EUI` | valid MAC address (integer or string)
+`ts.network_interface` | `str` | valid network interface on the current system
+`ts.port_number` | `int` | valid port number
+`ts.port_number_range` | `list(int)` | valid list of port numbers, ranging from and to the given bounds
 
 -----
 
@@ -165,7 +206,7 @@ Tinyscript also provides a series of intuitive data transformation functions, fo
 
 The currently supported functions are:
 
-- Binary <=> Integer: `bin2int` / `int2bin`
+- Binary <=> Integer: `ts.bin2int` / `ts.int2bin`
 
         :::python
         >>> bin2int("0100")
@@ -190,7 +231,7 @@ The currently supported functions are:
         >>> bin2int("00000000 00000100", n_groups=2, order="big")
         1024
 
-- Binary <=> Hexadecimal: `bin2hex` / `hex2bin`
+- Binary <=> Hexadecimal: `ts.bin2hex` / `ts.hex2bin`
 
         :::python
         >>> hex2bin("deadbeef", sep=" ")
@@ -198,7 +239,7 @@ The currently supported functions are:
         >>> bin2hex("11011110 10101101 10111110 11101111")
         'deadbeef'
 
-- Binary <=> String: `bin2str` / `str2bin`
+- Binary <=> String: `ts.bin2str` / `ts.str2bin`
 
         :::python
         >>> str2bin("test")
@@ -211,7 +252,7 @@ The currently supported functions are:
         >>> bin2str('1110100 1100101 1110011 1110100')
         'test'
 
-- Integer <=> Hexadecimal: `int2hex` / `hex2int`
+- Integer <=> Hexadecimal: `ts.int2hex` / `ts.hex2int`
 
         :::python
         >>> hex2int("deadbeef")
@@ -224,7 +265,7 @@ The currently supported functions are:
         >>> hex2int("00000000deadbeef")
         3735928559
 
-- Integer <=> String: `int2str` / `str2int`
+- Integer <=> String: `ts.int2str` / `ts.str2int`
 
         :::python
         >>> str2int("test")
@@ -242,47 +283,13 @@ The currently supported functions are:
         >>> int2str(8387236823645254770, 6909543)
         'test string'
 
-- Hexadecimal <=> String: `hex2str` / `str2hex`
+- Hexadecimal <=> String: `ts.hex2str` / `ts.str2hex`
 
         :::python
         >>> str2hex("test string")
         '7465737420737472696e67'
         >>> hex2str("7465737420737472696e67")
         'test string'
-
------
-
-## Useful constants
-
-Tinyscript also provides some predefined boolean constants:
-
-**Name** | **Description**
-:---: | :---:
-`DARWIN` | Darwin platform
-`JYTHON` | Java implementation of Python
-`LINUX` | `Linux platform
-`PYPY` | PyPy implementation of Python
-`PYTHON3` | `True` if Python 3, `False` if Python 2
-`WINDOWS` | Windows platform
-
------
-
-## Runtime monkey-patching functions
-
-Code can be monkey-patched at runtime using multiple functions, depending on what should be patched and how. This feature relies on the [`patchy`](https://github.com/adamchainz/patchy) module.
-
-The functions for this purpose are:
-
-- `code_patch`: alias for `patchy.patch`, taking a function and a patch file's text as arguments.
-- `code_unpatch`: alias for `patchy.unpatch`, taking a function and a previous patch file's text as arguments in order to revert the function to its previous version.
-- `CodePatch`: context manager, alias for `patchy.temp_patch`, taking a function in argument and a patch ; it patches the function in the context of the open code block and then restores the function at the end of this block.
-- `code_add_line`, `code_add_lines`, `code_insert_line`, `code_insert_line`: it allows to add line(s) at specific indices (starting from 0), before or after (using `after=True`).
-- `code_delete_line`, `code_delete_lines`, `code_remove_line`, `code_remove_lines`: it allows to delete line(s) by index (starting from 0).
-- `code_replace`: wrapper for `patchy.replace`, handling multiple replacements at a time, either replacing whole function (like in original `replace`) or only parts of the code.
-- `code_replace_lines`: for replacing specific lines in the code of a given function, specifying replacements as pairs of line index (starting from 0) and replacement text.
-- `code_restore`: for restoring a function to its original code.
-- `code_revert`: for reverting code to a previous version (up to 3 previous versions).
-- `code_source`: for getting function's source code (shortcut for `patchy.api._get_source`).
 
 -----
 
