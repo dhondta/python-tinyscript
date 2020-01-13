@@ -9,7 +9,7 @@ from tinyscript.warnings import *
 from tinyscript.warnings import __features__
 
 
-class TestHelpersTypes(TestCase):
+class TestWarnings(TestCase):
     def test_deprecation_warnings(self):
         for f in __features__:
             self.assertRaises(DeprecationWarning, eval(f))

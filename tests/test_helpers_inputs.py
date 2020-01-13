@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Utility functions' tests.
+"""Input functions' tests.
 
 """
-from unittest import TestCase
-
-from tinyscript.helpers.utils import *
+from tinyscript.helpers.compat import b
+from tinyscript.helpers.inputs import *
 from tinyscript.loglib import logger as ts_logger
 
 from utils import *
 
 
-class TestHelpersUtils(TestCase):
+class TestHelpersInputs(TestCase):
     def test_input_functions(self):
         clear()
         temp_stdout(self)
@@ -43,6 +42,8 @@ class TestHelpersUtils(TestCase):
         self.assertEqual(user_input(choices=lambda v: v in ["test"]), "test")
         temp_stdin(self, "bad\n")
         self.assertIs(user_input(choices=["1", "2"]), None)
+        temp_stdin(self, "y\n")
+        self.assertIsNotNone(list(stdin_pipe()))
     
     def test_capture_functions(self):
         with Capture() as (out, err):
@@ -58,11 +59,3 @@ class TestHelpersUtils(TestCase):
         captured_dummy = capture(dummy)
         r, out, err = captured_dummy()
         self.assertEqual(out, "TEST")
-    
-    def test_other_functions(self):
-        CMD_PY = "print('hello')"
-        TEST_PY = "execfile-test.py"
-        with open(TEST_PY, 'w') as f:
-            f.write(CMD_PY)
-        execfile(TEST_PY)
-        remove(TEST_PY)

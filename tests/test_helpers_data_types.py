@@ -5,14 +5,12 @@
 """
 import netaddr
 import netifaces
-from unittest import main, TestCase
-
-from tinyscript.helpers.types import *
+from tinyscript.helpers.data.types import *
 
 from utils import *
 
 
-class TestHelpersTypes(TestCase):
+class TestHelpersDataTypes(TestCase):
     def test_general_purpose_types(self):
         tf = "test_folder"
         tfne = "test_folder_not_existing"

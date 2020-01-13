@@ -3,9 +3,9 @@
 """License features' tests.
 
 """
-from unittest import TestCase
-
 from tinyscript.helpers.licenses import license, LICENSES
+
+from utils import TestCase
 
 
 class TestHelpersLicenses(TestCase):

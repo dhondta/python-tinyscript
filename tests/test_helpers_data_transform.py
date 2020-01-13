@@ -3,12 +3,12 @@
 """Data transformation tests.
 
 """
-from unittest import TestCase
+from tinyscript.helpers.data.transform import *
 
-from tinyscript.helpers.datatrans import *
+from utils import TestCase
 
 
-class TestHelpersLambdas(TestCase):
+class TestHelpersDataTransform(TestCase):
     def setUp(self):
         global BIN, BIN_BE1, BIN_BE2, HEX, INT, STR
         BIN = "01110100011001010111001101110100"
@@ -92,6 +92,12 @@ class TestHelpersLambdas(TestCase):
         self.assertRaises(ValueError, int2hex, BIN)
         self.assertRaises(ValueError, int2hex, HEX)
         self.assertRaises(ValueError, int2hex, STR)
+        # int -> uni
+        self.assertIsNotNone(int2uni(1000, 10000, 100000))
+        self.assertRaises(UnicodeDecodeError, int2uni, -1)
+        self.assertRaises(ValueError, int2uni, BIN)
+        self.assertRaises(ValueError, int2uni, HEX)
+        self.assertRaises(ValueError, int2uni, STR)
 
     def test_data_conversion_from_str(self):
         # str -> bin
