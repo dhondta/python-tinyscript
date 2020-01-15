@@ -3,6 +3,7 @@
 
 """
 from itertools import product
+from six import string_types
 from subprocess import Popen, PIPE
 
 
@@ -24,10 +25,12 @@ def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1):
             yield c if isinstance(c[0], int) else ''.join(c)
 
 
-def execute(cmd):
+def execute(cmd, **kwargs):
     """
     Dummy wrapper for subprocess.Popen.
     
     :param cmd: command string
     """
-    return Popen(cmd.split(), stdout=PIPE, stderr=PIPE).communicate()
+    if isinstance(cmd, string_types):
+        cmd = cmd.split()
+    return Popen(cmd, stdout=PIPE, stderr=PIPE, **kwargs).communicate()

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Decorators for classes and methods.
 
@@ -57,7 +56,7 @@ def try_or_die(message, exc=Exception, extra_info=""):
         def wrapper(*args, **kwargs):
             self = args[0] if __is_method(f) else None
             try:
-                return method(*args, **kwargs)
+                return f(*args, **kwargs)
             except exc:
                 # try to get a logger from the current instance or from the
                 #  global scope
@@ -86,7 +85,7 @@ def try_and_pass(exc=Exception):
     def _try_and_pass(f):
         def wrapper(*args, **kwargs):
             try:
-                return method(*args, **kwargs)
+                return f(*args, **kwargs)
             except exc:
                 pass
         return wrapper
@@ -108,7 +107,7 @@ def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
         def wrapper(*args, **kwargs):
             self = args[0] if __is_method(f) else None
             try:
-                return method(*args, **kwargs)
+                return f(*args, **kwargs)
             except exc:
                 # try to get a logger from the current instance or from the
                 #  global scope
