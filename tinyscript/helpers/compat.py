@@ -2,12 +2,13 @@
 """Common Python2/3 compatibility functions.
 
 """
-from six import b as six_b, string_types, u
+from six import b as six_b, ensure_str, string_types, u
 
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["b", "byteindex", "execfile", "iterbytes", "u"]
+__all__ = __features__ = ["b", "byteindex", "execfile", "iterbytes",
+                          "ensure_str", "u"]
 
 
 # see: http://python3porting.com/problems.html

@@ -57,6 +57,8 @@ It also provides some other utility functions:
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
 `ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
 `ts.stdin_pipe` | Python2/3-compatible iterator of STDIN lines
+`ts.strings` | generator for yielding strings with a minimal length and characters in a given charset from a string buffer
+`ts.strings_from_file` | same as `ts.strings` but yielding strings from a file
 `ts.timeout` | decorator for applying a timeout to a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `ts.Timeout` | context manager for applying a timeout to a code block
