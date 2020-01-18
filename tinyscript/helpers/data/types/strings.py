@@ -79,7 +79,7 @@ def str_contains(alphabet, threshold=1.0):
     if threshold < 0.0 or threshold > 1.0:
         raise ValueError("Bad threshold (should be between 0 and 1)")
     def _validation(s):
-        p = sum(int(c in alphabet) for c in s) / len(s)
+        p = sum(int(c in alphabet) for c in s) / float(len(s))
         if p < threshold:
             raise ValueError("Input string does not contain enough items from "
                              "the given alphabet ({:.2f}%)".format(p * 100))

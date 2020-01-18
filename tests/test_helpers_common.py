@@ -12,4 +12,6 @@ class TestHelpersCommon(TestCase):
     def test_common_utility_functions(self):
         self.assertEqual(list(bruteforce(2, "ab")),
                          ["a", "b", "aa", "ab", "ba", "bb"])
+        self.assertEqual(list(bruteforce(2, "ab", repeat=False)),
+                         ["a", "b", "ab", "ba"])
         self.assertIsNotNone(execute("id"))
