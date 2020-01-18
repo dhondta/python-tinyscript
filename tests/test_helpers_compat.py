@@ -16,3 +16,4 @@ class TestHelpersCompat(TestCase):
             f.write(CMD_PY)
         execfile(TEST_PY)
         remove(TEST_PY)
+        self.assertEqual(list(iterbytes("test")), [116, 101, 115, 116])
