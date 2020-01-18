@@ -8,7 +8,7 @@ import re
 from email.utils import parseaddr as parse_email
 from itertools import chain
 
-from .common import _str2list
+from .strings import _str2list
 
 
 __all__ = __features__ = []

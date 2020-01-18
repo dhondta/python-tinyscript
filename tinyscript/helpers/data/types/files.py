@@ -5,7 +5,7 @@
 from os import makedirs
 from os.path import exists, isdir, isfile
 
-from .common import _str2list
+from .strings import _str2list
 
 
 __all__ = __features__ = []

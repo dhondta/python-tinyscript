@@ -126,17 +126,39 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_dict` | dictionary
 `ts.is_dir` / `ts.is_folder` | dummy shortcuts to `os.path.isdir`
 `ts.is_file` | dummy shortcut to `os.path.isfile`
-`ts.is_hash` | hash string, among MD5/SHA1/SHA224/SHA256/SHA512
 `ts.is_hex` | hexadecimal string (case insensitive)
 `ts.is_int` / `ts.is_pos_int` / `ts.is_neg_int` | integer (positive / negative)
 `ts.is_lambda` / `ts.is_function` | lazy or any function
 `ts.is_list` | list, tuple, set
+`ts.is_long_opt` | for an argument with the "`--option`" format
+`ts.is_str` | str, bytes, unicode
+`ts.is_short_opt` | for an argument with the "`-o`" format
+
+For string-related data:
+
+**Function** | **Description**
+:---: | :---:
+`ts.is_digits` | the given string has only digits
+`ts.is_letters` | the given string has only letters
+`ts.is_lowercase` | the given string has only lowercase characters
+`ts.is_printable` | the given string has only printable characters
+`ts.is_punctuation` | the given string has only punctuation characters
+`ts.is_uppercase` | the given string has only uppercase characters
+
+!!! note "Character percentage threshold"
+    
+    These functions have all a `threshold` argument that defaults to `1.0`. It can be tuned to accept strings that are not fully consisting of the given alphabet.
+
+For hash-related data:
+
+**Function** | **Description**
+:---: | :---:
+`ts.is_hash` | hash string, among MD5/SHA1/SHA224/SHA256/SHA512
 `ts.is_md5` | MD5 hash
 `ts.is_sha1` | SHA1 hash
 `ts.is_sha224` | SHA224 hash
 `ts.is_sha256` | SHA256 hash
 `ts.is_sha512` | SHA512 hash
-`ts.is_str` | str, bytes, unicode
 
 And for network-related data:
 
@@ -158,7 +180,6 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 
 **Type** | **Output** | **Description**
 :---: | :---: | :---:
-`ts.any_hash` | `str` | any valid hash amongst MD5|SHA1|SHA224|SHA256|SHA512
 `ts.file_does_not_exist` | `str` | non-existing file path
 `ts.file_exists` | `str` | existing file path
 `ts.files_list` | `list(str)` | list of only existing file paths
@@ -166,17 +187,23 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `ts.folder_does_not_exist` | `str` | non-existing folder
 `ts.folder_exists` / `ts.folder_exists_or_create` | `str` | existing folder or folder to be created if it does not exist
 `ts.ints` | `list(int)` | list of integers
-`ts.md5_hash` | `str` | MD5 hash
 `ts.neg_int` / `negative_int` | `int` | single negative integer
 `ts.neg_ints` / `negative_ints` | `list(int)` | list of negative integers
 `ts.pos_int` / `positive_int` | `int` | single positive integer
 `ts.pos_ints` / `positive_ints` | `list(int)` | list of positive integers
+`ts.str_contains(alphabet, threshold)` | `str` | string that contains characters with a percentage of at least `threshold`
+`ts.str_matches(pattern, flags)` | `str` | string that matches the given pattern with the given flags
+
+For hash-related types:
+
+**Type** | **Output** | **Description**
+:---: | :---: | :---:
+`ts.any_hash` | `str` | any valid hash amongst MD5|SHA1|SHA224|SHA256|SHA512
+`ts.md5_hash` | `str` | MD5 hash
 `ts.sha1_hash` | `str` | SHA1 hash
 `ts.sha224_hash` | `str` | SHA224 hash
 `ts.sha256_hash` | `str` | SHA256 hash
 `ts.sha512_hash` | `str` | SHA512 hash
-`ts.str_matches(pattern, flags)` | `str` | string that matches the given pattern with the given flags
-
 
 And for network-related types:
 

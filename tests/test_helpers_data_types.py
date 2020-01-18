@@ -70,6 +70,9 @@ class TestHelpersDataTypes(TestCase):
         self.assertRaises(ValueError, pos_ints, "test,0")
         self.assertEqual(str_matches(r"^[abc]$")("a"), "a")
         self.assertRaises(ValueError, str_matches(r"^[abc]$"), "d")
+        self.assertEqual(str_contains("ABCD")("ADDCBABB"), "ADDCBABB")
+        self.assertRaises(ValueError, str_contains, "ABCD", -.1)
+        self.assertRaises(ValueError, str_contains, "ABCD", 1.1)
     
     def test_hash_related_types(self):
         self.assertIsNotNone(any_hash("0" * 32))
@@ -146,6 +149,11 @@ class TestHelpersDataTypes(TestCase):
         self.assertFalse(is_list("not_a_list"))
         self.assertTrue(is_str("test"))
         self.assertFalse(is_str(1))
+        self.assertTrue(is_lowercase("test"))
+        self.assertTrue(is_uppercase("TEST"))
+        self.assertTrue(is_printable("test1234!"))
+        self.assertFalse(is_lowercase("Test"))
+        self.assertTrue(is_lowercase("Test", .75))
         self.assertTrue(is_lambda(dummy_lambda))
         self.assertFalse(is_lambda(True))
         self.assertTrue(is_function(dummy_lambda))
