@@ -57,9 +57,9 @@ def try_or_die(message, exc=Exception, extra_info=""):
                         method)
     """
     def _try_or_die(f):
+        @wraps(f)
         def wrapper(*args, **kwargs):
-            self = args[0] if __is_method(f) else None
-            einfo = tuple()
+            self = args[0] if len(args) > 0 and __is_method(f) else None
             try:
                 return f(*args, **kwargs)
             except exc as e:
@@ -70,14 +70,12 @@ def try_or_die(message, exc=Exception, extra_info=""):
                     l.critical(message)
                     if extra_info != "" and hasattr(self, extra_info):
                         l.info(getattr(self, extra_info))
-                einfo = exc_info()
-                # re-raise the exception
-                raise e
-            finally:
                 # if the decorated method is part of a context manager, close it
                 #  with its __exit__ method and continue
                 if hasattr(self, "__exit__"):
-                    self.__exit__(*einfo)
+                    self.__exit__(*exc_info())
+                # re-raise the exception
+                raise e
         return wrapper
     return _try_or_die
 
@@ -114,7 +112,7 @@ def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
     def _try_and_warn(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            self = args[0] if __is_method(f) else None
+            self = args[0] if len(args) > 0 and __is_method(f) else None
             try:
                 return f(*args, **kwargs)
             except exc:

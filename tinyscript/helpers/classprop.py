@@ -7,7 +7,7 @@ __all__ = __features__ = ["classproperty"]
 
 def classproperty(f):
     if not isinstance(f, (classmethod, staticmethod)):
-        func = classmethod(f)
+        f = classmethod(f)
     return ClassProperty(f)
 
 
@@ -25,7 +25,7 @@ class ClassProperty(object):
     
     def __get__(self, obj, objtype=None):
         objtype = objtype or type(obj)
-        return self.fget.__get__(objtype)()
+        return self.fget.__get__(obj, objtype)()
     
     def setter(self, f):
         if not isinstance(f, (classmethod, staticmethod)):
