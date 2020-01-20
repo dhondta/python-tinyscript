@@ -11,12 +11,16 @@ Tinyscript provides some predefined boolean constants, handy in some use cases:
 `PYTHON3` | `True` if Python 3, `False` if Python 2
 `WINDOWS` | Windows platform
 
+It defines a `classproperty` decorator for setting a property to the class level.
+
 It also defines a few compatibility/utility functions for working with the same code either in Python 2 or 3.
 
 **Name** | **Description**
 :---: | :---:
 `b` | bytes conversion function, overloading `six.b` for a better compatibility
 `byteindex` | selects the byte value from a string at the given index
+`ensure_binary` | identical to `six.ensure_binary`
+`ensure_str` | similar to `six.ensure_str`
 `execfile` | added in Python3 for backward-compatibility
 `iterbytes` | iterates over the bytes of a string (trivial in Python3 but
 `u` | alias for `six.u`
@@ -47,7 +51,7 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 `ts.user_input` | Python2/3-compatible enhanced input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful), choices, default value and 'required' option)
 
 It also provides some other utility functions:
-
+ 
 **Name** | **Description**
 :---: | :---:
 `ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length

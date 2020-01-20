@@ -2,7 +2,7 @@
 """Class property.
 
 """
-__all__ = __features__ = ["classproperty"]#, "MetaClassProperty"]
+__all__ = __features__ = ["classproperty"]
 
 
 def classproperty(f):
