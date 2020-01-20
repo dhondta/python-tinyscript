@@ -57,9 +57,9 @@ def try_or_die(message, exc=Exception, extra_info=""):
                         method)
     """
     def _try_or_die(f):
-        @wraps(f, ('__doc__', '__name__'), ('__dict__', ))
         def wrapper(*args, **kwargs):
             self = args[0] if __is_method(f) else None
+            einfo = tuple()
             try:
                 return f(*args, **kwargs)
             except exc as e:
