@@ -9,7 +9,7 @@ from tinyscript.helpers.data.utils import PAD
 from utils import TestCase
 
 
-class TestHelpersCommon(TestCase):
+class TestHelpersDataUtils(TestCase):
     def test_common_utility_functions(self):
         BIN = "01010"
         STR = "test"

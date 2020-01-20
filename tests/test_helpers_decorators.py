@@ -56,6 +56,6 @@ class TestHelpersDecorators(TestCase):
     def test_try_decorators(self):
         temp_stdout(self)
         t = Test1()
-        self.assertRaises(Exception, t.test1)
+        self.assertRaises(Exception, t.test1, ())
         self.assertIsNone(t.test2())
         self.assertIsNone(t.test3())

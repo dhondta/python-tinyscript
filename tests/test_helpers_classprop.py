@@ -36,7 +36,7 @@ class Test(object):
         return cls._test1
 
 
-class TestHelpersCommon(TestCase):
+class TestHelpersClassProp(TestCase):
     def test_classproperty_feature(self):
         S1, S2, S3 = "OK1", "OK2", "OK3"
         self.assertIsNone(Test.test1)
