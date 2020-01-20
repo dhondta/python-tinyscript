@@ -2,7 +2,7 @@
 """Decorators for classes and methods.
 
 """
-from functools import wraps
+from functools import update_wrapper, wraps
 from sys import exc_info
 try:  # PYTHON3
     from inspect import getfullargspec
@@ -57,7 +57,6 @@ def try_or_die(message, exc=Exception, extra_info=""):
                         method)
     """
     def _try_or_die(f):
-        @wraps(f)
         def wrapper(*args, **kwargs):
             self = args[0] if __is_method(f) else None
             try:
@@ -76,7 +75,7 @@ def try_or_die(message, exc=Exception, extra_info=""):
                     self.__exit__(*exc_info())
                 # finally, re-raise the exception
                 raise
-        return wrapper
+        return update_wrapper(wrapper, f)
     return _try_or_die
 
 
