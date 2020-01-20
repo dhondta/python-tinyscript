@@ -2,13 +2,13 @@
 """Common Python2/3 compatibility functions.
 
 """
-from six import b as six_b, ensure_str, string_types, u
+from six import b as six_b, ensure_str as six_ensure_str, string_types, u
 
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["b", "byteindex", "execfile", "iterbytes",
-                          "ensure_str", "u"]
+__all__ = __features__ = ["b", "byteindex", "execfile", "ensure_str",
+                          "iterbytes", "string_types", "u"]
 
 
 # see: http://python3porting.com/problems.html
@@ -23,7 +23,22 @@ def b(text):
     try:
         return six_b(text)
     except:
+        pass
+    try:
+        return text.encode()
+    except:
         return text
+
+
+def ensure_str(text):
+    """
+    Ugly overload for six.ensure_str function, in order to avoir unicode error
+     with the original one. 
+    """
+    try:
+        return six_ensure_str(text)
+    except:
+        return text.decode("latin-1")
 
 
 def execfile(source, globals=None, locals=None):

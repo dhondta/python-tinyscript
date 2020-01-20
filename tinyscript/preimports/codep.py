@@ -5,6 +5,7 @@
 import code
 import patchy
 from collections import deque
+from functools import wraps
 from six import string_types
 
 
@@ -102,6 +103,7 @@ def __sort_int_text_pairs(text, lst, item):
 
 def _cache(f):
     """ Decorator for caching code changes locally inside the module. """
+    @wraps(f)
     def _wrapper(*args, **kwargs):
         cache = kwargs.pop("cache", True)
         if cache:

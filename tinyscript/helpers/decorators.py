@@ -2,6 +2,7 @@
 """Decorators for classes and methods.
 
 """
+from functools import wraps
 from sys import exc_info
 try:  # PYTHON3
     from inspect import getfullargspec
@@ -22,6 +23,7 @@ def __is_method(f):
     return len(spec.args) > 0 and spec.args[0] == "self"
 
 
+
 def applicable_to(*classes):
     """
     Class decorator for checking that a class is well inherited from any given
@@ -29,9 +31,11 @@ def applicable_to(*classes):
 
     :param classes: list of compatible parent bot classes
     """
-    def _applicable_to(cls):
+    def _wrapper(cls):
         class NewClass(cls):
             def __init__(self, *args, **kwargs):
+                self.__doc__ = cls.__doc__
+                self.__name__ = cls.__name__
                 valid = [c.__name__ for c in classes]
                 if all(c not in self.__class__.__mro__ for c in classes):
                     msg = "This class is not compatible with the given parent" \
@@ -39,7 +43,7 @@ def applicable_to(*classes):
                     raise IncompatibleClassError(msg)
                 super(NewClass, self).__init__(*args, **kwargs)
         return NewClass
-    return _applicable_to
+    return _wrapper
 
 
 def try_or_die(message, exc=Exception, extra_info=""):
@@ -53,6 +57,7 @@ def try_or_die(message, exc=Exception, extra_info=""):
                         method)
     """
     def _try_or_die(f):
+        @wraps(f)
         def wrapper(*args, **kwargs):
             self = args[0] if __is_method(f) else None
             try:
@@ -83,6 +88,7 @@ def try_and_pass(exc=Exception):
     :param exc: exception class on which the error is thrown
     """
     def _try_and_pass(f):
+        @wraps(f)
         def wrapper(*args, **kwargs):
             try:
                 return f(*args, **kwargs)
@@ -104,6 +110,7 @@ def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
                         additional information
     """
     def _try_and_warn(f):
+        @wraps(f)
         def wrapper(*args, **kwargs):
             self = args[0] if __is_method(f) else None
             try:
