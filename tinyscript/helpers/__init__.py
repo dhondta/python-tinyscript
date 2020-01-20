@@ -5,6 +5,7 @@
 from pprint import pprint
 from types import ModuleType
 
+from .classprop import *
 from .common import *
 from .compat import *
 from .constants import *
@@ -16,6 +17,7 @@ from .path import *
 from .termsize import *
 from .timeout import *
 
+from .classprop import __features__ as _classprop
 from .common import __features__ as _common
 from .compat import __features__ as _compat
 from .constants import __features__ as _constants
@@ -77,4 +79,4 @@ ts = ModuleType("ts", """
 for h in __helpers__:
     setattr(ts, h, globals()[h])
 
-__all__ = __features__ = ["pprint", "ts"] + _compat + _constants
+__all__ = __features__ = ["pprint", "ts"] + _classprop + _compat + _constants
