@@ -11,44 +11,43 @@ from utils import TestCase
 class TestHelpersDataTransform(TestCase):
     def setUp(self):
         global BIN, BIN_BE1, BIN_BE2, HEX, INT, STR
-        BIN = "01110100011001010111001101110100"
+        BIN =     "01110100011001010111001101110100"
         BIN_BE1 = "01110100011100110110010101110100"
         BIN_BE2 = "01100101011101000111010001110011"
         HEX = "74657374"
-        INT = 0x74657374
+        INT = 1953719668
         STR = "test"
 
     def test_data_conversion_from_bin(self):
         # bin -> hex
         self.assertEqual(bin2hex(BIN), HEX)
-        self.assertEqual(bin2hex(BIN, 2, 3), HEX)
+        self.assertEqual(bin2hex(BIN, 2), "01030100010201010103000301030100")
+        self.assertEqual(bin2hex(BIN, 8, 2), "1c")
+        self.assertEqual(bin2hex(BIN, 8, 10), "1d0651cc74")
         self.assertRaises(ValueError, bin2hex, HEX)
         self.assertRaises(ValueError, bin2hex, INT)
         self.assertRaises(ValueError, bin2hex, STR)
         self.assertRaises(ValueError, bin2hex, BIN, -1)
-        self.assertRaises(ValueError, bin2hex, BIN, 4, -1)
-        self.assertRaises(ValueError, bin2hex, BIN, 8, 1, "bad_order")
-        self.assertRaises(ValueError, bin2hex, "000 01", 2, 1, " ")
+        self.assertRaises(ValueError, bin2hex, BIN, 8, -1)
         # bin -> int
         self.assertEqual(bin2int(BIN), INT)
-        self.assertEqual(bin2int(BIN, 2, 3), INT)
+        self.assertEqual(bin2int(BIN, nbits_out=10), 501644068381)
+        self.assertEqual(bin2int(BIN, nbits_out=2), 28)
         self.assertRaises(ValueError, bin2int, HEX)
         self.assertRaises(ValueError, bin2int, INT)
         self.assertRaises(ValueError, bin2int, STR)
         self.assertRaises(ValueError, bin2int, BIN, -1)
-        self.assertRaises(ValueError, bin2int, BIN, 4, -1)
-        self.assertRaises(ValueError, bin2int, BIN, 8, 1, "bad_order")
-        self.assertRaises(ValueError, bin2int, "000 01", 2, 1)
+        self.assertRaises(ValueError, bin2int, BIN, 8, -1)
+        self.assertRaises(ValueError, bin2int, BIN, 8, 8, "bad_order")
         # bin -> str
         self.assertEqual(bin2str(BIN), STR)
-        self.assertEqual(bin2str(BIN, 2, 3), STR)
+        self.assertEqual(bin2str(BIN, 2),
+            "\x01\x03\x01\x00\x01\x02\x01\x01\x01\x03\x00\x03\x01\x03\x01\x00")
         self.assertRaises(ValueError, bin2str, HEX)
         self.assertRaises(ValueError, bin2str, INT)
         self.assertRaises(ValueError, bin2str, STR)
         self.assertRaises(ValueError, bin2str, BIN, -1)
-        self.assertRaises(ValueError, bin2str, BIN, 4, -1)
-        self.assertRaises(ValueError, bin2str, BIN, 8, 1, "bad_order")
-        self.assertRaises(ValueError, bin2str, "000 01", 2, 1, " ")
+        self.assertRaises(ValueError, bin2str, BIN, 8, -1)
 
     def test_data_conversion_from_hex(self):
         # hex -> bin
@@ -56,8 +55,7 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, hex2bin, INT)
         self.assertRaises(ValueError, hex2bin, STR)
         self.assertRaises(ValueError, hex2bin, HEX, -1)
-        self.assertRaises(ValueError, hex2bin, HEX, 4, -1)
-        self.assertRaises(ValueError, hex2bin, HEX, 8, 1, "", "bad_order")
+        self.assertRaises(ValueError, hex2bin, HEX, 8, -1)
         # hex -> int
         self.assertEqual(hex2int(HEX), INT)
         self.assertRaises(ValueError, hex2int, INT)
@@ -70,25 +68,24 @@ class TestHelpersDataTransform(TestCase):
     def test_data_conversion_from_int(self):
         # int -> bin
         self.assertEqual(int2bin(INT), BIN)
-        self.assertEqual(int2bin(INT, n_groups=4, order="big"), BIN_BE1)
-        self.assertEqual(int2bin(INT, 8, 5), "0" * 8 + BIN)
-        self.assertEqual(int2bin(INT, 8, 2, order="big"), BIN_BE2)
+        self.assertEqual(int2bin(INT, order="big"), BIN_BE1)
+        self.assertEqual(int2bin(INT, 8, 5), "10100001011001110100")
+        self.assertEqual(int2bin(INT, 8, 2, order="big"), "00110100")
         self.assertRaises(ValueError, int2bin, BIN)
         self.assertRaises(ValueError, int2bin, HEX)
         self.assertRaises(ValueError, int2bin, STR)
         self.assertRaises(ValueError, int2bin, INT, -1)
         self.assertRaises(ValueError, int2bin, INT, 4, -1)
-        self.assertRaises(ValueError, int2bin, INT, 8, 1, "", "bad_order")
+        self.assertRaises(ValueError, int2bin, INT, order="bad_order")
         # int -> hex
         self.assertEqual(int2hex(INT), HEX)
-        self.assertEqual(int2hex(INT, len(HEX) // 2 + 1), "00" + HEX)
         self.assertRaises(ValueError, int2hex, BIN)
         self.assertRaises(ValueError, int2hex, HEX)
         self.assertRaises(ValueError, int2hex, STR)
         self.assertRaises(ValueError, int2hex, INT, 0)
         # int -> str
         self.assertEqual(int2str(INT), STR)
-        self.assertEqual(int2str(29797, 29556), STR)
+        self.assertEqual(int2str(25972, 29811), STR)
         self.assertRaises(ValueError, int2hex, BIN)
         self.assertRaises(ValueError, int2hex, HEX)
         self.assertRaises(ValueError, int2hex, STR)
@@ -103,9 +100,6 @@ class TestHelpersDataTransform(TestCase):
         # str -> bin
         self.assertEqual(str2bin(STR), BIN)
         self.assertRaises(ValueError, str2bin, INT)
-        self.assertRaises(ValueError, str2bin, STR, -1)
-        self.assertRaises(ValueError, str2bin, STR, 4, -1)
-        self.assertRaises(ValueError, str2bin, STR, 8, 1, "", "bad_order")
         # str -> hex
         self.assertEqual(str2hex(STR), HEX)
         self.assertRaises(ValueError, str2hex, INT)
@@ -115,15 +109,12 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, str2int, STR, -1)
     
     def test_data_conversion_back_and_forth(self):
-        for kw in [{},
-                   {"n_bits": 4, "n_groups": 2},
-                   {"order": "big"}]:
-            self.assertEqual(hex2bin(bin2hex(BIN, **kw), **kw), BIN)
-            self.assertEqual(bin2hex(hex2bin(HEX, **kw), **kw), HEX)
-            self.assertEqual(int2bin(bin2int(BIN, **kw), **kw), BIN)
-            self.assertEqual(bin2int(int2bin(INT, **kw), **kw), INT)
-            self.assertEqual(str2bin(bin2str(BIN, **kw), **kw), BIN)
-            self.assertEqual(bin2str(str2bin(STR, **kw), **kw), STR)
+        self.assertEqual(hex2bin(bin2hex(BIN, nbits_out=10), 10), BIN)
+        self.assertEqual(bin2hex(hex2bin(HEX, nbits_out=10), 10), HEX)
+        self.assertEqual(int2bin(bin2int(BIN, nbits_out=10), 10), BIN)
+        self.assertEqual(bin2int(int2bin(INT, nbits_out=10), 10), INT)
+        self.assertEqual(str2bin(bin2str(BIN, nbits_out=10), 10), BIN)
+        self.assertEqual(bin2str(str2bin(STR, nbits_out=10), 10), STR)
         self.assertEqual(hex2str(str2hex(STR)), STR)
         self.assertEqual(str2hex(hex2str(HEX)), HEX)
         self.assertEqual(hex2int(int2hex(INT)), INT)
