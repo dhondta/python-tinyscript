@@ -57,7 +57,7 @@ def try_or_die(message, exc=Exception, extra_info=""):
                         method)
     """
     def _try_or_die(f):
-        #@wraps(f)
+        @wraps(f)
         def wrapper(*args, **kwargs):
             self = args[0] if __is_method(f) else None
             try:
@@ -75,7 +75,7 @@ def try_or_die(message, exc=Exception, extra_info=""):
                 if hasattr(self, "__exit__"):
                     self.__exit__(*exc_info())
                 # finally, re-raise the exception
-                raise exc
+                raise
         return wrapper
     return _try_or_die
 
