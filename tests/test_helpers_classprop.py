@@ -29,6 +29,11 @@ class Test(object):
     @test2.setter
     def test2(self, value):
         self._test2 = value
+    
+    @classproperty
+    @classmethod
+    def test3(cls):
+        return cls._test1
 
 
 class TestHelpersCommon(TestCase):

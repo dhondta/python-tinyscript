@@ -75,7 +75,7 @@ def try_or_die(message, exc=Exception, extra_info=""):
                 if hasattr(self, "__exit__"):
                     self.__exit__(*exc_info())
                 # finally, re-raise the exception
-                raise exc
+                raise exc(message)
         return wrapper
     return _try_or_die
 
