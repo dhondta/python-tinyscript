@@ -8,52 +8,53 @@ from tinyscript.helpers.classprop import *
 from utils import TestCase
 
 
-class Test(object):
-    _test1 = None
+class UselessClass(object):
+    _val1 = None
     
     def __init__(self):
-        self._test2 = None
+        self._val2 = None
     
     @classproperty
-    def test1(cls):
-        return cls._test1
+    def val1(cls):
+        return cls._val1
     
-    @test1.setter
-    def test1(cls, value):
-        cls._test1 = value
+    @val1.setter
+    def val1(cls, value):
+        cls._val1 = value
     
     @property
-    def test2(self):
-        return self._test2
+    def val2(self):
+        return self._val2
 
-    @test2.setter
-    def test2(self, value):
-        self._test2 = value
+    @val2.setter
+    def val2(self, value):
+        self._val2 = value
     
     @classproperty
     @classmethod
-    def test3(cls):
-        return cls._test1
+    def val3(cls):
+        return cls._val1
 
 
 class TestHelpersClassProp(TestCase):
     def test_classproperty_feature(self):
         S1, S2, S3 = "OK1", "OK2", "OK3"
-        self.assertIsNone(Test.test1)
-        self.assertIsInstance(Test.test2, property)
-        Test.test1 = S1
-        self.assertEqual(Test.test1, S1)
-        t1 = Test()
-        self.assertIsNone(t1.test2)
-        t1.test2 = S2
-        self.assertEqual(t1.test2, S2)
-        self.assertIsInstance(Test.test2, property)
-        t1.test1 = S2
-        self.assertEqual(t1.test1, S2)
-        self.assertEqual(Test.test1, S1)
-        t2 = Test()
-        t2.test2 = S3
-        self.assertEqual(t2.test2, S3)
-        t2.test1 = S2
-        self.assertEqual(t2.test1, S2)
-        self.assertEqual(Test.test1, S1)
+        self.assertIsNone(UselessClass.val1)
+        self.assertIsNone(UselessClass.val3)
+        self.assertIsInstance(UselessClass.val2, property)
+        UselessClass.val1 = S1
+        self.assertEqual(UselessClass.val1, S1)
+        t1 = UselessClass()
+        self.assertIsNone(t1.val2)
+        t1.val2 = S2
+        self.assertEqual(t1.val2, S2)
+        self.assertIsInstance(UselessClass.val2, property)
+        t1.val1 = S2
+        self.assertEqual(t1.val1, S2)
+        self.assertEqual(UselessClass.val1, S1)
+        t2 = UselessClass()
+        t2.val2 = S3
+        self.assertEqual(t2.val2, S3)
+        t2.val1 = S2
+        self.assertEqual(t2.val1, S2)
+        self.assertEqual(UselessClass.val1, S1)
