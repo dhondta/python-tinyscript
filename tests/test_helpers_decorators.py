@@ -44,6 +44,19 @@ class Test1(GoodClass, TestMixin):
         raise Exception("something wrong happened")
 
 
+@try_or_die("TRY_OR_DIE message", extra_info="test")
+def test1(self):
+    raise Exception("something wrong happened")
+
+@try_and_pass()
+def test2(self):
+    raise Exception("something wrong happened")
+
+@try_and_warn("TRY_OR_WARN message", trace=True, extra_info="test")
+def test3(self):
+    raise Exception("something wrong happened")
+
+
 class Test2(BadClass, TestMixin):
     pass
 
@@ -56,6 +69,9 @@ class TestHelpersDecorators(TestCase):
     def test_try_decorators(self):
         temp_stdout(self)
         t = Test1()
-        self.assertRaises(Exception, t.test1, ())
+        self.assertRaises(Exception, t.test1)
         self.assertIsNone(t.test2())
         self.assertIsNone(t.test3())
+        self.assertRaises(Exception, test1)
+        self.assertIsNone(test2())
+        self.assertIsNone(test3())
