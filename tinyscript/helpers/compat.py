@@ -2,43 +2,61 @@
 """Common Python2/3 compatibility functions.
 
 """
-from six import b as six_b, ensure_str as six_ensure_str, string_types, u
+from six import binary_type, string_types, text_type, u
 
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["b", "byteindex", "execfile", "ensure_str",
-                          "iterbytes", "string_types", "u"]
+__all__ = __features__ = ["b", "binary_type", "byteindex", "execfile",
+                          "ensure_binary", "ensure_str", "iterbytes",
+                          "string_types", "text_type", "u"]
 
 
 # see: http://python3porting.com/problems.html
 byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
 
 
-def b(text):
+def b(s):
     """
     Overload for six.b function, because the behavior of 'b' in Python2/3 is not
      exactly the same. This makes 'b' behave in Python 3 like in Python 2.
     """
-    try:
-        return six_b(text)
-    except:
-        pass
-    try:
-        return text.encode()
-    except:
-        return text
+    if PYTHON3:
+        try:
+            return s.encode("latin-1")
+        except:
+            pass
+    return s
 
 
-def ensure_str(text):
+def ensure_binary(s, encoding='utf-8', errors='strict'):
     """
-    Ugly overload for six.ensure_str function, in order to avoir unicode error
-     with the original one. 
+    Identical to six.ensure_binary. Copied here to avoid messing up with six
+     version errors.
     """
-    try:
-        return six_ensure_str(text)
-    except:
-        return text.decode("latin-1")
+    if isinstance(s, text_type):
+        return s.encode(encoding, errors)
+    elif isinstance(s, binary_type):
+        return s
+    else:
+        raise TypeError("not expecting type '%s'" % type(s))
+
+
+def ensure_str(s, encoding='utf-8', errors='strict'):
+    """
+    Similar to six.ensure_str. Adapted here to avoid messing up with six version
+     errors.
+    """
+    if not PYTHON3 and isinstance(s, text_type):
+        return s.encode(encoding, errors)
+    elif PYTHON3 and isinstance(s, binary_type):
+        try:
+            return s.decode(encoding, errors)
+        except:
+            return s.decode("latin-1")
+    elif not isinstance(s, (text_type, binary_type)):
+        raise TypeError("not expecting type '%s'" % type(s))
+    return s
 
 
 def execfile(source, globals=None, locals=None):
