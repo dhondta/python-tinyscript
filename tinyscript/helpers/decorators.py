@@ -57,11 +57,12 @@ def try_or_die(message, exc=Exception, extra_info=""):
                         method)
     """
     def _try_or_die(f):
+        @wraps(f, ('__doc__', '__name__'), ('__dict__', ))
         def wrapper(*args, **kwargs):
             self = args[0] if __is_method(f) else None
             try:
                 return f(*args, **kwargs)
-            except exc:
+            except exc as e:
                 # try to get a logger from the current instance or from the
                 #  global scope
                 l = getattr(self, "logger", None) or globals().get('logger')
@@ -69,13 +70,15 @@ def try_or_die(message, exc=Exception, extra_info=""):
                     l.critical(message)
                     if extra_info != "" and hasattr(self, extra_info):
                         l.info(getattr(self, extra_info))
+                einfo = exc_info()
+                # re-raise the exception
+                raise e
+            finally:
                 # if the decorated method is part of a context manager, close it
                 #  with its __exit__ method and continue
                 if hasattr(self, "__exit__"):
-                    self.__exit__(*exc_info())
-                # finally, re-raise the exception
-                raise
-        return update_wrapper(wrapper, f)
+                    self.__exit__(*einfo)
+        return wrapper
     return _try_or_die
 
 
