@@ -10,15 +10,19 @@ from utils import TestCase
 
 class TestHelpersDataTransform(TestCase):
     def setUp(self):
-        global BIN, BIN_BE1, BIN_BE2, HEX, INT, STR
-        BIN =     "01110100011001010111001101110100"
-        BIN_BE1 = "01110100011100110110010101110100"
-        BIN_BE2 = "01100101011101000111010001110011"
+        global BIN, BIN_LE, HEX, INT, STR
+        BIN =    "01110100011001010111001101110100"
+        BIN_LE = "01110100011100110110010101110100"
         HEX = "74657374"
-        INT = 1953719668
+        INT = 1952805748
         STR = "test"
 
     def test_data_conversion_from_bin(self):
+        # bin -> bin
+        self.assertEqual(bin2bin(BIN), BIN)
+        self.assertRaises(ValueError, bin2bin, HEX)
+        self.assertRaises(ValueError, bin2bin, BIN, -1)
+        self.assertRaises(ValueError, bin2bin, BIN, 8, -1)
         # bin -> hex
         self.assertEqual(bin2hex(BIN), HEX)
         self.assertEqual(bin2hex(BIN, 2), "01030100010201010103000301030100")
@@ -31,7 +35,7 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, bin2hex, BIN, 8, -1)
         # bin -> int
         self.assertEqual(bin2int(BIN), INT)
-        self.assertEqual(bin2int(BIN, nbits_out=10), 501644068381)
+        self.assertEqual(bin2int(BIN, nbits_out=10), 124660075636)
         self.assertEqual(bin2int(BIN, nbits_out=2), 28)
         self.assertRaises(ValueError, bin2int, HEX)
         self.assertRaises(ValueError, bin2int, INT)
@@ -68,9 +72,9 @@ class TestHelpersDataTransform(TestCase):
     def test_data_conversion_from_int(self):
         # int -> bin
         self.assertEqual(int2bin(INT), BIN)
-        self.assertEqual(int2bin(INT, order="big"), BIN_BE1)
+        self.assertEqual(int2bin(INT, order="little"), BIN_LE)
         self.assertEqual(int2bin(INT, 8, 5), "10100001011001110100")
-        self.assertEqual(int2bin(INT, 8, 2, order="big"), "00110100")
+        self.assertEqual(int2bin(INT, 8, 2, order="little"), "00110100")
         self.assertRaises(ValueError, int2bin, BIN)
         self.assertRaises(ValueError, int2bin, HEX)
         self.assertRaises(ValueError, int2bin, STR)
@@ -85,7 +89,7 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, int2hex, INT, 0)
         # int -> str
         self.assertEqual(int2str(INT), STR)
-        self.assertEqual(int2str(25972, 29811), STR)
+        self.assertEqual(int2str(29797, 29556), STR)
         self.assertRaises(ValueError, int2hex, BIN)
         self.assertRaises(ValueError, int2hex, HEX)
         self.assertRaises(ValueError, int2hex, STR)
@@ -109,12 +113,14 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, str2int, STR, -1)
     
     def test_data_conversion_back_and_forth(self):
-        self.assertEqual(hex2bin(bin2hex(BIN, nbits_out=10), 10), BIN)
-        self.assertEqual(bin2hex(hex2bin(HEX, nbits_out=10), 10), HEX)
-        self.assertEqual(int2bin(bin2int(BIN, nbits_out=10), 10), BIN)
-        self.assertEqual(bin2int(int2bin(INT, nbits_out=10), 10), INT)
-        self.assertEqual(str2bin(bin2str(BIN, nbits_out=10), 10), BIN)
-        self.assertEqual(bin2str(str2bin(STR, nbits_out=10), 10), STR)
+        for i in range(8, 12):
+            self.assertEqual(bin2bin(bin2bin(BIN, nbits_out=i), i), BIN)
+            self.assertEqual(hex2bin(bin2hex(BIN, nbits_out=i), i), BIN)
+            self.assertEqual(bin2hex(hex2bin(HEX, nbits_out=i), i), HEX)
+            self.assertEqual(int2bin(bin2int(BIN, nbits_out=i), i), BIN)
+            self.assertEqual(bin2int(int2bin(INT, nbits_out=i), i), INT)
+            self.assertEqual(str2bin(bin2str(BIN, nbits_out=i), i), BIN)
+            self.assertEqual(bin2str(str2bin(STR, nbits_out=i), i), STR)
         self.assertEqual(hex2str(str2hex(STR)), STR)
         self.assertEqual(str2hex(hex2str(HEX)), HEX)
         self.assertEqual(hex2int(int2hex(INT)), INT)

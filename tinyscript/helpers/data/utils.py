@@ -2,9 +2,11 @@
 """Common utility functions for data.
 
 """
+import binascii
+import bitstring
+import patchy
 import re
 from ast import literal_eval as litev
-from bitstring import BitArray as BaseBitArray
 from random import randint
 
 from .types import *
@@ -16,22 +18,44 @@ __all__ = __features__ = ["BitArray", "pad", "unpad"]
 PAD = ["ansic9.23", "incremental", "iso7816-4", "pkcs5", "pkcs7", "w3c"]
 
 
-class BitArray(BaseBitArray):
+patchy.replace(bitstring.Bits._getlength, """
+    def _getlength(self):
+        \"\"\"Return the length of the bitstring in bits.\"\"\"
+        return self._datastore.bitlength
+""", """
+    def _getlength(self):
+        \"\"\"Return the length of the bitstring in bits.\"\"\"
+        l = self._datastore.bitlength
+        return l + (8 - l % 8) % 8 if getattr(Bits, "_padding", True) else l
+""")
+patchy.replace(bitstring.Bits._getbin, """
+    def _getbin(self):
+        \"\"\"Return interpretation as a binary string.\"\"\"
+        return self._readbin(self.len, 0)
+""", """
+    def _getbin(self):
+        \"\"\"Return interpretation as a binary string.\"\"\"
+        Bits._padding = False
+        r = self._readbin(self.len, 0)
+        Bits._padding = True
+        return r
+""")
+
+
+class BitArray(bitstring.BitArray):
     __doc__ = """
     Small improvement to the original bitstring.BitArray class.
     
     It allows to set the number of bits per group (by default, 8, for
      considering bytes).
     
-    """ + BaseBitArray.__doc__
+    """ + bitstring.BitArray.__doc__
     
     def __new__(cls, auto=None, length=None, offset=None, nbits=8, **kwargs):
         if auto:
             if not auto.startswith("0b"):
                 auto = "0b" + auto
-            auto = "0b" + pad(auto[2:], "0", nbits)
-        c = super(BitArray, cls).__new__(cls, auto, length, offset,
-                                                 **kwargs)
+        c = super(BitArray, cls).__new__(cls, auto, length, offset, **kwargs)
         c._nbits = nbits
         c.original = True
         return c
@@ -45,7 +69,10 @@ class BitArray(BaseBitArray):
         ob = self.bin
         nb = ""
         for i in range(0, len(ob), self._nbits):
-            group = pad(ob[i:i+self._nbits], ">0", n)[-n:]
+            group = ob[i:i+self._nbits]
+            if len(group) < self._nbits:
+                break
+            group = pad(group, ">0", n)[-n:]
             if int(ob[i:i+self._nbits], 2) != int(group, 2):
                 self.original = False
             nb += group

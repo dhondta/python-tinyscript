@@ -11,7 +11,7 @@ from ..compat import b, ensure_str
 
 
 __all__ = __features__ = [
-    "bin2int", "bin2hex", "bin2str", "hex2bin", "hex2int", "hex2str",
+    "bin2bin", "bin2int", "bin2hex", "bin2str", "hex2bin", "hex2int", "hex2str",
     "int2bin", "int2hex", "int2str", "int2uni", "str2bin", "str2int", "str2hex",
 ]
 
@@ -43,29 +43,31 @@ def __validation(**kwargs):
                 raise ValueError("Bad bits group order")
 
 
-# BINARY STRING <=> HEXADECIMAL STRING
-def bin2hex(binary_string, nbits_in=8, nbits_out=8):
-    """ Convert a binary string (eventually using a separator) to a hexadecimal
-         string, using a given number of bits and in little or big endian. """
+# BINARY STRING <=> *
+def bin2bin(binary_string, nbits_in=8, nbits_out=8):
+    """ Convert a binary string with groups of nbits_in bits to a binary string
+         with groups of nbits_out bits. """
     bs = binary_string
     __validation(b=bs, n_b=nbits_in, n_B=nbits_out)
     bs = Bits(bs, nbits=nbits_in)
     bs.nbits = nbits_out
-    return bs.hex
+    return bs.bin
 
 
-# BINARY STRING <=> INTEGER
-def bin2int(binary_string, nbits_in=8, nbits_out=8, order="little"):
+def bin2hex(binary_string, nbits_in=8, nbits_out=8):
+    """ Convert a binary string (eventually using a separator) to a hexadecimal
+         string, using a given number of bits and in little or big endian. """
+    return Bits(bin2bin(binary_string, nbits_in, nbits_out)).hex
+
+
+def bin2int(binary_string, nbits_in=8, nbits_out=8, order="big"):
     """ Convert a binary string (eventually using a separator) to an integer,
          using a given number of bits and in little or big endian. """
-    bs = binary_string
-    __validation(b=bs, n_b=nbits_in, n_B=nbits_out, o=order)
-    bs = Bits(bs, nbits=nbits_in)
-    bs.nbits = nbits_out
-    return bs.uintle if order == "little" else bs.uintbe
+    __validation(o=order)
+    bs = Bits(bin2bin(binary_string, nbits_in, nbits_out))
+    return bs.intle if order == "little" else bs.intbe
 
 
-# BINARY STRING <=> 8-BITS CHARACTERS
 def bin2str(binary_string, nbits_in=8, nbits_out=8):
     """ Convert a binary string to string of 8-bits characters, using a given
          number of bits. """
@@ -76,27 +78,27 @@ def bin2str(binary_string, nbits_in=8, nbits_out=8):
     return ensure_str(bs.bytes)
 
 
+# HEXADECIMAL STRING <=> *
 def hex2bin(hex_string, nbits_in=8, nbits_out=8):
     """ Convert a hexadecimal string to a binary string. """
     h = hex_string
     __validation(h=h, n_b=nbits_in, n_B=nbits_out)
-    bs = Bits(nbits=nbits_in)
+    bs = Bits()
     bs.hex = h
+    bs._nbits = nbits_in
     bs.nbits = nbits_out
     return bs.bin
 
 
-# HEXADECIMAL STRING <=> INTEGER
-def hex2int(hex_string, order="little"):
+def hex2int(hex_string, order="big"):
     """ Convert a hexadecimal string to a big integer. """
     h = hex_string
     __validation(h=h, o=order)
     bs = Bits()
     bs.hex = h
-    return bs.uintle if order == "little" else bs.uintbe
+    return bs.intle if order == "little" else bs.intbe
 
 
-# HEXADECIMAL STRING <=> 8-BITS CHARACTERS
 def hex2str(hex_string):
     """ Convert a hexadecimal string to a string of 8-bits characters. """
     h = hex_string
@@ -104,45 +106,43 @@ def hex2str(hex_string):
     return ensure_str(binascii.unhexlify(b(hex_string)))
 
 
-# INTEGER <=> BINARY STRING
-def int2bin(integer, nbits_in=8, nbits_out=8, order="little"):
+# INTEGER <=> *
+def int2bin(integer, nbits_in=8, nbits_out=8, order="big"):
     """ Convert an integer to a binary string in little or big endian. """
     i = integer
     __validation(i=i, n_b=nbits_in, n_B=nbits_out, o=order)
-    bs = Bits(nbits=nbits_in)
-    bs.hex = int(ceil(i.bit_length() / 8.0)) * 2 * "0"
-    setattr(bs, "uintle" if order == "little" else "uintbe", i)
+    bs = Bits()
+    bs.hex = int(ceil(max(i.bit_length(), 1) / 8.0)) * 2 * "0"
+    setattr(bs, "intle" if order == "little" else "intbe", i)
+    bs._nbits = nbits_in
     bs.nbits = nbits_out
     return bs.bin
 
 
-# INTEGER <=> HEXADECIMAL STRING
-def int2hex(integer, order="little"):
+def int2hex(integer, order="big"):
     """ Convert an integer to a hexadecimal string. """
     i = integer
     __validation(i=i, o=order)
     bs = Bits()
-    bs.hex = int(ceil(i.bit_length() / 8.0)) * 2 * "0"
-    setattr(bs, "uintle" if order == "little" else "uintbe", i)
+    bs.hex = int(ceil(max(i.bit_length(), 1) / 8.0)) * 2 * "0"
+    setattr(bs, "intle" if order == "little" else "intbe", i)
     return bs.hex
 
 
-# INTEGER <=> 8-BITS CHARACTERS
 def int2str(*integers, **kwargs):
     """ Convert a big integer or a list of big integers to a string of 8-bits
          characters. """
-    order = kwargs.get('order', "little")
+    order = kwargs.get('order', "big")
     s = ""
     for i in integers:
         __validation(i=i, o=order)
         bs = Bits()
-        bs.hex = int(ceil(i.bit_length() / 8.0)) * 2 * "0"
-        setattr(bs, "uintle" if order == "little" else "uintbe", i)
+        bs.hex = int(ceil(max(i.bit_length(), 1) / 8.0)) * 2 * "0"
+        setattr(bs, "intle" if order == "little" else "intbe", i)
         s += ensure_str(bs.bytes)
     return s
 
 
-# INTEGERS ==> UNICODE CHARACTERS
 def int2uni(*integers):
     """ Convert a big integer or a list of big integers to a unicode string. """
     s = ""
@@ -152,7 +152,7 @@ def int2uni(*integers):
     return s
 
 
-# 8-BITS CHARACTERS <=> BINARY STRING
+# 8-BITS CHARACTERS <=> *
 def str2bin(chars_string, nbits_in=8, nbits_out=8):
     """ Convert a string of 8-bits characters to a binary string. """
     s = chars_string
@@ -163,7 +163,6 @@ def str2bin(chars_string, nbits_in=8, nbits_out=8):
     return bs.bin
 
 
-# 8-BITS CHARACTERS <=> HEXADECIMAL STRING
 def str2hex(chars_string):
     """ Convert a string of 8-bits characters to a hexadecimal string. """
     s = chars_string
@@ -171,8 +170,7 @@ def str2hex(chars_string):
     return ensure_str(binascii.hexlify(b(s)))
 
 
-# 8-BITS CHARACTERS <=> INTEGER
-def str2int(chars_string, nchars=None, order="little"):
+def str2int(chars_string, nchars=None, order="big"):
     """ Convert a string of 8-bits characters to a big integer or, if using
          blocks of nchars characters, a list of big integers. """
     r, s, n = [], chars_string, nchars
