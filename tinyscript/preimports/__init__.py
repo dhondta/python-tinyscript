@@ -48,6 +48,7 @@ __imports__ = {
         "subprocess",
         "sys",
         "time",
+        "types",
     ],
     'optional': [
         "bs4",
