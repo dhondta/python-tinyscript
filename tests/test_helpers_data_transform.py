@@ -19,11 +19,13 @@ class TestHelpersDataTransform(TestCase):
 
     def test_data_conversion_from_bin(self):
         # bin -> bin
+        self.assertEqual(bin2bin("100000"), "00100000")
         self.assertEqual(bin2bin(BIN), BIN)
         self.assertRaises(ValueError, bin2bin, HEX)
         self.assertRaises(ValueError, bin2bin, BIN, -1)
         self.assertRaises(ValueError, bin2bin, BIN, 8, -1)
         # bin -> hex
+        self.assertEqual(bin2hex("100000"), "20")
         self.assertEqual(bin2hex(BIN), HEX)
         self.assertEqual(bin2hex(BIN, 2), "01030100010201010103000301030100")
         self.assertEqual(bin2hex(BIN, 8, 2), "1c")
@@ -34,6 +36,7 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, bin2hex, BIN, -1)
         self.assertRaises(ValueError, bin2hex, BIN, 8, -1)
         # bin -> int
+        self.assertEqual(bin2int("100000"), 32)
         self.assertEqual(bin2int(BIN), INT)
         self.assertEqual(bin2int(BIN, nbits_out=10), 124660075636)
         self.assertEqual(bin2int(BIN, nbits_out=2), 28)
@@ -43,7 +46,11 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, bin2int, BIN, -1)
         self.assertRaises(ValueError, bin2int, BIN, 8, -1)
         self.assertRaises(ValueError, bin2int, BIN, 8, 8, "bad_order")
+        self.assertEqual(bin2ints(BIN), [INT])
+        self.assertEqual(bin2ints(BIN, n_chunks=2), [29797, 29556])
+        self.assertEqual(bins2int(BIN[:16], BIN[16:]), INT)
         # bin -> str
+        self.assertEqual(bin2str("100000"), " ")
         self.assertEqual(bin2str(BIN), STR)
         self.assertEqual(bin2str(BIN, 2),
             "\x01\x03\x01\x00\x01\x02\x01\x01\x01\x03\x00\x03\x01\x03\x01\x00")
@@ -52,6 +59,10 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, bin2str, STR)
         self.assertRaises(ValueError, bin2str, BIN, -1)
         self.assertRaises(ValueError, bin2str, BIN, 8, -1)
+        # * -> bins
+        self.assertRaises(ValueError, int2bins, INT, n_chunks=-1)
+        self.assertRaises(ValueError, str2bins, STR, len_in=-1)
+        self.assertRaises(ValueError, hex2bins, BIN, len_out=-1)
 
     def test_data_conversion_from_hex(self):
         # hex -> bin
@@ -68,6 +79,10 @@ class TestHelpersDataTransform(TestCase):
         self.assertEqual(hex2str(HEX), STR)
         self.assertRaises(ValueError, hex2str, INT)
         self.assertRaises(ValueError, hex2str, STR)
+        # * -> hexs
+        self.assertRaises(ValueError, int2hexs, INT, n_chunks=-1)
+        self.assertRaises(ValueError, str2hexs, STR, len_in=-1)
+        self.assertRaises(ValueError, bin2hexs, BIN, len_out=-1)
 
     def test_data_conversion_from_int(self):
         # int -> bin
@@ -81,6 +96,9 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, int2bin, INT, -1)
         self.assertRaises(ValueError, int2bin, INT, 4, -1)
         self.assertRaises(ValueError, int2bin, INT, order="bad_order")
+        self.assertEqual(int2bins(INT, n_chunks=2), [BIN[:16], BIN[16:]])
+        self.assertEqual(int2bins(INT, len_in=16), [BIN[:16], BIN[16:]])
+        self.assertEqual(int2bins(INT, len_out=16), [BIN[:16], BIN[16:]])
         # int -> hex
         self.assertEqual(int2hex(INT), HEX)
         self.assertRaises(ValueError, int2hex, BIN)
@@ -89,16 +107,20 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, int2hex, INT, 0)
         # int -> str
         self.assertEqual(int2str(INT), STR)
-        self.assertEqual(int2str(29797, 29556), STR)
+        self.assertEqual(ints2str(29797, 29556), STR)
         self.assertRaises(ValueError, int2hex, BIN)
         self.assertRaises(ValueError, int2hex, HEX)
         self.assertRaises(ValueError, int2hex, STR)
         # int -> uni
-        self.assertIsNotNone(int2uni(1000, 10000, 100000))
+        self.assertIsNotNone(ints2uni(1000, 10000, 100000))
         self.assertRaises(UnicodeDecodeError, int2uni, -1)
         self.assertRaises(ValueError, int2uni, BIN)
         self.assertRaises(ValueError, int2uni, HEX)
         self.assertRaises(ValueError, int2uni, STR)
+        # * -> ints
+        self.assertRaises(ValueError, hex2ints, HEX, n_chunks=-1)
+        self.assertRaises(ValueError, str2ints, STR, len_in=-1)
+        self.assertRaises(ValueError, bin2ints, BIN, len_out=-1)
 
     def test_data_conversion_from_str(self):
         # str -> bin
@@ -111,6 +133,11 @@ class TestHelpersDataTransform(TestCase):
         self.assertEqual(str2int(STR), INT)
         self.assertRaises(ValueError, str2int, INT)
         self.assertRaises(ValueError, str2int, STR, -1)
+        self.assertEqual(str2ints(STR, n_chunks=2), [29797, 29556])
+        # * -> strs
+        self.assertRaises(ValueError, hex2strs, HEX, n_chunks=-1)
+        self.assertRaises(ValueError, int2strs, INT, len_in=-1)
+        self.assertRaises(ValueError, bin2strs, BIN, len_out=-1)
     
     def test_data_conversion_back_and_forth(self):
         for i in range(8, 12):
