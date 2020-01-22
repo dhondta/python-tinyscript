@@ -3,11 +3,12 @@
 
 """
 import binascii
+from functools import wraps
 from math import ceil
 
-from .types import is_bin, is_hex, is_int, is_pos_int, is_str
+from .types import is_bin, is_bytes, is_hex, is_int, is_pos_int, is_str
 from .utils import BitArray as Bits
-from ..compat import b, ensure_str
+from ..compat import b, ensure_binary, ensure_str
 
 
 __all__ = __features__ = [
@@ -21,26 +22,31 @@ def __validation(**kwargs):
     for k, v in kwargs.items():
         if k == "b":
             if not is_bin(v):
-                raise ValueError("Bad input binary string")
+                raise ValueError("Bad input binary string '{}'".format(v))
         elif k == "h":
             if not is_hex(v):
-                raise ValueError("Bad input hexadecimal string")
+                raise ValueError("Bad input hexadecimal string '{}'".format(v))
         elif k == "i":
             if not is_int(v):
-                raise ValueError("Bad input integer")
+                raise ValueError("Bad input integer {}".format(v))
         elif k == "s":
             if not is_str(v):
-                raise ValueError("Bad input string of 8-bits characaters")
+                raise ValueError("Bad input string of 8-bits characaters '{}'"
+                                 .format(v))
         elif k in ["n_b", "n_B", "n_c", "n_g"]:
-            if k in ["n_B", "n_c"] and v is None:
-                continue
             if not is_pos_int(v, zero=False):
-                raise ValueError("Number of {} must be a positive integer"
+                raise ValueError("Number of {} must be a positive int, not {}"
                                  .format({"n_b": "bits", "n_B": "bits",
-                                      "n_c": "characters", "n_g": "groups"}[k]))
+                                 "n_c": "characters", "n_g": "groups"}[k], v))
         elif k == "o":
             if v not in ["little", "big"]:
-                raise ValueError("Bad bits group order")
+                raise ValueError("Bad bits group order '{}'".format(v))
+        else:
+            if v is None:
+                continue
+            if not is_pos_int(v, zero=False):
+                raise ValueError("{} must be a positive int, not {}"
+                                 .format(k, v))
 
 
 # BINARY STRING <=> *
@@ -60,12 +66,13 @@ def bin2hex(binary_string, nbits_in=8, nbits_out=8):
     return Bits(bin2bin(binary_string, nbits_in, nbits_out)).hex
 
 
-def bin2int(binary_string, nbits_in=8, nbits_out=8, order="big"):
+def bin2int(binary_string, nbits_in=8, nbits_out=8, order="big", unsigned=True):
     """ Convert a binary string (eventually using a separator) to an integer,
          using a given number of bits and in little or big endian. """
     __validation(o=order)
     bs = Bits(bin2bin(binary_string, nbits_in, nbits_out))
-    return bs.intle if order == "little" else bs.intbe
+    pref = ["", "u"][unsigned]
+    return getattr(bs, pref + ("intle" if order == "little" else "intbe"))
 
 
 def bin2str(binary_string, nbits_in=8, nbits_out=8):
@@ -75,7 +82,7 @@ def bin2str(binary_string, nbits_in=8, nbits_out=8):
     __validation(b=bs, n_b=nbits_in, n_B=nbits_out)
     bs = Bits(bs, nbits=nbits_in)
     bs.nbits = nbits_out
-    return ensure_str(bs.bytes)
+    return bs.bytes
 
 
 # HEXADECIMAL STRING <=> *
@@ -90,24 +97,25 @@ def hex2bin(hex_string, nbits_in=8, nbits_out=8):
     return bs.bin
 
 
-def hex2int(hex_string, order="big"):
+def hex2int(hex_string, order="big", unsigned=True):
     """ Convert a hexadecimal string to a big integer. """
     h = hex_string
     __validation(h=h, o=order)
     bs = Bits()
     bs.hex = h
-    return bs.intle if order == "little" else bs.intbe
+    pref = ["", "u"][unsigned]
+    return getattr(bs, pref + ("intle" if order == "little" else "intbe"))
 
 
 def hex2str(hex_string):
     """ Convert a hexadecimal string to a string of 8-bits characters. """
     h = hex_string
     __validation(h=h)
-    return ensure_str(binascii.unhexlify(b(hex_string)))
+    return binascii.unhexlify(b(hex_string))
 
 
 # INTEGER <=> *
-def int2bin(integer, nbits_in=8, nbits_out=8, order="big"):
+def int2bin(integer, nbits_in=8, nbits_out=8, order="big", unsigned=True):
     """ Convert an integer to a binary string in little or big endian. """
     i = integer
     __validation(i=i, n_b=nbits_in, n_B=nbits_out, o=order)
@@ -119,7 +127,7 @@ def int2bin(integer, nbits_in=8, nbits_out=8, order="big"):
     return bs.bin
 
 
-def int2hex(integer, order="big"):
+def int2hex(integer, order="big", unsigned=True):
     """ Convert an integer to a hexadecimal string. """
     i = integer
     __validation(i=i, o=order)
@@ -129,27 +137,21 @@ def int2hex(integer, order="big"):
     return bs.hex
 
 
-def int2str(*integers, **kwargs):
-    """ Convert a big integer or a list of big integers to a string of 8-bits
-         characters. """
-    order = kwargs.get('order', "big")
-    s = ""
-    for i in integers:
-        __validation(i=i, o=order)
-        bs = Bits()
-        bs.hex = int(ceil(max(i.bit_length(), 1) / 8.0)) * 2 * "0"
-        setattr(bs, "intle" if order == "little" else "intbe", i)
-        s += ensure_str(bs.bytes)
-    return s
+def int2str(integer, order="big", unsigned=True):
+    """ Convert a big integer to a string of 8-bits characters. """
+    i = integer
+    __validation(i=i, o=order)
+    bs = Bits()
+    bs.hex = int(ceil(max(i.bit_length(), 1) / 8.0)) * 2 * "0"
+    setattr(bs, "intle" if order == "little" else "intbe", i)
+    return bs.bytes
 
 
-def int2uni(*integers):
-    """ Convert a big integer or a list of big integers to a unicode string. """
-    s = ""
-    for i in integers:
-        __validation(i=i)
-        s += b("\\u{:0>4}".format(hex(i)[2:])).decode('unicode-escape')
-    return s
+def int2uni(integer):
+    """ Convert an integer to a unicode string. """
+    i = integer
+    __validation(i=i)
+    return b("\\u{:0>4}".format(hex(i)[2:])).decode('unicode-escape')
 
 
 # 8-BITS CHARACTERS <=> *
@@ -167,18 +169,103 @@ def str2hex(chars_string):
     """ Convert a string of 8-bits characters to a hexadecimal string. """
     s = chars_string
     __validation(s=s)
-    return ensure_str(binascii.hexlify(b(s)))
+    return binascii.hexlify(b(s))
 
 
-def str2int(chars_string, nchars=None, order="big"):
+def str2int(chars_string, order="big", unsigned=True):
     """ Convert a string of 8-bits characters to a big integer or, if using
          blocks of nchars characters, a list of big integers. """
-    r, s, n = [], chars_string, nchars
-    __validation(s=s, n_c=n, o=order)
-    n = nchars or len(chars_string)
-    for k in range(0, len(s), n):
-        i, grp = 0, s[k:k+n]
-        for j, c in enumerate(grp if order == "little" else grp[::-1]):
-            i += ord(c) * (2 ** (8 * j))
-        r.append(i)
-    return r[0] if len(r) == 1 else r
+    s = chars_string
+    __validation(s=s, o=order)
+    i = 0
+    for j, c in enumerate(s if order == "little" else s[::-1]):
+        i += ord(c) * (2 ** (8 * j))
+    return i
+
+
+# make conversion functions compatible with input/output strings/bytes
+def __fix_inout_formats(f):
+    @wraps(f)
+    def _wrapper(*args, **kwargs):
+        a0 = args[0]
+        a0 = ensure_str(a0) if is_str(a0) or is_bytes(a0) else a0
+        r = f(a0, *args[1:], **kwargs)
+        return r if is_int(r) else ensure_binary(r) if is_bytes(args[0]) else \
+               ensure_str(r)
+    return _wrapper
+
+
+for f in __features__:
+    if f == "int2uni":
+        continue
+    globals()[f] = __fix_inout_formats(globals()[f])
+
+
+# add multi-input conversion functions
+def __items2something(f):
+    """
+    This decorates infmt2outfmt functions to make intfmtS2outfmt (taking
+     multiple inputs and producing a single output.
+    """
+    infmt, outfmt = f.__name__.split("2")
+    def _wrapper(*args, **kwargs):
+        r = [] if outfmt == "int" else ""
+        for arg in args:
+            out = f(arg, **kwargs)
+            if outfmt == "int":
+                r.append(out)
+            else:
+                r += out
+        return str2int(ints2str(*r)) if outfmt == "int" else r
+    _wrapper.__name__ = "{}s2{}".format(infmt, outfmt)
+    _wrapper.__doc__ = f.__doc__
+    return _wrapper
+
+
+def __something2items(f):
+    """
+    This decorates infmt2outfmt functions to make intfmt2outfmtS (taking a
+     single input and producing multiple outputs.
+    """
+    infmt, outfmt = f.__name__.split("2")
+    def _wrapper(data, **kwargs):
+        func = f
+        n = kwargs.pop('n_chunks', None)
+        inl = kwargs.pop('len_in', None)
+        outl = kwargs.pop('len_out', None)
+        __validation(n_chunks=n, len_in=inl, len_out=outl)
+        if not n and not inl and not outl:
+            n = 1
+        r = []
+        # if input chunk length is given, process the data per block
+        if n is None and inl is not None:
+            if infmt == "int":
+                data = int2bin(data, **kwargs)
+                func = globals()['bin2' + outfmt]
+            for i in range(0, len(data), inl):
+                r.append(func(data[i:i+inl], **kwargs))
+        # otherwise, chunk the output
+        else:
+            if outfmt == "int":
+                if n is not None:
+                    inl = int(ceil(len(data) / float(n)))
+                for i in range(0, len(data), inl):
+                    r.append(func(data[i:i+inl], **kwargs))
+            else:
+                out = func(data, **kwargs)
+                if n is not None:
+                    outl = int(ceil(len(out) / float(n)))
+                for i in range(0, len(out), outl):
+                    r.append(out[i:i+outl])
+        return r
+    _wrapper.__name__ = "{}2{}s".format(infmt, outfmt)
+    _wrapper.__doc__ = f.__doc__
+    return _wrapper
+
+
+for fname in __features__[:]:
+    f1 = __items2something(globals()[fname])
+    globals()[f1.__name__] = f1
+    f2 = __something2items(globals()[fname])
+    globals()[f2.__name__] = f2
+    __features__ += [f1.__name__, f2.__name__]

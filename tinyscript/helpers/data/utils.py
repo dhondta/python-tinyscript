@@ -70,7 +70,7 @@ class BitArray(bitstring.BitArray):
         nb = ""
         for i in range(0, len(ob), self._nbits):
             group = ob[i:i+self._nbits]
-            if len(group) < self._nbits:
+            if i > 0 and len(group) < self._nbits:
                 break
             group = pad(group, ">0", n)[-n:]
             if int(ob[i:i+self._nbits], 2) != int(group, 2):
