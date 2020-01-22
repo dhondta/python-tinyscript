@@ -8,7 +8,7 @@ from math import ceil
 
 from .types import is_bin, is_bytes, is_hex, is_int, is_pos_int, is_str
 from .utils import BitArray as Bits
-from ..compat import b, ensure_binary, ensure_str
+from ..compat import b, ensure_str
 
 
 __all__ = __features__ = [
@@ -29,10 +29,6 @@ def __validation(**kwargs):
         elif k == "i":
             if not is_int(v):
                 raise ValueError("Bad input integer {}".format(v))
-        elif k == "s":
-            if not is_str(v):
-                raise ValueError("Bad input string of 8-bits characaters '{}'"
-                                 .format(v))
         elif k in ["n_b", "n_B", "n_c", "n_g"]:
             if not is_pos_int(v, zero=False):
                 raise ValueError("Number of {} must be a positive int, not {}"
@@ -41,6 +37,13 @@ def __validation(**kwargs):
         elif k == "o":
             if v not in ["little", "big"]:
                 raise ValueError("Bad bits group order '{}'".format(v))
+        elif k == "s":
+            if not is_str(v):
+                raise ValueError("Bad input string of 8-bits characaters '{}'"
+                                 .format(v))
+        elif k == "u":
+            if not isinstance(v, bool):
+                raise ValueError("Bad value for input boolean {}".format(v))
         else:
             if v is None:
                 continue
@@ -69,7 +72,7 @@ def bin2hex(binary_string, nbits_in=8, nbits_out=8):
 def bin2int(binary_string, nbits_in=8, nbits_out=8, order="big", unsigned=True):
     """ Convert a binary string (eventually using a separator) to an integer,
          using a given number of bits and in little or big endian. """
-    __validation(o=order)
+    __validation(o=order, u=unsigned)
     bs = Bits(bin2bin(binary_string, nbits_in, nbits_out))
     pref = ["", "u"][unsigned]
     return getattr(bs, pref + ("intle" if order == "little" else "intbe"))
@@ -100,7 +103,7 @@ def hex2bin(hex_string, nbits_in=8, nbits_out=8):
 def hex2int(hex_string, order="big", unsigned=True):
     """ Convert a hexadecimal string to a big integer. """
     h = hex_string
-    __validation(h=h, o=order)
+    __validation(h=h, o=order, u=unsigned)
     bs = Bits()
     bs.hex = h
     pref = ["", "u"][unsigned]
@@ -118,10 +121,12 @@ def hex2str(hex_string):
 def int2bin(integer, nbits_in=8, nbits_out=8, order="big", unsigned=True):
     """ Convert an integer to a binary string in little or big endian. """
     i = integer
-    __validation(i=i, n_b=nbits_in, n_B=nbits_out, o=order)
+    __validation(i=i, n_b=nbits_in, n_B=nbits_out, o=order, u=unsigned)
     bs = Bits()
-    bs.hex = int(ceil(max(i.bit_length(), 1) / 8.0)) * 2 * "0"
-    setattr(bs, "intle" if order == "little" else "intbe", i)
+    nbits = i.bit_length() + int(not unsigned)
+    bs.hex = int(ceil(max(nbits, 1) / 8.0)) * 2 * "0"
+    pref = ["", "u"][unsigned]
+    setattr(bs, pref + ("intle" if order == "little" else "intbe"), i)
     bs._nbits = nbits_in
     bs.nbits = nbits_out
     return bs.bin
@@ -130,20 +135,24 @@ def int2bin(integer, nbits_in=8, nbits_out=8, order="big", unsigned=True):
 def int2hex(integer, order="big", unsigned=True):
     """ Convert an integer to a hexadecimal string. """
     i = integer
-    __validation(i=i, o=order)
+    __validation(i=i, o=order, u=unsigned)
     bs = Bits()
-    bs.hex = int(ceil(max(i.bit_length(), 1) / 8.0)) * 2 * "0"
-    setattr(bs, "intle" if order == "little" else "intbe", i)
+    nbits = i.bit_length() + int(not unsigned)
+    bs.hex = int(ceil(max(nbits, 1) / 8.0)) * 2 * "0"
+    pref = ["", "u"][unsigned]
+    setattr(bs, pref + ("intle" if order == "little" else "intbe"), i)
     return bs.hex
 
 
 def int2str(integer, order="big", unsigned=True):
     """ Convert a big integer to a string of 8-bits characters. """
     i = integer
-    __validation(i=i, o=order)
+    __validation(i=i, o=order, u=unsigned)
     bs = Bits()
-    bs.hex = int(ceil(max(i.bit_length(), 1) / 8.0)) * 2 * "0"
-    setattr(bs, "intle" if order == "little" else "intbe", i)
+    nbits = i.bit_length() + int(not unsigned)
+    bs.hex = int(ceil(max(nbits, 1) / 8.0)) * 2 * "0"
+    pref = ["", "u"][unsigned]
+    setattr(bs, pref + ("intle" if order == "little" else "intbe"), i)
     return bs.bytes
 
 
@@ -160,7 +169,7 @@ def str2bin(chars_string, nbits_in=8, nbits_out=8):
     s = chars_string
     __validation(s=s, n_b=nbits_in, n_B=nbits_out)
     bs = Bits(nbits=nbits_in)
-    bs.bytes = b(chars_string)
+    bs.bytes = b(s)
     bs.nbits = nbits_out
     return bs.bin
 
@@ -176,11 +185,11 @@ def str2int(chars_string, order="big", unsigned=True):
     """ Convert a string of 8-bits characters to a big integer or, if using
          blocks of nchars characters, a list of big integers. """
     s = chars_string
-    __validation(s=s, o=order)
-    i = 0
-    for j, c in enumerate(s if order == "little" else s[::-1]):
-        i += ord(c) * (2 ** (8 * j))
-    return i
+    __validation(s=s, o=order, u=unsigned)
+    bs = Bits()
+    bs.bytes = b(s)
+    pref = ["", "u"][unsigned]
+    return getattr(bs, pref + ("intle" if order == "little" else "intbe"))
 
 
 # make conversion functions compatible with input/output strings/bytes
@@ -190,8 +199,7 @@ def __fix_inout_formats(f):
         a0 = args[0]
         a0 = ensure_str(a0) if is_str(a0) or is_bytes(a0) else a0
         r = f(a0, *args[1:], **kwargs)
-        return r if is_int(r) else ensure_binary(r) if is_bytes(args[0]) else \
-               ensure_str(r)
+        return r if is_int(r) else b(r) if is_bytes(args[0]) else ensure_str(r)
     return _wrapper
 
 

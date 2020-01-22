@@ -49,6 +49,7 @@ class TestHelpersDataTransform(TestCase):
         self.assertEqual(bin2ints(BIN), [INT])
         self.assertEqual(bin2ints(BIN, n_chunks=2), [29797, 29556])
         self.assertEqual(bins2int(BIN[:16], BIN[16:]), INT)
+        self.assertRaises(ValueError, bin2int, BIN, unsigned="bad")
         # bin -> str
         self.assertEqual(bin2str("100000"), " ")
         self.assertEqual(bin2str(BIN), STR)
