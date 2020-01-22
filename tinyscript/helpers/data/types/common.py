@@ -2,6 +2,8 @@
 """Common checking functions and argument types.
 
 """
+import types
+
 from .strings import _str2list
 
 
@@ -14,16 +16,23 @@ except NameError:
 
 
 # various object type check functions
-__all__ += ["is_dict", "is_function", "is_int", "is_lambda", "is_list",
+__all__ += ["is_coroutine", "is_dict", "is_frame", "is_function",
+            "is_generator", "is_int", "is_lambda", "is_list", "is_method",
             "is_neg_int", "is_pos_int"]
-is_int      = lambda i: isinstance(i, (int, long))
-is_pos_int  = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
-is_neg_int  = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
-is_dict     = lambda d: isinstance(d, dict)
-is_list     = lambda l: isinstance(l, (list, set, tuple))
-is_lambda   = lambda l: isinstance(l, type(lambda:0)) and \
-                        l.__name__ == (lambda:0).__name__
-is_function = lambda f: hasattr(f, "__call__")
+is_int       = lambda i: isinstance(i, (int, long))
+is_pos_int   = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
+is_neg_int   = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
+is_dict      = lambda d: isinstance(d, dict)
+is_list      = lambda l: isinstance(l, (list, set, tuple))
+
+is_coroutine = lambda c: isinstance(c, types.CoroutineType)
+is_frame     = lambda f: isinstance(f, types.FrameType)
+is_function  = lambda f, builtin=False: isinstance(f, getattr(types,
+                                     ["", "Builtin"][builtin] + "FunctionType"))
+is_generator = lambda g: isinstance(g, types.GeneratorType)
+is_lambda    = lambda l: isinstance(l, types.LambdaType)
+is_method    = lambda m, builtin=False: isinstance(m, getattr(types,
+                                       ["", "Builtin"][builtin] + "MethodType"))
 
 
 # -------------------- DATA FORMAT ARGUMENT TYPES --------------------

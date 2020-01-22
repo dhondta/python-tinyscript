@@ -4,7 +4,7 @@
 """
 import ast
 import re
-from six import string_types
+from six import binary_type, string_types
 from string import ascii_lowercase as LC, ascii_uppercase as UC, \
                    ascii_letters as letters, digits, printable, punctuation
 
@@ -45,9 +45,10 @@ def _is_from_alph(s, a, t):
 
 
 # various string-related check functions
-__all__ += ["is_str", "is_digits", "is_letters", "is_lowercase", "is_printable",
-            "is_punctuation", "is_uppercase"]
+__all__ += ["is_str", "is_bytes", "is_digits", "is_letters", "is_lowercase",
+            "is_printable", "is_punctuation", "is_uppercase"]
 is_str         = lambda s: isinstance(s, string_types)
+is_bytes       = lambda s: isinstance(s, binary_type)
 is_digits      = lambda s, t=1.0: _is_from_alph(s, digits, t)
 is_letters     = lambda s, t=1.0: _is_from_alph(s, letters, t)
 is_lowercase   = lambda s, t=1.0: _is_from_alph(s, LC, t)
