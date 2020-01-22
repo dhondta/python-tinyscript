@@ -129,14 +129,19 @@ Tinyscript provides some type checking functions, for common data:
 **Function** | **Description**
 :---: | :---:
 `ts.is_bin` | binary string (with or without `\W` separators)
+`ts.is_coroutine` | coroutine (relying on `types.CoroutineType`)
 `ts.is_dict` | dictionary
 `ts.is_dir` / `ts.is_folder` | dummy shortcuts to `os.path.isdir`
 `ts.is_file` | dummy shortcut to `os.path.isfile`
+`ts.is_frame` | frame object (relying on `types.FrameType`)
+`ts.is_function` | any function (relying on `types.FunctionType`)
+`ts.is_generator` | generator object (relying on `types.GeneratorType`)
 `ts.is_hex` | hexadecimal string (case insensitive)
 `ts.is_int` / `ts.is_pos_int` / `ts.is_neg_int` | integer (positive / negative)
-`ts.is_lambda` / `ts.is_function` | lazy or any function
+`ts.is_lambda` | lazy function (relying on `types.LambdaType`)
 `ts.is_list` | list, tuple, set
 `ts.is_long_opt` | for an argument with the "`--option`" format
+`ts.is_method` | method of an object (relying on `types.MethodType`)
 `ts.is_str` | str, bytes, unicode
 `ts.is_short_opt` | for an argument with the "`-o`" format
 
@@ -238,93 +243,98 @@ Tinyscript also provides a series of intuitive data transformation functions, fo
 
 ```
 [input_data_type_trigram]2[output_data_type_trigram]
+
+[input_data_type_trigram]s2[output_data_type_trigram]
+
+[input_data_type_trigram]2[output_data_type_trigram]s
 ```
 
 The currently supported functions are:
 
-- Binary <=> Integer: `ts.bin2int` / `ts.int2bin`
+- Binary <=> Integer: `ts.bin`(`s`)`2int`(`s`) / `ts.int`(`s`)`2bin`(`s`)
 
         :::python
-        >>> bin2int("0100")
+        >>> ts.bin2int("0100")
         4
-        >>> int2bin(4, 4)
+        >>> ts.int2bin(4, nbits_out=4)
         '0100'
-        >>> int2bin(4)
+        >>> ts.int2bin(4)
         '00000100'
-        >>> bin2int("00000100 00000000", n_groups=2, order="big")
+        >>> ts.bin2int("0000010000000000")
+        1024
+        >>> ts.bin2int("0000010000000000", order="little")
         4
-
-        >>> int2bin(1024, sep=" ")
-        '00000100 00000000'
-        >>> int2bin(1024, n_groups=2, sep=" ", order="big")
-        '00000000 00000100'
-        >>> bin2int("0100 0000")
-        1024
-        >>> bin2int("00000100 00000000")
-        1024
-        >>> bin2int("0000010000000000", order="big")
-        1024
-        >>> bin2int("00000000 00000100", n_groups=2, order="big")
-        1024
-
-- Binary <=> Hexadecimal: `ts.bin2hex` / `ts.hex2bin`
-
-        :::python
-        >>> hex2bin("deadbeef", sep=" ")
-        '11011110 10101101 10111110 11101111'
-        >>> bin2hex("11011110 10101101 10111110 11101111")
-        'deadbeef'
-
-- Binary <=> String: `ts.bin2str` / `ts.str2bin`
-
-        :::python
-        >>> str2bin("test")
+        >>> ts.bins2int("00000000", "00000100")
+        4
+        >>> ts.int2bin(1024)
+        '0000010000000000'
+        >>> ts.int2bin(1024, order="little")
+        '0000000000000100'
+        >>> ts.int2bins(1024, order="little", n_chunks=2)
+        ['00000000', '00000100']
+        >>> ts.ints2bin(29797, 29556)
         '01110100011001010111001101110100'
-        >>> str2bin("test", sep=" ")
-        '01110100 01100101 01110011 01110100'
 
-        >>> str2bin("test", 16, sep=" ")
-        '0000000001110100 0000000001100101 0000000001110011 0000000001110100'
-        >>> bin2str('1110100 1100101 1110011 1110100')
-        'test'
-
-- Integer <=> Hexadecimal: `ts.int2hex` / `ts.hex2int`
+- Binary <=> Hexadecimal: `ts.bin`(`s`)`2hex`(`s`) / `ts.hex`(`s`)`2bin`(`s`)
 
         :::python
-        >>> hex2int("deadbeef")
-        3735928559
-        >>> int2hex(3735928559)
+        >>> ts.hex2bin("deadbeef")
+        '11011110101011011011111011101111'
+        >>> ts.hex2bins("deadbeef", len_in=2)
+        ['11011110', '10101101', '10111110', '11101111']
+        >>> ts.bin2hex("11011110101011011011111011101111")
+        'deadbeef'
+        >>> ts.hexs2bin("dead", "beef")
+        '11011110101011011011111011101111'
+        >>> ts.bins2hex("11011110", "10101101", "10111110", "11101111")
         'deadbeef'
 
-        >>> int2hex(3735928559, 8)
-        '00000000deadbeef'
-        >>> hex2int("00000000deadbeef")
-        3735928559
-
-- Integer <=> String: `ts.int2str` / `ts.str2int`
+- Binary <=> String: `ts.bin`(`s`)`2str`(`s`) / `ts.str`(`s`)`2bin`(`s`)
 
         :::python
-        >>> str2int("test")
-        1952805748
-        >>> int2str(1952805748)
+        >>> ts.str2bin("test")
+        '01110100011001010111001101110100'
+        >>> ts.str2bin("test", nbits_out=16)
+        '0000000001110100000000000110010100000000011100110000000001110100'
+        >>> ts.bin2str('01110100011001010111001101110100')
         'test'
 
-        >>> str2int("test string")
-        140714483833450346658229863
-        >>> int2str(140714483833450346658229863)
-        'test string'
-
-        >>> str2int("test string", 8)
-        [8387236823645254770, 6909543]
-        >>> int2str(8387236823645254770, 6909543)
-        'test string'
-
-- Hexadecimal <=> String: `ts.hex2str` / `ts.str2hex`
+- Integer <=> Hexadecimal: `ts.int`(`s`)`2hex`(`s`) / `ts.hex`(`s`)`2int`(`s`)
 
         :::python
-        >>> str2hex("test string")
+        >>> ts.hex2int("deadbeef")
+        -559038737
+        >>> ts.int2hex(3735928559)
+        'deadbeef'
+        >>> ts.int2hex(3735928559, 8)
+        '00000000deadbeef'
+        >>> ts.hex2int("00000000deadbeef")
+        3735928559
+
+- Integer <=> String: `ts.int`(`s`)`2str`(`s`) / `ts.str`(`s`)`2int`(`s`)
+
+        :::python
+        >>> ts.str2int("test")
+        1952805748
+        >>> ts.int2str(1952805748)
+        'test'
+        >>> ts.ints2str(29797, 29556)
+        'test'
+        >>> ts.str2int("test string")
+        140714483833450346658229863
+        >>> ts.int2str(140714483833450346658229863)
+        'test string'
+        >>> ts.str2int("test string", 8)
+        [8387236823645254770, 6909543]
+        >>> ts.int2str(8387236823645254770, 6909543)
+        'test string'
+
+- Hexadecimal <=> String: `ts.hex`(`s`)`2str`(`s`) / `ts.str`(`s`)`2hex`(`s`)
+
+        :::python
+        >>> ts.str2hex("test string")
         '7465737420737472696e67'
-        >>> hex2str("7465737420737472696e67")
+        >>> ts.hex2str("7465737420737472696e67")
         'test string'
 
 -----
