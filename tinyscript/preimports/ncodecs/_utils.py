@@ -1,9 +1,10 @@
 # -*- coding: UTF-8 -*-
 import codecs
 import re
+import sys
 import types
 from functools import wraps
-from six import b, binary_type, ensure_str, string_types
+from six import b, binary_type, string_types, text_type
 
 
 __all__ = ["b", "codecs", "ensure_str", "fix_inout_formats"]
@@ -13,22 +14,6 @@ isb = lambda s: isinstance(s, binary_type)
 iss = lambda s: isinstance(s, string_types)
 
 fix = lambda x, ref: b(x) if isb(ref) else ensure_str(x) if iss(ref) else x
-
-
-# make conversion functions compatible with input/output strings/bytes
-def fix_inout_formats(f):
-    """
-    This decorator ensures that the first output of f will have the same text
-     format as the first input (str or bytes).
-    """
-    @wraps(f)
-    def _wrapper(*args, **kwargs):
-        a0 = args[0]
-        a0 = ensure_str(a0) if iss(a0) or isb(a0) else a0
-        r = f(a0, *args[1:], **kwargs)
-        return (fix(r[0], args[0]), ) + r[1:] if isinstance(r, (tuple, list)) \
-               else fix(r, args[0])
-    return _wrapper
 
 
 def add_codec(ename, encode=None, decode=None, pattern=None, text_only=False):
@@ -116,6 +101,35 @@ def add_codec(ename, encode=None, decode=None, pattern=None, text_only=False):
             streamreader=streamreader,
         )
     codecs.register(getregentry)
-
-
 codecs.add_codec = add_codec
+
+
+def ensure_str(s, encoding='utf-8', errors='strict'):
+    """
+    Similar to six.ensure_str. Adapted here to avoid messing up with six version
+     errors.
+    """
+    if sys.version[0] == "2" and isinstance(s, text_type):
+        return s.encode(encoding, errors)
+    elif sys.version[0] == "3" and isinstance(s, binary_type):
+        try:
+            return s.decode(encoding, errors)
+        except:
+            return s.decode("latin-1")
+    return s
+
+
+# make conversion functions compatible with input/output strings/bytes
+def fix_inout_formats(f):
+    """
+    This decorator ensures that the first output of f will have the same text
+     format as the first input (str or bytes).
+    """
+    @wraps(f)
+    def _wrapper(*args, **kwargs):
+        a0 = args[0]
+        a0 = ensure_str(a0) if iss(a0) or isb(a0) else a0
+        r = f(a0, *args[1:], **kwargs)
+        return (fix(r[0], args[0]), ) + r[1:] if isinstance(r, (tuple, list)) \
+               else fix(r, args[0])
+    return _wrapper
