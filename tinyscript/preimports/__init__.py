@@ -13,6 +13,7 @@ except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
 from .codep import code
 from .hash import hashlib
 from .log import logging
+from .ncodecs import codecs
 from .venv import virtualenv, PipPackage, VirtualEnv
 
 
@@ -23,6 +24,7 @@ __imports__ = {
     'bad': [],
     'enhanced': [
         "code",
+        "codecs",
         "hashlib",
         "logging",
         "virtualenv",
@@ -32,7 +34,6 @@ __imports__ = {
         "ast",
         "base64",
         "binascii",
-        "codecs",
         "collections",
         "configparser",
         "ctypes",
