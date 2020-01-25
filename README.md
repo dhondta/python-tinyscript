@@ -25,7 +25,9 @@ This library is aimed to provide useful features and to shorten required lines o
 - [Malicious Macro Tester](https://github.com/dhondta/malicious-macro-tester) (malicious VB macro detection)
 - [Paddinganograph](https://gist.github.com/dhondta/90a07d9d106775b0cd29bb51ffe15954) (base32/64 padding-based steganography)
 - [Solitaire Cipher](https://gist.github.com/dhondta/1858f406fc55e5e5d440ff26432ad0a4) (encryption)
+- [StegoLSB](https://gist.github.com/dhondta/d2151c82dcd9a610a7380df1c6a0272c) (Least Significant Bit)
 - [StegoPIT](https://gist.github.com/dhondta/30abb35bb8ee86109d17437b11a1477a) (Pixel Indicator Technique)
+- [StegoPVD](https://gist.github.com/dhondta/feaf4f5fb3ed8d1eb7515abe8cde4880) (Pixel Value Differencing)
 - [STIX Report Generator](https://gist.github.com/dhondta/ca5fb748957b1ec6f13418ac41c94d5b)
 - [WLF (Word List Filter)](https://gist.github.com/dhondta/82a7919f8aafc1393c37c2d0f06b77e8)
 
