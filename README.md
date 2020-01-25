@@ -24,7 +24,7 @@ This library is aimed to provide useful features and to shorten required lines o
 - [DroneSploit](https://github.com/dhondta/dronesploit) (startup script)
 - [Malicious Macro Tester](https://github.com/dhondta/malicious-macro-tester) (malicious VB macro detection)
 - [Paddinganograph](https://gist.github.com/dhondta/90a07d9d106775b0cd29bb51ffe15954) (base32/64 padding-based steganography)
-- [Solitaire Cipher](https://github.com/dhondta/solitaire-cipher) (encryption)
+- [Solitaire Cipher](https://gist.github.com/dhondta/1858f406fc55e5e5d440ff26432ad0a4) (encryption)
 - [StegoPIT](https://gist.github.com/dhondta/30abb35bb8ee86109d17437b11a1477a) (Pixel Indicator Technique)
 - [STIX Report Generator](https://gist.github.com/dhondta/ca5fb748957b1ec6f13418ac41c94d5b)
 - [WLF (Word List Filter)](https://gist.github.com/dhondta/82a7919f8aafc1393c37c2d0f06b77e8)
