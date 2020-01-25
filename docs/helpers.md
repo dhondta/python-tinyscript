@@ -56,6 +56,7 @@ It also provides some other utility functions:
 :---: | :---:
 `ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
+`ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
 `ts.get_terminal_size` | cross-platform terminal size function
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
@@ -64,9 +65,9 @@ It also provides some other utility functions:
 `ts.strings` | generator for yielding strings with a minimal length and characters in a given charset from a string buffer
 `ts.strings_from_file` | same as `ts.strings` but yielding strings from a file
 `ts.timeout` | decorator for applying a timeout to a function
-`ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `ts.Timeout` | context manager for applying a timeout to a code block
 `ts.TimeoutError` | custom exception for handling a timeout (as it is natively available in Python 3 but not in Python 2)
+`ts.xor` | repeated XOR function, also allowing to apply an ordinal offset on XORed characters
 
 -----
 
@@ -142,6 +143,7 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_list` | list, tuple, set
 `ts.is_long_opt` | for an argument with the "`--option`" format
 `ts.is_method` | method of an object (relying on `types.MethodType`)
+`ts.is_module` | module object (relying on `types.ModuleType`)
 `ts.is_str` | str, bytes, unicode
 `ts.is_short_opt` | for an argument with the "`-o`" format
 

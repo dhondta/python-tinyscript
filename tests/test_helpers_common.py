@@ -14,6 +14,7 @@ class TestHelpersCommon(TestCase):
                          ["a", "b", "aa", "ab", "ba", "bb"])
         self.assertEqual(list(bruteforce(2, "ab", repeat=False)),
                          ["a", "b", "ab", "ba"])
+        self.assertEqual(xor("this is a test", " "), "THIS\x00IS\x00A\x00TEST")
         self.assertIsNotNone(execute("id"))
         self.assertEqual(list(strings("this is a \x00 test")),
                          ["this is a ", " test"])

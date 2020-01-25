@@ -18,12 +18,16 @@ byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
 
 def b(s):
     """
-    Overload for six.b function, because the behavior of 'b' in Python2/3 is not
+    Similar to six.b function, because the behavior of 'b' in Python2/3 is not
      exactly the same. This makes 'b' behave in Python 3 like in Python 2.
     """
     if PYTHON3:
         try:
             return s.encode("latin-1")
+        except:
+            pass
+        try:
+            return s.encode("utf-8")
         except:
             pass
     return s

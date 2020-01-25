@@ -2,7 +2,7 @@
 """Common utility functions.
 
 """
-from itertools import permutations, product
+from itertools import cycle, permutations, product
 from six import string_types
 from string import printable
 from subprocess import Popen, PIPE
@@ -12,7 +12,23 @@ from .constants import PYTHON3
 
 
 __all__ = __features__ = ["bruteforce", "execute", "strings",
-                          "strings_from_file"]
+                          "strings_from_file", "xor"]
+
+
+def xor(str1, str2, offset=0):
+    """
+    Function for XORing two strings of different length. Either the first of the
+     second string can be longer than the other.
+
+    :param str1:   first string, with length L1
+    :param str2:   second string, with length L2
+    :param offset: ASCII offset to be applied on each resulting character
+    """
+    r = ""
+    for c1, c2 in zip(cycle(str1) if len(str1) < len(str2) else str1,
+                      cycle(str2) if len(str2) < len(str1) else str2):
+        r += chr(((ord(c1) ^ ord(c2)) + offset) % 256)
+    return r
 
 
 def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1,

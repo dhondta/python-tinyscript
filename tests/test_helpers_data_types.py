@@ -159,6 +159,9 @@ class TestHelpersDataTypes(TestCase):
         self.assertTrue(is_function(dummy_lambda))
         self.assertTrue(is_function(dummy_function))
         self.assertFalse(is_function("not_a_function"))
+        self.assertTrue(is_module(netaddr))
+        self.assertFalse(is_module(dummy_function))
+        self.assertFalse(is_module("not_a_module"))
     
     def test_data_format_check(self):
         self.assertTrue(is_bin("01000111"))
