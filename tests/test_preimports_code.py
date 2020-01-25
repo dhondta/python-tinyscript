@@ -23,6 +23,7 @@ def dummy3():
 
 class TestPreimportsCode(TestCase):
     def test_function_replacement(self):
+        self.assertRaises(ValueError, code.replace, code, "", "")
         # this will use patchy.replace
         code.replace(dummy1, "def dummy1(): return 1", "def dummy1(): return 42")
         self.assertEqual(dummy1(), 42)

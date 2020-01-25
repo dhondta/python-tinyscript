@@ -4,6 +4,7 @@
 """
 import code
 import patchy
+import types
 from collections import deque
 from functools import wraps
 from six import string_types
@@ -13,6 +14,7 @@ BLOCK_KW = ["class", "def", "elif", "else", "except", "finally", "for", "if",
             "try", "while", "with"]
 N_MODIF  = 3
 
+is_function  = lambda f: isinstance(f, types.FunctionType)
 
 code.patch   = patchy.patch
 code.unpatch = patchy.unpatch
@@ -101,6 +103,12 @@ def __sort_int_text_pairs(text, lst, item):
     return sorted(d.items(), reverse=True)
 
 
+def __validate(f):
+    """ Simple validation for validating that the input is a function. """
+    if not is_function(f):
+        raise ValueError("{} is not a function".format(f))
+
+
 def _cache(f):
     """ Decorator for caching code changes locally inside the module. """
     @wraps(f)
@@ -133,6 +141,7 @@ def code_add_block(func, index, block, after=False):
     :param after: add line after the given index, not before
     :return:      whether code was modified or not
     """
+    __validate(func)
     # make the new code
     old_code = code_source(func)
     new_code = old_code.splitlines()
@@ -149,6 +158,7 @@ def code_add_line(func, index, addition, **kwargs):
     """
     Alias for applying a single-line addition.
     """
+    __validate(func)
     return code_add_lines(func, index, addition, **kwargs)
 code.add_line = code.insert_line = code_add_line
 
@@ -164,6 +174,7 @@ def code_add_lines(func, *additions, **kwargs):
     :param after:     add line after the given index, not before
     :return:          whether code was modified or not
     """
+    __validate(func)
     after = kwargs.pop("after", False)
     old_code = code_source(func)
     new_code = old_code.splitlines()
@@ -185,6 +196,7 @@ def code_delete_line(func, index):
     """
     Alias for applying a single-line removal.
     """
+    __validate(func)
     return code_delete_lines(func, index)
 code.delete_line = code.remove_line = code_delete_line
 
@@ -198,6 +210,7 @@ def code_delete_lines(func, *indices):
     :param indices: list of line indices for removal
     :return:        whether code was modified or not
     """
+    __validate(func)
     replacements = []
     for i in indices:
         replacements.extend([i, None])
@@ -215,6 +228,7 @@ def code_replace(func, *replacements):
     :param replacements: list of replacements - pairs (str_to_repl, replac)
     :return:             whether code was modified or not
     """
+    __validate(func)
     try:
         patchy.replace(func, *replacements)
         old_code, new_code = replacements
@@ -237,6 +251,7 @@ def code_replace_line(func, index, replacement):
     """
     Alias for applying a single-line replacement.
     """
+    __validate(func)
     return code_replace_lines(func, index, replacement)
 code.replace_line = code_replace_line
 
@@ -251,6 +266,7 @@ def code_replace_lines(func, *replacements):
     :param replacements: list of replacements - pairs (line_index, replac)
     :return:             whether code was modified or not
     """
+    __validate(func)
     r = replacements
     old_code = code_source(func)
     new_code = old_code.splitlines()
@@ -272,6 +288,7 @@ def code_restore(func):
     :param func: function object to be restored
     :return:     True if function's code was restored
     """
+    __validate(func)
     old_code = __orig_code.get(func)
     if old_code is not None:
         patchy.api._set_source(func, patchy.api.dedent(old_code))
@@ -288,6 +305,7 @@ def code_revert(func):
     :param func: function object to be reverted to last version
     :return:     True if function's code was reverted to last version
     """
+    __validate(func)
     try:
         old_code = __old_code.get(func).pop()
         if old_code is not None:
@@ -305,6 +323,7 @@ def code_source(func):
     :param func: function object
     :return:     function's source code
     """
+    __validate(func)
     return patchy.api._get_source(func)
 code.source = code_source
 
