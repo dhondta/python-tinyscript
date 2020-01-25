@@ -21,4 +21,10 @@ from .preimports import __features__ as _preimports
 from .warnings import __features__ as _warnings
 
 
+ts.__author__    = __author__
+ts.__copyright__ = __copyright__
+ts.__license__   = __license__
+ts.__version__   = __version__
+
+
 __all__ = _handlers + _helpers + _loglib + _parser + _preimports + _warnings
