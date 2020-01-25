@@ -2,12 +2,12 @@
 """Module for enhancing codecs preimport.
 
 """
-import codecs
 import os
+
+from ._utils import codecs
 
 
 for f in os.listdir(os.path.dirname(__file__)):
     if not f.endswith(".py") or f == "__init__.py":
         continue
-    mname = f[:-3]
-    __import__(mname, globals(), locals(), [], 1)
+    __import__(f[:-3], globals(), locals(), [], 1)

@@ -1,14 +1,21 @@
 # -*- coding: UTF-8 -*-
+import _codecs
 import codecs
 import re
 import sys
 import types
 from functools import wraps
-from six import b, binary_type, string_types, text_type
+from six import binary_type, string_types, text_type
 
 
-__all__ = ["b", "codecs", "ensure_str", "fix_inout_formats"]
+__all__ = ["b", "codecs", "ensure_str", "fix_inout_formats", "PY3"]
 
+PY3 = sys.version[0] == "3"
+
+orig_lookup                = _codecs.lookup
+orig_register              = _codecs.register
+_ts_codecs_registry        = []
+_ts_codecs_registry_hashes = []
 
 isb = lambda s: isinstance(s, binary_type)
 iss = lambda s: isinstance(s, string_types)
@@ -16,17 +23,17 @@ iss = lambda s: isinstance(s, string_types)
 fix = lambda x, ref: b(x) if isb(ref) else ensure_str(x) if iss(ref) else x
 
 
-def add_codec(ename, encode=None, decode=None, pattern=None, text_only=False):
+def add_codec(ename, encode=None, decode=None, pattern=None, text=True):
     """
     This adds a new codec to the codecs module setting its encode and/or decode
      functions, eventually dynamically naming the encoding with a pattern and
-     with file handling (if text_only is False).
+     with file handling (if text is True).
     
-    :param ename:     encoding name
-    :param encode:    encoding function or None
-    :param decode:    decoding function or None
-    :param pattern:   pattern for dynamically naming the encoding
-    :param text_only: whether to consider file handling with the codec
+    :param ename:   encoding name
+    :param encode:  encoding function or None
+    :param decode:  decoding function or None
+    :param pattern: pattern for dynamically naming the encoding
+    :param text:    specify whether the codec is a text encoding
     """
     if encode and not isinstance(encode, types.FunctionType):
         raise ValueError("Bad encode function")
@@ -73,14 +80,17 @@ def add_codec(ename, encode=None, decode=None, pattern=None, text_only=False):
                 g = m.group(1)
                 fenc = fenc(g) if fenc else fenc
                 fdec = fdec(g) if fdec else fdec
+            except AttributeError:
+                return  # this occurs when m is None, meaning no match
             except IndexError:
-                pass
+                pass    # this occurs while m is not None, but possibly no
+                        #  capture group that gives at least 1 group index
         if fenc:
             fenc = fix_inout_formats(fenc)
         if fdec:
             fdec = fix_inout_formats(fdec)
         
-        if not text_only:
+        if text:
             
             class StreamWriter(Codec, codecs.StreamWriter):
                 charbuffertype = bytes
@@ -90,7 +100,7 @@ def add_codec(ename, encode=None, decode=None, pattern=None, text_only=False):
             
             streamwriter = StreamWriter
             streamreader = StreamReader
-
+        
         return codecs.CodecInfo(
             name=name,
             encode=Codec().encode,
@@ -99,9 +109,26 @@ def add_codec(ename, encode=None, decode=None, pattern=None, text_only=False):
             incrementaldecoder=incrementaldecoder,
             streamwriter=streamwriter,
             streamreader=streamreader,
+            _is_text_encoding=text,
         )
     codecs.register(getregentry)
 codecs.add_codec = add_codec
+
+
+def b(s):
+    """
+    Non-crashing bytes conversion function.
+    """
+    if PY3:
+        try:
+            return s.encode("latin-1")
+        except:
+            pass
+        try:
+            return s.encode("utf-8")
+        except:
+            pass
+    return s
 
 
 def ensure_str(s, encoding='utf-8', errors='strict'):
@@ -109,9 +136,9 @@ def ensure_str(s, encoding='utf-8', errors='strict'):
     Similar to six.ensure_str. Adapted here to avoid messing up with six version
      errors.
     """
-    if sys.version[0] == "2" and isinstance(s, text_type):
+    if not PY3 and isinstance(s, text_type):
         return s.encode(encoding, errors)
-    elif sys.version[0] == "3" and isinstance(s, binary_type):
+    elif PY3 and isinstance(s, binary_type):
         try:
             return s.decode(encoding, errors)
         except:
@@ -133,3 +160,48 @@ def fix_inout_formats(f):
         return (fix(r[0], args[0]), ) + r[1:] if isinstance(r, (tuple, list)) \
                else fix(r, args[0])
     return _wrapper
+
+
+# codecs module hooked functions
+def decode(obj, encoding='utf-8', errors='strict'):
+    """
+    Custom decode function relying on the hooked lookup function.
+    """
+    codecinfo = lookup(encoding)
+    return codecinfo.decode(obj, errors)[0]
+codecs.decode = decode
+
+
+def encode(obj, encoding='utf-8', errors='strict'):
+    """
+    Custom encode function relying on the hooked lookup function.
+    """
+    codecinfo = lookup(encoding)
+    return codecinfo.encode(obj, errors)[0]
+codecs.encode = encode
+
+
+def lookup(encoding):
+    """
+    Hooked lookup function for searching first for codecs in the local registry
+     of this module.
+    """
+    for search in _ts_codecs_registry:
+        codecinfo = search(encoding)
+        if codecinfo is not None:
+            return codecinfo
+    return orig_lookup(encoding)
+codecs.lookup = lookup
+
+
+def register(search_function):
+    """
+    Hooked register function for registering new codecs in the local registry
+     of this module.
+    """
+    h = hash(search_function)
+    if h not in _ts_codecs_registry_hashes:
+        _ts_codecs_registry_hashes.append(h)
+        _ts_codecs_registry.append(search_function)
+    orig_register(search_function)
+codecs.register = register

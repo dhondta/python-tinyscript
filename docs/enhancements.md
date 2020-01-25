@@ -22,8 +22,14 @@ A context manager is also available:
 
 ## `codecs`
 
-`codecs` has multiple additional encodings, among others:
+`codecs` has multiple new encodings in addition to [the native ones](https://docs.python.org/3.8/library/codecs.html#standard-encodings), among others:
 
+- `ascii85`: bidirectional conversion of ascii85 (Python3 only)
+- `base16`: bidirectional conversion of base16
+- `base32`: bidirectional conversion of base32
+- `base64`: bidirectional conversion of base64 (overwrites the native base64_codec to also support en/decoding from str)
+- `base85`: bidirectional conversion of base85 (Python3 only)
+- `base100`: bidirectional conversion of base100/emoji's (Python3 only)
 - `leetspeak`: bidirectional conversion between leetspeak and normal text
 - `markdown`: unidirectional conversion of Markdown to HTML using ´markdown2.markdown`
 - `morse`: bidirectional conversion between morse and normal text

@@ -1,4 +1,12 @@
 # -*- coding: UTF-8 -*-
+"""ROT-N Codec - rotN content encoding.
+
+This codec:
+- en/decodes strings from str to str
+- en/decodes strings from bytes to bytes
+- decodes file content to str (read)
+- encodes file content from str to bytes (write)
+"""
 from string import ascii_lowercase as LC, ascii_uppercase as UC
 try:                 # Python 2
     from string import maketrans

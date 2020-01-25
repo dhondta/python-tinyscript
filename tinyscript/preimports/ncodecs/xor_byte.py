@@ -1,4 +1,12 @@
 # -*- coding: UTF-8 -*-
+"""XOR-N Codec - XOR-with-1-byte content encoding.
+
+This codec:
+- en/decodes strings from str to str
+- en/decodes strings from bytes to bytes
+- decodes file content to str (read)
+- encodes file content from str to bytes (write)
+"""
 from ._utils import *
 
 

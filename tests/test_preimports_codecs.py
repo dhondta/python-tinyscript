@@ -20,6 +20,62 @@ class TestPreimportsCodecs(TestCase):
         self.assertRaises(ValueError, codecs.add_codec, "test", "BAD")
         self.assertRaises(ValueError, codecs.add_codec, "test", f, "BAD")
     
+    def test_codec_ascii85(self):
+        if PYTHON3:
+            A85 = "FD,B0+DGm>@3BZ'F*%"
+            self.assertEqual(codecs.encode(STR, "ascii85"), A85)
+            self.assertEqual(codecs.encode(b(STR), "ascii85"), b(A85))
+            self.assertEqual(codecs.decode(A85, "ascii85"), STR)
+            self.assertEqual(codecs.decode(b(A85), "ascii85"), b(STR))
+    
+    def test_codec_barbie(self):
+        BRB = ["hstf tf i hafh", "sfhp hp t sips", "fpsu su h ftuf",
+               "pufq fq s phqp"]
+        self.assertRaises(LookupError, codecs.encode, STR, "barbie")
+        for i in range(1, 5):
+            self.assertEqual(codecs.encode(STR, "barbie{}".format(i)), BRB[i-1])
+        self.assertEqual(codecs.encode(b(STR), "barbie_1"), b(BRB[0]))
+        self.assertEqual(codecs.encode(b(STR), "barbie-2"), b(BRB[1]))
+        self.assertRaises(ValueError, codecs.encode, "\r", "barbie-2")
+        self.assertRaises(ValueError, codecs.decode, "\r", "barbie-4")
+        self.assertIsNotNone(codecs.encode("test\r", "barbie-3", "replace"))
+        self.assertIsNotNone(codecs.decode("test\r", "barbie-1", "replace"))
+        self.assertIsNotNone(codecs.encode("test\r", "barbie-3", "ignore"))
+        self.assertIsNotNone(codecs.decode("test\r", "barbie-1", "ignore"))
+        self.assertRaises(ValueError, codecs.encode, "\r", "barbie-2", "BAD")
+        self.assertRaises(ValueError, codecs.decode, "\r", "barbie-4", "BAD")
+    
+    def test_codec_base(self):
+        B16 = "7468697320697320612074657374"
+        self.assertEqual(codecs.encode(STR, "base16"), B16)
+        self.assertEqual(codecs.encode(b(STR), "base16"), b(B16))
+        self.assertEqual(codecs.decode(B16, "base16"), STR)
+        self.assertEqual(codecs.decode(b(B16), "base16"), b(STR))
+        B32 = "ORUGS4ZANFZSAYJAORSXG5A="
+        self.assertEqual(codecs.encode(STR, "base32"), B32)
+        self.assertEqual(codecs.encode(b(STR), "base32"), b(B32))
+        self.assertEqual(codecs.decode(B32, "base32"), STR)
+        self.assertEqual(codecs.decode(b(B32), "base32"), b(STR))
+        B64 = "dGhpcyBpcyBhIHRlc3Q="
+        self.assertEqual(codecs.encode(STR, "base64"), B64)
+        self.assertEqual(codecs.encode(b(STR), "base64"), b(B64))
+        self.assertEqual(codecs.decode(B64, "base64"), STR)
+        self.assertEqual(codecs.decode(b(B64), "base64"), b(STR))
+        if PYTHON3:
+            B85 = "bZBXFAZc?TVIXv6b94"
+            self.assertEqual(codecs.encode(STR, "base85"), B85)
+            self.assertEqual(codecs.encode(b(STR), "base85"), b(B85))
+            self.assertEqual(codecs.decode(B85, "base85"), STR)
+            self.assertEqual(codecs.decode(b(B85), "base85"), b(STR))
+            B100 = "\U0001f46b\U0001f45f\U0001f460\U0001f46a\U0001f417" \
+                   "\U0001f460\U0001f46a\U0001f417\U0001f458\U0001f417" \
+                   "\U0001f46b\U0001f45c\U0001f46a\U0001f46b"
+            self.assertEqual(codecs.encode(STR, "base100"), B100)
+            self.assertEqual(codecs.encode(b(STR), "base100"), b(B100))
+            self.assertEqual(codecs.decode(B100, "base100"), STR)
+            self.assertEqual(codecs.decode(b(B100), "base100"), b(STR))
+            self.assertRaises(ValueError, codecs.decode, b(B100)[1:], "base100")
+    
     def test_codec_leetspeak(self):
         LTS = "7H15 15 4 7357"
         TFILE = "test-codec-leetspeak.txt"

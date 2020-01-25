@@ -1,4 +1,11 @@
 # -*- coding: UTF-8 -*-
+"""Markdown Codec - markdown content conversion to HTML.
+
+This codec:
+- encodes strings from str to str
+- encodes strings from bytes to bytes
+- encodes file content from str to bytes (write)
+"""
 from markdown2 import markdown
 
 from ._utils import *

@@ -1,4 +1,12 @@
 # -*- coding: UTF-8 -*-
+"""Morse Codec - morse content encoding.
+
+This codec:
+- en/decodes strings from str to str
+- en/decodes strings from bytes to bytes
+- decodes file content to str (read)
+- encodes file content from str to bytes (write)
+"""
 from ._utils import *
 
 
@@ -30,12 +38,10 @@ class MorseError(ValueError):
 
 class MorseDecodeError(MorseError):
     pass
-codecs.MorseDecodeError = MorseDecodeError
 
 
 class MorseEncodeError(MorseError):
     pass
-codecs.MorseEncodeError = MorseEncodeError
 
 
 def morse_encode(text, errors="strict"):
@@ -45,9 +51,8 @@ def morse_encode(text, errors="strict"):
             r += TRANS[c] + " "
         except KeyError:
             if errors == "strict":
-                raise codecs.MorseEncodeError("'morse' codec can't encode "
-                                              "character '{}' in position {}"
-                                              .format(c, i))
+                raise MorseEncodeError("'morse' codec can't encode character "
+                                       "'{}' in position {}".format(c, i))
             elif errors == "replace":
                 r += REPLACE_CHAR + " "
             elif errors == "ignore":
@@ -64,9 +69,8 @@ def morse_decode(text, errors="strict"):
             r += BTRANS[c]
         except KeyError:
             if errors == "strict":
-                raise codecs.MorseDecodeError("'morse' codec can't decode "
-                                              "character '{}' in position {}"
-                                              .format(c, i))
+                raise MorseDecodeError("'morse' codec can't decode character "
+                                       "'{}' in position {}".format(c, i))
             elif errors == "replace":
                 r += REPLACE_CHAR
             elif errors == "ignore":

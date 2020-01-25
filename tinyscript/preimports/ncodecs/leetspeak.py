@@ -1,4 +1,12 @@
 # -*- coding: UTF-8 -*-
+"""Leetspeak Codec - leetspeak content encoding.
+
+This codec:
+- en/decodes strings from str to str
+- en/decodes strings from bytes to bytes
+- decodes file content to str (read)
+- encodes file content from str to bytes (write)
+"""
 try:                 # Python 2
     from string import maketrans
 except ImportError:  # Python 3
