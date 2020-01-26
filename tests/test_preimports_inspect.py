@@ -16,7 +16,7 @@ class TestPreimportsInspect(TestCase):
         self.assertEqual(m.__name__, "test_preimports_inspect")
         m = inspect.getmainmodule()
         self.assertTrue(is_module(m))
-        self.assertEqual(m.__name__, "__main__" if PYTHON3 else "pytest")
+        self.assertIn(m.__name__, ["__main__", "pytest"])
         self.assertIsNotNone(inspect.getmainframe())
         self.assertIn(('__name__', "__main__"),
                       inspect.getmainglobals().items())
