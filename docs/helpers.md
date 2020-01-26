@@ -130,20 +130,13 @@ Tinyscript provides some type checking functions, for common data:
 **Function** | **Description**
 :---: | :---:
 `ts.is_bin` | binary string (with or without `\W` separators)
-`ts.is_coroutine` | coroutine (relying on `types.CoroutineType`)
 `ts.is_dict` | dictionary
 `ts.is_dir` / `ts.is_folder` | dummy shortcuts to `os.path.isdir`
 `ts.is_file` | dummy shortcut to `os.path.isfile`
-`ts.is_frame` | frame object (relying on `types.FrameType`)
-`ts.is_function` | any function (relying on `types.FunctionType`)
-`ts.is_generator` | generator object (relying on `types.GeneratorType`)
 `ts.is_hex` | hexadecimal string (case insensitive)
 `ts.is_int` / `ts.is_pos_int` / `ts.is_neg_int` | integer (positive / negative)
-`ts.is_lambda` | lazy function (relying on `types.LambdaType`)
 `ts.is_list` | list, tuple, set
 `ts.is_long_opt` | for an argument with the "`--option`" format
-`ts.is_method` | method of an object (relying on `types.MethodType`)
-`ts.is_module` | module object (relying on `types.ModuleType`)
 `ts.is_str` | str, bytes, unicode
 `ts.is_short_opt` | for an argument with the "`-o`" format
 
@@ -161,6 +154,23 @@ For string-related data:
 !!! note "Character percentage threshold"
     
     These functions have all a `threshold` argument that defaults to `1.0`. It can be tuned to accept strings that are not fully consisting of the given alphabet.
+
+Also for various objects:
+
+**Function** | **Description**
+:---: | :---:
+`ts.is_class` | class definition (relying on `inspect.isclass`)
+`ts.is_coroutine` | coroutine (relying on `inspect.iscoroutine`)
+`ts.is_coroutinefunc` | coroutine function (relying on `inspect.iscoroutinefunction`)
+`ts.is_frame` | frame object (relying on `types.FrameType`)
+`ts.is_function` | any function (relying on `types.[Builtin]FunctionType`)
+`ts.is_generator` | generator object (relying on `inspect.isgenerator`)
+`ts.is_generatorfunc` | generator function (relying on `inspect.isgeneratorfunction`)
+`ts.is_instance` | instance of `object` or a specific class
+`ts.is_lambda` | lazy function (relying on `types.LambdaType`)
+`ts.is_method` | method of an object (relying on `types.[Builtin]MethodType`)
+`ts.is_module` | module object (relying on `types.ModuleType`)
+`ts.is_type` | type definition
 
 For hash-related data:
 

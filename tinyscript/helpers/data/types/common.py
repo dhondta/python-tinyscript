@@ -2,6 +2,7 @@
 """Common checking functions and argument types.
 
 """
+import inspect
 import types
 
 from .strings import _str2list
@@ -16,24 +17,30 @@ except NameError:
 
 
 # various object type check functions
-__all__ += ["is_coroutine", "is_dict", "is_frame", "is_function",
-            "is_generator", "is_int", "is_lambda", "is_list", "is_method",
-            "is_module", "is_neg_int", "is_pos_int"]
-is_int       = lambda i: isinstance(i, (int, long))
-is_pos_int   = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
-is_neg_int   = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
+__all__ += ["is_dict", "is_int", "is_list", "is_neg_int", "is_pos_int"]
 is_dict      = lambda d: isinstance(d, dict)
+is_int       = lambda i: isinstance(i, (int, long))
 is_list      = lambda l: isinstance(l, (list, set, tuple))
+is_neg_int   = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
+is_pos_int   = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
 
-is_coroutine = lambda c: isinstance(c, types.CoroutineType)
-is_frame     = lambda f: isinstance(f, types.FrameType)
-is_function  = lambda f, builtin=False: isinstance(f, getattr(types,
+__all__ += ["is_class", "is_coroutine", "is_coroutinefunc", "is_frame",
+            "is_function", "is_generator", "is_generatorfunc", "is_instance",
+            "is_lambda", "is_method", "is_module", "is_type"]
+is_class         = lambda c: inspect.isclass(c)
+is_coroutine     = lambda c: inspect.iscoroutine(c)
+is_coroutinefunc = lambda c: inspect.iscoroutinefunction(c)
+is_frame         = lambda f: isinstance(f, types.FrameType)
+is_function      = lambda f, builtin=False: isinstance(f, getattr(types,
                                      ["", "Builtin"][builtin] + "FunctionType"))
-is_generator = lambda g: isinstance(g, types.GeneratorType)
-is_lambda    = lambda l: isinstance(l, types.LambdaType)
-is_method    = lambda m, builtin=False: isinstance(m, getattr(types,
+is_generator     = lambda g: inspect.isgenerator(g)
+is_generatorfunc = lambda g: inspect.isgeneratorfunction(g)
+is_instance      = lambda i, cls=None: isinstance(i, cls or object)
+is_lambda        = lambda l: isinstance(l, types.LambdaType)
+is_method        = lambda m, builtin=False: isinstance(m, getattr(types,
                                        ["", "Builtin"][builtin] + "MethodType"))
-is_module    = lambda m: isinstance(m, types.ModuleType)
+is_module        = lambda m: isinstance(m, types.ModuleType)
+is_type          = lambda t: isinstance(t, type)
 
 
 # -------------------- DATA FORMAT ARGUMENT TYPES --------------------
