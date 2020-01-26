@@ -8,9 +8,48 @@ from tinyscript.preimports import logging
 from utils import *
 
 
-class TestPreimportsLogging(TestCase):    
-    def test_logging_improvements(self):
+@logging.bindLogger
+def f_with_logging(testcase, **kwargs):
+    logger.info("OK")
+    testcase.assertEqual(logger.name, "other")
+
+
+class LoggingInFunc(object):
+    def f1(self, testcase):
+        testcase.assertRaises(AttributeError, getattr, self, "logger")
+    
+    @logging.bindLogger
+    def f2(self, testcase, **kwargs):
+        logger.info("OK")
+        testcase.assertEqual(self.logger.name, "other")
+
+
+class TestPreimportsLogging(TestCase):
+    def test_log_levels(self):
+        self.assertRaises(ValueError, logging.addLogLevel, "info", "yellow", 10)
+        levelname = "test"
+        self.assertIsNone(logging.addLogLevel(levelname, "cyan", 1))
+        self.assertTrue(hasattr(logging, levelname.upper()))
+        l = logging.getLogger("test_logger")
+        self.assertTrue(hasattr(l, levelname))
+        self.assertIsNone(logging.delLogLevel(levelname))
+        self.assertRaises(ValueError, logging.delLogLevel, "does_not_exist")
+        self.assertFalse(hasattr(logging, levelname.upper()))
+        l = logging.getLogger("test_logger")
+        self.assertFalse(hasattr(l, levelname))
+        self.assertIsNone(logging.addLevelName(100, levelname))
+        self.assertIsNone(logging.delLevelName(100))
+        self.assertIsNone(logging.addLevelName(100, levelname))
+        self.assertIsNone(logging.delLevelName(levelname))
+    
+    def test_set_loggers(self):
         l = logging.getLogger("test")
-        l.addHandler(logging.StreamHandler())
-        logging.setLoggers(globals())
-        logging.setLogger(globals(), "test")
+        h = logging.StreamHandler()
+        l.addHandler(h)
+        self.assertIn(h, l.handlers)
+        self.assertIsNone(logging.setLoggers())
+        self.assertIsNone(logging.setLogger("test"))
+        self.assertNotIn(h, l.handlers)
+        f_with_logging(self, logger=logging.getLogger("other"))
+        LoggingInFunc().f1(self)
+        LoggingInFunc().f2(self, logger=logging.getLogger("other"))
