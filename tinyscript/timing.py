@@ -8,7 +8,6 @@ import time
 from errno import ETIME
 from os import strerror
 
-from .__info__ import __author__, __copyright__, __version__
 from .helpers.timeout import TimeoutError
 
 

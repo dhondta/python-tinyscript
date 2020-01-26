@@ -9,8 +9,6 @@ import sys
 from code import compile_command, interact as base_interact, \
                  InteractiveConsole as BaseInteractiveConsole
 
-from .__info__ import __author__, __copyright__, __version__
-
 
 __all__ = ["set_interact_items"]
 

@@ -8,7 +8,7 @@ omit =
 exclude_lines =
     pragma: no cover
     # Python2/3 incompatibilities if/elif/else blocks
-    (?m)(?P<indent>(?:\s+))if.*?PYTHON3.*?\:((?P=indent)\s+.*?)+(((?P=indent)else|elif).*?\:((?P=indent)\s+.*?)+)*$
+    (?m)(?P<indent>(?:\s+))if.*?PY(?:THON)?3.*?\:((?P=indent)\s+.*?)+(((?P=indent)else|elif).*?\:((?P=indent)\s+.*?)+)*$
     # __main__ logics
     if\s+__name__\s+==\s+(?P<q>(?:[\'\"]))__main__(?P=q)\s+:
     import ConfigParser
@@ -27,3 +27,4 @@ exclude_lines =
     # virtualenv package install
     elif line.startswith\(\"Successfully installed\"\):
     for top_level in __install
+    def __deprecated

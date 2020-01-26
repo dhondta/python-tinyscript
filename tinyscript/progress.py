@@ -5,8 +5,6 @@
 """
 from tqdm import tqdm, trange
 
-from .__info__ import __author__, __copyright__, __version__
-
 
 __all__ = ["set_progress_items"]
 

@@ -14,7 +14,6 @@ from inspect import getmembers, isfunction, ismethod
 from os.path import basename, splitext
 from six import string_types
 
-from .__info__ import __author__, __copyright__, __version__
 from .argreparse import *
 from .timing import set_time_items
 from .handlers import *
@@ -338,7 +337,8 @@ def initialize(sudo=False,
                 t.stats()
             glob['at_graceful_exit']()
         glob['at_exit']()
-        logging.shutdown()
+        from logging import shutdown
+        shutdown()
     atexit.register(__at_exit)
 
 

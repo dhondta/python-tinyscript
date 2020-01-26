@@ -7,8 +7,6 @@ import logging
 import sys
 from signal import signal, SIGINT, SIGTERM
 
-from .__info__ import __author__, __copyright__, __version__
-
 
 __features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate"]
 __all__ = ["_hooks"] + __features__
