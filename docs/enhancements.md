@@ -24,17 +24,19 @@ A context manager is also available:
 
 `codecs` has multiple new encodings in addition to [the native ones](https://docs.python.org/3.8/library/codecs.html#standard-encodings), among others:
 
-- `ascii85`: bidirectional conversion of ascii85 (Python3 only)
-- `base16`: bidirectional conversion of base16
-- `base32`: bidirectional conversion of base32
-- `base64`: bidirectional conversion of base64 (overwrites the native base64_codec to also support en/decoding from str)
-- `base85`: bidirectional conversion of base85 (Python3 only)
-- `base100`: bidirectional conversion of base100/emoji's (Python3 only)
-- `leetspeak`: bidirectional conversion between leetspeak and normal text
-- `markdown`: unidirectional conversion of Markdown to HTML using ´markdown2.markdown`
-- `morse`: bidirectional conversion between morse and normal text
-- `rot-N` (with N belonging to ]0, 26[): bidirectional conversion between ROT and normal text
-- `xor-N` (with N belonging to ]0, 256[): XORing of 1 byte with normal text
+**Codec** | **Description**
+:---: | :---:
+`ascii85` | bidirectional conversion of ascii85 (Python3 only)
+`base16` | bidirectional conversion of base16
+`base32` | bidirectional conversion of base32
+`base64` | bidirectional conversion of base64 (overwrites the native base64_codec to also support en/decoding from str)
+`base85` | bidirectional conversion of base85 (Python3 only)
+`base100` | bidirectional conversion of base100/emoji's (Python3 only)
+`leetspeak` | bidirectional conversion between leetspeak and normal text
+`markdown` | unidirectional conversion of Markdown to HTML using ´markdown2.markdown`
+`morse` | bidirectional conversion between morse and normal text
+`rot-N` | (with N belonging to ]0, 26[) bidirectional conversion between ROT and normal text
+`xor-N` | (with N belonging to ]0, 256[) XORing of 1 byte with normal text
 
 New codecs can be added easilly using the new function `codecs.add_codec`.
 
@@ -69,15 +71,40 @@ New codecs can be added easilly using the new function `codecs.add_codec`.
 
 -----
 
+## `inspect`
+    
+`inspect` has also a few additional functions:
+
+- `getcallermodule`: gets the module object of the caller function.
+- `getmainframe`: gets the frame where `__name__` is "`__main__`".
+- `getmainglobals`: gets the globals dictionary from the main frame.
+- `getmainmodule`: gets the module object from the main frame.
+- `getparentframe`: gets the first parent frame in the stack that has the given keyword-values.
+
+-----
+
+## `logging`
+
+`logging` is slightly enhanced with a few things:
+
+- `addLogLevel`: adds a custom log level (with a color).
+- `bindLogger`: decorates a function or method to provide a logger inside (`self.logger` for a method, `logger` for a function).
+- `delLevelName`: deletes a level from the registry by its name or integer.
+- `delLogLevel`: deletes a log level, that is, its complete definition.
+- `nullLogger`: a ready-to-use null logger.
+- `setLogger` / `setLoggers`: sets respectively one or multiple loggers using Tinyscript's logger configuration.
+
+-----
+
 ## `virtualenv`
 
 `virtualenv`, while imported with Tinyscript, is enhanced with convenient functions for setting up a virtual environment.
 
-- `activate(venv_dir)`: sets environment variables and globals as of `bin/activate_this.py` in order to activate the given environment
-- `deactivate()`: unsets the current environment variables and globals
-- `install(package, ...)`: uses Pip to install the given package ; "`...`" corresponds to the arguments and keyword-arguments that can be passed to Pip
-- `is_installed(package)`: indicates if the given package is installed in the environment
-- `list_packages()`: lists the packages installed in the environment
-- `setup(venv_dir, requirements)`: sets up a virtual environment to the given directory and installs the given requirements (either a requirements file or a list of packages)
-- `teardown(venv_dir)`: deactivates and removes the given environment ; if no directory given, the currently defined one is handled
+- `activate(venv_dir)`: sets environment variables and globals as of `bin/activate_this.py` in order to activate the given environment.
+- `deactivate()`: unsets the current environment variables and globals.
+- `install(package, ...)`: uses Pip to install the given package ; "`...`" corresponds to the arguments and keyword-arguments that can be passed to Pip.
+- `is_installed(package)`: indicates if the given package is installed in the environment.
+- `list_packages()`: lists the packages installed in the environment.
+- `setup(venv_dir, requirements)`: sets up a virtual environment to the given directory and installs the given requirements (either a requirements file or a list of packages).
+- `teardown(venv_dir)`: deactivates and removes the given environment ; if no directory given, the currently defined one is handled.
 
