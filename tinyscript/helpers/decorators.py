@@ -2,6 +2,7 @@
 """Decorators for classes and methods.
 
 """
+import logging
 from functools import update_wrapper, wraps
 from sys import exc_info
 try:  # PYTHON3
@@ -58,18 +59,16 @@ def try_or_die(message, exc=Exception, extra_info=""):
     """
     def _try_or_die(f):
         @wraps(f)
+        @logging.bindLogger
         def wrapper(*args, **kwargs):
             self = args[0] if len(args) > 0 and __is_method(f) else None
             try:
                 return f(*args, **kwargs)
             except exc as e:
-                # try to get a logger from the current instance or from the
-                #  global scope
-                l = getattr(self, "logger", None) or globals().get('logger')
-                if l is not None:
-                    l.critical(message)
-                    if extra_info != "" and hasattr(self, extra_info):
-                        l.info(getattr(self, extra_info))
+                l = logger if self is None else self.logger
+                l.critical(message)
+                if extra_info != "" and hasattr(self, extra_info):
+                    l.info(getattr(self, extra_info))
                 # if the decorated method is part of a context manager, close it
                 #  with its __exit__ method and continue
                 if hasattr(self, "__exit__"):
@@ -111,19 +110,17 @@ def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
     """
     def _try_and_warn(f):
         @wraps(f)
+        @logging.bindLogger
         def wrapper(*args, **kwargs):
             self = args[0] if len(args) > 0 and __is_method(f) else None
             try:
                 return f(*args, **kwargs)
             except exc:
-                # try to get a logger from the current instance or from the
-                #  global scope
-                l = getattr(self, "logger", None) or globals().get('logger')
-                if l is not None:
-                    l.warning(message)
-                    if trace:
-                        l.exception(exc)
-                    if extra_info != "" and hasattr(self, extra_info):
-                        l.info(getattr(self, extra_info))
+                l = logger if self is None else self.logger
+                l.warning(message)
+                if trace:
+                    l.exception(exc)
+                if extra_info != "" and hasattr(self, extra_info):
+                    l.info(getattr(self, extra_info))
         return wrapper
     return _try_and_warn
