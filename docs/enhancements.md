@@ -32,11 +32,13 @@ A context manager is also available:
 `base64` | bidirectional conversion of base64 (overwrites the native base64_codec to also support en/decoding from str)
 `base85` | bidirectional conversion of base85 (Python3 only)
 `base100` | bidirectional conversion of base100/emoji's (Python3 only)
-`leetspeak` | bidirectional conversion between leetspeak and normal text
+`dna` | bidirectional conversion between DNA and text
+`leetspeak` | bidirectional conversion between leetspeak and text
 `markdown` | unidirectional conversion of Markdown to HTML using ´markdown2.markdown`
-`morse` | bidirectional conversion between morse and normal text
-`rot-N` | (with N belonging to ]0, 26[) bidirectional conversion between ROT and normal text
-`xor-N` | (with N belonging to ]0, 256[) XORing of 1 byte with normal text
+`morse` | bidirectional conversion between morse and text
+`nokia3310` | bidirectional conversion between Nokia 3310 keystrokes and text
+`rot-N` | (with N belonging to ]0, 26[) bidirectional conversion between ROT and text
+`xor-N` | (with N belonging to ]0, 256[) XORing of 1 byte with text
 
 New codecs can be added easilly using the new function `codecs.add_codec`.
 

@@ -8,7 +8,7 @@ from functools import wraps
 from six import binary_type, string_types, text_type
 
 
-__all__ = ["b", "codecs", "ensure_str", "fix_inout_formats", "PY3"]
+__all__ = ["b", "codecs", "ensure_str", "fix_inout_formats", "re", "PY3"]
 
 PY3 = sys.version[0] == "3"
 

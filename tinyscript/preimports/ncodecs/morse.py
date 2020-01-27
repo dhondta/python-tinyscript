@@ -10,7 +10,7 @@ This codec:
 from ._utils import *
 
 
-TRANS = {
+ENCMAP = {
     # letters
     'a': ".-", 'b': "-...", 'c': "-.-.", 'd': "-..", 'e': ".", 'f': "..-.",
     'g': "--.", 'h': "....",  'i': "..", 'j': ".---", 'k': "-.-", 'l': ".-..",
@@ -28,7 +28,7 @@ TRANS = {
     # word separator
     ' ' : "/",
 }
-BTRANS = {v: k for k, v in TRANS.items()}
+DECMAP = {v: k for k, v in ENCMAP.items()}
 REPLACE_CHAR = "#"
 
 
@@ -48,7 +48,7 @@ def morse_encode(text, errors="strict"):
     r = ""
     for i, c in enumerate(ensure_str(text)):
         try:
-            r += TRANS[c] + " "
+            r += ENCMAP[c] + " "
         except KeyError:
             if errors == "strict":
                 raise MorseEncodeError("'morse' codec can't encode character "
@@ -66,7 +66,7 @@ def morse_decode(text, errors="strict"):
     r = ""
     for i, c in enumerate(ensure_str(text).split()):
         try:
-            r += BTRANS[c]
+            r += DECMAP[c]
         except KeyError:
             if errors == "strict":
                 raise MorseDecodeError("'morse' codec can't decode character "

@@ -76,6 +76,18 @@ class TestPreimportsCodecs(TestCase):
             self.assertEqual(codecs.decode(b(B100), "base100"), b(STR))
             self.assertRaises(ValueError, codecs.decode, b(B100)[1:], "base100")
     
+    def test_codec_dna(self):
+        DNA = "CTCACGGACGGCCTATAGAACGGCCTATAGAACGACAGAACTCACGCCCTATCTCA"
+        self.assertEqual(codecs.encode(STR, "dna"), DNA)
+        self.assertEqual(codecs.encode(b(STR), "dna"), b(DNA))
+        self.assertEqual(codecs.decode(DNA, "dna"), STR)
+        self.assertEqual(codecs.decode(b(DNA), "dna"), b(STR))
+        self.assertRaises(ValueError, codecs.decode, "ABCD", "dna")
+        self.assertEqual(codecs.decode("ABCD", "dna", errors="replace"),
+                         "[00??01??]")
+        self.assertEqual(codecs.decode("ABCD", "dna", errors="ignore"), "\x01")
+        self.assertRaises(ValueError, codecs.decode, "B", "dna", errors="BAD")
+    
     def test_codec_leetspeak(self):
         LTS = "7H15 15 4 7357"
         TFILE = "test-codec-leetspeak.txt"
@@ -151,6 +163,20 @@ class TestPreimportsCodecs(TestCase):
             s = f.read().strip()
         self.assertEqual(STR, ensure_str(s))
         remove(TFILE)
+    
+    def test_codec_nokia3310(self):
+        NOK = "8-44-444-7777-0-444-7777-0-2-0-8-33-7777-8"
+        self.assertEqual(codecs.encode(STR, "nokia3310"), NOK)
+        self.assertEqual(codecs.encode(STR, "nokia-3310"), NOK)
+        self.assertEqual(codecs.encode(STR, "nokia_3310"), NOK)
+        self.assertEqual(codecs.encode(b(STR), "nokia3310"), b(NOK))
+        self.assertEqual(codecs.decode(NOK, "nokia3310"), STR)
+        self.assertEqual(codecs.decode(b(NOK), "nokia3310"), b(STR))
+        self.assertRaises(ValueError, codecs.decode, "ABCD", "nokia3310")
+        self.assertEqual(codecs.decode("A", "nokia3310", errors="replace"), "?")
+        self.assertEqual(codecs.decode("A", "nokia3310", errors="ignore"), "")
+        self.assertRaises(ValueError, codecs.decode, "B", "nokia3310",
+                          errors="BAD")
     
     def test_codec_rotn(self):
         RT1 = "uijt jt b uftu"
