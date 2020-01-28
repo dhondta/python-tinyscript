@@ -1,10 +1,10 @@
 [![PyPi](https://img.shields.io/pypi/v/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
-[![Read The Docs](https://readthedocs.org/projects/tinyscript/badge/?version=latest)](https://tinyscript.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.org/dhondta/tinyscript.svg?branch=master)](https://travis-ci.org/dhondta/tinyscript)
-[![Coverage Status](https://coveralls.io/repos/github/dhondta/tinyscript/badge.svg?branch=master)](https://coveralls.io/github/dhondta/tinyscript?branch=master)
+[![Read The Docs](https://readthedocs.org/projects/python-tinyscript/badge/?version=latest)](https://python-tinyscript.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/dhondta/python-tinyscript.svg?branch=master)](https://travis-ci.org/dhondta/python-tinyscript)
+[![Coverage Status](https://coveralls.io/repos/github/dhondta/python-tinyscript/badge.svg?branch=master)](https://coveralls.io/github/dhondta/python-tinyscript?branch=master)
 [![Python Versions](https://img.shields.io/pypi/pyversions/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
-[![Requirements Status](https://requires.io/github/dhondta/tinyscript/requirements.svg?branch=master)](https://requires.io/github/dhondta/tinyscript/requirements/?branch=master)
-[![Known Vulnerabilities](https://snyk.io/test/github/dhondta/tinyscript/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/tinyscript?targetFile=requirements.txt)
+[![Requirements Status](https://requires.io/github/dhondta/python-tinyscript/requirements.svg?branch=master)](https://requires.io/github/dhondta/python-tinyscript/requirements/?branch=master)
+[![Known Vulnerabilities](https://snyk.io/test/github/dhondta/python-tinyscript/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/python-tinyscript?targetFile=requirements.txt)
 [![License](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 
 # TinyScript

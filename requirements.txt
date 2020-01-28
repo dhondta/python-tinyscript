@@ -1,5 +1,6 @@
 asciistuff
 bitstring
+codext
 coloredlogs
 colorful
 ipaddress
