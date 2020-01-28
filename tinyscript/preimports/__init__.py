@@ -2,6 +2,7 @@
 """Module for defining the list of preimports.
 
 """
+import codext
 from importlib import import_module
 try:  # will work in Python 3
     from importlib import reload
@@ -14,7 +15,6 @@ from .codep import code
 from .hash import hashlib
 from .inspectp import inspect
 from .log import logging
-from .ncodecs import codecs
 from .venv import virtualenv, PipPackage, VirtualEnv
 
 
@@ -25,7 +25,6 @@ __imports__ = {
     'bad': [],
     'enhanced': [
         "code",
-        "codecs",
         "hashlib",
         "inspect",
         "logging",
@@ -36,6 +35,7 @@ __imports__ = {
         "ast",
         "base64",
         "binascii",
+        "codecs",
         "collections",
         "configparser",
         "ctypes",

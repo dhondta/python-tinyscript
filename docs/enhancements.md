@@ -20,50 +20,6 @@ A context manager is also available:
 
 -----
 
-## `codecs`
-
-`codecs` has multiple new encodings in addition to [the native ones](https://docs.python.org/3.8/library/codecs.html#standard-encodings), among others:
-
-**Codec** | **Description**
-:---: | :---:
-`ascii85` | bidirectional conversion of ascii85 (Python3 only)
-`base16` | bidirectional conversion of base16
-`base32` | bidirectional conversion of base32
-`base64` | bidirectional conversion of base64 (overwrites the native base64_codec to also support en/decoding from str)
-`base85` | bidirectional conversion of base85 (Python3 only)
-`base100` | bidirectional conversion of base100/emoji's (Python3 only)
-`dna` | bidirectional conversion between DNA and text
-`leetspeak` | bidirectional conversion between leetspeak and text
-`markdown` | unidirectional conversion of Markdown to HTML using ´markdown2.markdown`
-`morse` | bidirectional conversion between morse and text
-`nokia3310` | bidirectional conversion between Nokia 3310 keystrokes and text
-`rot-N` | (with N belonging to ]0, 26[) bidirectional conversion between ROT and text
-`xor-N` | (with N belonging to ]0, 256[) XORing of 1 byte with text
-
-New codecs can be added easilly using the new function `codecs.add_codec`.
-
-??? example "XOR-N encoding"
-    
-    This defines a new codec XOR-N and adds it to `codecs`.
-    
-        :::python
-        def _xorn(text, n=1):
-            return "".join(chr(ord(c) ^ (n % 256)) for c in text)
-
-        def xor_byte_encode(i):
-            def encode(text, errors="strict"):
-                r = _xorn(ensure_str(text), int(i))
-                return r, len(r)
-            return encode
-        xor_byte_decode = xor_byte_encode
-
-        codecs.add_codec("xorN", xor_byte_encode, xor_byte_decode,
-                         r"(?i)xor[-_]?([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$")
-    
-    The pattern allows to dynamically define XOR so that XOR-1 to XOR-255 are valid and handles a different byte to XOR with the input text.
-
------
-
 ## `hashlib`
     
 `hashlib`, while imported with Tinyscript, is enhanced with additional functions so that these must not be rewritten in many applications, that is:
