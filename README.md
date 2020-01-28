@@ -12,7 +12,7 @@
 This library is aimed to provide useful features and to shorten required lines of code for writing nice-looking scripts or tools.
 
 <p align="center">
-    <img src="https://dhondta.github.io/tinyscript/docs/demos/simple-script.svg">
+    <img src="https://dhondta.github.io/python-tinyscript/docs/demos/simple-script.svg">
 </p>
 
 ## Example tools
