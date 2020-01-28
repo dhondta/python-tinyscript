@@ -1,6 +1,7 @@
 [run]
 source = tinyscript
 omit =
+    tinyscript/warnings.py
     tinyscript/helpers/termsize.py
     tests/*
 
