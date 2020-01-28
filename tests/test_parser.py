@@ -145,14 +145,16 @@ class TestParser(TestCase):
         sys.argv[1:] = []
         # SystemExit is raised with code 0 as the version is displayed then it
         #  exits
-        self.assertRaises(SystemExit, initialize, noargs_action="version")
+        with self.assertRaises(SystemExit):
+            initialize(noargs_action="version")
     
     def test_noargs_wizard(self):
         temp_stdout(self)
         temp_stdin(self, "\n")
         sys.argv[1:] = []
         # EOFError is raised as the wizard stands with no input but a newline
-        self.assertRaises(EOFError, initialize, noargs_action="wizard")
+        with self.assertRaises(EOFError):
+            initialize(noargs_action="wizard")
     
     def test_noargs_action(self):
         sys.argv[1:] = []
@@ -162,7 +164,8 @@ class TestParser(TestCase):
     
     def test_bad_noargs_action(self):
         sys.argv[1:] = []
-        self.assertRaises(ValueError, initialize, noargs_action="does_not_exist")
+        with self.assertRaises(ValueError):
+            initialize(noargs_action="does_not_exist")
     
     def test_scriptname_banner(self):
         sys.argv[1:] = []
@@ -199,10 +202,17 @@ class TestParser(TestCase):
         parser.add_argument("-a", "--arg1")
         parser.add_argument("-b", "--arg2", action="store_true")
         initialize()
-        validate(('arg1', " ? is None", "Failed", "test"))
-        self.assertRaises(ValueError, validate, ('bad/arg', "True"))
-        self.assertRaises(SystemExit, validate,
-                          ('arg1', "bad condition"))
-        validate(('arg1', "bad condition", "message", "default"))
+        self.assertIsNone(validate(('arg1', " ? is None", "Failed", "test")))
+        with self.assertRaises(ValueError):
+            validate(('bad/arg', "True"))
+        with self.assertRaises(ValueError):
+            validate(('os.system("id")', ""))
+        with self.assertRaises(ValueError):
+            validate(('import pty; pty.spawn("/bin/bash")', ""))
+        with self.assertRaises(AttributeError):
+            validate(('arg123', "bad condition"))
+        with self.assertRaises(SystemExit):
+            validate(('arg1', "bad condition"))
+        self.assertIsNone(validate(('arg1', "False", "message", "default")))
         globals()['args'] = None
-        validate()
+        self.assertIsNone(validate())

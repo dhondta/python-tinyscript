@@ -8,9 +8,8 @@ import atexit
 import os
 import re
 import sys
-import inspect
 from asciistuff import AsciiFile, Banner
-from inspect import getmembers, isfunction, ismethod
+from inspect import currentframe, getmembers, isfunction, ismethod
 from os.path import basename, splitext
 from six import string_types
 
@@ -27,6 +26,7 @@ from .step import set_step_items
 
 __all__ = __features__ = ["parser", "initialize", "validate"]
 
+AT_EXIT_SET = False
 BANNER_FONT = None
 BANNER_STYLE = {}
 
@@ -87,16 +87,25 @@ def initialize(sudo=False,
     :param report_func:       report generation function
     """
     global parser, parser_calls
-    # dynamically get caller's frame
-    prev_frame = inspect.currentframe().f_back
-    glob = {}
+    # get caller's frame
+    frame = currentframe().f_back
     # walk the stack until a frame containing a known object is found
-    while prev_frame:
-        glob = prev_frame.f_globals
-        if "ProxyArgumentParser" in glob and \
-           glob['ProxyArgumentParser'] is ProxyArgumentParser:
+    glob = {}
+    while frame:
+        if isinstance(frame.f_globals.get('parser'), ProxyArgumentParser):
+            glob = frame.f_globals
+            # search for dunders
+            for d in DUNDERS:
+                f = frame
+                while f and (d not in f.f_globals.keys() or \
+                             f.f_globals[d] is None):
+                    f = f.f_back
+                try:
+                    glob[d] = f.f_globals[d]
+                except (AttributeError, KeyError):
+                    pass
             break
-        prev_frame = prev_frame.f_back
+        frame = frame.f_back
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
            'progress': add_progress, 'step': add_step, 'time': add_time,
            'version': add_version, 'wizard': add_wizard, 'help': True}
@@ -243,32 +252,36 @@ def initialize(sudo=False,
         if not isfunction(report_func):
             report_func = None
             glob['logger'].error(gt("Bad report generation function"))
-            return
-        # lazily import report features
-        #  -> reason: they rely on pandas and weasyprint, which take time to be
-        #              imported ; so, when report features are not used in a
-        #              script, report classes won't be loaded
-        all_list = __import__("tinyscript.report", fromlist=['__all__']).__all__
-        report = __import__("tinyscript.report", fromlist=all_list)
-        for f in all_list:
-            glob[f] = globals()[f] = getattr(report, f)
-        # now populate the parser with report-related arguments
-        r = p.add_argument_group(gt("report arguments"))
-        output_func = list(filter(lambda x: not x[0].startswith('_'),
-                                  getmembers(Report, predicate=isfunction)))
-        choices = list(map(lambda x: x[0], output_func))
-        if r.add_argument("--output", choices=choices, default="pdf", last=True,
-                          prefix="report", help=gt("report output format")):
-            r.add_argument("--title", last=True, prefix="report",
-                           help=gt("report title"))
-            r.add_argument("--css", last=True, prefix="report",
-                           help=gt("report stylesheet file"))
-            r.add_argument("--theme", default="default", last=True,
-                           prefix="report", help=gt("report stylesheet theme"),
-                           note=gt("--css overrides this setting"))
-            r.add_argument("--filename", last=True, prefix="report",
-                           help=gt("report filename"))
+        else:
+            # lazily import report features
+            #  -> reason: they rely on pandas and weasyprint, which take time to
+            #              be imported ; so, when report features are not used
+            #              in a script, report classes won't be loaded
+            all_list = __import__("tinyscript.report",
+                                  fromlist=['__all__']).__all__
+            report = __import__("tinyscript.report", fromlist=all_list)
+            for f in all_list:
+                glob[f] = globals()[f] = getattr(report, f)
+            # now populate the parser with report-related arguments
+            r = p.add_argument_group(gt("report arguments"))
+            output_func = list(filter(lambda x: not x[0].startswith('_'),
+                                      getmembers(Report, predicate=isfunction)))
+            choices = list(map(lambda x: x[0], output_func))
+            if r.add_argument("--output", choices=choices, default="pdf",
+                              last=True, prefix="report",
+                              help=gt("report output format")):
+                r.add_argument("--title", last=True, prefix="report",
+                               help=gt("report title"))
+                r.add_argument("--css", last=True, prefix="report",
+                               help=gt("report stylesheet file"))
+                r.add_argument("--theme", default="default", last=True,
+                               prefix="report",
+                               help=gt("report stylesheet theme"),
+                               note=gt("--css overrides this setting"))
+                r.add_argument("--filename", last=True, prefix="report",
+                               help=gt("report filename"))
     elif report_func is not None and not PYTHON3:
+        report_func = None  # disable reporting in the at_exit handler
         glob['logger'].warning(gt("Report generation is only for Python 3"))
     # extended logging features
     if ext_logging:
@@ -318,28 +331,36 @@ def initialize(sudo=False,
         # then handle the state
         do_post_actions = True
         if _hooks.state == "INTERRUPTED":
-            glob['at_interrupt']()
+            glob.get('at_interrupt', lambda: None)()
             do_post_actions = post_actions
         elif _hooks.state == "TERMINATED":
-            glob['at_terminate']()
+            glob.get('at_terminate', lambda: None)()
             do_post_actions = False
         # finally handle post-actions
         if do_post_actions:
-            if report_func is not None and PYTHON3:
+            if report_func is not None:
                 # generate the report only when exiting gracefully, just before
                 #  the user-defined function at_graceful_exit
-                _ = glob['args']
-                r = Report(*report_func(), title=_.title, filename=_.filename,
-                           logger=glob['logger'], css=_.css)
-                getattr(r, _.output)(False)
+                a = glob['args']
+                try:
+                    r = Report(*report_func(),
+                               title=a.title,
+                               filename=a.filename,
+                               css=a.css,
+                               logger=glob['logger'])
+                    getattr(r, a.output)(False)
+                except AttributeError:
+                    pass
             t = glob['time_manager']
             if add['time'] and t._stats:
                 t.stats()
-            glob['at_graceful_exit']()
-        glob['at_exit']()
+            glob.get('at_graceful_exit', lambda: None)()
+        glob.get('at_exit', lambda: None)()
         from logging import shutdown
         shutdown()
-    atexit.register(__at_exit)
+    if not AT_EXIT_SET:
+        atexit.register(__at_exit)
+        globals()['AT_EXIT_SET'] = False
 
 
 def validate(*arg_checks):
@@ -360,40 +381,30 @@ def validate(*arg_checks):
 
     :param arg_checks: list of 3/4-tuples
     """
-
-    # dynamically get caller's frame
-    prev_frame = inspect.currentframe().f_back
-    glob = {}
-
-    # walk the stack until a frame containing a known object is found
-    while prev_frame:
-        glob = prev_frame.f_globals
-        if 'ProxyArgumentParser' in glob and glob['ProxyArgumentParser'] is ProxyArgumentParser:
-            break
-        prev_frame = prev_frame.f_back
-
-    locals().update(glob)  # allows to import user-defined objects from glob
-                           #  into the local scope
-    if glob['args'] is None or glob['logger'] is None:
+    glob = currentframe().f_back.f_globals
+    if glob.get('args') is None:
         return
+    locals().update(glob)
     exit_app = False
     for check in arg_checks:
         check = check + (None, ) * (4 - len(check))
         param, condition, message, default = check
         if re.match(r'^_?[a-zA-Z][a-zA-Z0-9_]*$', param) is None:
             raise ValueError(gt("Illegal argument name"))
+        if not hasattr(glob['args'], param):
+            raise AttributeError("'{}' argument does not exist".format(param))
         try:
             result = eval(condition.replace(" ? ", " glob['args'].{} "
-                                            .format(param)))
+                                                   .format(param)))
         except Exception as e:
             result = True
             message = str(e)
         if result:
             if default is None:
-                glob['logger'].error(gt(message or "Validation failed"))
+                logger.error(gt(message or "Validation failed"))
                 exit_app = True
             else:
-                glob['logger'].warning(gt(message or "Validation failed"))
+                logger.warning(gt(message or "Validation failed"))
                 setattr(glob['args'], param, default)
     if exit_app:
         sys.exit(2)

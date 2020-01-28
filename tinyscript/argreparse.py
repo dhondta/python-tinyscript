@@ -29,8 +29,17 @@ from .helpers.data.types import is_long_opt, is_pos_int, is_short_opt
 from .loglib import logger
 
 
-__all__ = ["gt", "ArgumentParser", "SCRIPTNAME_FORMAT", "SUPPRESS"]
+__all__ = ["gt", "ArgumentParser", "DUNDERS", "SCRIPTNAME_FORMAT", "SUPPRESS"]
 
+
+BASE_DUNDERS = ['__author__', '__copyright__', '__credits__', '__license__',
+                '__reference__', '__source__', '__training__']
+DUNDERS = BASE_DUNDERS + [
+    '__date__', '__details__', '__description__', '__doc__', '__docformat__',
+    '__email__', '__examples__', '__functions__', '__maximum_python_version__',
+    '__minimum_python_version__', '__priority__', '__product__', '__status__',
+    '__version__',
+]
 
 DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
@@ -311,10 +320,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         v = gd.get('__status__')
         if v:
             d += " (" + v + ")"
-        dunders = ['__author__', '__copyright__', '__license__',
-                   '__reference__', '__source__', '__training__']
-        l = max(list(map(lambda x: len(x.strip('_')), dunders)))
-        for k in dunders:
+        l = max(list(map(lambda x: len(x.strip('_')), BASE_DUNDERS)))
+        for k in BASE_DUNDERS:
             m = gd.get(k)
             if m:
                 if k == '__copyright__':

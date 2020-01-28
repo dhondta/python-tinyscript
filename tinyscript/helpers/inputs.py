@@ -73,11 +73,7 @@ def std_input(prompt="", style=None, palette=None):
         if isinstance(style, (list, tuple, set)):
             style = "_".join(style)
         prompt = getattr(colorful, style)(prompt)
-    try:
-        _ = raw_input(prompt)
-    except NameError:
-        _ = input(prompt)
-    return _.strip()
+    return (input(prompt) if PYTHON3 else raw_input(prompt)).strip()
 
 
 def stdin_pipe():
