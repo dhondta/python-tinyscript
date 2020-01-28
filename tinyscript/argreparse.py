@@ -37,8 +37,8 @@ BASE_DUNDERS = ['__author__', '__copyright__', '__credits__', '__license__',
 DUNDERS = BASE_DUNDERS + [
     '__date__', '__details__', '__description__', '__doc__', '__docformat__',
     '__email__', '__examples__', '__functions__', '__maximum_python_version__',
-    '__minimum_python_version__', '__priority__', '__product__', '__status__',
-    '__version__',
+    '__minimum_python_version__', '__priority__', '__product__', '__script__',
+    '__status__', '__version__',
 ]
 
 DEFAULT_MAX_LEN     = 20
