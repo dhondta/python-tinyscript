@@ -4,22 +4,18 @@
 """
 import inspect
 import types
+from six import integer_types
 
 from .strings import _str2list
 
 
 __all__ = __features__ = []
 
-try:
-    long
-except NameError:
-    long = int
-
 
 # various object type check functions
 __all__ += ["is_dict", "is_int", "is_list", "is_neg_int", "is_pos_int"]
 is_dict      = lambda d: isinstance(d, dict)
-is_int       = lambda i: isinstance(i, (int, long))
+is_int       = lambda i: isinstance(i, integer_types)
 is_list      = lambda l: isinstance(l, (list, set, tuple))
 is_neg_int   = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
 is_pos_int   = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)

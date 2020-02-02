@@ -47,12 +47,13 @@ def applicable_to(*classes):
     return _wrapper
 
 
-def try_or_die(message, exc=Exception, extra_info=""):
+def try_or_die(message, exc=Exception, trace=True, extra_info=""):
     """
     Decorator handling a try-except block to log an error.
 
     :param message:    message to be displayed when crashing
     :param exc:        exception class on which the error is thrown
+    :param trace:      display exception traceback
     :param extra_info: class attribute name whose value is to be displayed as
                         additional information (only applies when used with a
                         method)
@@ -67,6 +68,8 @@ def try_or_die(message, exc=Exception, extra_info=""):
             except exc as e:
                 l = logger if self is None else self.logger
                 l.critical(message)
+                if trace:
+                    l.exception(e)
                 if extra_info != "" and hasattr(self, extra_info):
                     l.info(getattr(self, extra_info))
                 # if the decorated method is part of a context manager, close it
@@ -115,11 +118,11 @@ def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
             self = args[0] if len(args) > 0 and __is_method(f) else None
             try:
                 return f(*args, **kwargs)
-            except exc:
+            except exc as e:
                 l = logger if self is None else self.logger
                 l.warning(message)
                 if trace:
-                    l.exception(exc)
+                    l.exception(e)
                 if extra_info != "" and hasattr(self, extra_info):
                     l.info(getattr(self, extra_info))
         return wrapper
