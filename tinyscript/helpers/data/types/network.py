@@ -15,31 +15,34 @@ __all__ = __features__ = []
 
 
 # network-related check functions
-__all__ += ["is_defgw", "is_domain", "is_email", "is_gw", "is_ifaddr", "is_ip",
-            "is_ipv4", "is_ipv6", "is_mac", "is_netif", "is_port"]
-is_defgw  = lambda gw:  __gateway_address(gw, True, False) is not None
-is_domain = lambda n:   __domain_name(n, False, False) is not None
-is_email  = lambda e:   __email_address(e, False) is not None
-is_gw     = lambda gw:  __gateway_address(gw, False, False) is not None
-is_ifaddr = lambda ip:  __interface_address(ip, False) is not None
-is_ip     = lambda ip:  __ip_address(ip, None, False) is not None
-is_ipv4   = lambda ip:  __ip_address(ip, 4, False) is not None
-is_ipv6   = lambda ip:  __ip_address(ip, 6, False) is not None
-is_mac    = lambda mac: __mac_address(mac, False) is not None
-is_netif  = lambda nif: __network_interface(nif, False) is not None
-is_port   = lambda p:   is_int(p) and 0 < p < 2**16
+__all__ += ["is_defgw", "is_domain", "is_email", "is_gw", "is_hostname",
+            "is_ifaddr", "is_ip", "is_ipv4", "is_ipv6", "is_mac", "is_netif",
+            "is_port"]
+is_defgw    = lambda gw:  __gateway_address(gw, True, False) is not None
+is_domain   = lambda n:   __domain_name(n, False, False) is not None
+is_email    = lambda e:   __email_address(e, False) is not None
+is_gw       = lambda gw:  __gateway_address(gw, False, False) is not None
+is_hostname = lambda h:   __hostname(h, False) is not None
+is_ifaddr   = lambda ip:  __interface_address(ip, False) is not None
+is_ip       = lambda ip:  __ip_address(ip, None, False) is not None
+is_ipv4     = lambda ip:  __ip_address(ip, 4, False) is not None
+is_ipv6     = lambda ip:  __ip_address(ip, 6, False) is not None
+is_mac      = lambda mac: __mac_address(mac, False) is not None
+is_netif    = lambda nif: __network_interface(nif, False) is not None
+is_port     = lambda p:   is_int(p) and 0 < p < 2**16
 
 
 # network-related argument types
 __all__ += ["default_gateway_address", "domain_name", "email_address", 
-            "gateway_address", "ip_address", "ipv4_address", "ipv6_address",
-            "ip_address_list", "ipv4_address_list", "ipv6_address_list",
-            "ip_address_filtered_list", "ipv4_address_filtered_list",
-            "ipv6_address_filtered_list", "ip_address_network",
-            "ipv4_address_network", "ipv6_address_network",
-            "interface_address", "interface_address_list",
-            "interface_address_filtered_list", "mac_address",
-            "network_interface", "port_number", "port_number_range"]
+            "gateway_address", "hostname", "ip_address", "ipv4_address",
+            "ipv6_address", "ip_address_list", "ipv4_address_list",
+            "ipv6_address_list", "ip_address_filtered_list",
+            "ipv4_address_filtered_list", "ipv6_address_filtered_list",
+            "ip_address_network", "ipv4_address_network",
+            "ipv6_address_network", "interface_address",
+            "interface_address_list", "interface_address_filtered_list",
+            "mac_address", "network_interface", "port_number",
+            "port_number_range"]
 
 
 def __domain_name(name, dotted=False, fail=True):
@@ -60,7 +63,7 @@ def __email_address(email, fail=True):
     """ Email address validation. """
     # reference: https://stackoverflow.com/questions/8022530/
     if re.match(r"^[^@]+@[^@]+$", email) and is_domain(email.split("@")[1]) \
-        and parse_email(email)[1] != "":
+       and parse_email(email)[1] != "":
         return email
     if fail:
         raise ValueError("Bad email address")
@@ -82,6 +85,17 @@ def __gateway_address(gw, default=False, fail=True):
         raise ValueError("Bad {}gateway".format(["", "default "][default]))
 default_gateway_address = lambda gw: __gateway_address(gw, True)
 gateway_address         = lambda gw: __gateway_address(gw)
+
+
+HN = re.compile(r"(?!-)[A-Z\d-]{1,63}(?<!-)$", re.I)
+def __hostname(hostname, fail=True):
+    """ Hostname validation. """
+    if len(hostname) <= 255 and all(HN.match(x) for x in \
+       hostname.rstrip(".").split(".")):
+        return hostname
+    if fail:
+        raise ValueError("Bad hostname")
+hostname = lambda h: __hostname(h)
 
 
 def __interface_address(addr, fail=True):
@@ -122,7 +136,7 @@ def __ip_address(ip, version=None, fail=True):
     except (ValueError, netaddr.core.AddrFormatError) as e:
         if fail:
             raise ValueError(str(e))
-ip_address = lambda ip: __ip_address(ip)
+ip_address   = lambda ip: __ip_address(ip)
 ipv4_address = lambda ip: __ip_address(ip, 4)
 ipv6_address = lambda ip: __ip_address(ip, 6)
 

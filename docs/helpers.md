@@ -191,6 +191,7 @@ And for network-related data:
 `ts.is_domain` | domain name
 `ts.is_email` | email address
 `ts.is_gw` | gateway
+`ts.is_hostname` | hostname
 `ts.is_ifaddr` | interface address
 `ts.is_ip` / `ts.is_ipv4` / `ts.is_ipv6` | IPv4 or IPv6 address
 `ts.is_mac` | MAC address
@@ -236,6 +237,7 @@ And for network-related types:
 `ts.domain_name` | `str`  | valid domain name
 `ts.email_address` | `str`  | valid email address
 `ts.gateway_address` | `str`  | valid gateway address
+`ts.hostname` | `str` | valid hostname
 `ts.interface_address` | `str`  | assigned interface address
 `ts.interface_address_list` | `list(str)`  | list of assigned interface addresses
 `ts.interface_address_filtered_list` | `list(str)` | list of assigned interface addresses, with non-assigned ones filtered

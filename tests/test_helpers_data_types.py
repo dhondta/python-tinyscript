@@ -85,7 +85,9 @@ class TestHelpersDataTypes(TestCase):
     
     def test_network_related_types(self):
         self.assertIsNotNone(domain_name("example.com"))
+        self.assertIsNotNone(hostname("www.example.com"))
         self.assertRaises(ValueError, domain_name, "bad_name")
+        self.assertRaises(ValueError, hostname, "www.example-.com")
         self.assertRaises(ValueError, email_address, "bad_email")
         self.assertRaises(ValueError, email_address, "user@bad_name")
         self.assertIsInstance(ip_address("127.0.0.1"), netaddr.IPAddress)
@@ -181,6 +183,7 @@ class TestHelpersDataTypes(TestCase):
     
     def test_network_format_check(self):
         self.assertTrue(is_domain("example.com"))
+        self.assertTrue(is_hostname("www.example.com"))
         self.assertFalse(is_email("example.com"))
         self.assertTrue(is_email("test@example.com"))
         self.assertTrue(is_ip("1234"))
