@@ -13,7 +13,9 @@ __all__ = __features__ = []
 
 
 # various object type check functions
-__all__ += ["is_dict", "is_int", "is_list", "is_neg_int", "is_pos_int"]
+__all__ += ["is_bool", "is_dict", "is_int", "is_list", "is_neg_int",
+            "is_pos_int"]
+is_bool      = lambda b: isinstance(b, bool)
 is_dict      = lambda d: isinstance(d, dict)
 is_int       = lambda i: isinstance(i, integer_types)
 is_list      = lambda l: isinstance(l, (list, set, tuple))

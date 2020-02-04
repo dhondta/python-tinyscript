@@ -11,24 +11,20 @@ from .compat import b
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["bruteforce", "execute", "strings",
+__all__ = __features__ = ["bruteforce", "bruteforce_mask", "execute", "strings",
                           "strings_from_file", "xor"]
 
 
-def xor(str1, str2, offset=0):
-    """
-    Function for XORing two strings of different length. Either the first of the
-     second string can be longer than the other.
-
-    :param str1:   first string, with length L1
-    :param str2:   second string, with length L2
-    :param offset: ASCII offset to be applied on each resulting character
-    """
-    r = ""
-    for c1, c2 in zip(cycle(str1) if len(str1) < len(str2) else str1,
-                      cycle(str2) if len(str2) < len(str1) else str2):
-        r += chr(((ord(c1) ^ ord(c2)) + offset) % 256)
-    return r
+MASKS = {
+    'a': printable,
+    'b': "".join(chr(i) for i in range(256)),
+    'd': "0123456789",
+    'h': "0123456789abcdef",
+    'H': "0123456789ABCDEF",
+    'l': "abcdefghijklmnopqrstuvwxyz",
+    's': " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~",
+    'u': "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+}
 
 
 def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1,
@@ -49,6 +45,30 @@ def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1,
         else:
             for c in permutations(alphabet, i):
                 yield c if isinstance(c[0], int) else ''.join(c)
+
+
+def bruteforce_mask(mask, charsets=None):
+    """
+    Generator for bruteforcing according to a given mask (similar to this used
+     in hashcat).
+     
+    :param mask:     bruteforce mask
+    :param charsets: custom alphabets for use with the mask
+    """
+    iterables, charset = [], False
+    masks = {k: v for k, v in MASKS.items()}
+    masks.update(charsets or {})
+    for c in mask:
+        if c == "?":
+            charset = True
+            continue
+        if charset:
+            iterables.append(masks[c])
+            charset = False
+            continue
+        iterables.append(c)
+    for c in product(*iterables):
+        yield c if isinstance(c[0], int) else ''.join(c)
 
 
 def execute(cmd, **kwargs):
@@ -109,3 +129,19 @@ def strings_from_file(filename, minlen=4, alphabet=printable, offset=0):
                 result = ""
         if len(result) >= minlen:
             yield result
+
+
+def xor(str1, str2, offset=0):
+    """
+    Function for XORing two strings of different length. Either the first of the
+     second string can be longer than the other.
+
+    :param str1:   first string, with length L1
+    :param str2:   second string, with length L2
+    :param offset: ASCII offset to be applied on each resulting character
+    """
+    r = ""
+    for c1, c2 in zip(cycle(str1) if len(str1) < len(str2) else str1,
+                      cycle(str2) if len(str2) < len(str1) else str2):
+        r += chr(((ord(c1) ^ ord(c2)) + offset) % 256)
+    return r

@@ -55,6 +55,7 @@ It also provides some other utility functions:
 **Name** | **Description**
 :---: | :---:
 `ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
+`ts.bruteforce_mask` | generator for bruteforcing according to a given mask (similar to this used in HashCat)
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
@@ -130,6 +131,7 @@ Tinyscript provides some type checking functions, for common data:
 **Function** | **Description**
 :---: | :---:
 `ts.is_bin` | binary string (with or without `\W` separators)
+`ts.is_bool` | boolean
 `ts.is_dict` | dictionary
 `ts.is_dir` / `ts.is_folder` | dummy shortcuts to `os.path.isdir`
 `ts.is_file` | dummy shortcut to `os.path.isfile`
