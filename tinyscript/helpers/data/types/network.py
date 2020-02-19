@@ -50,7 +50,7 @@ def __domain_name(name, dotted=False, fail=True):
     if not dotted and not name.endswith("."):
         name += "."
     # source: https://stackoverflow.com/questions/19705002/
-    if len(email) <= 255 and re.match(r"^(((([a-z0-9]+){1,63}\.)|(([a-z0-9]+"
+    if len(name) <= 255 and re.match(r"^(((([a-z0-9]+){1,63}\.)|(([a-z0-9]+"
                 r"(\-)+[a-z0-9]+){1,63}\.))+){1,255}$", name, re.I) is not None:
         return name
     if fail:
