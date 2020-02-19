@@ -51,7 +51,14 @@ def addLogLevel(levelName, color, level, bold=True):
     setattr(logging.Logger, n, display)
     attrs = {'color': color}
     if bold:
-        attrs['bold'] = coloredlogs.CAN_USE_BOLD_FONT
+        # compatibility fix due to a change in coloredlogs from version 14.0
+        # see: https://github.com/xolox/python-coloredlogs/issues/82
+        try:
+            attrs['bold'] = coloredlogs.CAN_USE_BOLD_FONT
+        except AttributeError:
+            # in coloredlogs from v14, CAN_USE_BOLD_FONT is not present anymore
+            #  and its flag is set to True everywhere it appears
+            attrs['bold'] = True
     coloredlogs.DEFAULT_LEVEL_STYLES[n] = attrs
     if PY3:
         logging._levelToName[level] = N
