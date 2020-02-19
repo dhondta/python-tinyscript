@@ -47,13 +47,12 @@ __all__ += ["default_gateway_address", "domain_name", "email_address",
 
 def __domain_name(name, dotted=False, fail=True):
     """ Domain name validation. """
-    _ = name
     if not dotted and not name.endswith("."):
         name += "."
     # source: https://stackoverflow.com/questions/19705002/
-    if re.match(r"^(((([a-z0-9]+){1,63}\.)|(([a-z0-9]+(\-)+"
-                r"[a-z0-9]+){1,63}\.))+){1,255}$", name, re.I) is not None:
-        return _
+    if len(email) <= 255 and re.match(r"^(((([a-z0-9]+){1,63}\.)|(([a-z0-9]+"
+                r"(\-)+[a-z0-9]+){1,63}\.))+){1,255}$", name, re.I) is not None:
+        return name
     if fail:
         raise ValueError("Bad domain name")
 domain_name = lambda n: __domain_name(n)
@@ -62,8 +61,8 @@ domain_name = lambda n: __domain_name(n)
 def __email_address(email, fail=True):
     """ Email address validation. """
     # reference: https://stackoverflow.com/questions/8022530/
-    if re.match(r"^[^@]+@[^@]+$", email) and is_domain(email.split("@")[1]) \
-       and parse_email(email)[1] != "":
+    if len(email) <= 320 and re.match(r"^[^@]+@[^@]+$", email) and \
+       is_hostname(email.split("@")[1]) and parse_email(email)[1] != "":
         return email
     if fail:
         raise ValueError("Bad email address")

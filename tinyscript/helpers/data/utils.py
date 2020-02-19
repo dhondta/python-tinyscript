@@ -143,7 +143,7 @@ def unpad(string, padding=None, blocksize=8, raw=False):
     :param padding:   padding characters or padding algorithm
     :param blocksize: block size to be considered for padding
     :param raw:       whether the input string must be considered as a normal
-                       strint (it disables the check for hexstring)
+                       string (it disables the check for hexstring)
     """
     s, bs = string, blocksize
     isb, ish = is_bin(s) and not raw, is_hex(s) and not raw

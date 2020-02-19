@@ -4,7 +4,7 @@
 """
 from itertools import cycle, permutations, product
 from six import string_types
-from string import printable
+from string import digits,printable, punctuation
 from subprocess import Popen, PIPE
 
 from .compat import b
@@ -22,7 +22,7 @@ MASKS = {
     'h': "0123456789abcdef",
     'H': "0123456789ABCDEF",
     'l': "abcdefghijklmnopqrstuvwxyz",
-    's': " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~",
+    's': " " + punctuation,
     'u': "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
 }
 

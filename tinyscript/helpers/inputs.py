@@ -78,7 +78,7 @@ def std_input(prompt="", style=None, palette=None):
 
 def stdin_pipe():
     """
-    Python2/3-compatible stdin pipe read funtcion.
+    Python2/3-compatible stdin pipe read function.
     """
     if PYTHON3:
         with open(0, 'rb') as f:
