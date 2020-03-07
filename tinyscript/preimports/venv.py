@@ -14,7 +14,6 @@ from shutil import rmtree
 from six import string_types
 from slugify import slugify
 from subprocess import Popen, PIPE
-from time import sleep
 
 from ..helpers import Path, JYTHON, PYPY, WINDOWS
 
@@ -210,7 +209,11 @@ def __setup(venv_dir, requirements=None, verbose=False):
     __deactivate()
     venv_dir = os.path.abspath(venv_dir)
     if not os.path.exists(venv_dir):
-        virtualenv.create_environment(venv_dir)
+        # fix to issue: https://github.com/pypa/virtualenv/issues/1585
+        try:
+            virtualenv.create_environment(venv_dir)
+        except AttributeError:
+            virtualenv.cli_run([venv_dir])
     __activate(venv_dir)
     if isinstance(requirements, string_types):
         with open(requirements) as f:
