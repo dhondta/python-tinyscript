@@ -11,6 +11,7 @@ from .compat import *
 from .constants import *
 from .data import *
 from .decorators import *
+from .fexec import *
 from .inputs import *
 from .licenses import *
 from .path import *
@@ -23,6 +24,7 @@ from .compat import __features__ as _compat
 from .constants import __features__ as _constants
 from .data import __features__ as _data
 from .decorators import __features__ as _decorators
+from .fexec import __features__ as _fexec
 from .inputs import __features__ as _inputs
 from .licenses import __features__ as _licenses
 from .path import __features__ as _path
@@ -30,8 +32,8 @@ from .termsize import __features__ as _termsize
 from .timeout import __features__ as _timeout
 
 
-__helpers__ = _common + _data + _decorators + _inputs + _licenses + _path + \
-              _termsize + _timeout
+__helpers__ = _common + _data + _decorators + _fexec + _inputs + _licenses + \
+              _path + _termsize + _timeout
 
 ts = ModuleType("ts", """
     Tinyscript helpers

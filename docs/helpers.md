@@ -50,6 +50,16 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 `ts.std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
 `ts.user_input` | Python2/3-compatible enhanced input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful), choices, default value and 'required' option)
 
+It also provides some simple execution functions:
+
+**Name** | **Description**
+:---: | :---:
+`ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
+`ts.process` | decorator for turning a function into a process
+`ts.processes_clean` | cleanup function for joining processes opened with `ts.process`
+`ts.thread` | decorator for turning a function into a thread
+`ts.threads_clean` | cleanup function for joining threads opened with `ts.thread`
+ 
 It also provides some other utility functions:
  
 **Name** | **Description**
@@ -58,7 +68,6 @@ It also provides some other utility functions:
 `ts.bruteforce_mask` | generator for bruteforcing according to a given mask (similar to this used in HashCat)
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
-`ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
 `ts.get_terminal_size` | cross-platform terminal size function
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
 `ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
