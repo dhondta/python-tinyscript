@@ -3,16 +3,14 @@
 
 """
 from itertools import cycle, permutations, product
-from six import string_types
-from string import digits,printable, punctuation
-from subprocess import Popen, PIPE
+from string import printable, punctuation
 
 from .compat import b
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["bruteforce", "bruteforce_mask", "execute", "strings",
-                          "strings_from_file", "xor"]
+__all__ = __features__ = ["bruteforce", "bruteforce_mask", "strings",
+                          "strings_from_file", "xor", "xor_file"]
 
 
 MASKS = {
@@ -35,7 +33,8 @@ def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1,
     
     :param maxlen:   maximum bruteforce entry length
     :param alphabet: bruteforce alphabet to be used
-    :param minlen:   minimum bruteforce entry length (optional)  
+    :param minlen:   minimum bruteforce entry length (optional)
+    :param repeat:   whether alphabet characters can be repeated or not
     :yield:          bruteforce entry
     """
     for i in range(minlen, maxlen + 1):
@@ -71,23 +70,12 @@ def bruteforce_mask(mask, charsets=None):
         yield c if isinstance(c[0], int) else ''.join(c)
 
 
-def execute(cmd, **kwargs):
-    """
-    Dummy wrapper for subprocess.Popen.
-    
-    :param cmd: command string
-    """
-    if isinstance(cmd, string_types):
-        cmd = cmd.split()
-    return Popen(cmd, stdout=PIPE, stderr=PIPE, **kwargs).communicate()
-
-
 def strings(data, minlen=4, alphabet=printable):
     """
     Generator yielding strings according to a charset and a minimal length from
      a given string buffer.
-    
-    :param filename: input file
+
+    :param data:     input data
     :param minlen:   minimal length of strings to be considered
     :param alphabet: valid charset for the strings
     """
@@ -117,7 +105,7 @@ def strings_from_file(filename, minlen=4, alphabet=printable, offset=0):
         f.seek(offset)
         result = ""
         while True:
-            data = f.read(1024)
+            data = f.read(max(1024, 2 * minlen))
             if not data:
                 break
             for c in data:
@@ -140,8 +128,32 @@ def xor(str1, str2, offset=0):
     :param str2:   second string, with length L2
     :param offset: ASCII offset to be applied on each resulting character
     """
-    r = ""
+    convert = isinstance(str1[0], int) or isinstance(str2[0], int)
+    r = b("") if convert else ""
     for c1, c2 in zip(cycle(str1) if len(str1) < len(str2) else str1,
                       cycle(str2) if len(str2) < len(str1) else str2):
-        r += chr(((ord(c1) ^ ord(c2)) + offset) % 256)
+        c1 = c1 if isinstance(c1, int) else ord(c1)
+        c2 = c2 if isinstance(c2, int) else ord(c2)
+        c = chr(((c1 ^ c2) + offset) % 256)
+        r += b(c) if convert else c
     return r
+
+
+def xor_file(filename, key, offset=0):
+    """
+    Function for XORing a file with a given key.
+
+    :param filename: input file
+    :param key:      XOR key
+    :param offset:   start offset in the input file
+    """
+    with open(filename, 'rb+') as f:
+        cursor, l = offset, len(key)
+        f.seek(cursor)
+        while True:
+            data = f.read(l)
+            if not data:
+                break
+            f.seek(cursor)
+            f.write(xor(data, b(key[:len(data)])))
+            cursor += l

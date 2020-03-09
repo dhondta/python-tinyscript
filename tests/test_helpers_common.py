@@ -17,12 +17,15 @@ class TestHelpersCommon(TestCase):
         self.assertEqual(list(bruteforce_mask("ab?l", {'l': "cde"})),
                          ["abc", "abd", "abe"])
         self.assertEqual(xor("this is a test", " "), "THIS\x00IS\x00A\x00TEST")
-        self.assertIsNotNone(execute("id"))
         self.assertEqual(list(strings("this is a \x00 test")),
                          ["this is a ", " test"])
-        FILE = ".test_strings"
+        FILE, CONTENT = ".test_strings", b"this is a \x00 test"
         with open(FILE, 'wb') as f:
-            f.write(b"this is a \x00 test")
+            f.write(CONTENT)
+        self.assertIsNone(xor_file(FILE, " "))
+        self.assertIsNone(xor_file(FILE, " "))
+        with open(FILE, 'rb') as f:
+            self.assertEqual(f.read(), CONTENT)
         self.assertEqual(list(strings_from_file(FILE)),
                          ["this is a ", " test"])
         remove(FILE)
