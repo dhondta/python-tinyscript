@@ -3,13 +3,39 @@
 """Module for defining handlers and exit hook.
 
 """
-import logging
 import sys
-from signal import signal, SIGINT, SIGTERM
+from signal import getsignal, signal, SIGINT, SIGTERM
 
 
-__features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate"]
+__features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate",
+                "DisableSignals"]
 __all__ = ["_hooks"] + __features__
+
+
+class DisableSignals(object):
+    """
+    Context manager that disable signal handlers.
+
+    :param signals: list of signal identifiers
+    :param fail:    whether execution should fail or not when a bad signal ID is
+                     encountered
+    """
+    def __init__(self, *signals, **kwargs):
+        self.__handlers = {}
+        for s in signals:
+            try:
+                self.__handlers[s] = getsignal(s)
+            except ValueError as e:
+                if kwargs.get('fail', False):
+                    raise e
+
+    def __enter__(self):
+        for s in self.__handlers.keys():
+            signal(s, lambda *a, **kw: None)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for s, h in self.__handlers.items():
+            signal(s, h)
 
 
 class ExitHooks(object):
@@ -26,7 +52,7 @@ class ExitHooks(object):
     def exit(self, code=0):
         self.code = code
         self._orig_exit(code)
-    
+
     def quit(self, code=0):
         if self.state != "INTERRUPTED" or self._exit:
             self.exit(code)

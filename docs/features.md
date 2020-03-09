@@ -463,3 +463,14 @@ def at_terminate():
     # do something before at_exit() if something went wrong
 ...
 ```
+
+Some of these behaviors can be disabled in a block of code using the `DisableSignals` context manager by passing it the signal identifiers.
+
+```python hl_lines="2"
+...
+with DisableSignals(SIGINT, SIGTERM) as _:
+    # do something
+    # if an interrupt or termination signal is raised, it will do nothing as
+    #  long as we are in this block of code
+...
+```
