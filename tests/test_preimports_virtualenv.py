@@ -19,7 +19,8 @@ class TestPreimportsVirtualenv(TestCase):
             f.write("asciistuff")
         self.assertRaises(Exception, virtualenv.activate, "venv_does_not_exist")
         virtualenv.setup(VENV, REQS)
-        remove(REQS)
+        if exists(REQS):
+            remove(REQS)
         virtualenv.setup(VENV, ["os"])
         virtualenv.install("asciistuff", "-v", progress_bar="off")
         os.environ['PIP_REQ_TRACKER'] = "/tmp/does_not_exist"

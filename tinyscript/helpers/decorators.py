@@ -3,7 +3,7 @@
 
 """
 import logging
-from functools import update_wrapper, wraps
+from functools import wraps
 from sys import exc_info
 try:  # PYTHON3
     from inspect import getfullargspec
