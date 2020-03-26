@@ -13,8 +13,7 @@ from argparse import _ActionsContainer, _ArgumentGroup, \
                      Action, ArgumentError, RawTextHelpFormatter, SUPPRESS, \
                      _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, \
                      ArgumentParser as BaseArgumentParser
-from gettext import gettext as gt
-from os import access, environ, X_OK
+from os import environ
 from os.path import abspath, basename, dirname, splitext
 from stat import S_IXUSR
 try:
@@ -25,11 +24,14 @@ except ImportError:
 from .helpers.constants import PYTHON3
 from .helpers.inputs import user_input
 from .helpers.licenses import *
-from .helpers.data.types import is_long_opt, is_pos_int, is_short_opt
+from .helpers.data.types import is_executable, is_long_opt, is_pos_int, \
+                                is_short_opt
+from .helpers.text import *
+from .helpers.text import configure_docformat, txt_terminal_render
 from .loglib import logger
 
 
-__all__ = ["gt", "ArgumentParser", "DUNDERS", "SCRIPTNAME_FORMAT", "SUPPRESS"]
+__all__ = ["ArgumentParser", "DUNDERS", "SCRIPTNAME_FORMAT", "SUPPRESS"]
 
 
 BASE_DUNDERS = ['__author__', '__copyright__', '__credits__', '__license__',
@@ -128,7 +130,7 @@ class _NewSubParsersAction(_SubParsersAction):
         parser = self._parser_class(ArgumentParser.globals_dict, add_help=False,
                                     **kwargs)
         parser.name = name
-        i = parser.add_argument_group(gt("extra arguments"))
+        i = parser.add_argument_group(txt2title(gt("extra arguments")))
         i.add_argument("-h", "--help", action='help', default=SUPPRESS,
                        help=gt("show this help message and exit"))
         # add it to the map
@@ -271,20 +273,20 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     name = "main"
     
     def __init__(self, globals_dict=None, *args, **kwargs):
+        self._docfmt = globals_dict.get('__docformat__')
+        configure_docformat(globals_dict)
         self._config_parsed = False
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         ArgumentParser.globals_dict = gd = globals_dict or {}
-        self.examples = gd.get('__examples__')
-        if self.examples == [] and len(self.examples) == 0:
-            self.examples = None
-        script = gd.get('__file__') or sys.argv[0]
+        self.examples = gd.get('__examples__', [])
+        script = gd.get('__file__', sys.argv[0])
         if script and kwargs.get('prog') is None:
             path = abspath(script)
             root = dirname(path)
             script = basename(script)
             kwargs['prog'] = "python{} ".format(["", "3"][PYTHON3]) + \
-                           script if not access(path, X_OK) else "./" + script \
-                           if root not in environ['PATH'].split(":") else script
+                          script if not is_executable(path) else "./" + script \
+                          if root not in environ['PATH'].split(":") else script
             ArgumentParser.prog = kwargs['prog']
             script, _ = splitext(script)
         kwargs['add_help'] = False
@@ -295,9 +297,11 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             _ = ["{} {}".format(ArgumentParser.prog, e) for e in self.examples]
             _ = list(filter(lambda x: x.startswith(kwargs['prog']), _))
             if len(_) > 0:
-                kwargs['epilog'] = gt("Usage example{}"
-                                      .format(["", "s"][len(_) > 1])) + \
-                                   ":\n" + '\n'.join("  " + e for e in _)
+                kwargs['epilog'] = txt2title(gt("Usage example{}"
+                                   .format(["", "s"][len(_) > 1])) + ":")
+                e = '\n'.join(["\n", "  "][self._docfmt is None] + \
+                              txt2paragraph(e) for e in _)
+                kwargs['epilog'] += "\n" + e
         # adapt the script name ; if SCRIPTNAME is provided, it supersedes
         #  SCRIPTNAME_FORMAT, otherwise compute the name according to the
         #  format specified in SCRIPTNAME_FORMAT
@@ -314,13 +318,13 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self.scriptname = sname
         # format the description message
         d = sname
-        v = str(gd.get('__version__') or "")
-        if v:
-            d += " v" + v
+        d += " " + str(gd.get('__version__') or "")
+        d = txt2title(d, level=1)
         v = gd.get('__status__')
         if v:
             d += " (" + v + ")"
-        l = max(list(map(lambda x: len(x.strip('_')), BASE_DUNDERS)))
+        l = max(list(map(lambda x: len(txt2italic(x.strip('_'))),
+                         BASE_DUNDERS)))
         for k in BASE_DUNDERS:
             m = gd.get(k)
             if m:
@@ -328,12 +332,14 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                     m = copyright(m)
                 elif k == '__license__':
                     m = license(m, True) or m
-                d += ("\n{: <%d}: {}" % l).format(k.strip('_').capitalize(), m)
+                meta = ("{: <%d}: {}" % l) \
+                       .format(txt2italic(k.strip('_').capitalize()), m)
                 if k == '__author__':
-                    e = gd.get('__email__')
+                    e = txt2email(gd.get('__email__'))
                     if e:
-                        d += " ({})".format(e)
-        doc = gd.get('__doc__')
+                        meta += " ({})".format(e)
+                d += ["\n\n", "\n"][self._docfmt is None] + txt2paragraph(meta)
+        doc = txt2blockquote(gd.get('__doc__') or "")
         if doc:
             d += "\n\n" + doc
         kwargs['description'] = d
@@ -501,7 +507,82 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         """
         argv = random.choice(self.examples).replace("--demo", "")
         self._reparse_args['pos'] = shlex.split(argv)
+
+    def error(self, message):
+        """
+        Prints a usage message incorporating the message to stderr and exits in
+         the case when no new arguments to be reparsed, that is when no special
+         action like _DemoAction (triggering parser.demo_args()) or 
+         _WizardAction (triggering input_args()) was called. Otherwise, it
+         simply does not stop execution so that new arguments can be reparsed.
+        """
+        if all(len(x) == 0 for x in self._reparse_args.values()):
+            # normal behavior with argparse
+            self.print_usage(sys.stderr)
+            self.exit(2, gt("%s: error: %s\n") % (self.prog, message))
+
+    def format_help(self):
+        text = ""
+        # description
+        formatter = self._get_formatter()
+        formatter.add_text(self.description)
+        text += formatter.format_help() + "\n"
+        # usage
+        text += self.format_usage().rstrip("\n")
+        # positionals, optionals and user-defined groups
+        for action_group in self._action_groups:
+            formatter = self._get_formatter()
+            formatter.start_section(txt2title(gt(action_group.title) + ":"))
+            formatter.add_text(action_group.description)
+            formatter.add_arguments(action_group._group_actions)
+            formatter.end_section()
+            actions = formatter.format_help()
+            if self._docfmt:
+                a = ""
+                for i, line in enumerate(actions.splitlines()):
+                    s, dedent = line.lstrip(), 0
+                    if i == 0:
+                        # action_group.title has ":" added after txt2title(...)
+                        #  causing an extra ":" to be appended
+                        if self._docfmt in ["bbcode", "html"]:
+                            # for markup languages with tags, ":" appears behind
+                            #  the title tag
+                            a += line.rstrip(":") + "\n"
+                        else:
+                            # for other markup languages without tags, ":"
+                            #  appears at the end in duplicate
+                            a += line.rstrip(":") + ":\n"
+                        continue
+                    if i == 1 and self._docfmt == "rst":
+                        # action_group.title has ":" added after txt2title(...)
+                        #  causing an extra ":" to be appended behind the
+                        #  underline, making rendering fail
+                        a = a.rstrip("\n") + "\n" + line.rstrip(":") + "\n"
+                        continue
+                    if s[0] in "-*":
+                        dedent = len(line) - len(s)
+                    a += (line + "\n\n") if line.rstrip()[-1] == ":" else \
+                         (txt2paragraph(line[dedent:]) + "\n")
+                actions = a
+            text += actions + "\n"
+        # epilog
+        formatter = self._get_formatter()
+        formatter.add_text(self.epilog)
+        text += formatter.format_help()
+        # determine help from format above
+        return txt_terminal_render(text)
     
+    def format_usage(self):
+        formatter = self._get_formatter()
+        formatter.add_usage(self.usage, self._actions,
+                            self._mutually_exclusive_groups)
+        text = formatter.format_help()
+        if self._docfmt:
+            title, usage = text.split(": ", 1)
+            text = txt2title(title + ":") + "\n\n" + \
+                   txt2paragraph(usage.rstrip("\n")) + "\n"
+        return text
+
     def input_args(self):
         """
         Additional method for making the user input arguments manually.
@@ -516,6 +597,9 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         """
         if not namespace:  # use the new Namespace class for handling _config
             namespace = Namespace(self)
+        if len(sys.argv) == 2 and sys.argv[1] == "DISPLAY_USAGE":
+            self.print_usage()
+            self.exit()
         namespace = super(ArgumentParser, self).parse_args(args, namespace)
         if len(self._reparse_args['pos']) > 0 or \
            len(self._reparse_args['opt']) > 0 or \
@@ -525,30 +609,24 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         # process "-hh..." here, after having parsed the arguments
         help_level = getattr(namespace, "help", 0)
         if help_level > 0:
+            eh = getattr(self, "_extra_help", None)
+            if eh and sys.argv[1] == "--help":
+                self.description += "\n\n" + eh.strip("\n")
             self.print_help()
             self.print_extended_help(help_level)
             self.exit()
         return namespace
-
-    def error(self, message):
-        """
-        Prints a usage message incorporating the message to stderr and exits in
-         the case when no new arguments to be reparsed, that is when no special
-         action like _DemoAction (triggering parser.demo_args()) or 
-         _WizardAction (triggering input_args()) was called. Otherwise, it
-         simply does not stop execution so that new arguments can be reparsed.
-        """
-        if all(len(x) == 0 for x in self._reparse_args.values()):
-            # normal behavior with argparse
-            self.print_usage(sys.stderr)
-            self.exit(2, gt("%s: error: %s\n") % (self.prog, message))
     
     def print_extended_help(self, level=1, file=None):
         if not isinstance(self.details, (tuple, list, set)):
             self.details = [self.details]
         for _, message in zip((level - 1) * [None], self.details):
             message = "\n{}\n".format(message.strip())
-            self._print_message(message, file)
+            self._print_message(message, file or sys.stdout)
+
+    def print_usage(self, file=None):
+        self._print_message(txt_terminal_render(self.format_usage()),
+                            file or sys.stdout)
 
     @classmethod
     def add_to_config(cls, section, name, value):

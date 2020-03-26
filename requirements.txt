@@ -5,6 +5,7 @@ coloredlogs
 colorful
 ipaddress
 markdown2
+mdv
 netaddr
 netifaces
 numpy; python_version>='3.4'
@@ -12,6 +13,7 @@ pandas; python_version>='3.4'
 patchy
 pathlib
 pip
+pypandoc
 python-slugify
 six
 tqdm

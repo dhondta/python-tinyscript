@@ -150,6 +150,7 @@ $ python
               'ast',
               'base64',
               'binascii',
+              'codecs',
               'collections',
               'configparser',
               'ctypes',

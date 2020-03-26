@@ -69,7 +69,19 @@ class TestParser(TestCase):
     
     def test_initialization_flags(self):
         sys.argv[1:] = ["--stats"]
-        initialize(False, True, False, *([True] * 10))
+        initialize(
+            add_banner=False,
+            add_config=False,
+            add_demo=True,
+            add_interact=True,
+            add_progress=True,
+            add_step=True,
+            add_time=True,
+            add_version=True,
+            add_wizard=True,
+            multi_level_debug=True,
+            ext_logging=True,
+        )
         self.assertFalse(args.interact)
         self.assertFalse(args.progress)
         self.assertFalse(args.relative)
@@ -139,6 +151,13 @@ class TestParser(TestCase):
         initialize(noargs_action="time")
         self.assertTrue(args.stats)
         self.assertFalse(args.timings)
+    
+    def test_noargs_usage(self):
+        sys.argv[1:] = []
+        # SystemExit is raised with code 0 as the usage is displayed then it
+        #  exits
+        with self.assertRaises(SystemExit):
+            initialize(noargs_action="usage")
     
     def test_noargs_version(self):
         temp_stdout(self)

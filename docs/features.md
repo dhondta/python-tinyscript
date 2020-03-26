@@ -22,10 +22,8 @@ initialize()
 
 This gives the following help message:
 
-```sh hl_lines="4 5 6 7 8 9 10 12 19"
+```sh hl_lines="2 3 4 5 6 7 8 12 19"
 $ python tool.py -h
-usage: tool [-h] [-v]
-
 MyScript v1.0
 Author   : John Doe (john.doe@example.com)
 Copyright: © 2020 John Doe Inc.
@@ -33,6 +31,8 @@ License  : GNU Affero General Public License v3.0
 Reference: ...
 Source   : ...
 Training : ...
+
+usage: tool [-h] [-v]
 
 This tool ...
 
@@ -55,13 +55,33 @@ If not using `__script__`, the name of the script will be used taking a format i
 
 -----
 
+## Help message styling
+
+Help can be formatted using multiple markup languages for making the help text more user-friendly with colors and styling. This is configured by using the `__docformat__` dunder (which can also be `None`, meaning no formatting). This feature is supported by [`mdv`](https://github.com/axiros/terminal_markdown_viewer) and the theme can be tuned by using the constant `DOCFORMAT_THEME`.
+
+Currently, the following markup languages are supported: HTML, Markdown, RestructuredText and Textile.
+
+```python hl_lines=""
+...
+__docformat__ = "html"  # None|"md"|"rst"|"textile"
+...
+DOCFORMAT_THEME = "Star"
+...
+```
+
+!!! note "List of themes"
+    
+    Unfortunately, the documentation of [`mdv`](https://github.com/axiros/terminal_markdown_viewer) is a bit poor. However, one can find the names of the available themes in [this JSON](https://github.com/axiros/terminal_markdown_viewer/blob/master/mdv/ansi_tables.json).
+
+-----
+
 ## Script banner
 
 Displaying a banner can be achieved in two ways:
 
 - by passing a keyword argument `add_banner=True` ; in this case, a random font is used
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initialize(...
                add_banner=True,
@@ -90,7 +110,7 @@ BANNER_STYLE = {'adjust': "right", 'fgcolor': "blue"}
 
 This is achieved by passing a keyword argument `sudo=[boolean]` to `initialize(...)`.
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initalize(...
               sudo=True,
@@ -108,7 +128,7 @@ This will prompt the user for providing superuser credentials in case of insuffi
 
 This is achieved by passing a keyword argument `multi_level_debug=[boolean]` to `initialize(...)`.
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initalize(...
               multi_level_debug=True,
@@ -133,7 +153,7 @@ This modifies the classical `-v`/`--verbose` option to `-v`/`-vv`/`-vvv`.
 
 This is achieved by passing a keyword argument `ext_logging=[boolean]` to `initialize(...)`.
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initalize(...
               ext_logging=True,
@@ -178,19 +198,42 @@ This modifies the classical `-h`/`--help` option to `-h`/`-hh`/`-hhh`.
 
 -----
 
+## Short/Long help
+
+This is achieved by setting the `__doclong__` metadata at the beginning of the script. When it is defined, `__doc__` is displayed with "`-h`" while `__doc__` and `__doclong__` are displayed with "`--help`".
+
+```python hl_lines="2 3 4"
+    ...
+    __doclong__ = """
+    Extra doc to be displayed when using --help but not when using -h.
+    """
+    ...
+    initalize(...)
+    ...
+```
+
+This modifies the classical behavior of `-h`/`--help`.
+
+!!! note "Precedence and conflict"
+
+    This dunder is superseeded by `__details__` when it is defined.
+    
+    Also, adding a new short argument "`-h`" for another purpose will then cause the help to be viewable only in its long form with "`--help`".
+
+-----
+
 ## Playing a demo
 
 This is achieved by passing a keyword argument `add_demo=[boolean]` to `initialize(...)` and requires that `__examples__` is set as a non-empty list.
 
-```python hl_lines="2 7"
+```python hl_lines="2 5"
 ...
 __examples__ = ["test", "-sv", "-d --test"]
 ...
-    ...
-    initalize(...
-              add_demo=True,
-              ...)
-    ...
+initalize(...
+          add_demo=True,
+          ...)
+...
 ```
 
 This adds the `--demo` option to pick a random example and execute it.
@@ -203,7 +246,7 @@ This adds the `--demo` option to pick a random example and execute it.
 
 This is achieved by passing a keyword argument `add_step=[boolean]` to `initialize(...)`. It will allow to pause the script/tool where a `step()` function or a `Step(...)` context manager is used when the step mode is enabled.
 
-```python hl_lines="4 5 11 14 16"
+```python hl_lines="4 5 9 12 14"
 ...
 def my_function(...):
     # do something
@@ -211,16 +254,15 @@ def my_function(...):
     with Step(at_end=True) as _:
         # this will stop after the execution of the block
 ...
-    ...
-    initalize(...
-              add_step=True,
-              ...)
-    ...
-    with Step("this is a first step") as step1:
-        # do something
-    with Step("this is a second step") as step2:
-        # do something else
-    ...
+initalize(...
+          add_step=True,
+          ...)
+...
+with Step("this is a first step") as step1:
+    # do something
+with Step("this is a second step") as step2:
+    # do something else
+...
 ```
 
 This adds the `--step` option to enable the step mode.
@@ -231,7 +273,7 @@ This adds the `--step` option to enable the step mode.
 
 This is achieved by passing a keyword argument `add_time=[boolean]` to `initialize(...)`. It will measure time in the script/tool where a `get_time()` or `get_time_since_last()` function or a `Timer(...)` context manager is used.
 
-```python hl_lines="4 6 13 16 18"
+```python hl_lines="4 6 11 14 16"
 ...
 def my_function(...):
     # do something
@@ -241,16 +283,15 @@ def my_function(...):
         # this will measure time for this block of instructions
         # it will also stop block's execution after 10 seconds
 ...
-    ...
-    initalize(...
-              add_time=True,
-              ...)
-    ...
-    with Timer("First block with time measure") as timer1:
-        # do something
-    with Timer("Second block with time measure") as timer2:
-        # do something else
-    ...
+initalize(...
+          add_time=True,
+          ...)
+...
+with Timer("First block with time measure") as timer1:
+    # do something
+with Timer("Second block with time measure") as timer2:
+    # do something else
+...
 ```
 
 This adds two options:
@@ -270,7 +311,7 @@ This adds two options:
 
 This can be done by passing a keyword argument `add_progress=[boolean]` to `initialize(...)`. It will allow to display a progress bar where `progressbar` or `progress_manager` is used. This feature relies on the [`tqdm`](https://github.com/tqdm/tqdm) module.
 
-```python hl_lines="4 7"
+```python hl_lines="3 6"
     ...
     initalize(...
               add_progress=True,
@@ -289,7 +330,7 @@ This adds the `--progress` option to enable the progress mode.
 
 This is achieved by passing a keyword argument `add_interact=[boolean]` to `initialize(...)`. It allows to interact with the program during its execution by spawning a Python interpreter. This feature relies on the built-in `code` module.
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initalize(...
               add_interact=True,
@@ -309,7 +350,7 @@ This adds multiple options:
 
 This is achieved by passing a keyword argument `add_wizard=[boolean]` to `initialize(...)`. It will interactively ask for prividing arguments to the script/tool.
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initalize(...
               add_wizard=True,
@@ -325,7 +366,7 @@ This adds the `--wizard` option for enabling the wizard mode.
 
 This is achieved by passing a keyword argument `add_config=[boolean]` to `initialize(...)`. It will allow to read/write a configuration INI file with the arguments of the script. This can be useful for passing the right bunch of arguments in a saved file to a colleague or simply if you don't remember how to use your script with a complex configuration.
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initalize(...
               add_config=True,
@@ -348,7 +389,7 @@ This adds two options:
 
 This is achieved by passing a keyword argument `add_version=[boolean]` to `initialize(...)`. It provides an option to the script/tool for displaying the version from the metadata `__version__`.
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initalize(...
               add_version=True,
@@ -364,7 +405,7 @@ This adds the `--version` option for displaying the version from `__version__`.
 
 This is achieved by passing a keyword argument `noargs_action="[action]"` to `initialize(...)`. It triggers the related action when no argument is given by the user. It thus overrides the default behavior of argparse, which is to display an error message telling that too few arguments were given.
 
-```python hl_lines="4"
+```python hl_lines="3"
     ...
     initalize(...
               noargs_action="...",
@@ -391,7 +432,7 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
 
 This is achieved by passing a keyword argument `report_func=[function]` to `initialize(...)`. It allows to trigger a user-provided report generation function which must use Tinyscript's report objects.
 
-```python hl_lines="2 15"
+```python hl_lines="2 6 7 8 9 14"
 ...
 def make_report():
     # define a list of headers here

@@ -18,6 +18,7 @@ from .timing import set_time_items
 from .handlers import *
 from .helpers.constants import LINUX, PYTHON3
 from .helpers.data.types import ip_address, port_number
+from .helpers.text import configure_docformat, gt, txt2title
 from .interact import set_interact_items
 from .progress import set_progress_items
 from .loglib import *
@@ -42,9 +43,7 @@ def _save_config(glob):
                              .format(cf))
 
 
-def initialize(sudo=False,
-               multi_level_debug=False,
-               add_banner=False,
+def initialize(add_banner=False,
                add_config=False,
                add_demo=False,
                add_interact=False,
@@ -53,6 +52,8 @@ def initialize(sudo=False,
                add_time=False,
                add_version=False,
                add_wizard=False,
+               sudo=False,
+               multi_level_debug=False,
                exit_at_interrupt=True,
                ext_logging=False,
                noargs_action=None,
@@ -63,11 +64,6 @@ def initialize(sudo=False,
      logger to be inserted in the input dictionary of global variables from the
      calling script.
 
-    :param sudo:              if True, require sudo credentials and re-run
-                               script with sudo
-    :param multi_level_debug: allow to use -v, -vv, -vvv (adjust logging level)
-                               instead of just -v (only debug on/off)
-    :param relative_time:     use relative time for log messages
     :param add_banner:        add an ASCII banner when starting the tool
     :param add_config:        add an option to input an INI configuration file
     :param add_demo:          add an option to re-run the process using a random
@@ -80,6 +76,10 @@ def initialize(sudo=False,
     :param add_version:       add a version option
     :param add_wizard:        add an option to run a wizard, asking for each
                                input argument
+    :param sudo:              if True, require sudo credentials and re-run
+                               script with sudo
+    :param multi_level_debug: allow to use -v, -vv, -vvv (adjust logging level)
+                               instead of just -v (only debug on/off)
     :param exit_at_interrupt: enable exit at interrupt
     :param ext_logging:       extended logging options
     :param noargs_action:     action to be performed when no argument is input
@@ -108,7 +108,8 @@ def initialize(sudo=False,
         frame = frame.f_back
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
            'progress': add_progress, 'step': add_step, 'time': add_time,
-           'version': add_version, 'wizard': add_wizard, 'help': True}
+           'version': add_version, 'wizard': add_wizard,
+           'help': True, 'usage': True}
     p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
     add['demo'] = add['demo'] and p.examples
@@ -154,10 +155,12 @@ def initialize(sudo=False,
     #  clean list of calls and an empty _config attribute
     parser_calls = []
     ArgumentParser.reset()
+    # configure documentation formatting
+    configure_docformat(glob)
     #  config handling feature, for reading/writing an INI config file with the
     #   input arguments, e.g. for future reuse
     if add['config']:
-        c = p.add_argument_group(gt("config arguments"))
+        c = p.add_argument_group("config arguments")
         opt = c.add_argument("-r", "--read-config", action='config',
                              help=gt("read args from a config file"),
                              note=gt("this overrides other arguments"))
@@ -165,7 +168,7 @@ def initialize(sudo=False,
                        help=gt("write args to a config file"))
         if noarg and noargs_action == "config":
             sys.argv[1:] = [opt, "config.ini"]
-    i = p.add_argument_group(gt("extra arguments"))
+    i = p.add_argument_group("extra arguments")
     #  demonstration feature, for executing an example amongst these defined in
     #   __examples__, useful for observing what the tool does
     if add['demo']:
@@ -180,6 +183,7 @@ def initialize(sudo=False,
                                help=gt("show extended help message and exit"),
                                note=gt("-hhh is the highest help detail level"))
         else:
+            p._extra_help = glob.get('__doclong__')
             opt = i.add_argument("-h", "--help", action='help', prefix="show",
                                  help=gt("show this help message and exit"))
         if noarg and noargs_action == "help":
@@ -187,7 +191,7 @@ def initialize(sudo=False,
     #  interaction mode feature, for interacting with the tool during its
     #   execution, useful for debugging when it is complex
     if add['interact']:
-        j = p.add_argument_group(gt("interaction arguments"))
+        j = p.add_argument_group("interaction arguments")
         opt = j.add_argument("--interact", action="store_true",
                              suffix="mode", help=gt("interaction mode"))
         if opt:
@@ -212,7 +216,7 @@ def initialize(sudo=False,
             sys.argv[1:] = [opt]
     #  timing mode feature, for measuring time along the execution of the tool
     if add['time']:
-        b = p.add_argument_group(gt("timing arguments"))
+        b = p.add_argument_group("timing arguments")
         opt = b.add_argument("--stats", action='store_true', last=True,
                              prefix="time",
                              help=gt("display execution time stats at exit"))
@@ -263,7 +267,7 @@ def initialize(sudo=False,
             for f in all_list:
                 glob[f] = globals()[f] = getattr(report, f)
             # now populate the parser with report-related arguments
-            r = p.add_argument_group(gt("report arguments"))
+            r = p.add_argument_group("report arguments")
             output_func = list(filter(lambda x: not x[0].startswith('_'),
                                       getmembers(Report, predicate=isfunction)))
             choices = list(map(lambda x: x[0], output_func))
@@ -292,12 +296,13 @@ def initialize(sudo=False,
         if LINUX:
             i.add_argument("-s", "--syslog", action="store_true", last=True,
                            suffix="mode", help=gt("log to /var/log/syslog"))
+    # display short usage information about the tool
+    if noarg and noargs_action == "usage":
+        sys.argv[1:] = ["DISPLAY_USAGE"]
+    # now parse inputs
     glob['args'], glob['parser'] = p.parse_args(), p
     # 3) if sudo required, restart the script
     if sudo:
-        # FIXME: when prompting for sudo and restarting the script, some imports
-        #         fail (e.g. with DroneSploit ; import error with
-        #         FrameworkConsole)
         # if not root, restart the script in another process and jump to this
         if os.geteuid() != 0:
             os.execvp("sudo", ["sudo", sys.executable] + sys.argv)

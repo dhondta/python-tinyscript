@@ -16,6 +16,7 @@ from .inputs import *
 from .licenses import *
 from .path import *
 from .termsize import *
+from .text import *
 from .timeout import *
 
 from .classprop import __features__ as _classprop
@@ -29,11 +30,12 @@ from .inputs import __features__ as _inputs
 from .licenses import __features__ as _licenses
 from .path import __features__ as _path
 from .termsize import __features__ as _termsize
+from .text import __features__ as _text
 from .timeout import __features__ as _timeout
 
 
 __helpers__ = _common + _data + _decorators + _fexec + _inputs + _licenses + \
-              _path + _termsize + _timeout
+              _path + _termsize + _text + _timeout
 
 ts = ModuleType("ts", """
     Tinyscript helpers
