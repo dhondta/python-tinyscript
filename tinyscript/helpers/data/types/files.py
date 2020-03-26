@@ -2,7 +2,7 @@
 """Files/Folders-related checking functions and argument types.
 
 """
-from os import makedirs
+from os import access, makedirs, X_OK
 from os.path import exists, isdir, isfile
 
 from .strings import _str2list
@@ -12,8 +12,9 @@ __all__ = __features__ = []
 
 
 # dummy shortcuts, compliant with the is_* naming convention
-__all__ += ["is_dir", "is_file", "is_folder"]
+__all__ += ["is_dir", "is_executable", "is_file", "is_folder"]
 is_dir = is_folder = isdir
+is_executable = lambda f: access(f, X_OK)
 is_file = isfile
 
 

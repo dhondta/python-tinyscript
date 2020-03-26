@@ -147,6 +147,7 @@ class Path(BasePath):
             new = self.joinpath(str(prefix) + _ + str(suffix))
             if not new.exists():
                 return new
+    rand_folder_name = generate
     
     def is_hidden(self):
         """ Check if the current path is hidden. """

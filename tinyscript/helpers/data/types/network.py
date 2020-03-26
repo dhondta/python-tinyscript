@@ -17,7 +17,7 @@ __all__ = __features__ = []
 # network-related check functions
 __all__ += ["is_defgw", "is_domain", "is_email", "is_gw", "is_hostname",
             "is_ifaddr", "is_ip", "is_ipv4", "is_ipv6", "is_mac", "is_netif",
-            "is_port"]
+            "is_port", "is_url"]
 is_defgw    = lambda gw:  __gateway_address(gw, True, False) is not None
 is_domain   = lambda n:   __domain_name(n, False, False) is not None
 is_email    = lambda e:   __email_address(e, False) is not None
@@ -29,7 +29,8 @@ is_ipv4     = lambda ip:  __ip_address(ip, 4, False) is not None
 is_ipv6     = lambda ip:  __ip_address(ip, 6, False) is not None
 is_mac      = lambda mac: __mac_address(mac, False) is not None
 is_netif    = lambda nif: __network_interface(nif, False) is not None
-is_port     = lambda p:   is_int(p) and 0 < p < 2**16
+is_port     = lambda p:   isinstance(p, int) and 0 < p < 2**16
+is_url      = lambda url: __url(url, False) is not None
 
 
 # network-related argument types
@@ -42,7 +43,7 @@ __all__ += ["default_gateway_address", "domain_name", "email_address",
             "ipv6_address_network", "interface_address",
             "interface_address_list", "interface_address_filtered_list",
             "mac_address", "network_interface", "port_number",
-            "port_number_range"]
+            "port_number_range", "url"]
 
 
 def __domain_name(name, dotted=False, fail=True):
@@ -200,6 +201,43 @@ def __network_interface(netif, fail=True):
     if fail:
         raise ValueError("Not an existing interface")
 network_interface = lambda nif: __network_interface(nif)
+
+
+def __url(url, fail=True):
+    """ URL hyperlink. """
+    if len(url) > 2048:
+        raise ValueError("Not a valid URL (too long)")
+    try:
+        scheme, link = url.split("://")
+    except ValueError:
+        if fail:
+            raise ValueError("Not a valid URL (cannot parse scheme)")
+        else:
+            return
+    if len(scheme) > 36:
+        if fail:
+            raise ValueError("Not a valid URL (invalid scheme)")
+        else:
+            return
+    link = link.split("?")
+    link, query = link if len(link) == 2 else (link[0], "")
+    link = link.split("/")
+    link, reqpath = link if len(link) == 2 else (link[0], "")
+    link = link.split("@")
+    auth, domain = link if len(link) == 2 else ("", link[0])
+    if not is_domain(domain):
+        if fail:
+            raise ValueError("Not a valid URL (bad domain)")
+        else:
+            return
+    auth = auth.split(":")
+    if auth != [''] and (len(auth) != 2 or auth[0] == "" and auth[1] == ""):
+        if fail:
+            raise ValueError("Not a valid URL (bad auth)")
+        else:
+            return
+    return url
+url = lambda url: __url(url)
 
 
 def port_number(port):

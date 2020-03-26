@@ -144,6 +144,7 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_bool` | boolean
 `ts.is_dict` | dictionary
 `ts.is_dir` / `ts.is_folder` | dummy shortcuts to `os.path.isdir`
+`ts.is_executable` | whether the given path has the execution flag
 `ts.is_file` | dummy shortcut to `os.path.isfile`
 `ts.is_hex` | hexadecimal string (case insensitive)
 `ts.is_int` / `ts.is_pos_int` / `ts.is_neg_int` | integer (positive / negative)
@@ -209,6 +210,7 @@ And for network-related data:
 `ts.is_mac` | MAC address
 `ts.is_netif` | network interface
 `ts.is_port` | port number
+`ts.is_url` | Uniform Resource Locator
 
 ## Common argument types
 
@@ -260,6 +262,7 @@ And for network-related types:
 `ts.network_interface` | `str` | valid network interface on the current system
 `ts.port_number` | `int` | valid port number
 `ts.port_number_range` | `list(int)` | valid list of port numbers, ranging from and to the given bounds
+`ts.url` | valid Uniform Resource Locator
 
 -----
 
