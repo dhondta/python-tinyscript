@@ -4,7 +4,6 @@
 """
 import mdv
 import re
-import tomd
 from gettext import gettext as gt
 from pypandoc import convert_text
 
