@@ -61,7 +61,7 @@ Help can be formatted using multiple markup languages for making the help text m
 
 Currently, the following markup languages are supported: HTML, Markdown, RestructuredText and Textile.
 
-```python hl_lines=""
+```python hl_lines="2 4"
 ...
 __docformat__ = "html"  # None|"md"|"rst"|"textile"
 ...

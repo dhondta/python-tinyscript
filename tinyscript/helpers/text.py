@@ -7,7 +7,6 @@ import re
 from gettext import gettext as gt
 from pypandoc import convert_text
 
-from .convert import to_markdown
 from .data.types.network import is_email, is_url
 
 
