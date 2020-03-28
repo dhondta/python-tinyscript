@@ -131,7 +131,9 @@ class _NewSubParsersAction(_SubParsersAction):
                                     **kwargs)
         parser.name = name
         i = parser.add_argument_group(txt2title(gt("extra arguments")))
-        i.add_argument("-h", "--help", action='help', default=SUPPRESS,
+        i.add_argument("-h", action="usage", prefix="show",
+                       help=gt("show usage message and exit"))
+        i.add_argument("--help", action="help", prefix="show",
                        help=gt("show this help message and exit"))
         # add it to the map
         self._name_parser_map[name] = parser
@@ -139,6 +141,20 @@ class _NewSubParsersAction(_SubParsersAction):
         for alias in aliases:
             self._name_parser_map[alias] = parser
         return parser
+
+
+class _UsageAction(Action):
+    """
+    Custom action for displaying the usage message.
+    """
+    def __init__(self, option_strings, dest=SUPPRESS, help=None):
+        super(_UsageAction, self).__init__(option_strings=option_strings,
+                                           dest=SUPPRESS, default=SUPPRESS,
+                                           nargs=0, help=gt(help))
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.print_usage()
+        parser.exit()
 
 
 class _WizardAction(Action):
@@ -166,6 +182,7 @@ class _NewActionsContainer(_ActionsContainer):
         self.register('action', 'config', _ConfigAction)
         self.register('action', 'demo', _DemoAction)
         self.register('action', 'extend', _ExtendAction)
+        self.register('action', 'usage', _UsageAction)
         self.register('action', 'wizard', _WizardAction)
     
     def add_argument(self, *args, **kwargs):
@@ -198,7 +215,8 @@ class _NewActionsContainer(_ActionsContainer):
             short_opt = list(filter(is_short_opt, args))
             if len(short_opt) > 0:
                 args.remove(short_opt[0])
-                return self.add_argument(*args, **kwargs)
+                if len(args) > 0:
+                    return self.add_argument(*args, **kwargs)
             # otherwise, retry after modifying the long option string with the
             #  precedence to the prefix (if set) then the suffix (if set)
             long_opt = list(filter(is_long_opt, args))
@@ -479,8 +497,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         for a in filter(lambda _: self.is_action(_, 'parsers'),
                         self._actions):
             yield a
-        
-        
+    
     def config_args(self, section="main"):
         """
         Additional method for feeding input arguments from a config file.
@@ -507,7 +524,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         """
         argv = random.choice(self.examples).replace("--demo", "")
         self._reparse_args['pos'] = shlex.split(argv)
-
+    
     def error(self, message):
         """
         Prints a usage message incorporating the message to stderr and exits in
@@ -520,7 +537,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             # normal behavior with argparse
             self.print_usage(sys.stderr)
             self.exit(2, gt("%s: error: %s\n") % (self.prog, message))
-
+    
     def format_help(self):
         text = ""
         # description
@@ -528,7 +545,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         formatter.add_text(self.description)
         text += formatter.format_help() + "\n"
         # usage
-        text += self.format_usage().rstrip("\n")
+        text += self.format_usage().rstrip("\n") + "\n\n"
         # positionals, optionals and user-defined groups
         for action_group in self._action_groups:
             formatter = self._get_formatter()
@@ -537,34 +554,33 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             formatter.add_arguments(action_group._group_actions)
             formatter.end_section()
             actions = formatter.format_help()
-            if self._docfmt:
-                a = ""
-                for i, line in enumerate(actions.splitlines()):
-                    s, dedent = line.lstrip(), 0
-                    if i == 0:
-                        # action_group.title has ":" added after txt2title(...)
-                        #  causing an extra ":" to be appended
-                        if self._docfmt in ["bbcode", "html"]:
-                            # for markup languages with tags, ":" appears behind
-                            #  the title tag
-                            a += line.rstrip(":") + "\n"
-                        else:
-                            # for other markup languages without tags, ":"
-                            #  appears at the end in duplicate
-                            a += line.rstrip(":") + ":\n"
-                        continue
-                    if i == 1 and self._docfmt == "rst":
-                        # action_group.title has ":" added after txt2title(...)
-                        #  causing an extra ":" to be appended behind the
-                        #  underline, making rendering fail
-                        a = a.rstrip("\n") + "\n" + line.rstrip(":") + "\n"
-                        continue
-                    if s[0] in "-*":
-                        dedent = len(line) - len(s)
-                    a += (line + "\n\n") if line.rstrip()[-1] == ":" else \
-                         (txt2paragraph(line[dedent:]) + "\n")
-                actions = a
-            text += actions + "\n"
+            a = ""
+            for i, line in enumerate(actions.splitlines()):
+                s, dedent = line.lstrip(), 0
+                if i == 0:
+                    # action_group.title has ":" added after txt2title(...)
+                    #  causing an extra ":" to be appended
+                    if self._docfmt == "html":
+                        # for markup languages with tags, ":" appears behind
+                        #  the title tag
+                        a += line.rstrip(":") + "\n"
+                    else:
+                        # for other markup languages without tags, ":"
+                        #  appears at the end in duplicate
+                        a += line.rstrip(":") + ":\n"
+                    continue
+                if i == 1 and self._docfmt == "rst":
+                    # action_group.title has ":" added after txt2title(...)
+                    #  causing an extra ":" to be appended behind the
+                    #  underline, making rendering fail
+                    a = a.rstrip("\n") + "\n" + line.rstrip(":") + "\n"
+                    continue
+                if self._docfmt and s[0] in "-*":
+                    dedent = len(line) - len(s)
+                a += (line + "\n\n") if line.rstrip()[-1] == ":" else \
+                     (txt2paragraph(line[dedent:]) + \
+                     ["\n\n", "\n"][self._docfmt is None])
+            text += a + "\n"
         # epilog
         formatter = self._get_formatter()
         formatter.add_text(self.epilog)
@@ -582,14 +598,14 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             text = txt2title(title + ":") + "\n\n" + \
                    txt2paragraph(usage.rstrip("\n")) + "\n"
         return text
-
+    
     def input_args(self):
         """
         Additional method for making the user input arguments manually.
         """
         for a in self._sorted_actions():
             self._set_arg(a)
-        
+    
     def parse_args(self, args=None, namespace=None):
         """
         Reparses new arguments when _DemoAction (triggering parser.demo_args())
@@ -609,9 +625,6 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         # process "-hh..." here, after having parsed the arguments
         help_level = getattr(namespace, "help", 0)
         if help_level > 0:
-            eh = getattr(self, "_extra_help", None)
-            if eh and sys.argv[1] == "--help":
-                self.description += "\n\n" + eh.strip("\n")
             self.print_help()
             self.print_extended_help(help_level)
             self.exit()
@@ -623,11 +636,11 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         for _, message in zip((level - 1) * [None], self.details):
             message = "\n{}\n".format(message.strip())
             self._print_message(message, file or sys.stdout)
-
+    
     def print_usage(self, file=None):
         self._print_message(txt_terminal_render(self.format_usage()),
                             file or sys.stdout)
-
+    
     @classmethod
     def add_to_config(cls, section, name, value):
         """
@@ -699,7 +712,7 @@ class Namespace(BaseNamespace):
         self._collisions = {a.orig: a.dest for a in parser._actions \
                             if getattr(a, "orig", None)}
         self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
-
+    
     def __getattr__(self, name):
         # handle __privdict__ entry first
         if (name.startswith("_") or name in self.excludes) and \
@@ -707,7 +720,7 @@ class Namespace(BaseNamespace):
             return self.__privdict__[name]
         # then get the attribute the normal way
         return self.__getattribute__(name)
-          
+    
     def __setattr__(self, name, value):
         # handle __privdict__ entry first
         if (name.startswith("_") or name in self.excludes) and \

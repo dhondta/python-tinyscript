@@ -37,7 +37,8 @@ usage: tool [-h] [-v]
 This tool ...
 
 extra arguments:
-  -h, --help     show this help message and exit
+  -h             show usage message and exit
+  --help         show this help message and exit
   -v, --verbose  verbose mode (default: False)
 
 Usage examples:
@@ -68,6 +69,10 @@ __docformat__ = "html"  # None|"md"|"rst"|"textile"
 DOCFORMAT_THEME = "Star"
 ...
 ```
+
+!!! warning "Various formats support"
+    
+    The support for HTML, RestructuredText and Textile is based on document conversion with ['pypandoc'](https://pypi.org/project/pypandoc/) to get Markdown before using [`mdv`](https://github.com/axiros/terminal_markdown_viewer). In some cases with complex formate text, Pandoc can cause issues with indentation or break the layout. It is then advised to only use Markdown directly to avoid any conversion.
 
 !!! note "List of themes"
     
@@ -106,7 +111,7 @@ BANNER_STYLE = {'adjust': "right", 'fgcolor': "blue"}
 
 -----
 
-## Privilege escalation
+## Privilege elevation
 
 This is achieved by passing a keyword argument `sudo=[boolean]` to `initialize(...)`.
 
@@ -200,25 +205,17 @@ This modifies the classical `-h`/`--help` option to `-h`/`-hh`/`-hhh`.
 
 ## Short/Long help
 
-This is achieved by setting the `__doclong__` metadata at the beginning of the script. When it is defined, `__doc__` is displayed with "`-h`" while `__doc__` and `__doclong__` are displayed with "`--help`".
+This is enabled by the `short_long_help` parameter of `initialize(...)` and is set to `True` by default.
 
-```python hl_lines="2 3 4"
-    ...
-    __doclong__ = """
-    Extra doc to be displayed when using --help but not when using -h.
-    """
-    ...
-    initalize(...)
-    ...
+```python hl_lines="3"
+...
+initalize(...
+          short_long_help=False,
+          ...)
+...
 ```
 
-This modifies the classical behavior of `-h`/`--help`.
-
-!!! note "Precedence and conflict"
-
-    This dunder is superseeded by `__details__` when it is defined.
-    
-    Also, adding a new short argument "`-h`" for another purpose will then cause the help to be viewable only in its long form with "`--help`".
+When set to `True`, `-h` only displays usage information and `--help` shows the full help message. If `False`, `-h` and `--help` both displays the full help message.
 
 -----
 
@@ -419,10 +416,11 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
     
     - [`config`](#using-a-configuration-ini-file)
     - [`demo`](#playing-a-demo)
-    - [`help`](#multi-level-help)
+    - [`help`](#short-long-help)
     - [`interact`](#interacting-during-the-execution)
     - [`step`](#stepping-the-execution)
     - [`time`](#timing-the-execution)
+    - [`usage`](#short-long-help)
     - [`version`](#adding-the-version-option)
     - [`wizard`](#starting-a-wizard)
 

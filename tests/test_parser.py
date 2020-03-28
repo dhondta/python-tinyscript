@@ -7,12 +7,11 @@ from tinyscript import *
 from tinyscript.parser import *
 from tinyscript.parser import _save_config, ProxyArgumentParser
 
-from utils import remove, tmpf, TestCase, temp_stdin, temp_stdout
+from utils import *
 
 
-__details__  = ["first details", "second details"]
-__examples__ = ["-v"]
-__version__  = "1.2.3"
+for k, v in FIXTURES.items():
+    globals()[k] = v
 
 INI = tmpf(ext="ini")
 INI_CONF = """[main]
@@ -36,6 +35,8 @@ class TestParser(TestCase):
     
     def setUp(self):
         global parser
+        if '__docformat__' in globals():
+            del globals()['__docformat__']
         parser = proxy_parser  # reuse the original proxy parser reference
 
     def test_input_arguments(self):
@@ -67,6 +68,26 @@ class TestParser(TestCase):
         # default verbose option still exists as only "-v" was overwritten
         self.assertEqual(args.verbose, False)
     
+    def test_help_message_variants(self):
+        # multi-level help
+        globals()['__details__'] = ["first level", "second level", "unused"]
+        for i in range(1, 5):
+            sys.argv[1:] = ["-{}".format(i * "h")]
+            self.assertRaises(SystemExit, initialize)
+        globals()['__details__'] = "single extra level"
+        for i in range(1, 5):
+            sys.argv[1:] = ["-{}".format(i * "h")]
+            self.assertRaises(SystemExit, initialize)
+        # help's documentation formats
+        globals()['__docformat__'] = "BAD"
+        self.assertRaises(ValueError, initialize)
+        for fmt in ["html", "md", "rst", "textile", None]:
+            globals()['__docformat__'] = fmt
+            parser.add_argument("--opt1")
+            parser.add_argument("--opt2", action="store_true")
+            sys.argv[1:] = ["--help"]
+            self.assertRaises(SystemExit, initialize)
+    
     def test_initialization_flags(self):
         sys.argv[1:] = ["--stats"]
         initialize(
@@ -80,6 +101,7 @@ class TestParser(TestCase):
             add_version=True,
             add_wizard=True,
             multi_level_debug=True,
+            short_long_help=False,
             ext_logging=True,
         )
         self.assertFalse(args.interact)

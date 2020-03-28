@@ -19,7 +19,19 @@ __all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep",
            "exists", "join", "logger", "makedirs", "remove", "rmdir", "rmtree",
            "sleep", "sys", "temp_stdin", "touch", "temp_stdout", "tmpf",
            "FakeLogRecord", "FakeNamespace", "TestCase", "PYTHON3",
-           "_FakeParserAction"]
+           "_FakeParserAction", "FIXTURES"]
+
+
+FIXTURES = {
+    '__author__':    "John Doe",
+    '__copyright__': "test",
+    '__doc__':       "test tool",
+    '__email__':     "john.doe@example.com",
+    '__examples__':  ["-v"],
+    '__license__':   "agpl-v3.0",
+    '__status__':    "beta",
+    '__version__':   "1.2.3",
+}
 
 
 dummy_lambda = lambda *a, **k: None

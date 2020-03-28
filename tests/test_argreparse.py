@@ -8,20 +8,6 @@ from tinyscript.argreparse import ArgumentParser, HelpFormatter, Namespace, \
 from utils import *
 
 
-FIXTURES = {
-    '__author__':    "John Doe",
-    '__copyright__': "test",
-    '__details__':   "test",
-    '__doc__':       "test tool",
-    '__email__':     "john.doe@example.com",
-    '__examples__':  [],
-    '__help__':      "an extra message in addition of __doc__",
-    '__license__':   "agpl-v3.0",
-    '__status__':    "beta",
-    '__version__':   "1.2.3",
-}
-
-
 class TestArgreparse(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -39,8 +25,10 @@ class TestArgreparse(TestCase):
 
     def test_dunders(self):
         self.assertIn("test", self.p.description)
+        self.assertIn("1.2.3", self.p.description)
         self.assertIn("agpl-v3.0", self.p.description)
         self.assertIn("John Doe", self.p.description)
+        self.assertIn("john.doe@example.com", self.p.description)
 
     def test_positional_arguments(self):
         temp_stdin(self, "input_test")
@@ -102,7 +90,8 @@ class TestArgreparse(TestCase):
         self.p.add_argument("-e", action="count")
         self.p.add_argument("--fff", action="count")
         self.p.add_argument("-g", default=1, choices=[1, 2])
-        self.p.add_argument("-h", action="help", dest=SUP, default=SUP)
+        self.p.add_argument("-h", action="usage", dest=SUP)
+        self.p.add_argument("--help", action="help", dest=SUP)
         for a in self.p._actions:
             temp_stdin(self, "\n")
             self.p._input_arg(a)
@@ -115,6 +104,8 @@ class TestArgreparse(TestCase):
         self.assertEqual(args.e, 1)
         self.assertEqual(args.fff, 2)
         self.assertEqual(args.g, 1)
+        sys.argv[1:] = ["-h"]
+        self.assertRaises(SystemExit, self.p.parse_args)
 
     def test_set_common_actions(self):
         sys.argv[1:] = ["-c"]
@@ -124,7 +115,8 @@ class TestArgreparse(TestCase):
         self.p.add_argument("-d", action="store_false")
         self.p.add_argument("-e", action="count")
         self.p.add_argument("--fff", action="count")
-        self.p.add_argument("-h", action="help", dest=SUP, default=SUP)
+        self.p.add_argument("-h", action="usage", dest=SUP)
+        self.p.add_argument("--help", action="help", dest=SUP)
         ArgumentParser.add_to_config("main", "a", "TEST")
         ArgumentParser.add_to_config("main", "b", "add")
         ArgumentParser.add_to_config("main", "c", "y")
@@ -193,6 +185,10 @@ class TestArgreparse(TestCase):
         self.p.parse_args()
         self.p.print_help()
         self.p.print_extended_help(3)
+        self.p.add_argument("-a", "--arg", help="a test argument", note="test")
+        for f in ["html", "md", "rst", "textile", None]:
+            self.p._docfmt = f
+            self.assertIsNotNone(self.p.format_help())
     
     def test_namespace(self):
         subparsers = self.p.add_subparsers(dest="command")

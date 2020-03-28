@@ -57,36 +57,69 @@ def txt_terminal_render(text, format=None):
     __check(format=format)
     if format is None:
         return text
+    # collect whitespaces in argument lines and line indentations
+    ARG_REGEX = re.compile(r"((?P<h>\-{1,2})[a-z][a-z0-9_]*(?:\s+[A-Z][A-Z_]*)?"
+                       r"(?:\,\s+(?P=h)\-[a-z][a-z0-9_]*(?:\s+[A-Z][A-Z_]*)?)?)"
+                       r"(\s+)(.*)$")
+    spaces = {}
+    for line in text.split("\n"):
+        s = ARG_REGEX.search(line)
+        if s:
+            spaces[s.group(1)] = len(s.group(3))
+            # e.g. "-v, --verbose" and 10 (whitespaces)
+        else:
+            tmp = line.lstrip()
+            indent = len(line) - len(tmp)
+            if indent > 0:
+                spaces[tmp.strip()] = indent
+    # convert here   
     md = text if format == "md" else convert_text(text, "md", format=format) \
                                      .replace("\\", "")
-    # bug corrections
-    # 1. misaligned metadata fields
-    tmp = md
-    md, l = "", 0
-    #  first, collect the maximum field length
-    for line in tmp.split("\n"):
-        try:
-            f, v = line.split(":", 1)
-            if re.search(r"(?P<t>[_\*])(.*?)(?P=t)", f):
-                f = "_" + f.strip(" *_") + "_"
-                l = max(l, len(f))
-        except ValueError:
-            pass
-    #  then, remake markdown string
-    for line in tmp.split("\n"):
-        try:
-            f, v = line.split(":", 1)
-            if re.search(r"(?P<t>[_\*])(.*?)(?P=t)", f):
-                f = "_" + f.strip(" *_") + "_"
-                md += ("{: <%d}: {}" % l).format(f, v) + "\n"
-                continue
-        except ValueError:
-            pass
-        md += line + "\n"
-    # 2. links incorrectly rendered with mdv after using pandoc
-    for link in re.findall("(<(.*?)>)", md):
-        md = md.replace(link[0], "[{0}]({1}{0})"
-                        .format(link[1], ["", "mailto:"][is_email(link[1])]))
+    if format != "md":
+        # bug corrections
+        # 1. misaligned metadata fields
+        # 2. rectify misaligned arguments' helps
+        tmp = md
+        md, l = "", 0
+        #  collect the maximum field length
+        for line in tmp.split("\n"):
+            try:
+                f, v = line.split(":", 1)
+                if f.endswith("default"):
+                    raise ValueError
+                if re.search(r"(?P<t>[_\*])(.*?)(?P=t)", f):
+                    f = "_" + f.strip(" *_") + "_"
+                    l = max(l, len(f))
+            except ValueError:
+                pass
+        #  then, remake markdown string
+        for line in tmp.split("\n"):
+            try:
+                f, v = line.split(":", 1)
+                if f.endswith("default"):
+                    raise ValueError()
+                if re.search(r"(?P<t>[_\*])(.*?)(?P=t)", f):
+                    f = "_" + f.strip(" *_") + "_"
+                    md += ("{: <%d}: {}" % l).format(f, v) + "\n"
+                    continue
+            except ValueError:
+                pass
+            # restore spaces between arguments and their help messages
+            s = ARG_REGEX.search(line)
+            if s:
+                l = spaces[s.group(1)]
+                line = ARG_REGEX.sub(r"\1{}\4".format(" " * l), line)
+            # restore indentations
+            else:
+                try:
+                    line = spaces[line] * " " + line
+                except KeyError:
+                    pass
+            md += line + "\n"
+        # 3. links incorrectly rendered with mdv after using pandoc
+        for link in re.findall("(<(.*?)>)", md):
+            md = md.replace(link[0], "[{0}]({1}{0})"
+                           .format(link[1], ["", "mailto:"][is_email(link[1])]))
     return mdv.main(md, display_links=True, theme=DOCFORMAT_THEME)
 
 
@@ -171,7 +204,8 @@ def txt2blockquote(text, format=None):
     elif format == "rst":
         text = "\n".join("\t{}".format(line) for line in text.splitlines())
     elif format == "textile":
-        text = "\n".join("bq. {}".format(line) for line in text.splitlines())
+        text = "\n".join("" if line.strip() == "" else "bq. " + line \
+                         for line in text.splitlines())
     return text
 
 

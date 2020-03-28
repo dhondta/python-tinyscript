@@ -18,7 +18,7 @@ from .timing import set_time_items
 from .handlers import *
 from .helpers.constants import LINUX, PYTHON3
 from .helpers.data.types import ip_address, port_number
-from .helpers.text import configure_docformat, gt, txt2title
+from .helpers.text import configure_docformat, gt
 from .interact import set_interact_items
 from .progress import set_progress_items
 from .loglib import *
@@ -54,6 +54,7 @@ def initialize(add_banner=False,
                add_wizard=False,
                sudo=False,
                multi_level_debug=False,
+               short_long_help=True,
                exit_at_interrupt=True,
                ext_logging=False,
                noargs_action=None,
@@ -80,6 +81,7 @@ def initialize(add_banner=False,
                                script with sudo
     :param multi_level_debug: allow to use -v, -vv, -vvv (adjust logging level)
                                instead of just -v (only debug on/off)
+    :param short_long_help:   enable/disable the separation of -h/--help
     :param exit_at_interrupt: enable exit at interrupt
     :param ext_logging:       extended logging options
     :param noargs_action:     action to be performed when no argument is input
@@ -161,7 +163,7 @@ def initialize(add_banner=False,
     #   input arguments, e.g. for future reuse
     if add['config']:
         c = p.add_argument_group("config arguments")
-        opt = c.add_argument("-r", "--read-config", action='config',
+        opt = c.add_argument("-r", "--read-config", action="config",
                              help=gt("read args from a config file"),
                              note=gt("this overrides other arguments"))
         c.add_argument("-w", "--write-config", metavar="INI",
@@ -172,7 +174,7 @@ def initialize(add_banner=False,
     #  demonstration feature, for executing an example amongst these defined in
     #   __examples__, useful for observing what the tool does
     if add['demo']:
-        opt = i.add_argument("--demo", action='demo', prefix="play",
+        opt = i.add_argument("--demo", action="demo", prefix="play",
                              help=gt("demonstrate a random example"))
         if noarg and noargs_action == "demo":
             sys.argv[1:] = [opt]
@@ -182,12 +184,18 @@ def initialize(add_banner=False,
             opt = i.add_argument("-h", dest="help", default=0, action="count",
                                help=gt("show extended help message and exit"),
                                note=gt("-hhh is the highest help detail level"))
+        elif short_long_help:
+            opt = i.add_argument("-h", dest="usage", action="usage",
+                                 help=gt("show usage message and exit"))
+            opt = i.add_argument("--help", action="help",
+                                 help=gt("show this help message and exit"))
         else:
-            p._extra_help = glob.get('__doclong__')
-            opt = i.add_argument("-h", "--help", action='help', prefix="show",
+            opt = i.add_argument("-h", "--help", action="help",
                                  help=gt("show this help message and exit"))
         if noarg and noargs_action == "help":
-            sys.argv[1:] = [opt]
+            sys.argv[1:] = ["--help"]
+        elif noarg and noargs_action == "usage":
+            sys.argv[1:] = ["DISPLAY_USAGE"]
     #  interaction mode feature, for interacting with the tool during its
     #   execution, useful for debugging when it is complex
     if add['interact']:
@@ -246,7 +254,7 @@ def initialize(add_banner=False,
                        suffix="mode", help=gt("verbose mode"))
     #  wizard feature, for asking argument values to the user
     if add['wizard']:
-        opt = i.add_argument("-w", "--wizard", action='wizard',
+        opt = i.add_argument("-w", "--wizard", action="wizard",
                              prefix="start", help=gt("start a wizard"))
         if noarg and noargs_action == "wizard":
             sys.argv[1:] = [opt]
@@ -296,9 +304,6 @@ def initialize(add_banner=False,
         if LINUX:
             i.add_argument("-s", "--syslog", action="store_true", last=True,
                            suffix="mode", help=gt("log to /var/log/syslog"))
-    # display short usage information about the tool
-    if noarg and noargs_action == "usage":
-        sys.argv[1:] = ["DISPLAY_USAGE"]
     # now parse inputs
     glob['args'], glob['parser'] = p.parse_args(), p
     # 3) if sudo required, restart the script

@@ -45,12 +45,17 @@ Training: ...
 This tool ...
 
 optional arguments:
-  -h, --help  show this help message and exit
-  -v          debug verbose level (default: false)
+  -h             show usage message and exit
+  --help         show this help message and exit
+  -v, --verbose  verbose mode (default: False)
 
 Usage examples:
   python tool.py ...
 ```
+
+!!! note "Short/long help"
+    
+    The default behavior of help options is that "`-h`" only gives usage information while "`--help`" provides the full help message. This can be disabled using a parameter, see [the *Features* page, section *Short/long help*](features.html#shortlong-help).
 
 -----
 
