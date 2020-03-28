@@ -73,6 +73,16 @@ class TestHandlers(TestCase):
     def test_interrupt_handler(self):
         self.assertIs(at_interrupt(), None)
         self._test_handler("interrupt")
+        _hooks.sigint_action = "confirm"
+        temp_stdout(self)
+        temp_stdin(self, "\n")
+        self.assertRaises(SystemExit, ih)
+        _hooks.sigint_action = "continue"
+        self.assertIsNone(ih())
+        with self.assertRaises(ValueError):
+            _hooks.sigint_action = "BAD_ACTION"
+        self.assertIsNotNone(_hooks.sigint_action)
+        _hooks.sigint_action = "exit"
     
     def test_terminate_handler(self):
         self.assertIs(at_terminate(), None)

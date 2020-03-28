@@ -6,6 +6,8 @@
 import sys
 from signal import getsignal, signal, SIGINT, SIGTERM
 
+from .helpers.inputs import user_input
+
 
 __features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate",
                 "DisableSignals"]
@@ -39,10 +41,11 @@ class DisableSignals(object):
 
 
 class ExitHooks(object):
+    sigint_actions = ["confirm", "continue", "exit"]
     # inspired from: https://stackoverflow.com/questions/9741351/how-to-find-exi
     #                 t-code-or-reason-when-atexit-callback-is-called-in-python
     def __init__(self):
-        self._exit = True
+        self.__sigint_action = "exit"
         self._orig_exit = sys.exit
         self.code = None
         self.exception = None
@@ -54,8 +57,23 @@ class ExitHooks(object):
         self._orig_exit(code)
 
     def quit(self, code=0):
-        if self.state != "INTERRUPTED" or self._exit:
+        if self.__sigint_action == "confirm" and \
+           user_input("Do you really want to interrupt execution ?",
+                      ["(Y)es", "(N)o"], "y", style="bold") == "yes":
+            self.__sigint_action = "exit"
+        if self.state != "INTERRUPTED" or self.__sigint_action == "exit":
             self.exit(code)
+    
+    @property
+    def sigint_action(self):
+        return self.__sigint_action
+    
+    @sigint_action.setter
+    def sigint_action(self, value):
+        if value not in self.sigint_actions:
+            raise ValueError("Bad interrupt action ; should be one of {}"
+                             .format("|".join(self.sigint_actions)))
+        self.__sigint_action = value
 
 _hooks = ExitHooks()
 

@@ -490,9 +490,13 @@ def at_interrupt():
 ...
 ```
 
-!!! note "Exit at interrupt"
+!!! note "Action at interrupt"
     
-    By default, when interrupting the execution, `sys.exit` is triggered therefore stopping the script. This behavior can be disabled by setting `exit_at_interrupt=False` when calling `initialize(...)`.
+    By default, when interrupting the execution, `sys.exit` is triggered therefore stopping the script. This behavior can be changed in several ways by setting `action_at_interrupt` when calling `initialize(...)`. The possible values are:
+    
+    - `confirm`: ask the user to confirm if the script should exit
+    - `continue`: do not interrupt execution
+    - `exit`: exit when SIGINT signal is sent
 
 - *terminate*: before *exit*, if the script was terminated from the OS or due to an error
     

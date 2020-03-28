@@ -55,7 +55,7 @@ def initialize(add_banner=False,
                sudo=False,
                multi_level_debug=False,
                short_long_help=True,
-               exit_at_interrupt=True,
+               action_at_interrupt="exit",
                ext_logging=False,
                noargs_action=None,
                post_actions=True,
@@ -65,28 +65,29 @@ def initialize(add_banner=False,
      logger to be inserted in the input dictionary of global variables from the
      calling script.
 
-    :param add_banner:        add an ASCII banner when starting the tool
-    :param add_config:        add an option to input an INI configuration file
-    :param add_demo:          add an option to re-run the process using a random
-                               entry from the __examples__ (only works if this
-                               variable is populated)
-    :param add_interact:      add an interaction option
-    :param add_progress:      add a progress management option
-    :param add_step:          add an execution stepping option
-    :param add_time:          add an execution timing option
-    :param add_version:       add a version option
-    :param add_wizard:        add an option to run a wizard, asking for each
-                               input argument
-    :param sudo:              if True, require sudo credentials and re-run
-                               script with sudo
-    :param multi_level_debug: allow to use -v, -vv, -vvv (adjust logging level)
-                               instead of just -v (only debug on/off)
-    :param short_long_help:   enable/disable the separation of -h/--help
-    :param exit_at_interrupt: enable exit at interrupt
-    :param ext_logging:       extended logging options
-    :param noargs_action:     action to be performed when no argument is input
-    :param post_actions:      enable post-actions at interrupt
-    :param report_func:       report generation function
+    :param add_banner:          add an ASCII banner when starting the tool
+    :param add_config:          add an option to input an INI configuration file
+    :param add_demo:            add an option to re-run the process using a
+                                 random entry from the __examples__ (only works
+                                 if this variable is populated)
+    :param add_interact:        add an interaction option
+    :param add_progress:        add a progress management option
+    :param add_step:            add an execution stepping option
+    :param add_time:            add an execution timing option
+    :param add_version:         add a version option
+    :param add_wizard:          add an option to run a wizard, asking for each
+                                 input argument
+    :param sudo:                if True, require sudo credentials and re-run
+                                 script with sudo
+    :param multi_level_debug:   allow to use -v, -vv, -vvv (adjust logging
+                                 level) instead of just -v (only debug on/off)
+    :param short_long_help:     enable/disable the separation of -h/--help
+    :param action_at_interrupt: perform an action at interrupt
+                                 (confirm|continue|exit)
+    :param ext_logging:         extended logging options
+    :param noargs_action:       action to be performed when no argument is input
+    :param post_actions:        enable post-actions at interrupt
+    :param report_func:         report generation function
     """
     global parser, parser_calls
     # get caller's frame
@@ -330,7 +331,7 @@ def initialize(add_banner=False,
         f['title', bs] = Banner(p.scriptname, font=bf)
         print(f)
     # 7) finally, bind the global exit handler
-    _hooks._exit = exit_at_interrupt
+    _hooks.sigint_action = action_at_interrupt
     def __at_exit():
         # first, dump the config if required
         if add['config']:
