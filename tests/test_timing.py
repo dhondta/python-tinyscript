@@ -32,20 +32,17 @@ class TestTiming(TestCase):
     
     def test_timer_object(self):
         temp_stdout(self)
-        with Timer(timeout=1, fail_on_timeout=True) as timer:
-            self.assertTrue(timer.fail)
-            self.assertTrue(timer.descr)
-            self.assertTrue(timer.message)
-            self.assertTrue(timer.start)
-            self.assertEqual(timer.timeout, 1)
-            self.assertRaises(TimeoutError, timer._handler, None, None)
-            time.sleep(1)
-        
-        def timeout_test():
-            with Timer(timeout=1) as t:
+        with self.assertRaises(TimeoutError):
+            with Timer(timeout=1, fail_on_timeout=True) as timer:
+                self.assertTrue(timer.fail)
+                self.assertTrue(timer.descr)
+                self.assertTrue(timer.message)
+                self.assertTrue(timer.start)
+                self.assertEqual(timer.timeout, 1)
+                self.assertRaises(TimeoutError, timer._handler, None, None)
                 time.sleep(2)
-
-        self.assertRaises(TimeoutError, timeout_test)
+        with Timer(timeout=1):
+            time.sleep(2)
     
     def test_timing_functions(self):
         temp_stdout(self)
