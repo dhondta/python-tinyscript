@@ -3,18 +3,27 @@
 
 """
 import colorful
+import os
 import re
 import sys
 from six import StringIO
 
 from .constants import *
-from .data.types import is_lambda
+from .data.types import is_function, is_lambda, is_str
+
+# fix to Xlib.error.DisplayConnectionError: Can't connect to display ":0":
+#  No protocol specified
+if LINUX and os.geteuid() == 0:
+    os.system("xhost +SI:localuser:root > /dev/null 2>&1")
+
+from pynput.keyboard import Controller, Key, Listener
 
 
-__all__ = __features__ = ["capture", "clear", "confirm", "pause", "silent",
-                          "std_input", "stdin_pipe", "user_input", "Capture"]
+__all__ = __features__ = ["capture", "clear", "confirm", "handle_keystrokes",
+                          "pause", "silent", "std_input", "stdin_pipe",
+                          "user_input", "Capture"]
 
-
+_keyboard = Controller()
 pause = lambda *a, **kw: std_input("Press Enter to continue", *a, **kw) or None
 
 
@@ -40,12 +49,68 @@ def clear():
         system("cls")
 
 
-def confirm(style="bold"):
+def confirm(prompt="Are you sure ?", style="bold"):
     """
     Ask for confirmation.
     """
-    return user_input("Are you sure ?", ["(Y)es", "(N)o"], "n", style=style) \
-           == "yes"
+    return user_input(prompt, ["(Y)es", "(N)o"], "n", style=style) == "yes"
+
+
+def handle_keystrokes(keystrokes, silent=True):
+    """
+    Keystrokes handling function relying on pynput.
+    
+    :param keystrokes: dictionary of keystrokes and related actions
+    :param silent:     do not show errors (of keys not handled)
+    
+    Keystrokes dictionary formats:
+    1. keystroke: on_press action
+    2. keystroke: dictionary with on_press and on_release actions
+    
+    Action representations:
+    1. (str, output handler)
+    2. function returning None|str|(str, output handler)
+    """
+    for k, v in keystrokes.items():
+        try:
+            k_obj = getattr(Key, k)
+            keystrokes[k_obj] = v
+            del keystrokes[k]
+        except Exception:
+            pass
+    
+    def __handle(f):
+        r = f()
+        r, out = r if isinstance(r, tuple) and len(r) == 2 else (r, None)
+        if is_str(r):
+            if out is None:
+                print(r)
+            elif out in [sys.stdout, sys.stderr]:
+                out.write(r)
+                out.flush()
+            else:
+                out(r)
+    
+    def on_event(event):
+        def _event_handler(key):
+            k = str(key).strip("'")
+            try:
+                v = keystrokes[k]
+                if isinstance(v, dict):
+                    v = v.get(event)
+                __handle(lambda: v if not is_function(v) else v)
+            except KeyError:
+                if not silent:
+                    raise ValueError("Key '{}' not handled".format(k))
+            except Exception:
+                raise ValueError("Bad keystrokes handling")
+        return _event_handler
+    
+    listener = Listener(on_press=on_event("on_press"),
+                        on_release=on_event("on_release"))
+    listener.start()
+    listener.wait()
+    return listener
 
 
 def silent(f):
@@ -61,7 +126,7 @@ def silent(f):
 
 def std_input(prompt="", style=None, palette=None):
     """
-    Very simple Python2/3-compatible input method handling prompt styling.
+    Very simple Python2/3-compatible input function handling prompt styling.
     
     :param prompt:  prompt message
     :param style:   colorful styling function, e.g. red_on_green (for green
@@ -92,7 +157,7 @@ def stdin_pipe():
 def user_input(prompt="", choices=None, default=None, choices_str="",
                required=False, newline=False, **kwargs):
     """
-    Python2/3-compatible input method handling choices and default value.
+    Python2/3-compatible input function handling choices and default value.
     
     :param prompt:      prompt message
     :param choices:     list of possible choices or lambda function

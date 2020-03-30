@@ -5,6 +5,7 @@
 """
 from tinyscript.helpers.compat import b
 from tinyscript.helpers.inputs import *
+from tinyscript.helpers.inputs import _keyboard, Key
 from tinyscript.loglib import logger as ts_logger
 
 from utils import *
@@ -57,3 +58,27 @@ class TestHelpersInputs(TestCase):
         captured_dummy = capture(dummy)
         r, out, err = captured_dummy()
         self.assertEqual(out, "TEST")
+    
+    def test_keystrokes_function(self):
+        temp_stdout(self)
+        l = handle_keystrokes({'t': "TEST"})
+        _keyboard.press("t")
+        l.stop()
+        l = handle_keystrokes({'t': {'on_release': "TEST"}})
+        _keyboard.press("t")
+        l.stop()
+        l = handle_keystrokes({'t': ("TEST", sys.stdout)})
+        _keyboard.type("t")
+        l.stop()
+        l = handle_keystrokes({'t': ("TEST", ts_logger.info)})
+        _keyboard.type("t")
+        l.stop()
+        l = handle_keystrokes({'t': ("TEST", "BAD_OUTPUT_HANDLER")}, False)
+        with self.assertRaises(ValueError):
+            _keyboard.press("a")
+        with self.assertRaises(ValueError):
+            _keyboard.press("t")
+        l.stop()
+        l = handle_keystrokes({'ctrl': ("CTRL", ts_logger.info)})
+        _keyboard.press(Key.ctrl)
+        l.stop()
