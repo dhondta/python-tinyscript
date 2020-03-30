@@ -291,11 +291,11 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     name = "main"
     
     def __init__(self, globals_dict=None, *args, **kwargs):
-        self._docfmt = globals_dict.get('__docformat__')
-        configure_docformat(globals_dict)
-        self._config_parsed = False
-        self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         ArgumentParser.globals_dict = gd = globals_dict or {}
+        configure_docformat(gd)
+        self._config_parsed = False
+        self._docfmt = gd.get('__docformat__')
+        self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         self.examples = gd.get('__examples__', [])
         script = gd.get('__file__', sys.argv[0])
         if script and kwargs.get('prog') is None:
@@ -347,7 +347,9 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             m = gd.get(k)
             if m:
                 if k == '__copyright__':
-                    m = copyright(m)
+                    if not isinstance(m, tuple):
+                        m = (m, )
+                    m = copyright(*m)
                 elif k == '__license__':
                     m = license(m, True) or m
                 meta = ("{: <%d}: {}" % l) \

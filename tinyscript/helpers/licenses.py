@@ -44,10 +44,22 @@ LICENSES = {
     'wtfpl': "Do What The F*ck You Want To Public License",
     'zlib': "zLib License",
 }
-Y = datetime.now().year
 
 
-copyright     = lambda t: "© {} {}".format(Y, t) if not t.startswith("©") else t
-license       = lambda l, n=False: LICENSES.get(str(l)) or \
-                                   ["Invalid license", None][n]
-list_licenses = lambda: list(LICENSES.keys())
+def copyright(text, start=None):
+    """ Make the copyright field value from the given text. """
+    year = datetime.now().year
+    if isinstance(start, int) and start < year:
+        year = "{}-{}".format(start, year)
+    return "© {} {}".format(year, text) if not text.startswith("©") else text
+
+
+def license(name, null=False):
+    """ Get the full license description matching the given short name. """
+    return LICENSES.get(str(name)) or ["Invalid license", None][null]
+
+
+def list_licenses():
+    """ Get the list of all supported licenses by short name. """
+    return list(LICENSES.keys())
+
