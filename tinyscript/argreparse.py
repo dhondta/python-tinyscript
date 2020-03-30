@@ -353,9 +353,9 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 meta = ("{: <%d}: {}" % l) \
                        .format(txt2italic(k.strip('_').capitalize()), m)
                 if k == '__author__':
-                    e = txt2email(gd.get('__email__'))
+                    e = gd.get('__email__')
                     if e:
-                        meta += " ({})".format(e)
+                        meta += " ({})".format(txt2email(e))
                 d += ["\n\n", "\n"][self._docfmt is None] + txt2paragraph(meta)
         doc = txt2blockquote(gd.get('__doc__') or "")
         if doc:

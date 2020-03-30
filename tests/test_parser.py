@@ -78,6 +78,7 @@ class TestParser(TestCase):
         for i in range(1, 5):
             sys.argv[1:] = ["-{}".format(i * "h")]
             self.assertRaises(SystemExit, initialize)
+        del globals()['__details__']
         # help's documentation formats
         globals()['__docformat__'] = "BAD"
         self.assertRaises(ValueError, initialize)
@@ -113,6 +114,7 @@ class TestParser(TestCase):
         self.assertFalse(args.timings)
         self.assertEqual(args.verbose, 0)
         self.assertIs(args.logfile, None)
+        self.assertRaises(TypeError, initialize, bad_arg=True)
     
     def test_write_config(self):
         sys.argv[1:] = ["--arg1", "test", "--arg2", "-w", INI]
@@ -193,9 +195,7 @@ class TestParser(TestCase):
         temp_stdout(self)
         temp_stdin(self, "\n")
         sys.argv[1:] = []
-        # EOFError is raised as the wizard stands with no input but a newline
-        with self.assertRaises(EOFError):
-            initialize(noargs_action="wizard")
+        initialize(noargs_action="wizard")
     
     def test_noargs_action(self):
         sys.argv[1:] = []

@@ -59,7 +59,8 @@ def initialize(add_banner=False,
                ext_logging=False,
                noargs_action=None,
                post_actions=True,
-               report_func=None):
+               report_func=None,
+               **kwargs):
     """
     Initialization function ; sets up the arguments for the parser and creates a
      logger to be inserted in the input dictionary of global variables from the
@@ -90,6 +91,12 @@ def initialize(add_banner=False,
     :param report_func:         report generation function
     """
     global parser, parser_calls
+    # handle backward-compatibility arguments
+    exit_at_interrupt = kwargs.pop('exit_at_interrupt', None)
+    if len(kwargs) > 0:
+        raise TypeError("Unexpected keyword-argument{} ({})"
+                        .format(["", "s"][len(kwargs) > 1],
+                                ", ".join(kwargs.keys())))
     # get caller's frame
     frame = currentframe().f_back
     # walk the stack until a frame containing a known object is found
@@ -331,7 +338,8 @@ def initialize(add_banner=False,
         f['title', bs] = Banner(p.scriptname, font=bf)
         print(f)
     # 7) finally, bind the global exit handler
-    _hooks.sigint_action = action_at_interrupt
+    _hooks.sigint_action = action_at_interrupt if exit_at_interrupt is None \
+                           else ["continue", "exit"][exit_at_interrupt]
     def __at_exit():
         # first, dump the config if required
         if add['config']:
