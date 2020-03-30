@@ -6,18 +6,21 @@ pages:
   - Introduction: index.md
   - Setup: setup.md
   - Internals: internals.md
-  - Enhancements: enhancements.md
-  - Features: features.md
+  - 'Enhanced modules': enhancements.md
+  - 'Tool shaping': shaping.md
+  - 'Utility features': utility.md
   - Helpers: helpers.md
   - Usage: usage.md
   - Examples:
     - 'Simple script': examples/simple-script.md
     - 'Simple tool': examples/simple-tool.md
     - 'Metadata': examples/metadata.md
-    - 'Privilege escalation': examples/sudo.md
+    - 'Privilege elevation': examples/sudo.md
     - 'Multi-level debugging': examples/multi-level-debug.md
     - 'Multi-level help': examples/multi-level-help.md
     - 'Playing a demo': examples/demo.md
+    - 'Stepping execution': examples/step.md
+    - 'Timing execution': examples/timing.md
   - 'Real-life examples':
     - 'AppmemDumper': examples-rl/appmemdumper.md
     - 'Bots Scheduler': examples-rl/bots-scheduler.md

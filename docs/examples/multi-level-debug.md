@@ -2,24 +2,13 @@
 
 Very basic script demonstrating the multi-level debug mode.
 
-### Creation
-
-```sh
-$ tinyscript-new script --name multi-level-debug
-$ gedit multi-level-debug.py
-
-```
-
 ### Code
 
-```python hl_lines="7"
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+```python hl_lines="4"
 from tinyscript import *
 
-
 if __name__ == '__main__':
-    initialize(globals(), multi_level_debug=True)
+    initialize(multi_level_debug=True)
     logger.critical("This is always displayed")
     logger.error("This is always displayed")
     logger.warning("This is displayed with -v")
@@ -30,15 +19,16 @@ if __name__ == '__main__':
 ### Help
 
 ```sh hl_lines="8 9"
-$ python multi-level-debug.py -h
-usage: python multi-level-debug.py [-h] [-v]
+$ python multi-level-debug.py --help
+Tool 
 
-MultiLevelDebug
+usage: python multi-level-debug.py [-h] [--help] [-v]
 
 extra arguments:
-  -h, --help  show this help message and exit
-  -v          verbose level (default: 0)
-               NB: -vvv is the highest verbosity level
+  -h      show usage message and exit
+  --help  show this help message and exit
+  -v      verbose level (default: 0)
+           NB: -vvv is the highest verbosity level
 
 ```
 

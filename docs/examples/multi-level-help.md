@@ -2,21 +2,10 @@
 
 Very basic script demonstrating the multi-level help messages.
 
-### Creation
-
-```sh
-$ tinyscript-new script --name multi-level-help
-$ gedit multi-level-help.py
-
-```
-
 ### Code
 
 ```python hl_lines="7 8 9 10"
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
 from tinyscript import *
-
 
 __doc__ = "Main description"
 __details__ = [
@@ -24,20 +13,19 @@ __details__ = [
     "Second level of details",
 ]
 
-
 if __name__ == '__main__':
-    initialize(globals())
+    initialize()
 ```
 
 ### Help
 
-```sh hl_lines="1 9 10"
+```sh hl_lines="1 4"
 $ python multi-level-help.py -h
-usage: python multi-level-help.py [-h] [-v]
-
-MultiLevelHelp
+Tool
 
 Main description
+
+usage: ./tool.py [-h] [-v]
 
 extra arguments:
   -h             show extended help message and exit (default: 0)
@@ -46,35 +34,23 @@ extra arguments:
 
 ```
 
-```sh hl_lines="1 13"
+```sh hl_lines="1 7"
 $ python multi-level-help.py -hh
-usage: python multi-level-help.py [-h] [-v]
-
-MultiLevelHelp
-
-Main description
-
-extra arguments:
-  -h             show extended help message and exit (default: 0)
-                  NB: -hhh is the highest help detail level
+Tool
+[...]
   -v, --verbose  verbose mode (default: False)
+
 
 First level of details
 
 ```
 
-```sh hl_lines="1 13 15"
+```sh hl_lines="1 7 9"
 $ python multi-level-help.py -hh
-usage: python multi-level-help.py [-h] [-v]
-
-MultiLevelHelp
-
-Main description
-
-extra arguments:
-  -h             show extended help message and exit (default: 0)
-                  NB: -hhh is the highest help detail level
+Tool
+[...]
   -v, --verbose  verbose mode (default: False)
+
 
 First level of details
 

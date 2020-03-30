@@ -2,14 +2,6 @@
 
 Very basic tool, using the demonstration feature when no argument is given. It also redefines a constant for tuning the logging.
 
-### Creation
-
-```sh
-$ tinyscript-new tool --name simple-tool
-$ gedit simple-tool.py
-
-```
-
 ### Code
 
 ```python
@@ -37,9 +29,8 @@ def hello(message, critical=False):
 # ---------------------- MAIN SECTION -----------------------
 if __name__ == '__main__':
     parser.add_argument("message", help="message to be displayed")
-    parser.add_argument("--critical", action="store_true",
-                        help="critical message")
-    initialize(globals(), noargs_action="demo")
+    parser.add_argument("--critical", action="store_true", help="critical message")
+    initialize(noargs_action="demo")
     hello(args.message, args.critical)
 ```
 
@@ -47,13 +38,13 @@ if __name__ == '__main__':
 
 ```sh
 $ python simple-tool.py -h
-usage: simple-tool [-h] [-v] [--critical] message
-
 SimpleTool v1.0
 Author: John Doe
 Reference: John's Blog (http://blogsite.com/john/)
 
 This tool is a simple example from the Tinyscript project.
+
+usage: python simple-tool.py [--critical] [-h] [--help] [-v] message
 
 positional arguments:
   message        message to be displayed
@@ -62,7 +53,8 @@ optional arguments:
   --critical     critical message (default: False)
 
 extra arguments:
-  -h, --help     show this help message and exit
+  -h             show usage message and exit
+  --help         show this help message and exit
   -v, --verbose  verbose mode (default: False)
 
 Usage examples:

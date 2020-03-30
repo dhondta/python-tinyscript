@@ -55,7 +55,7 @@ Usage examples:
 
 !!! note "Short/long help"
     
-    The default behavior of help options is that "`-h`" only gives usage information while "`--help`" provides the full help message. This can be disabled using a parameter, see [the *Features* page, section *Short/long help*](features.html#shortlong-help).
+    The default behavior of help options is that "`-h`" only gives usage information while "`--help`" provides the full help message. This can be disabled using a parameter, see [this section of the documentation](shaping.html#shortlong-help).
 
 -----
 
@@ -63,7 +63,7 @@ Usage examples:
 
 This is achieved by passing arguments to `initialize(...)`.
 
-Various [features](features.md) are handled by this initialization and are explained in the related section of this documentation.
+Various [shaping](shaping.md) and [utility](utility.md) features are handled by this initialization and are explained in the related sections of this documentation.
 
 -----
 

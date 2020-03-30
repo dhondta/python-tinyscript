@@ -2,14 +2,6 @@
 
 Very basic script, with no particular feature used.
 
-### Creation
-
-```sh
-$ tinyscript-new script --name simple-script
-$ gedit simple-script.py
-
-```
-
 ### Code
 
 ```python
@@ -20,7 +12,7 @@ from tinyscript import *
 
 if __name__ == '__main__':
     parser.add_argument("string", help="string to be displayed")
-    initialize(globals())
+    initialize()
     logger.info(args.string)
 ```
 
@@ -28,15 +20,16 @@ if __name__ == '__main__':
 
 ```sh
 $ python simple-script.py -h
-usage: simple-script [-h] [-v] string
-
 SimpleScript
+
+usage: simple-script [-h] [--help] [-v] string
 
 positional arguments:
   string         string to be displayed
 
 extra arguments:
-  -h, --help     show this help message and exit
+  -h             show usage message and exit
+  --help         show this help message and exit
   -v, --verbose  verbose mode (default: False)
 
 ```
