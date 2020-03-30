@@ -15,6 +15,8 @@ from .data.types import is_function, is_lambda, is_str
 #  No protocol specified
 if LINUX and os.geteuid() == 0:
     os.system("xhost +SI:localuser:root > /dev/null 2>&1")
+    os.environ['DISPLAY'] = os.environ.get('DISPLAY') or \
+                            os.environ.get('REMOTE_DISPLAY', ":0")
 
 from pynput.keyboard import Controller, Key, Listener
 
