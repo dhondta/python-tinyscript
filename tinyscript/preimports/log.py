@@ -81,8 +81,10 @@ def bindLogger(f):
     """
     @wraps(f)
     def _wrapper(*args, **kwargs):
-        logger = kwargs.pop('logger', None) or globals().get('logger') or \
-                 inspect.getmainglobals().get('logger') or logging.nullLogger
+        logger = kwargs.pop('logger', None) or \
+                 globals().get('logger') or \
+                 inspect.getmainglobals().get('logger') or \
+                 logging.nullLogger
         # if f is a method, bind the logger to self
         if inspect.ismethod(f) or f.__code__.co_varnames[0] == "self":
             args[0].logger = logger
@@ -138,9 +140,22 @@ def delLogLevel(levelName):
 logging.delLogLevel = delLogLevel
 
 
-def setLogger(name):
+def lastLogRecord():
     """
-    Set up the loggers with the given names according to Tinyscript's logging
+    Display the last log record.
+    """
+    rec = getattr(logging, "_last_record", None)
+    if rec:
+        lastrec = logging.getLogger("__last_record__")
+        lastrec.name = rec.name
+        lastrec.log(rec.levelno, rec.msg)
+        lastrec.name = "__last_record__"
+logging.lastLogRecord = lastLogRecord
+
+
+def setLogger(name=None):
+    """
+    Set up the logger with the given name according to Tinyscript's logging
      configuration.
     
     :param name: logger name
@@ -159,9 +174,14 @@ def setLoggers(*names):
     if len(names) == 0:
         names = [None]
     main = inspect.getmainglobals().get('logger') or logging.getLogger()
+    main.setLevel(1)
+    if not any(type(h) is InterceptionHandler for h in main.handlers):
+        main.addHandler(InterceptionHandler())
+    # ensure that the main logger has no parent
+    main.parent = None
     for name in names:
         logger = logging.getLogger(name)
-        # check first that the given logger is not Tinyscript's one
+        # check that the given logger is not Tinyscript's one
         if main.name == name or id(main) == id(logger):
             continue
         # set Tinyscript's logger as the logger's parent
@@ -171,6 +191,23 @@ def setLoggers(*names):
         # disable propagation from the sublogger so that it does not duplicate
         #  log messages
         logger.propagate = False
-        # ensure that the main logger has no parent
-        main.parent = None
 logging.setLoggers = setLoggers
+
+
+class InterceptionHandler(logging.Handler):
+    """ Dummy handler saving the last handled log record. """
+    def __init__(self):
+        super(InterceptionHandler, self).__init__(1)
+    
+    def handle(self, record):
+        logging._last_record = record
+logging.InterceptionHandler = InterceptionHandler
+
+
+# setup the private logger for displaying the last intercepted log record
+__logger = logging.getLogger("__last_record__")
+__logger.setLevel(1)
+__handler = logging.StreamHandler()
+__formatter = logging.Formatter('\r%(asctime)s [%(levelname)s] %(message)s')
+__handler.setFormatter(__formatter)
+__logger.addHandler(__handler)

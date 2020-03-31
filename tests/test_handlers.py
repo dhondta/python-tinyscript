@@ -3,10 +3,14 @@
 """Handlers module assets' tests.
 
 """
+import threading
+
 from tinyscript import *
 from tinyscript.handlers import *
-from tinyscript.handlers import (signal, ExitHooks, SIGINT, SIGTERM,
-                           __interrupt_handler as ih, __terminate_handler as th)
+from tinyscript.handlers import signal, SIGINT, SIGUSR1, SIGTERM, _hooks, \
+                                __interrupt_handler as ih, \
+                                __pause_handler as ph, \
+                                __terminate_handler as th
 
 from utils import *
 
@@ -23,25 +27,35 @@ def at_{0}():
     with open("{1}", 'w+') as f:
         f.write("{2}")
 initialize()
-with ts.DisableSignals({2}) as _:
+with DisableSignals(signal.{2}) as _:
     {3}"""
 SIGNALS = {
+    'exit': "EXIT",
+    'graceful_exit': "GEXIT",
     'interrupt': "SIGINT",
     'terminate': "SIGTERM",
 }
-TEXT = tmpf("handler-result", "txt")
+FILE2 = tmpf("handler-result", "txt")
+
+
+def exec_pause(self):
+    while _hooks.state != "PAUSED":
+        sleep(.1)
+    self.assertEqual(_hooks.state, "PAUSED")
+    _hooks.resume()
 
 
 def exec_script(handler, template):
     s = SIGNALS.get(handler)
-    s = ["os.kill(os.getpid(), signal.{})".format(s), ""][s is None]
+    t = ["os.kill(os.getpid(), signal.{})".format(s), ""][s is None]
     with open(FILE, 'w+') as f:
-        f.write(template.format(handler.lower(), TEXT, handler.upper(), s))
+        f.write(template.format(handler, FILE2, s, t))
     p = subprocess.Popen(["python{}".format(["2", "3"][PYTHON3]), FILE])
     p.wait()
     try:
-        with open(TEXT) as f:
+        with open(FILE2) as f:
             out = f.read().strip()
+        remove(FILE2)
         return out
     except IOError:
         pass
@@ -49,19 +63,18 @@ def exec_script(handler, template):
 
 class TestHandlers(TestCase):
     def _test_handler(self, h):
-        self.assertEqual(exec_script(h, SCRIPT1), h.upper())
+        self.assertEqual(exec_script(h, SCRIPT1), SIGNALS.get(h))
     
     @classmethod
     def tearDownClass(self):
         remove(FILE)
-        remove(TEXT)
-
+    
     def test_disable_handlers(self):
-        with DisableSignals(SIGINT) as _:
+        with DisableSignals(SIGINT):
             self.assertIsNone(exec_script("interrupt", SCRIPT2))
             self.assertIsNone(exec_script("terminate", SCRIPT2))
         self.assertRaises(ValueError, DisableSignals, 123456, fail=True)
-
+    
     def test_exit_handler(self):
         self.assertIs(at_exit(), None)
         self._test_handler("exit")
@@ -83,6 +96,15 @@ class TestHandlers(TestCase):
             _hooks.sigint_action = "BAD_ACTION"
         self.assertIsNotNone(_hooks.sigint_action)
         _hooks.sigint_action = "exit"
+    
+    def test_pause_handler(self):
+        self.assertIsNot(signal(SIGUSR1, ph), None)
+        self.assertEqual(_hooks.state, "RUNNING")
+        t = threading.Thread(target=exec_pause, args=(self, ))
+        t.start()
+        ph()
+        t.join()
+        self.assertEqual(_hooks.state, "RUNNING")
     
     def test_terminate_handler(self):
         self.assertIs(at_terminate(), None)

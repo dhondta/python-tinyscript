@@ -266,6 +266,8 @@ This adds multiple options:
 - `--theme`: report theme (overridden by `--css`)
 - `--filename`: report filename
 
+For more detailed information about this feature, see [this section](usage.html#reporting).
+
 -----
 
 ## Customizable exit handlers
@@ -326,3 +328,30 @@ with DisableSignals(SIGINT, SIGTERM) as _:
     #  long as we are in this block of code
 ...
 ```
+
+-----
+
+## Hot keys
+
+It is possible to define hotkeys for interacting during the execution by declaring the `HOTKEYS` constant. This feature relies on [`pynput`](https://github.com/moses-palmer/pynput) (not [`keyboard`](https://github.com/boppreh/keyboard), as it suffers the heavy limitation of being used only with root privileges).
+
+The `HOTKEYS` constant has multiple formats:
+
+- By default, it is `None`, meaning no hotkey defined.
+- It can be "`default`", therefore causing default hotkeys (see hereafter) to be activated.
+- It can be a dictionary of user-defined hotkeys.
+- It can be a 2-tuple with "`default`" and a dictionary of user-defined hotkeys. Order matters, the last tuple element has the precedence.
+
+Defining a hotkey dictionary:
+
+- Dictionary keys are the keyboard key combinations (e.g. "`a`", "`ctrl+e`", ...)
+- Dictionary values can be:
+
+  - Key's callback function.
+  - A string ; in this case, the callback simply displays the string.
+  - A dictionary of `on_press` and `on_release` callback functions. The values of this subdictionary can also be a function or a string.
+
+Also, each "leaf" element of the tree of hotkey dictionaries can be a 2-tuple with a string and the output handler to be used (by default `print`, can also be e.g. `logger.info`). Any callback function can return such a 2-tuple to achieve this same behavior.
+
+[See example here](examples/hotkeys.md)
+

@@ -4,7 +4,8 @@
 
 """
 import sys
-from signal import getsignal, signal, SIGINT, SIGTERM
+from signal import getsignal, siginterrupt, signal, \
+                   SIG_IGN, SIGINT, SIGTERM, SIGUSR1
 
 from .helpers.inputs import user_input
 
@@ -33,7 +34,7 @@ class DisableSignals(object):
 
     def __enter__(self):
         for s in self.__handlers.keys():
-            signal(s, lambda *a, **kw: None)
+            signal(s, SIG_IGN)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         for s, h in self.__handlers.items():
@@ -49,13 +50,17 @@ class ExitHooks(object):
         self._orig_exit = sys.exit
         self.code = None
         self.exception = None
-        self.state = None
         sys.exit = self.exit
-
+        self.resume()
+    
     def exit(self, code=0):
         self.code = code
         self._orig_exit(code)
-
+    
+    def pause(self):
+        self.state = "PAUSED"
+        while self.state == "PAUSED": continue
+    
     def quit(self, code=0):
         if self.__sigint_action == "confirm" and \
            user_input("Do you really want to interrupt execution ?",
@@ -63,6 +68,10 @@ class ExitHooks(object):
             self.__sigint_action = "exit"
         if self.state != "INTERRUPTED" or self.__sigint_action == "exit":
             self.exit(code)
+        self.resume()
+    
+    def resume(self):
+        self.state = "RUNNING"
     
     @property
     def sigint_action(self):
@@ -90,6 +99,16 @@ def __interrupt_handler(*args):
     _hooks.quit(0)
 # bind to interrupt signal (Ctrl+C)
 signal(SIGINT, __interrupt_handler)
+
+
+def __pause_handler(*args):
+    """
+    Execution pause handler.
+    """
+    _hooks.pause()
+# bind to user-defined signal
+signal(SIGUSR1, __pause_handler)
+siginterrupt(SIGUSR1, False)
 
 
 def __terminate_handler(*args):

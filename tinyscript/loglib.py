@@ -33,6 +33,8 @@ logging.addLogLevel("failure", "red", 104)
 
 # setup a default logger for allowing logging before initialize() is called
 logger = logging.getLogger("main")
+logger.setLevel(1)
+logger.addHandler(logging.InterceptionHandler())
 coloredlogs.DEFAULT_LOG_FORMAT = LOG_FORMAT
 coloredlogs.DEFAULT_DATE_FORMAT = DATE_FORMAT
 coloredlogs.install(logger=logger)
@@ -75,19 +77,31 @@ def configure_logger(glob, multi_level,
     glob['args']._debug_level = dl = levels[verbose]
     glob['args']._debug_syslog = syslog
     glob['args']._debug_logfile = logfile
-    logger.handlers = []
     glob['logger'] = logger
+    logger.handlers = []
+    logger.setLevel(1)
+    logger.addHandler(logging.InterceptionHandler())
     handler = logging.StreamHandler()
-    lfmt = glob.get('LOG_FORMAT', LOG_FORMAT)
+    lfmt = "\r" + glob.get('LOG_FORMAT', LOG_FORMAT)
     dfmt = glob.get('DATE_FORMAT', DATE_FORMAT)
     formatter = logging.Formatter(lfmt, dfmt)
     handler.setFormatter(formatter)
-    glob['logger'].addHandler(handler)
-    glob['logger'].setLevel(dl)
+    handler.setLevel(dl)
+    logger.addHandler(handler)
     if relative:
         coloredlogs.ColoredFormatter = RelativeTimeColoredFormatter
     coloredlogs.install(
-        dl, logger=glob['logger'], fmt=lfmt, datefmt=dfmt,
+        dl, logger=logger, fmt=lfmt, datefmt=dfmt,
         milliseconds=glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS),
         syslog=syslog, stream=logfile,
+    )
+    lastrec = logging.getLogger("__last_record__")
+    lastrec.handlers = []
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("\r" + lfmt, dfmt))
+    lastrec.addHandler(handler)
+    lastrec.setLevel(1)
+    coloredlogs.install(
+        1, logger=lastrec, fmt="\r" + lfmt, datefmt=dfmt,
+        milliseconds=glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS),
     )

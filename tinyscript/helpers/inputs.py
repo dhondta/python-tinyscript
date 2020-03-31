@@ -5,24 +5,28 @@
 import colorful
 import os
 import re
+import signal
 import sys
+from ast import literal_eval
+from getpass import getuser
 from six import StringIO
 
+from .compat import ensure_str
 from .constants import *
 from .data.types import is_function, is_lambda, is_str
 
 # fix to Xlib.error.DisplayConnectionError: Can't connect to display ":0":
 #  No protocol specified
-if LINUX and os.geteuid() == 0:
-    os.system("xhost +SI:localuser:root > /dev/null 2>&1")
-    os.environ['DISPLAY'] = os.environ.get('DISPLAY') or \
-                            os.environ.get('REMOTE_DISPLAY', ":0")
+if LINUX:
+    os.system("xhost +SI:localuser:{} > /dev/null 2>&1".format(getuser()))
+os.environ['DISPLAY'] = os.environ.get('DISPLAY') or \
+                        os.environ.get('REMOTE_DISPLAY', ":0")
 
 from pynput.keyboard import Controller, Key, Listener
 
 
-__all__ = __features__ = ["capture", "clear", "confirm", "handle_keystrokes",
-                          "pause", "silent", "std_input", "stdin_pipe",
+__all__ = __features__ = ["capture", "clear", "confirm", "hotkeys", "pause",
+                          "silent", "std_input", "stdin_flush", "stdin_pipe",
                           "user_input", "Capture"]
 
 _keyboard = Controller()
@@ -55,33 +59,49 @@ def confirm(prompt="Are you sure ?", style="bold"):
     """
     Ask for confirmation.
     """
-    return user_input(prompt, ["(Y)es", "(N)o"], "n", style=style) == "yes"
+    return user_input("\r" + prompt, ["(Y)es", "(N)o"], "n", style=style) \
+           == "yes"
 
 
-def handle_keystrokes(keystrokes, silent=True):
+def hotkeys(hotkeys, silent=True):
     """
-    Keystrokes handling function relying on pynput.
+    Hotkeys declaration function relying on pynput.
     
-    :param keystrokes: dictionary of keystrokes and related actions
-    :param silent:     do not show errors (of keys not handled)
+    :param hotkeys: dictionary of hotkeys and related actions
+    :param silent:  do not show errors (of keys not handled)
+    :param die:     whether the hotkey should have its listener respawn or not
     
-    Keystrokes dictionary formats:
-    1. keystroke: on_press action
-    2. keystroke: dictionary with on_press and on_release actions
+    Hotkeys dictionary formats:
+    1. hotkey: on_press action
+    2. hotkey: dictionary with on_press and on_release actions
     
     Action representations:
     1. (str, output handler)
     2. function returning None|str|(str, output handler)
     """
-    for k, v in keystrokes.items():
+    global listener, on_press
+    # close the running listener, if hotkeys(...) was already called
+    try:
+        listener.stop()
+        del listener
+    except NameError:
+        pass
+    # replace string keys to Key.[...] objects (e.g. 'ctrl')
+    for k, v in hotkeys.items():
         try:
             k_obj = getattr(Key, k)
-            keystrokes[k_obj] = v
-            del keystrokes[k]
+            hotkeys[k_obj] = v
+            del hotkeys[k]
         except Exception:
             pass
     
     def __handle(f):
+        """ Hotkey action handler and listener regenerator. """
+        global listener, on_press
+        # stop the listener to avoid capturing multiple keystrokes
+        listener.stop()
+        # flush stdin to avoid printing the keystrokes
+        stdin_flush()
         r = f()
         r, out = r if isinstance(r, tuple) and len(r) == 2 else (r, None)
         if is_str(r):
@@ -92,27 +112,26 @@ def handle_keystrokes(keystrokes, silent=True):
                 out.flush()
             else:
                 out(r)
+        # open a new listener
+        listener = Listener(on_press=on_press)
+        listener.start()
     
-    def on_event(event):
-        def _event_handler(key):
-            k = str(key).strip("'")
-            try:
-                v = keystrokes[k]
-                if isinstance(v, dict):
-                    v = v.get(event)
-                __handle(lambda: v if not is_function(v) else v)
-            except KeyError:
-                if not silent:
-                    raise ValueError("Key '{}' not handled".format(k))
-            except Exception:
-                raise ValueError("Bad keystrokes handling")
-        return _event_handler
+    def on_press(key):
+        """ Generic on_press callback function. """
+        try:
+            k = key._name_
+        except AttributeError:
+            k = key.char
+        try:
+            v = hotkeys[ensure_str(k)]
+        except KeyError:
+            if not silent:
+                raise ValueError("Key '{}' not handled".format(k))
+            return
+        __handle((lambda: v) if not is_function(v) else v)
     
-    listener = Listener(on_press=on_event("on_press"),
-                        on_release=on_event("on_release"))
+    listener = Listener(on_press=on_press)
     listener.start()
-    listener.wait()
-    return listener
 
 
 def silent(f):
@@ -141,6 +160,24 @@ def std_input(prompt="", style=None, palette=None):
             style = "_".join(style)
         prompt = getattr(colorful, style)(prompt)
     return (input(prompt) if PYTHON3 else raw_input(prompt)).strip()
+
+
+def stdin_flush():
+    """
+    Multi-platform stdin flush function.
+    
+    Source:
+    https://rosettacode.org/wiki/Keyboard_input/Flush_the_keyboard_buffer#Python
+    """
+    try:
+        try:  # Windows
+            from msvcrt import getch, kbhit
+            while kbhit(): getch()
+        except ImportError:  # Linux/Unix
+            from termios import tcflush, TCIOFLUSH
+            tcflush(sys.stdin, TCIOFLUSH)
+    except Exception:
+        pass
 
 
 def stdin_pipe():
@@ -196,6 +233,7 @@ def user_input(prompt="", choices=None, default=None, choices_str="",
                                           [default is None and required])
     user_input, first = None, True
     while not user_input:
+        stdin_flush()
         user_input = std_input(["", prompt][first] + ["", "\n >> "][newline],
                                **kwargs)
         first = False

@@ -20,6 +20,7 @@ from .helpers.constants import LINUX, PYTHON3
 from .helpers.data.types import ip_address, port_number
 from .helpers.text import configure_docformat, gt
 from .interact import set_interact_items
+from .hotkeys import set_hotkeys
 from .progress import set_progress_items
 from .loglib import *
 from .step import set_step_items
@@ -326,6 +327,7 @@ def initialize(add_banner=False,
                      glob['args']._collisions.get("syslog"))
     # 5) append modes items
     set_interact_items(glob)
+    set_hotkeys(glob)
     set_progress_items(glob)
     set_step_items(glob)
     set_time_items(glob)
