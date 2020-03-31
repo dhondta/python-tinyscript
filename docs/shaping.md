@@ -54,6 +54,8 @@ If not using `__script__`, the name of the script will be used taking a format i
 
 [See example here](examples/metadata.md)
 
+For more detailed information about metadata fields, see [this section](usage.html#customization).
+
 -----
 
 ## Help message styling

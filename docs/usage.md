@@ -57,14 +57,41 @@ From there, the first thing to do can be to customize script/tool's metadata. Fo
 **Field** | **Comment**
 --- | ---
 ```__author__``` | self-explanatory
+```__copyright__``` | processed field for mentioning a copyright notice
+```__credits__``` | list of contributors for displaying credits
 ```__details__``` | list of extra docstrings (for multi-level help)
 ```__doc__``` | script's docstring
+```__docformat__``` | script's docstring styling format (`None`, `html`, `md`, `rst` or `textile`)
 ```__email__``` | self-explanatory
 ```__examples__``` | a list of strings providing example arguments and options (no need to mention the tool name)
-```__reference__``` | field for referencing a book/course/...
+```__license__``` | processed field for mentioning the license
+```__reference__``` | raw text field for referencing a book/course/...
 ```__source__``` | same as for ```__reference__```
-```__training__``` | field for mentioning a training the script comes from
+```__training__``` | raw text field for mentioning a training the script comes from
 ```__version__``` | self-explanatory
+
+!!! note "Processed fields"
+    
+    Copyright is handled the following way: either a copyright text is specified or a 2-tuple with the copyright text and the starting year.
+    
+    ```python
+    >>> from tinyscript import *
+    >>> ts.copyright("test")
+    '© 2020 test'
+    >>> ts.copyright("test", 2019)
+    '© 2019-2020 test'
+    ```
+    
+    In a script, it is thus defined as a metadata field: `__copyright__ = "test", 2019`
+    
+    License is handled by a function that gets the full license name from its short name. For a list of short names, use:
+    
+    ```python
+    >>> from tinyscript import *
+    >>> ts.list_licenses()
+    ['afl-3.0', 'agpl-3.0', ..., 'zlib']
+    ```
+    
 
 !!! note "Comments & Sections"
 
@@ -80,22 +107,32 @@ At this point, multiple global variables and modules imported by Tyniscript can 
 
 ## Initialization
 
-After customizing the metadata, the `initialize` function can be filled with the desired arguments :
+After customizing the metadata, the `initialize` function can be filled with the following arguments. The first list shows the utility features while the second one handles other tuning arguments.
 
 **Argument** | **Purpose**
 --- | ---
-```sudo=[boolean]``` | Force privilege escalation at startup
+```sudo=[boolean]``` | Force privilege elevation at startup
 ```multi_level_debug=[boolean]``` | Set the verbose mode with multiple levels of logging (as shown hereafter).
+```add_banner=[boolean]``` | Add a banner to be displayed when starting the script/tool.
 ```add_config=[boolean]``` | Add an option to input an INI configuration file.
 ```add_demo=[boolean]``` | Add the demonstration option (randomly picking an example).
 ```add_interact=[boolean]``` | Add an interaction option.
+```add_progress=[boolean]``` | Add an option to show a progress bar.
 ```add_step=[boolean]``` | Add a stepping mode option, for setting breakpoints into the code by using the `step` function or the `Step` context manager.
 ```add_time=[boolean]``` | Add an execution timing option, for benchmarking the exeuction by using the `get\_time` and `get\_time\_since\_last` functions or the `Timer` context manager.
 ```add_version=[boolean]``` | Add the version option.
 ```add_wizard=[boolean]``` | Add a wizard option for asking the user to input each value.
-```ext_logging=[boolean]``` | Enable extended logging options.
-```noargs_action="[string]"``` | Add a behavior when no argument is input by the user, a value amongst "`demo`", "`help`", "`step`", "`version`" or "`wizard`".
 ```report_func=[function]``` | Add report options (output format, title, stylesheet and filename) by setting a function (taking no argument) that will generate the report at the end of the execution of the script/tool.
+
+**Argument** | **Purpose**
+--- | ---
+```action_at_interrupt="[string]"``` | Control the action when Ctrl+C is hit ; one of: `exit`|`continue`|`confirm`.
+```ext_logging=[boolean]``` | Enable extended logging options.
+```multi_level_debug=[boolean]``` | Enable multi-level debugging with `-v[v[v[v]]]`.
+```noargs_action="[string]"``` | Add a behavior when no argument is input by the user, a value amongst "`demo`", "`help`", "`step`", "`version`" or "`wizard`".
+```post_actions``` | Enable/disable post-actions after an interrupt (only for interrupt, when exiting, these actions are triggered anyway), that is, features that are handled when the script is ending (e.g. report generation, time statistics displaying, ...).
+```short_long_help=[boolean]``` | Enable/disable short/long help (usage info with `-h` and full help with `--help`).
+```sudo=[boolean]``` | Elevate privilege before running.
 
 ??? example 
 
@@ -103,8 +140,7 @@ After customizing the metadata, the `initialize` function can be filled with the
         initialize(add_demo=True,
                    add_step=True,
                    noargs_action="wizard",
-                   report_func=make_report,
-        )
+                   report_func=make_report)
 
 <br>
 
