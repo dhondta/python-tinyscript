@@ -35,7 +35,7 @@ usage: python hotkeys.py [-h] [--help] [-v]
 During this execution, the following keys are pressed: `p`, `q`, `l`, `i`, `Enter`, `i`, `y`, `Enter`.
 
 ```sh hl_lines="1"
-$ python3 tool.py 
+$ python hotkeys.py 
 12:34:56 [INFO] TEST
 12:34:57 [WARNING] A computed string
 12:34:58 [WARNING] A computed string

@@ -347,9 +347,8 @@ Defining a hotkey dictionary:
 - Dictionary keys are the keyboard key combinations (e.g. "`a`", "`ctrl+e`", ...)
 - Dictionary values can be:
 
-  - Key's callback function.
-  - A string ; in this case, the callback simply displays the string.
-  - A dictionary of `on_press` and `on_release` callback functions. The values of this subdictionary can also be a function or a string.
+    - Key's callback function.
+    - A string ; in this case, the callback simply displays the string.
 
 Also, each "leaf" element of the tree of hotkey dictionaries can be a 2-tuple with a string and the output handler to be used (by default `print`, can also be e.g. `logger.info`). Any callback function can return such a 2-tuple to achieve this same behavior.
 
