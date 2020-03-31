@@ -8,6 +8,7 @@ python:
   - "3.8"
 cache: pip
 before_install:
+  - xhost +
   - sudo apt-get -q update
   - sudo apt-get -y install pandoc
 install:
