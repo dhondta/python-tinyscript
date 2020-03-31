@@ -10,8 +10,7 @@ cache: pip
 before_install:
   - sudo apt-get -q update
   - sudo apt-get -y install pandoc
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
+  - export DISPLAY=:0
 install:
   - pip install coveralls
   - pip install cairocffi>=1.0.0
