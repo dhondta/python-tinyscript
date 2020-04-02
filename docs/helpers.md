@@ -11,6 +11,13 @@ Tinyscript provides some predefined boolean constants, handy in some use cases:
 `PYTHON3` | `True` if Python 3, `False` if Python 2
 `WINDOWS` | Windows platform
 
+It also provides some other constants:
+
+**Name** | **Description**
+:---: | :---:
+`ENCODING` | system encoding
+`LANGUAGE` | system language code
+
 It defines a `classproperty` decorator for setting a property to the class level.
 
 It also defines a few compatibility/utility functions for working with the same code either in Python 2 or 3.
