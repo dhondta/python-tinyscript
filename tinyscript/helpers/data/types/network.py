@@ -15,9 +15,9 @@ __all__ = __features__ = []
 
 
 # network-related check functions
-__all__ += ["is_defgw", "is_domain", "is_email", "is_gw", "is_hostname",
-            "is_ifaddr", "is_ip", "is_ipv4", "is_ipv6", "is_mac", "is_netif",
-            "is_port", "is_url"]
+__all__ += ["is_asn", "is_defgw", "is_domain", "is_email", "is_gw", "is_hostname", "is_ifaddr", "is_ip", "is_ipv4",
+            "is_ipv6", "is_mac", "is_netif", "is_port", "is_url"]
+is_asn      = lambda a:   __as_number(a, False) is not None
 is_defgw    = lambda gw:  __gateway_address(gw, True, False) is not None
 is_domain   = lambda n:   __domain_name(n, False, False) is not None
 is_email    = lambda e:   __email_address(e, False) is not None
@@ -34,16 +34,21 @@ is_url      = lambda url: __url(url, False) is not None
 
 
 # network-related argument types
-__all__ += ["default_gateway_address", "domain_name", "email_address", 
-            "gateway_address", "hostname", "ip_address", "ipv4_address",
-            "ipv6_address", "ip_address_list", "ipv4_address_list",
-            "ipv6_address_list", "ip_address_filtered_list",
-            "ipv4_address_filtered_list", "ipv6_address_filtered_list",
-            "ip_address_network", "ipv4_address_network",
-            "ipv6_address_network", "interface_address",
-            "interface_address_list", "interface_address_filtered_list",
-            "mac_address", "network_interface", "port_number",
-            "port_number_range", "url"]
+__all__ += ["as_number", "default_gateway_address", "domain_name", "email_address", "gateway_address", "hostname",
+            "ip_address", "ipv4_address", "ipv6_address", "ip_address_list", "ipv4_address_list", "ipv6_address_list",
+            "ip_address_filtered_list", "ipv4_address_filtered_list", "ipv6_address_filtered_list",
+            "ip_address_network", "ipv4_address_network", "ipv6_address_network", "interface_address",
+            "interface_address_list", "interface_address_filtered_list", "mac_address", "network_interface",
+            "port_number", "port_number_range", "url"]
+
+
+def __as_number(asn, fail=True):
+    """ Autonomous System Number validation. """
+    if str(asn).isdigit() and 0 <= int(asn) < 2**32:
+        return asn
+    if fail:
+        raise ValueError("Bad AS number")
+as_number = lambda a: __as_number(a)
 
 
 def __domain_name(name, dotted=False, fail=True):
