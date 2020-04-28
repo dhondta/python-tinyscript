@@ -140,7 +140,13 @@ class TestHelpersDataTypes(TestCase):
         GBAD  = "THIS_GATEWAY_ADDRESS_IS_NOT_VALID"
         self.assertRaises(ValueError, gateway_address, GBAD)
         self.assertRaises(ValueError, default_gateway_address, GBAD)
-    
+        ASN1 = 12345
+        ASN2 = "4835354"
+        ASN3 = "BAD_ASN"
+        self.assertTrue(as_number(ASN1))
+        self.assertTrue(as_number(ASN2))
+        self.assertRaises(ValueError, as_number, ASN3)
+
     def test_data_type_check(self):
         self.assertTrue(is_int(1))
         self.assertFalse(is_int("a"))
@@ -234,8 +240,14 @@ class TestHelpersDataTypes(TestCase):
         ABAD  = "THIS_ADDRESS_IS_NOT_VALID"
         self.assertTrue(is_ifaddr(AGOOD))
         self.assertFalse(is_ifaddr(ABAD))
-        
-    
+        GBAD  = "THIS_GATEWAY_ADDRESS_IS_NOT_VALID"
+        self.assertFalse(is_gw(GBAD))
+        self.assertFalse(is_defgw(GBAD))
+        ASN1 = 12345
+        ASN2 = "BAD_ASN"
+        self.assertTrue(is_asn(ASN1))
+        self.assertFalse(is_asn(ASN2))
+
     def test_option_format_check(self):
         self.assertTrue(is_long_opt("--test"))
         self.assertFalse(is_long_opt("-t"))

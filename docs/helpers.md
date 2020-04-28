@@ -207,6 +207,7 @@ And for network-related data:
 
 **Function** | **Description**
 :---: | :---:
+`ts.is_asn` | 2-byte or 4-byte AS number
 `ts.is_defgw` | default gateway
 `ts.is_domain` | domain name
 `ts.is_email` | email address
@@ -254,6 +255,7 @@ And for network-related types:
 
 **Type** | **Output** | **Description**
 :---: | :---: | :---:
+`ts.as_number` | `int` or `str` | valid 2-byte or 4-byte AS number
 `ts.default_gateway_address` | `str` | valid default gateway address
 `ts.domain_name` | `str`  | valid domain name
 `ts.email_address` | `str`  | valid email address
