@@ -42,6 +42,7 @@ __imports__ = {
         "fileinput",
         "itertools",
         "os",
+        "platform",
         "random",
         "re",
         "shutil",
