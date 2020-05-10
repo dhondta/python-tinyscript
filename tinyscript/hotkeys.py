@@ -6,7 +6,7 @@ from os import getpid, kill
 from signal import SIGINT, SIGTERM, SIGUSR1
 
 from .handlers import _hooks
-from .helpers.inputs import confirm, hotkeys, _keyboard
+from .helpers.inputs import confirm, hotkeys, hotkeys_enabled
 from .preimports import logging
 
 
@@ -38,23 +38,24 @@ def set_hotkeys(glob):
     
     :param glob: main script's global scope dictionary reference
     """
-    k = glob.get('HOTKEYS', HOTKEYS)
-    # case 1: no hotkey to be configured
-    if k is None:
-        return
-    # case 2: only the default hotkeys
-    elif k == "default":
-        return hotkeys(BASE_HOTKEYS)
-    # case 3: only user-defined keys
-    elif isinstance(k, dict):
-        return hotkeys(k)
-    # case 4: default hotkeys and user-defined keys mix
-    elif isinstance(k, tuple) and len(k) == 2 and "default" in k:
-        r = {}
-        for hk in k:
-            if hk == "default":
-                hk = BASE_HOTKEYS
-            for key, actions in hk.items():
-                r[key] = actions
-        return hotkeys(r)
-    raise ValueError("Invalid HOTKEYS dictionary")
+    if hotkeys_enabled:
+        k = glob.get('HOTKEYS', HOTKEYS)
+        # case 1: no hotkey to be configured
+        if k is None:
+            return
+        # case 2: only the default hotkeys
+        elif k == "default":
+            return hotkeys(BASE_HOTKEYS)
+        # case 3: only user-defined keys
+        elif isinstance(k, dict):
+            return hotkeys(k)
+        # case 4: default hotkeys and user-defined keys mix
+        elif isinstance(k, tuple) and len(k) == 2 and "default" in k:
+            r = {}
+            for hk in k:
+                if hk == "default":
+                    hk = BASE_HOTKEYS
+                for key, actions in hk.items():
+                    r[key] = actions
+            return hotkeys(r)
+        raise ValueError("Invalid HOTKEYS dictionary")

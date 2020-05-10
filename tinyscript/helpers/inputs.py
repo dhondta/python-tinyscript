@@ -15,21 +15,24 @@ from .compat import ensure_str
 from .constants import *
 from .data.types import is_function, is_lambda, is_str
 
-# fix to Xlib.error.DisplayConnectionError: Can't connect to display ":0":
-#  No protocol specified
+# fix to Xlib.error.DisplayConnectionError: Can't connect to display ":0": No protocol specified
+# however, it does not fix the error while testing with Travis CI
 if LINUX:
     os.system("xhost +SI:localuser:{} > /dev/null 2>&1".format(getuser()))
-os.environ['DISPLAY'] = os.environ.get('DISPLAY') or \
-                        os.environ.get('REMOTE_DISPLAY', ":0")
+os.environ['DISPLAY'] = os.environ.get('DISPLAY') or os.environ.get('REMOTE_DISPLAY', ":0")
 
-from pynput.keyboard import Controller, Key, Listener
+try:
+    from pynput.keyboard import Controller, Key, Listener
+    _keyboard = Controller()
+    hotkeys_enabled = True
+except:
+    _keyboard = None
+    hotkeys_enabled = False
 
 
-__all__ = __features__ = ["capture", "clear", "confirm", "hotkeys", "pause",
-                          "silent", "std_input", "stdin_flush", "stdin_pipe",
-                          "user_input", "Capture"]
+__all__ = __features__ = ["capture", "clear", "confirm", "hotkeys", "pause", "silent", "std_input", "stdin_flush",
+                          "stdin_pipe", "user_input", "Capture"]
 
-_keyboard = Controller()
 pause = lambda *a, **kw: std_input("Press Enter to continue", *a, **kw) or None
 
 
@@ -59,8 +62,7 @@ def confirm(prompt="Are you sure ?", style="bold"):
     """
     Ask for confirmation.
     """
-    return user_input("\r" + prompt, ["(Y)es", "(N)o"], "n", style=style) \
-           == "yes"
+    return user_input("\r" + prompt, ["(Y)es", "(N)o"], "n", style=style) == "yes"
 
 
 def hotkeys(hotkeys, silent=True):
@@ -79,6 +81,8 @@ def hotkeys(hotkeys, silent=True):
     1. (str, output handler)
     2. function returning None|str|(str, output handler)
     """
+    if not hotkeys_enabled:
+        return
     global listener, on_press
     # close the running listener, if hotkeys(...) was already called
     try:
@@ -150,8 +154,7 @@ def std_input(prompt="", style=None, palette=None):
     Very simple Python2/3-compatible input function handling prompt styling.
     
     :param prompt:  prompt message
-    :param style:   colorful styling function, e.g. red_on_green (for green
-                     foreground and red background colors)
+    :param style:   colorful styling function, e.g. red_on_green (for green foreground and red background colors)
     :param palette: dictionary for defining new styles
     """
     colorful.update_palette(palette or {})
@@ -166,8 +169,7 @@ def stdin_flush():
     """
     Multi-platform stdin flush function.
     
-    Source:
-    https://rosettacode.org/wiki/Keyboard_input/Flush_the_keyboard_buffer#Python
+    Source: https://rosettacode.org/wiki/Keyboard_input/Flush_the_keyboard_buffer#Python
     """
     try:
         try:  # Windows
@@ -193,16 +195,14 @@ def stdin_pipe():
             yield l
 
 
-def user_input(prompt="", choices=None, default=None, choices_str="",
-               required=False, newline=False, **kwargs):
+def user_input(prompt="", choices=None, default=None, choices_str="", required=False, newline=False, **kwargs):
     """
     Python2/3-compatible input function handling choices and default value.
     
     :param prompt:      prompt message
     :param choices:     list of possible choices or lambda function
     :param default:     default value
-    :param choices_str: list of possible choices as a string (overrides the
-                         default composition from the list of choices)
+    :param choices_str: list of possible choices as a string (overrides the default composition from the choices list)
     :param required:    make non-null user input mandatory
     :param newline:     insert a newline and '>>' after the prompt
     :param kwargs:      keyword-arguments to be passed to std_input for styling
@@ -211,31 +211,24 @@ def user_input(prompt="", choices=None, default=None, choices_str="",
     shortcuts = {}
     if type(choices) in [list, tuple, set]:
         choices = list(map(lambda x: str(x).lower(), choices))
-        choices_str = " {%s}" % (choices_str or \
-                                 '|'.join(list(map(str, choices))))
-        # consider choices of the form ["(Y)es", "(N)o"] ;
-        #  in this case, we want the choices to be ['yes', 'no', 'y', 'n'] for
-        #  the sake of simplicity for the user
+        choices_str = " {%s}" % (choices_str or '|'.join(list(map(str, choices))))
+        # consider choices of the form ["(Y)es", "(N)o"] ; in this case, we want the choices to be
+        #  ['yes', 'no', 'y', 'n'] for the sake of simplicity for the user
         m = list(map(lambda x: re.match(r'\(([a-zA-Z0-9])\)', x), choices))
         # then remove the parenthesis from the choices
-        choices = [re.sub(r"\(([a-zA-Z0-9])\)", 
-                          lambda x: x.group(1).lower(), c) for c in choices]
-        shortcuts = {x.group(1).lower(): c for x, c in zip(m, choices) \
-                     if x is not None}
+        choices = [re.sub(r"\(([a-zA-Z0-9])\)", lambda x: x.group(1).lower(), c) for c in choices]
+        shortcuts = {x.group(1).lower(): c for x, c in zip(m, choices) if x is not None}
         # this way, if using ["Yes", "No"], choices will remain so
-        _check = lambda v: str(v).lower() in choices or \
-                           str(v).lower() in shortcuts.keys()
+        _check = lambda v: str(v).lower() in choices or str(v).lower() in shortcuts.keys()
     elif is_lambda(choices):
         _check = choices
     else:
         _check = lambda v: True
-    prompt += "{}{} ".format(choices_str, [" [{}]".format(default), ""] \
-                                          [default is None and required])
+    prompt += "{}{} ".format(choices_str, [" [{}]".format(default), ""][default is None and required])
     user_input, first = None, True
     while not user_input:
         stdin_flush()
-        user_input = std_input(["", prompt][first] + ["", "\n >> "][newline],
-                               **kwargs)
+        user_input = std_input(["", prompt][first] + ["", "\n >> "][newline], **kwargs)
         first = False
         if type(choices) in [list, tuple, set]:
             choices = list(map(lambda x: x.lower(), choices))
@@ -278,8 +271,7 @@ class Capture(object):
         return self.stdout, self.stderr
     
     def __exit__(self, *args):
-        # freeze stdout and stderr contents before closing the file handles,
-        #  using the references previously returned by __enter__
+        # freeze stdout and stderr contents before closing the file handles, using the references set in __enter__
         self.stdout.text = sys.stdout.getvalue().strip() 
         self.stderr.text = sys.stderr.getvalue().strip()
         # close current file handles

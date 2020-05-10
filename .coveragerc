@@ -1,6 +1,7 @@
 [run]
 source = tinyscript
 omit =
+    tinyscript/hotkeys.py
     tinyscript/warnings.py
     tinyscript/helpers/termsize.py
     tests/*
@@ -29,3 +30,4 @@ exclude_lines =
     elif line.startswith\(\"Successfully installed\"\):
     for top_level in __install
     def __deprecated
+    def hotkeys(hotkeys, silent=True):
