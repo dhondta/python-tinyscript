@@ -122,6 +122,11 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, hex2ints, HEX, n_chunks=-1)
         self.assertRaises(ValueError, str2ints, STR, len_in=-1)
         self.assertRaises(ValueError, bin2ints, BIN, len_out=-1)
+        # int -> flags
+        self.assertRaises(ValueError, int2flags, HEX)
+        self.assertEqual(int2flags(12), [True, True, False, False])
+        # flags -> int
+        self.assertEqual([True, True, False, False], int2flags(12))
 
     def test_data_conversion_from_str(self):
         # str -> bin

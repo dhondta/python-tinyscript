@@ -337,6 +337,14 @@ The currently supported functions are:
         >>> ts.bin2str('01110100011001010111001101110100')
         'test'
 
+- Integer <=> Flags: `ts.int2flags` / `ts.flags2int`
+
+        :::python
+        >>> ts.int2flags(12)
+        [True, True, False, False]
+        >>> ts.flags2int([True, True, False, False])
+        12
+
 - Integer <=> Hexadecimal: `ts.int`(`s`)`2hex`(`s`) / `ts.hex`(`s`)`2int`(`s`)
 
         :::python

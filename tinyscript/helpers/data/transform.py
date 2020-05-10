@@ -32,15 +32,13 @@ def __validation(**kwargs):
         elif k in ["n_b", "n_B", "n_c", "n_g"]:
             if not is_pos_int(v, zero=False):
                 raise ValueError("Number of {} must be a positive int, not {}"
-                                 .format({"n_b": "bits", "n_B": "bits",
-                                 "n_c": "characters", "n_g": "groups"}[k], v))
+                                 .format({"n_b": "bits", "n_B": "bits", "n_c": "characters", "n_g": "groups"}[k], v))
         elif k == "o":
             if v not in ["little", "big"]:
                 raise ValueError("Bad bits group order '{}'".format(v))
         elif k == "s":
             if not is_str(v):
-                raise ValueError("Bad input string of 8-bits characaters '{}'"
-                                 .format(v))
+                raise ValueError("Bad input string of 8-bits characaters '{}'".format(v))
         elif k == "u":
             if not isinstance(v, bool):
                 raise ValueError("Bad value for input boolean {}".format(v))
@@ -48,14 +46,12 @@ def __validation(**kwargs):
             if v is None:
                 continue
             if not is_pos_int(v, zero=False):
-                raise ValueError("{} must be a positive int, not {}"
-                                 .format(k, v))
+                raise ValueError("{} must be a positive int, not {}".format(k, v))
 
 
 # BINARY STRING <=> *
 def bin2bin(binary_string, nbits_in=8, nbits_out=8):
-    """ Convert a binary string with groups of nbits_in bits to a binary string
-         with groups of nbits_out bits. """
+    """ Convert a binary string with groups of nbits_in bits to a binary string with groups of nbits_out bits. """
     bs = binary_string
     __validation(b=bs, n_b=nbits_in, n_B=nbits_out)
     bs = Bits(bs, nbits=nbits_in)
@@ -64,14 +60,14 @@ def bin2bin(binary_string, nbits_in=8, nbits_out=8):
 
 
 def bin2hex(binary_string, nbits_in=8, nbits_out=8):
-    """ Convert a binary string (eventually using a separator) to a hexadecimal
-         string, using a given number of bits and in little or big endian. """
+    """ Convert a binary string (eventually using a separator) to a hexadecimal string, using a given number of bits and
+         in little or big endian. """
     return Bits(bin2bin(binary_string, nbits_in, nbits_out)).hex
 
 
 def bin2int(binary_string, nbits_in=8, nbits_out=8, order="big", unsigned=True):
-    """ Convert a binary string (eventually using a separator) to an integer,
-         using a given number of bits and in little or big endian. """
+    """ Convert a binary string (eventually using a separator) to an integer, using a given number of bits and in little
+         or big endian. """
     __validation(o=order, u=unsigned)
     bs = Bits(bin2bin(binary_string, nbits_in, nbits_out))
     pref = ["", "u"][unsigned]
@@ -79,13 +75,17 @@ def bin2int(binary_string, nbits_in=8, nbits_out=8, order="big", unsigned=True):
 
 
 def bin2str(binary_string, nbits_in=8, nbits_out=8):
-    """ Convert a binary string to string of 8-bits characters, using a given
-         number of bits. """
+    """ Convert a binary string to string of 8-bits characters, using a given number of bits. """
     bs = binary_string
     __validation(b=bs, n_b=nbits_in, n_B=nbits_out)
     bs = Bits(bs, nbits=nbits_in)
     bs.nbits = nbits_out
     return bs.bytes
+
+
+def flags2int(flags):
+    """ Convert a list of booleans to an integer representing binary flags. """
+    return int("".join(map(lambda x: "01"[bool(x)], flags)), 2)
 
 
 # HEXADECIMAL STRING <=> *
@@ -130,6 +130,13 @@ def int2bin(integer, nbits_in=8, nbits_out=8, order="big", unsigned=True):
     bs._nbits = nbits_in
     bs.nbits = nbits_out
     return bs.bin
+
+
+def int2flags(integer):
+    """ Convert an integer representing binary flags to a list of booleans. """
+    i = integer
+    __validation(i=i)
+    return list(map(lambda x: x == "1", bin(i)[2:]))
 
 
 def int2hex(integer, order="big", unsigned=True):
@@ -182,8 +189,8 @@ def str2hex(chars_string):
 
 
 def str2int(chars_string, order="big", unsigned=True):
-    """ Convert a string of 8-bits characters to a big integer or, if using
-         blocks of nchars characters, a list of big integers. """
+    """ Convert a string of 8-bits characters to a big integer or, if using blocks of nchars characters, a list of big
+         integers. """
     s = chars_string
     __validation(s=s, o=order, u=unsigned)
     bs = Bits()
@@ -211,10 +218,8 @@ for f in __features__:
 
 # add multi-input conversion functions
 def __items2something(f):
-    """
-    This decorates infmt2outfmt functions to make intfmtS2outfmt (taking
-     multiple inputs and producing a single output.
-    """
+    """ This decorates infmt2outfmt functions to make intfmtS2outfmt (taking multiple inputs and producing a single
+         output. """
     infmt, outfmt = f.__name__.split("2")
     def _wrapper(*args, **kwargs):
         r = [] if outfmt == "int" else ""
@@ -231,10 +236,8 @@ def __items2something(f):
 
 
 def __something2items(f):
-    """
-    This decorates infmt2outfmt functions to make intfmt2outfmtS (taking a
-     single input and producing multiple outputs.
-    """
+    """ This decorates infmt2outfmt functions to make intfmt2outfmtS (taking a single input and producing multiple
+         outputs. """
     infmt, outfmt = f.__name__.split("2")
     def _wrapper(data, **kwargs):
         func = f
@@ -277,3 +280,4 @@ for fname in __features__[:]:
     f2 = __something2items(globals()[fname])
     globals()[f2.__name__] = f2
     __features__ += [f1.__name__, f2.__name__]
+__features__ += ["flags2int", "int2flags"]
