@@ -5,7 +5,7 @@
 """
 from tinyscript.helpers.compat import b
 from tinyscript.helpers.inputs import *
-from tinyscript.helpers.inputs import _keyboard, Key
+from tinyscript.helpers.inputs import _keyboard, hotkeys_enabled
 from tinyscript.loglib import logger as ts_logger
 
 from utils import *
@@ -60,17 +60,19 @@ class TestHelpersInputs(TestCase):
         self.assertEqual(out, "TEST")
     
     def test_keystrokes_function(self):
-        temp_stdout(self)
-        hotkeys({'t': "TEST"})
-        _keyboard.type("t")
-        hotkeys({'t': ("TEST", sys.stdout)})
-        _keyboard.type("t")
-        hotkeys({'t': ("TEST", ts_logger.info)})
-        _keyboard.type("t")
-        hotkeys({'t': ("TEST", "BAD_OUTPUT_HANDLER")}, False)
-        with self.assertRaises(ValueError):
-            _keyboard.press("a")
-        with self.assertRaises(TypeError):
-            _keyboard.press("t")
-        hotkeys({'ctrl': ("CTRL", ts_logger.info)})
-        _keyboard.press(Key.ctrl)
+        if hotkeys_enabled:
+            temp_stdout(self)
+            hotkeys({'t': "TEST"})
+            _keyboard.type("t")
+            hotkeys({'t': ("TEST", sys.stdout)})
+            _keyboard.type("t")
+            hotkeys({'t': ("TEST", ts_logger.info)})
+            _keyboard.type("t")
+            hotkeys({'t': ("TEST", "BAD_OUTPUT_HANDLER")}, False)
+            with self.assertRaises(ValueError):
+                _keyboard.press("a")
+            with self.assertRaises(TypeError):
+                _keyboard.press("t")
+            hotkeys({'ctrl': ("CTRL", ts_logger.info)})
+            from tinyscript.helpers.inputs import Key
+            _keyboard.press(Key.ctrl)
