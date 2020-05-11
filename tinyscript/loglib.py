@@ -11,7 +11,7 @@ from .preimports import logging
 
 
 __features__ = ["LOG_FORMAT", "DATE_FORMAT", "TIME_MILLISECONDS", "logger"]
-__all__ = ["coloredlogs", "configure_logger"] + __features__
+__all__      = ["coloredlogs", "configure_logger"] + __features__
 
 
 DATE_FORMAT       = '%H:%M:%S'
@@ -51,16 +51,13 @@ class RelativeTimeColoredFormatter(coloredlogs.ColoredFormatter):
         self.datefmt = '%H:%M:%S.%f'
     
     def format(self, record):
-        record.created = timedelta(microseconds=record.relativeCreated) \
-                         .total_seconds()
+        record.created = timedelta(microseconds=record.relativeCreated).total_seconds()
         return super(RelativeTimeColoredFormatter, self).format(record)
 
 
-def configure_logger(glob, multi_level,
-                     relative=False, logfile=None, syslog=False):
+def configure_logger(glob, multi_level, relative=False, logfile=None, syslog=False):
     """
-    Logger configuration function for setting either a simple debug mode or a
-     multi-level one.
+    Logger configuration function for setting either a simple debug mode or a multi-level one.
     
     :param glob:        globals dictionary
     :param multi_level: boolean telling if multi-level debug is to be considered
@@ -68,8 +65,8 @@ def configure_logger(glob, multi_level,
     :param logfile:     log file to be saved (None means do not log to file)
     :param syslog:      enable logging to /var/log/syslog
     """
-    levels = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG] \
-             if multi_level else [logging.INFO, logging.DEBUG]
+    _l = logging
+    levels = [_l.ERROR, _l.WARNING, _l.INFO, _l.DEBUG] if multi_level else [_l.INFO, _l.DEBUG]
     try:
         verbose = min(int(glob['args'].verbose), 3)
     except AttributeError:
@@ -80,28 +77,22 @@ def configure_logger(glob, multi_level,
     glob['logger'] = logger
     logger.handlers = []
     logger.setLevel(1)
-    logger.addHandler(logging.InterceptionHandler())
-    handler = logging.StreamHandler()
+    logger.addHandler(_l.InterceptionHandler())
+    handler = _l.StreamHandler()
     lfmt = "\r" + glob.get('LOG_FORMAT', LOG_FORMAT)
     dfmt = glob.get('DATE_FORMAT', DATE_FORMAT)
-    formatter = logging.Formatter(lfmt, dfmt)
+    formatter = _l.Formatter(lfmt, dfmt)
     handler.setFormatter(formatter)
     handler.setLevel(dl)
     logger.addHandler(handler)
     if relative:
         coloredlogs.ColoredFormatter = RelativeTimeColoredFormatter
-    coloredlogs.install(
-        dl, logger=logger, fmt=lfmt, datefmt=dfmt,
-        milliseconds=glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS),
-        syslog=syslog, stream=logfile,
-    )
-    lastrec = logging.getLogger("__last_record__")
+    gtms = glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS)
+    coloredlogs.install(dl, logger=logger, fmt=lfmt, datefmt=dfmt, syslog=syslog, stream=logfile, milliseconds=gtms)
+    lastrec = _l.getLogger("__last_record__")
     lastrec.handlers = []
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("\r" + lfmt, dfmt))
+    handler = _l.StreamHandler()
+    handler.setFormatter(_l.Formatter("\r" + lfmt, dfmt))
     lastrec.addHandler(handler)
     lastrec.setLevel(1)
-    coloredlogs.install(
-        1, logger=lastrec, fmt="\r" + lfmt, datefmt=dfmt,
-        milliseconds=glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS),
-    )
+    coloredlogs.install(1, logger=lastrec, fmt="\r" + lfmt, datefmt=dfmt, milliseconds=gtms)

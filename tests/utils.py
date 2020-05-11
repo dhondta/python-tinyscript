@@ -15,11 +15,9 @@ from tinyscript.helpers.constants import PYTHON3
 from unittest import TestCase
 
 
-__all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep",
-           "exists", "join", "logger", "makedirs", "remove", "rmdir", "rmtree",
-           "sleep", "sys", "temp_stdin", "touch", "temp_stdout", "tmpf",
-           "FakeLogRecord", "FakeNamespace", "TestCase", "PYTHON3",
-           "_FakeParserAction", "FIXTURES"]
+__all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep", "exists", "join", "logger", "logging",
+           "makedirs", "remove", "rmdir", "rmtree", "sleep", "sys", "temp_stdin", "touch", "temp_stdout", "tmpf",
+           "FakeLogRecord", "FakeNamespace", "TestCase", "PYTHON3", "_FakeParserAction", "FIXTURES"]
 
 
 FIXTURES = {

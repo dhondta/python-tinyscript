@@ -21,6 +21,7 @@ from .helpers.data.types import ip_address, port_number
 from .helpers.text import configure_docformat, gt
 from .interact import set_interact_items
 from .hotkeys import set_hotkeys
+from .notify import set_notify_items
 from .progress import set_progress_items
 from .loglib import *
 from .step import set_step_items
@@ -40,14 +41,14 @@ def _save_config(glob):
     if cf:
         with open(cf, 'w') as f:
             glob['parser']._config.write(f)
-        glob['logger'].debug(gt("Input arguments written to file '{}'")
-                             .format(cf))
+        glob['logger'].debug(gt("Input arguments written to file '{}'").format(cf))
 
 
 def initialize(add_banner=False,
                add_config=False,
                add_demo=False,
                add_interact=False,
+               add_notify=False,
                add_progress=False,
                add_step=False,
                add_time=False,
@@ -63,9 +64,8 @@ def initialize(add_banner=False,
                report_func=None,
                **kwargs):
     """
-    Initialization function ; sets up the arguments for the parser and creates a
-     logger to be inserted in the input dictionary of global variables from the
-     calling script.
+    Initialization function ; sets up the arguments for the parser and creates a logger to be inserted in the input
+     dictionary of global variables from the calling script.
 
     :param add_banner:          add an ASCII banner when starting the tool
     :param add_config:          add an option to input an INI configuration file
@@ -73,6 +73,7 @@ def initialize(add_banner=False,
                                  random entry from the __examples__ (only works
                                  if this variable is populated)
     :param add_interact:        add an interaction option
+    :param add_notify:          add a notification option
     :param add_progress:        add a progress management option
     :param add_step:            add an execution stepping option
     :param add_time:            add an execution timing option
@@ -96,8 +97,7 @@ def initialize(add_banner=False,
     exit_at_interrupt = kwargs.pop('exit_at_interrupt', None)
     if len(kwargs) > 0:
         raise TypeError("Unexpected keyword-argument{} ({})"
-                        .format(["", "s"][len(kwargs) > 1],
-                                ", ".join(kwargs.keys())))
+                        .format(["", "s"][len(kwargs) > 1], ", ".join(kwargs.keys())))
     # get caller's frame
     frame = currentframe().f_back
     # walk the stack until a frame containing a known object is found
@@ -108,8 +108,7 @@ def initialize(add_banner=False,
             # search for dunders
             for d in DUNDERS:
                 f = frame
-                while f and (d not in f.f_globals.keys() or \
-                             f.f_globals[d] is None):
+                while f and (d not in f.f_globals.keys() or f.f_globals[d] is None):
                     f = f.f_back
                 try:
                     glob[d] = f.f_globals[d]
@@ -117,9 +116,10 @@ def initialize(add_banner=False,
                     pass
             break
         frame = frame.f_back
-    add = {'config': add_config, 'demo': add_demo, 'interact': add_interact,
-           'progress': add_progress, 'step': add_step, 'time': add_time,
-           'version': add_version, 'wizard': add_wizard,
+    if any(glob.get(k) is not None for k in ["NOTIFICATION_ICONS_PATH", "NOTIFICATION_LEVEL", "NOTIFICATION_TIMEOUT"]):
+        add_notify = True
+    add = {'config': add_config, 'demo': add_demo, 'interact': add_interact, 'notify': add_notify,
+           'progress': add_progress, 'step': add_step, 'time': add_time, 'version': add_version, 'wizard': add_wizard,
            'help': True, 'usage': True}
     p = ArgumentParser(glob)
     # 1) handle action when no input argument is given
@@ -127,10 +127,8 @@ def initialize(add_banner=False,
     noarg = len(sys.argv) == 1
     if noarg and noargs_action:
         if noargs_action not in add.keys():
-            raise ValueError(gt("Bad action when no args (should be one of: "
-                                "{})").format('|'.join(add.keys())))
-        add[noargs_action] = True  # ensure this action is enabled, even if it
-                                   #  is not given the passed arguments
+            raise ValueError(gt("Bad action when no args (should be one of: {})").format('|'.join(add.keys())))
+        add[noargs_action] = True  # ensure this action is enabled, even if it is not given the passed arguments
     # 2) populate the real parser and add information arguments
     __parsers = {parser: p}
     #  proxy parser to real parser recursive conversion function
@@ -144,8 +142,7 @@ def initialize(add_banner=False,
           >>> subparsers = parser.add_subparsers()
           >>> subparsers.add_parser(..., parents=[parent])
                                                     ^
-                              this is an instance of ProxyArgumentParser
-                              and must be converted to an actual parser instance
+                   this is an instance of ProxyArgumentParser and must be converted to an actual parser instance
 
         :param value: a value coming from args or kwargs aimed to a real parser
         """
@@ -162,157 +159,130 @@ def initialize(add_banner=False,
         real_subparser = getattr(real_parser, method)(*args, **kwargs)
         if real_subparser is not None:
             __parsers[proxy_subparser] = real_subparser
-    # this allows to ensure that another call to initialize(...) will have a
-    #  clean list of calls and an empty _config attribute
+    # this allows to ensure that another call to initialize(...) will have a clean list of calls and an empty _config
+    #  attribute
     parser_calls = []
     ArgumentParser.reset()
     # configure documentation formatting
     configure_docformat(glob)
-    #  config handling feature, for reading/writing an INI config file with the
-    #   input arguments, e.g. for future reuse
+    # config handling feature, for reading/writing an INI config file with the input arguments, e.g. for future reuse
     if add['config']:
         c = p.add_argument_group("config arguments")
-        opt = c.add_argument("-r", "--read-config", action="config",
-                             help=gt("read args from a config file"),
+        opt = c.add_argument("-r", "--read-config", action="config", help=gt("read args from a config file"),
                              note=gt("this overrides other arguments"))
-        c.add_argument("-w", "--write-config", metavar="INI",
-                       help=gt("write args to a config file"))
+        c.add_argument("-w", "--write-config", metavar="INI", help=gt("write args to a config file"))
         if noarg and noargs_action == "config":
             sys.argv[1:] = [opt, "config.ini"]
     i = p.add_argument_group("extra arguments")
-    #  demonstration feature, for executing an example amongst these defined in
-    #   __examples__, useful for observing what the tool does
+    # demonstration feature, for executing an example amongst these defined in __examples__, useful for observing what
+    #  the tool does
     if add['demo']:
-        opt = i.add_argument("--demo", action="demo", prefix="play",
-                             help=gt("demonstrate a random example"))
+        opt = i.add_argument("--demo", action="demo", prefix="play", help=gt("demonstrate a random example"))
         if noarg and noargs_action == "demo":
             sys.argv[1:] = [opt]
-    #  help feature, for displaying classical or extended help about the tool
+    # help feature, for displaying classical or extended help about the tool
     if add['help']:
         if glob.get('__details__'):
-            opt = i.add_argument("-h", dest="help", default=0, action="count",
-                               help=gt("show extended help message and exit"),
-                               note=gt("-hhh is the highest help detail level"))
+            opt = i.add_argument("-h", dest="help", default=0, help=gt("show extended help message and exit"),
+                                 action="count", note=gt("-hhh is the highest help detail level"))
         elif short_long_help:
-            opt = i.add_argument("-h", dest="usage", action="usage",
-                                 help=gt("show usage message and exit"))
-            opt = i.add_argument("--help", action="help",
-                                 help=gt("show this help message and exit"))
+            opt = i.add_argument("-h", dest="usage", action="usage", help=gt("show usage message and exit"))
+            opt = i.add_argument("--help", action="help", help=gt("show this help message and exit"))
         else:
-            opt = i.add_argument("-h", "--help", action="help",
-                                 help=gt("show this help message and exit"))
+            opt = i.add_argument("-h", "--help", action="help", help=gt("show this help message and exit"))
         if noarg and noargs_action == "help":
             sys.argv[1:] = ["--help"]
         elif noarg and noargs_action == "usage":
             sys.argv[1:] = ["DISPLAY_USAGE"]
-    #  interaction mode feature, for interacting with the tool during its
-    #   execution, useful for debugging when it is complex
+    # interaction mode feature, for interacting with the tool during its execution, useful for debugging
     if add['interact']:
         j = p.add_argument_group("interaction arguments")
-        opt = j.add_argument("--interact", action="store_true",
-                             suffix="mode", help=gt("interaction mode"))
+        opt = j.add_argument("--interact", action="store_true", suffix="mode", help=gt("interaction mode"))
         if opt:
-            j.add_argument("--host", default="127.0.0.1", type=ip_address,
-                           prefix="remote", help=gt("remote interacting host"))
-            j.add_argument("--port", default=12345, type=port_number,
-                           prefix="remote", help=gt("remote interacting port"))
+            j.add_argument("--host", default="127.0.0.1", type=ip_address, prefix="remote",
+                           help=gt("remote interacting host"))
+            j.add_argument("--port", default=12345, type=port_number, prefix="remote",
+                           help=gt("remote interacting port"))
         if noarg and noargs_action == "interact":
             sys.argv[1:] = [opt]
-    #  progress mode feature, for displaying a progress bar during the execution
+    # notification feature, for displaying notifications during the execution
+    if add['notify']:
+        opt = i.add_argument("-n", "--notify", action="store_true", suffix="mode", help=gt("notify mode"))
+        if noarg and noargs_action == "notify":
+            sys.argv[1:] = [opt]
+    # progress mode feature, for displaying a progress bar during the execution
     if add['progress']:
-        opt = i.add_argument("-p", "--progress", action="store_true",
-                             suffix="mode", help=gt("progress mode"))
+        opt = i.add_argument("-p", "--progress", action="store_true", suffix="mode", help=gt("progress mode"))
         if noarg and noargs_action == "progress":
             sys.argv[1:] = [opt]
-    #  stepping mode feature, for stepping within the tool during its execution,
-    #   especially useful for debugging when it is complex
+    # stepping mode feature, for stepping within the tool during its execution, especially useful for debugging
     if add['step']:
-        opt = i.add_argument("--step", action="store_true", last=True,
-                             suffix="mode", help=gt("stepping mode"))
+        opt = i.add_argument("--step", action="store_true", last=True, suffix="mode", help=gt("stepping mode"))
         if noarg and noargs_action == "step":
             sys.argv[1:] = [opt]
-    #  timing mode feature, for measuring time along the execution of the tool
+    # timing mode feature, for measuring time along the execution of the tool
     if add['time']:
         b = p.add_argument_group("timing arguments")
-        opt = b.add_argument("--stats", action='store_true', last=True,
-                             prefix="time",
+        opt = b.add_argument("--stats", action='store_true', last=True, prefix="time",
                              help=gt("display execution time stats at exit"))
-        b.add_argument("--timings", action='store_true', last=True,
-                       suffix="mode",
+        b.add_argument("--timings", action='store_true', last=True, suffix="mode",
                        help=gt("display time stats during execution"))
         if noarg and noargs_action == "time":
             sys.argv[1:] = [opt]
-    #  version feature, for displaying the version from __version__
+    # version feature, for displaying the version from __version__
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
         if version is not None:
-            opt = i.add_argument("--version", action='version', prefix="show",
-                                 version=version, help=gt("show program's "
-                                                  "version number and exit"))
+            opt = i.add_argument("--version", action='version', prefix="show", version=version,
+                                 help=gt("show program's version number and exit"))
             if noarg and noargs_action == "version":
                 sys.argv[1:] = [opt]
-    #  verbosity feature, for displaying debugging messages, with the
-    #   possibility to handle multi-level verbosity
+    # verbosity feature, for displaying debugging messages, with the possibility to handle multi-level verbosity
     if multi_level_debug:
-        i.add_argument("-v", dest="verbose", default=0, action="count",
-                       suffix="mode", cancel=True, last=True,
-                       help=gt("verbose level"),
-                       note=gt("-vvv is the highest verbosity level"))
+        i.add_argument("-v", dest="verbose", default=0, action="count", suffix="mode", cancel=True, last=True,
+                       help=gt("verbose level"), note=gt("-vvv is the highest verbosity level"))
     else:
-        i.add_argument("-v", "--verbose", action="store_true", last=True,
-                       suffix="mode", help=gt("verbose mode"))
-    #  wizard feature, for asking argument values to the user
+        i.add_argument("-v", "--verbose", action="store_true", last=True, suffix="mode", help=gt("verbose mode"))
+    # wizard feature, for asking argument values to the user
     if add['wizard']:
-        opt = i.add_argument("-w", "--wizard", action="wizard",
-                             prefix="start", help=gt("start a wizard"))
+        opt = i.add_argument("-w", "--wizard", action="wizard", prefix="start", help=gt("start a wizard"))
         if noarg and noargs_action == "wizard":
             sys.argv[1:] = [opt]
-    #  reporting feature, for making a reporting with the results of the tool
-    #   at the end of its execution
+    # reporting feature, for making a reporting with the results of the tool at the end of its execution
     if report_func is not None and PYTHON3:
         if not isfunction(report_func):
             report_func = None
             glob['logger'].error(gt("Bad report generation function"))
         else:
             # lazily import report features
-            #  -> reason: they rely on pandas and weasyprint, which take time to
-            #              be imported ; so, when report features are not used
-            #              in a script, report classes won't be loaded
-            all_list = __import__("tinyscript.report",
-                                  fromlist=['__all__']).__all__
+            #  -> reason: they rely on pandas and weasyprint, which take time to be imported ; so, when report features
+            #              are not used in a script, report classes won't be loaded
+            all_list = __import__("tinyscript.report", fromlist=['__all__']).__all__
             report = __import__("tinyscript.report", fromlist=all_list)
             for f in all_list:
                 glob[f] = globals()[f] = getattr(report, f)
             # now populate the parser with report-related arguments
             r = p.add_argument_group("report arguments")
-            output_func = list(filter(lambda x: not x[0].startswith('_'),
-                                      getmembers(Report, predicate=isfunction)))
+            output_func = list(filter(lambda x: not x[0].startswith('_'), getmembers(Report, predicate=isfunction)))
             choices = list(map(lambda x: x[0], output_func))
-            if r.add_argument("--output", choices=choices, default="pdf",
-                              last=True, prefix="report",
+            if r.add_argument("--output", choices=choices, default="pdf", last=True, prefix="report",
                               help=gt("report output format")):
-                r.add_argument("--title", last=True, prefix="report",
-                               help=gt("report title"))
-                r.add_argument("--css", last=True, prefix="report",
-                               help=gt("report stylesheet file"))
-                r.add_argument("--theme", default="default", last=True,
-                               prefix="report",
-                               help=gt("report stylesheet theme"),
-                               note=gt("--css overrides this setting"))
-                r.add_argument("--filename", last=True, prefix="report",
-                               help=gt("report filename"))
+                r.add_argument("--title", last=True, prefix="report", help=gt("report title"))
+                r.add_argument("--css", last=True, prefix="report", help=gt("report stylesheet file"))
+                r.add_argument("--theme", default="default", last=True, prefix="report",
+                               help=gt("report stylesheet theme"), note=gt("--css overrides this setting"))
+                r.add_argument("--filename", last=True, prefix="report", help=gt("report filename"))
     elif report_func is not None and not PYTHON3:
         report_func = None  # disable reporting in the at_exit handler
         glob['logger'].warning(gt("Report generation is only for Python 3"))
     # extended logging features
     if ext_logging:
-        i.add_argument("-f", "--logfile", last=True,
-                       help=gt("destination log file"))
-        i.add_argument("-r", "--relative", action="store_true", last=True,
-                       suffix="time", help=gt("display relative time"))
+        i.add_argument("-f", "--logfile", last=True, help=gt("destination log file"))
+        i.add_argument("-r", "--relative", action="store_true", last=True, suffix="time",
+                       help=gt("display relative time"))
         if LINUX:
-            i.add_argument("-s", "--syslog", action="store_true", last=True,
-                           suffix="mode", help=gt("log to /var/log/syslog"))
+            i.add_argument("-s", "--syslog", action="store_true", last=True, suffix="mode",
+                           help=gt("log to /var/log/syslog"))
     # now parse inputs
     glob['args'], glob['parser'] = p.parse_args(), p
     # 3) if sudo required, restart the script
@@ -321,13 +291,12 @@ def initialize(add_banner=False,
         if os.geteuid() != 0:
             os.execvp("sudo", ["sudo", sys.executable] + sys.argv)
     # 4) configure logging and get the main logger
-    configure_logger(glob, multi_level_debug,
-                     glob['args']._collisions.get("relative"),
-                     glob['args']._collisions.get("logfile"),
-                     glob['args']._collisions.get("syslog"))
+    configure_logger(glob, multi_level_debug, glob['args']._collisions.get("relative"),
+                     glob['args']._collisions.get("logfile"), glob['args']._collisions.get("syslog"))
     # 5) append modes items
     set_interact_items(glob)
     set_hotkeys(glob)
+    set_notify_items(glob)
     set_progress_items(glob)
     set_step_items(glob)
     set_time_items(glob)
@@ -340,8 +309,7 @@ def initialize(add_banner=False,
         f['title', bs] = Banner(p.scriptname, font=bf)
         print(f)
     # 7) finally, bind the global exit handler
-    _hooks.sigint_action = action_at_interrupt if exit_at_interrupt is None \
-                           else ["continue", "exit"][exit_at_interrupt]
+    _hooks.sigint_action = action_at_interrupt if exit_at_interrupt is None else ["continue", "exit"][exit_at_interrupt]
     def __at_exit():
         # first, dump the config if required
         if add['config']:
@@ -360,15 +328,10 @@ def initialize(add_banner=False,
         # finally handle post-actions
         if do_post_actions:
             if report_func is not None:
-                # generate the report only when exiting gracefully, just before
-                #  the user-defined function at_graceful_exit
+                # generate the report only when exiting gracefully, just before at_graceful_exit
                 a = glob['args']
                 try:
-                    r = Report(*report_func(),
-                               title=a.title,
-                               filename=a.filename,
-                               css=a.css,
-                               logger=glob['logger'])
+                    r = Report(*report_func(), title=a.title, filename=a.filename, css=a.css, logger=glob['logger'])
                     getattr(r, a.output)(False)
                 except AttributeError:
                     pass
@@ -386,19 +349,15 @@ def initialize(add_banner=False,
 
 def validate(*arg_checks):
     """
-    Function for validating group of arguments ; each argument is represented as
-     a 4-tuple like follows:
+    Function for validating group of arguments ; each argument is represented as a 4-tuple like follows:
 
         (argument_name, fail_condition, error_message, default)
 
         - argument_name: the name of the argument like entered in add_argument()
-        - fail_condition: condition in Python code with the argument name
-                          replaced by ' ? ' (e.g. " ? > 0")
-        - error_message: message describing what failed with the validation ofs
-                         the current argument
-        - default [optional]: value to be given if the validation fails ; this
-                              implies that the script will not exit after the
-                              validation (if no other blocking argument present)
+        - fail_condition: condition in Python code with the argument name replaced by ' ? ' (e.g. " ? > 0")
+        - error_message: message describing what failed with the validation ofs the current argument
+        - default [optional]: value to be given if the validation fails ; this implies that the script will not exit
+                              after the validation (if no other blocking argument present)
 
     :param arg_checks: list of 3/4-tuples
     """
@@ -415,8 +374,7 @@ def validate(*arg_checks):
         if not hasattr(glob['args'], param):
             raise AttributeError("'{}' argument does not exist".format(param))
         try:
-            result = eval(condition.replace(" ? ", " glob['args'].{} "
-                                                   .format(param)))
+            result = eval(condition.replace(" ? ", " glob['args'].{} ".format(param)))
         except Exception as e:
             result = True
             message = str(e)
@@ -436,16 +394,14 @@ class ProxyArgumentParser(object):
     Proxy class for collecting added arguments before initialization.
     """
     def __getattr__(self, name):
-        """ Each time a method is called, return __collect to make it capture
-             the input arguments and keyword-arguments if it exists in the
-             original parser class. """
+        """ Each time a method is called, return __collect to make it capture the input arguments and keyword-arguments
+             if it exists in the original parser class. """
         self.__call = name
         return self.__collect
 
     def __collect(self, *args, **kwargs):
-        """ Capture the input arguments and keyword-arguments of the currently
-             called method, appending a proxy subparser in case it should be
-             used for mutually exclusive groups or subparsers. """
+        """ Capture the input arguments and keyword-arguments of the currently called method, appending a proxy
+             subparser in case it should be used for mutually exclusive groups or subparsers. """
         subparser = ProxyArgumentParser()
         parser_calls.append((self, self.__call, args, kwargs, subparser))
         del self.__call

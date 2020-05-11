@@ -13,6 +13,7 @@ pandas; python_version>='3.4'
 patchy
 pathlib
 pip
+plyer
 pynput
 pypandoc
 python-slugify

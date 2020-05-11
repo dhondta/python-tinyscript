@@ -11,8 +11,7 @@ __all__ = ["set_progress_items"]
 
 def set_progress_items(glob):
     """
-    This function prepares the progress items for inclusion in main script's
-     global scope.
+    This function prepares the progress items for inclusion in main script's global scope.
     
     :param glob: main script's global scope dictionary reference
     """
@@ -33,8 +32,7 @@ def set_progress_items(glob):
                     pass
                 if hasattr(tqdm, name) and self._tqdm is not None:
                     return getattr(self._tqdm, name)
-                raise AttributeError("ProgressManager instance has no attribute"
-                                     " '{}'".format(name))
+                raise AttributeError("ProgressManager instance has no attribute '{}'".format(name))
         
         def range(self, *args, **kwargs):
             """ Dummy alias to trange. """

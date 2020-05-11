@@ -3,14 +3,14 @@
 
 """
 from itertools import cycle, permutations, product
+from plyer import notification
 from string import printable, punctuation
 
 from .compat import b
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["bruteforce", "bruteforce_mask", "strings",
-                          "strings_from_file", "xor", "xor_file"]
+__all__ = __features__ = ["bruteforce", "bruteforce_mask", "notify", "strings", "strings_from_file", "xor", "xor_file"]
 
 
 MASKS = {
@@ -23,13 +23,14 @@ MASKS = {
     's': " " + punctuation,
     'u': "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
 }
+# shortcut for Plyer's notify function
+# signature: notify(title='', message='', app_name='', app_icon='', timeout=10, ticker='', toast=False)
+notify = notification.notify
 
 
-def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1,
-               repeat=True):
+def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1, repeat=True):
     """
-    Generator for bruteforcing according to minimum and maximum lengths and an
-     alphabet.
+    Generator for bruteforcing according to minimum and maximum lengths and an alphabet.
     
     :param maxlen:   maximum bruteforce entry length
     :param alphabet: bruteforce alphabet to be used
@@ -48,8 +49,7 @@ def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1,
 
 def bruteforce_mask(mask, charsets=None):
     """
-    Generator for bruteforcing according to a given mask (similar to this used
-     in hashcat).
+    Generator for bruteforcing according to a given mask (similar to this used in hashcat).
      
     :param mask:     bruteforce mask
     :param charsets: custom alphabets for use with the mask
@@ -72,8 +72,7 @@ def bruteforce_mask(mask, charsets=None):
 
 def strings(data, minlen=4, alphabet=printable):
     """
-    Generator yielding strings according to a charset and a minimal length from
-     a given string buffer.
+    Generator yielding strings according to a charset and a minimal length from a given string buffer.
 
     :param data:     input data
     :param minlen:   minimal length of strings to be considered
@@ -93,8 +92,7 @@ def strings(data, minlen=4, alphabet=printable):
 
 def strings_from_file(filename, minlen=4, alphabet=printable, offset=0):
     """
-    Generator yielding strings according to a charset and a minimal length from
-     a given file.
+    Generator yielding strings according to a charset and a minimal length from a given file.
     
     :param filename: input file
     :param minlen:   minimal length of strings to be considered
@@ -121,8 +119,7 @@ def strings_from_file(filename, minlen=4, alphabet=printable, offset=0):
 
 def xor(str1, str2, offset=0):
     """
-    Function for XORing two strings of different length. Either the first of the
-     second string can be longer than the other.
+    Function for XORing two strings of different length. Either the first or the second string can be longer.
 
     :param str1:   first string, with length L1
     :param str2:   second string, with length L2
@@ -130,8 +127,7 @@ def xor(str1, str2, offset=0):
     """
     convert = isinstance(str1[0], int) or isinstance(str2[0], int)
     r = b("") if convert else ""
-    for c1, c2 in zip(cycle(str1) if len(str1) < len(str2) else str1,
-                      cycle(str2) if len(str2) < len(str1) else str2):
+    for c1, c2 in zip(cycle(str1) if len(str1) < len(str2) else str1, cycle(str2) if len(str2) < len(str1) else str2):
         c1 = c1 if isinstance(c1, int) else ord(c1)
         c2 = c2 if isinstance(c2, int) else ord(c2)
         c = chr(((c1 ^ c2) + offset) % 256)

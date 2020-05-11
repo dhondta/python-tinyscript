@@ -56,8 +56,8 @@ def addLogLevel(levelName, color, level, bold=True):
         try:
             attrs['bold'] = coloredlogs.CAN_USE_BOLD_FONT
         except AttributeError:
-            # in coloredlogs from v14, CAN_USE_BOLD_FONT is not present anymore
-            #  and its flag is set to True everywhere it appears
+            # in coloredlogs from v14, CAN_USE_BOLD_FONT is not present anymore and its flag is set to True everywhere
+            #  it appears
             attrs['bold'] = True
     coloredlogs.DEFAULT_LEVEL_STYLES[n] = attrs
     if PY3:
@@ -70,20 +70,16 @@ logging.addLogLevel = addLogLevel
 
 def bindLogger(f):
     """
-    This decorators allows either to bind a logger to self if f is a method or
-     to bind a logger in the local scope of f if it is a function. It tries
-     first to get the logger from kwargs, or then tries to get the logger from
-     caller's globals or finally sets a null logger. This way, the logger can be
-     used inside the function without caring to get a logger itself.
+    This decorators allows either to bind a logger to self if f is a method or to bind a logger in the local scope of f
+     if it is a function. It tries first to get the logger from kwargs, or then tries to get the logger from caller's
+     globals or finally sets a null logger. This way, the logger can be used inside the function without caring to get a
+     logger itself.
     
-    Inspired from: https://stackoverflow.com/questions/17862185/how-to-inject
-                    -variable-into-scope-with-a-decorator
+    Inspired from: https://stackoverflow.com/questions/17862185/how-to-inject-variable-into-scope-with-a-decorator
     """
     @wraps(f)
     def _wrapper(*args, **kwargs):
-        logger = kwargs.pop('logger', None) or \
-                 globals().get('logger') or \
-                 inspect.getmainglobals().get('logger') or \
+        logger = kwargs.pop('logger', None) or globals().get('logger') or inspect.getmainglobals().get('logger') or \
                  logging.nullLogger
         # if f is a method, bind the logger to self
         if inspect.ismethod(f) or f.__code__.co_varnames[0] == "self":
@@ -112,8 +108,7 @@ def delLevelName(level):
     """
     logging._acquireLock()
     if isinstance(level, int):
-        levelName = logging._levelToName[level] if PY3 else \
-                    logging._levelNames[level]
+        levelName = logging._levelToName[level] if PY3 else logging._levelNames[level]
     else:
         levelName = level.upper()
         level = logging._nameToLevel.get(levelName) if PY3 else \
@@ -155,8 +150,7 @@ logging.lastLogRecord = lastLogRecord
 
 def setLogger(name=None):
     """
-    Set up the logger with the given name according to Tinyscript's logging
-     configuration.
+    Set up the logger with the given name according to Tinyscript's logging configuration.
     
     :param name: logger name
     """
@@ -166,8 +160,7 @@ logging.setLogger = setLogger
 
 def setLoggers(*names):
     """
-    Set up the loggers with the given names according to Tinyscript's logging
-     configuration.
+    Set up the loggers with the given names according to Tinyscript's logging configuration.
     
     :param names: logger names
     """
@@ -188,8 +181,7 @@ def setLoggers(*names):
         logger.parent = main
         # copy the reference to the list of handlers
         logger.handlers = main.handlers
-        # disable propagation from the sublogger so that it does not duplicate
-        #  log messages
+        # disable propagation from the sublogger so that it does not duplicate log messages
         logger.propagate = False
 logging.setLoggers = setLoggers
 

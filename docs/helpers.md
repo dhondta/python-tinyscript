@@ -53,6 +53,7 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 :---: | :---:
 `ts.clear` | multi-platform clear screen function
 `ts.confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
+`ts.notify` | shortcut to the `notification.notify` function of [`plyer`](https://github.com/kivy/plyer)
 `ts.pause` | Python2/3-compatible dummy input function, waiting for a key to be pressed (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
 `ts.std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
 `ts.user_input` | Python2/3-compatible enhanced input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful), choices, default value and 'required' option)

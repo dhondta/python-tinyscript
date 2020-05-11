@@ -201,3 +201,28 @@ initalize(...
 
 When set to `True`, `-h` only displays usage information and `--help` shows the full help message. If `False`, `-h` and `--help` both displays the full help message.
 
+-----
+
+## Notifications
+
+Displaying notifications can be achieved in two ways:
+
+- by passing a keyword argument `add_notify=True`
+
+```python hl_lines="3"
+    ...
+    initialize(...
+               add_notify=True,
+               ...)
+    ...
+```
+
+- by defining any of the related constant
+
+The notification constants are:
+
+- `NOTIFICATION_ICONS_PATH`: A path for notification icons.
+- `NOTIFICATION_LEVEL`: An integer as the logging level.
+- `NOTIFICATION_TIMEOUT`: An integer for the timeout of the displayed notification.
+
+This feature adds a `-n`/`--notify` option for displaying notifications while logging using the `NOTIFICATION_LEVEL`. It also makes the `notify` function (a shortcut to the `notification.notify` function from [`plyer`](https://github.com/kivy/plyer)) available into the global scope. Using this function directly is not affected by the `-n`/`--notify` option.
