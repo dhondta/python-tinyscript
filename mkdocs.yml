@@ -1,4 +1,4 @@
-site_name: "Tinyscript - A library for quickly prototyping CLI Python-based tools"
+site_name: "Tinyscript - Devkit for quickly building CLI tools with Python"
 repo_url: https://github.com/dhondta/python-tinyscript
 site_author: dhondta
 docs_dir: docs
