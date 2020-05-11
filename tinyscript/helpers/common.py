@@ -23,9 +23,6 @@ MASKS = {
     's': " " + punctuation,
     'u': "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
 }
-# shortcut for Plyer's notify function
-# signature: notify(title='', message='', app_name='', app_icon='', timeout=10, ticker='', toast=False)
-notify = notification.notify
 
 
 def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1, repeat=True):
@@ -68,6 +65,23 @@ def bruteforce_mask(mask, charsets=None):
         iterables.append(c)
     for c in product(*iterables):
         yield c if isinstance(c[0], int) else ''.join(c)
+
+
+def notify(title="", message="", app="", icon="", timeout=5, ticker=""):
+    """
+    Shortcut to plyer.notification.notify, not considering the 'toast' option, and fail-safe.
+    
+    :param title:   title of the notification
+    :param message: message of the notification
+    :param app:     name of the app launching this notification
+    :param icon:    name or path of the icon to be displayed along with the message
+    :param timeout: time to display the message for
+    :param ticker:  text to display on status bar as the notification arrives
+    """
+    try:
+        notification.notify(title, message, app, icon, timeout, ticker)
+    except NotImplementedError:
+        pass
 
 
 def strings(data, minlen=4, alphabet=printable):
