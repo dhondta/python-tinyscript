@@ -160,3 +160,10 @@ class TestHelpersDataTransform(TestCase):
         self.assertEqual(int2hex(hex2int(HEX)), HEX)
         self.assertEqual(str2int(int2str(INT)), INT)
         self.assertEqual(int2str(str2int(STR)), STR)
+    
+    def test_other_data_conversions(self):
+        DICT = {'test': "Test string", 'data': {'a': 1, 'b': 2}}
+        self.assertTrue(json2html(DICT))
+        XML = json2xml(DICT)
+        self.assertTrue(XML)
+        self.assertTrue(xml2json(XML))

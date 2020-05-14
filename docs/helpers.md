@@ -384,6 +384,8 @@ The currently supported functions are:
         >>> ts.hex2str("7465737420737472696e67")
         'test string'
 
+- Others: `ts.json2html` (relying on [`json2html`](https://pypi.org/project/json2html/)) / `ts.json2xml` (relying on [`dicttoxml`](https://pypi.org/project/dicttoxml/)) / `ts.xml2json`  (relying on [`xmltodict`](https://pypi.org/project/xmltodict/))
+
 -----
 
 ## Copyright and licenses

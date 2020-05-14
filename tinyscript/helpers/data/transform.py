@@ -3,7 +3,10 @@
 
 """
 import binascii
+import xmltodict
+from dicttoxml import dicttoxml
 from functools import wraps
+from json2html import json2html as j2h
 from math import ceil
 
 from .types import is_bin, is_bytes, is_hex, is_int, is_pos_int, is_str
@@ -83,11 +86,6 @@ def bin2str(binary_string, nbits_in=8, nbits_out=8):
     return bs.bytes
 
 
-def flags2int(flags):
-    """ Convert a list of booleans to an integer representing binary flags. """
-    return int("".join(map(lambda x: "01"[bool(x)], flags)), 2)
-
-
 # HEXADECIMAL STRING <=> *
 def hex2bin(hex_string, nbits_in=8, nbits_out=8):
     """ Convert a hexadecimal string to a binary string. """
@@ -130,13 +128,6 @@ def int2bin(integer, nbits_in=8, nbits_out=8, order="big", unsigned=True):
     bs._nbits = nbits_in
     bs.nbits = nbits_out
     return bs.bin
-
-
-def int2flags(integer):
-    """ Convert an integer representing binary flags to a list of booleans. """
-    i = integer
-    __validation(i=i)
-    return list(map(lambda x: x == "1", bin(i)[2:]))
 
 
 def int2hex(integer, order="big", unsigned=True):
@@ -280,4 +271,28 @@ for fname in __features__[:]:
     f2 = __something2items(globals()[fname])
     globals()[f2.__name__] = f2
     __features__ += [f1.__name__, f2.__name__]
+
+
+# FLAGS <=> INTEGER
 __features__ += ["flags2int", "int2flags"]
+
+
+def flags2int(flags):
+    """ Convert a list of booleans to an integer representing binary flags. """
+    return int("".join(map(lambda x: "01"[bool(x)], flags)), 2)
+
+
+def int2flags(integer):
+    """ Convert an integer representing binary flags to a list of booleans. """
+    i = integer
+    __validation(i=i)
+    return list(map(lambda x: x == "1", bin(i)[2:]))
+
+
+# Others
+__features__ += ["json2html", "json2xml", "xml2json"]
+
+
+json2html = j2h.convert
+json2xml  = dicttoxml
+xml2json  = xmltodict.parse
