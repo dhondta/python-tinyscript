@@ -10,14 +10,13 @@ from weasyprint import CSS, HTML
 
 from .base import *
 from .objects import *
+from ..helpers.data.transform import json2xml
 
 
 __all__ = __features__ = ["Report"]
 
 PAGE_CSS = "@page{size:%(size)s;margin:%(margins)s;%(header)s%(footer)s}"
-THEMES = list(map(lambda f: splitext(f)[0],
-                  filter(lambda f: f.endswith(".css"),
-                              listdir(dirname(__file__)))))
+THEMES = list(map(lambda f: splitext(f)[0], filter(lambda f: f.endswith(".css"), listdir(dirname(__file__)))))
 
 
 class Report(object):
@@ -48,23 +47,33 @@ class Report(object):
         for piece in pieces:
             self._pieces.append(piece)
     
-    def _table_output(self, fmt, text=TEXT):
+    def _dict_output(self):
+        table_count = 0
+        results = {}
+        for piece in self._pieces:
+            if isinstance(piece, Table):
+                table_count += 1
+                results['Table-%d' % table_count] = piece.json(True)
+            elif isinstance(piece, Data):
+                results.update(piece.json(True))
+        return results
+    
+    def _table_output(self, fmt):
         results = []
         for piece in self._pieces:
             if not isinstance(piece, Table):
                 continue
-            results.append(getattr(piece, fmt)(text))
+            results.append(getattr(piece, fmt)(True))
         return results
     
     @output
     def csv(self, text=TEXT):
-        return self._table_output("csv", text)
+        return self._table_output("csv")
 
     @output
     def html(self, text=TEXT):
         """ Generate an HTML file from the report data. """
-        self.logger.debug("Generating the HTML report{}..."
-                          .format(["", " (text only)"][text]))
+        self.logger.debug("Generating the HTML report{}...".format(["", " (text only)"][text]))
         html = []
         for piece in self._pieces:
             if isinstance(piece, string_types):
@@ -75,7 +84,7 @@ class Report(object):
     
     @output
     def json(self, text=TEXT):
-        return self._table_output("json", text)
+        return self._dict_output()
     
     @output
     def md(self, text=TEXT):
@@ -96,11 +105,10 @@ class Report(object):
         """ Generate a PDF file from the report data. """
         self.logger.debug("Generating the PDF report...")
         html = HTML(string=self.html())
-        css_file = self.css or join(dirname(abspath(__file__)),
-                                    "{}.css".format(self.theme))
+        css_file = self.css or join(dirname(abspath(__file__)), "{}.css".format(self.theme))
         css = [css_file, CSS(string=PAGE_CSS % self.__dict__)]
         html.write_pdf("{}.pdf".format(self.filename), stylesheets=css)
     
     @output
     def xml(self, text=TEXT):
-        return self._table_output("xml", text)
+        return json2xml(self._dict_output())

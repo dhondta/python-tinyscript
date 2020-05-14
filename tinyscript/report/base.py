@@ -19,10 +19,10 @@ def output(f):
             text = kwargs.get('text') or args[0]
         except IndexError:
             text = True
-        _ = f(self, *args, **kwargs)
+        r = f(self, *args, **kwargs)
         if text:
-            return _
-        elif _ is not None and isinstance(_, string_types):
+            return r
+        elif r is not None and isinstance(r, string_types):
             filename = "{}.{}".format(self.filename, f.__name__)
             while exists(filename):
                 name, ext = splitext(filename)
@@ -33,7 +33,7 @@ def output(f):
                     i = 2
                 filename = "{}-{}".format(name, i) + ext
             with open(filename, 'w') as out:
-                out.write(_)
+                out.write(r)
     return wrapper
 
 

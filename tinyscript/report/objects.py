@@ -2,17 +2,41 @@
 """Module for defining report element classes.
 
 """
-import numpy as np
+import io
 import pandas as pd
 
 from .base import *
+from ..helpers.data.transform import json2html, json2xml
 
 
-__all__ = __features__ = ["Code", "Footer", "Header", "Table", "Section",
-                          "Text", "Title"]
+__all__ = __features__ = ["Code", "Data", "Footer", "Header", "Table", "Section", "Text", "Title"]
 
-HEAD_CSS = "@%(pos)s-left{%(left)s};@%(pos)s-center{%(center)s};@%(pos)s-righ" \
-           "t{%(right)s};"
+HEAD_CSS = "@%(pos)s-left{%(left)s};@%(pos)s-center{%(center)s};@%(pos)s-right{%(right)s};"
+
+
+class Data(Element):
+    """ This class represents a data dictionary. """
+    filename = "data"
+    
+    def __init__(self, data):
+        if not isinstance(data, dict):
+            raise ValueError("'data' argument shall be a dictionary")
+        self._data = data
+    
+    @output
+    def html(self, text=TEXT):
+        """ Generate an HTML table from the data dictionary. """
+        return json2html(self._data)
+    
+    @output
+    def json(self, text=TEXT):
+        """ Return the original JSON object. """
+        return self._data
+    
+    @output
+    def xml(self, text=TEXT):
+        """ Generate an XML output from the data dictionary. """
+        return json2xml(self._data)
 
 
 class Footer(Element):
@@ -45,7 +69,6 @@ class Table(Element):
     filename = "table"
     
     def __init__(self, data, col_headers=None, row_headers=None):
-        array = np.array(data) if not isinstance(data, np.ndarray) else data
         kw = {}
         if col_headers is not None:
             kw['columns'] = col_headers
@@ -85,8 +108,7 @@ class Table(Element):
                 xml += "    <field name=\"%s\">%s</field>\n" % (f, line[f])
             xml += "  </item>\n"
             return xml
-        return "<items>\n" + '\n'.join(self._data.apply(convert, axis=1)) + \
-               "</items>"
+        return "<items>\n%s</items>" % '\n'.join(self._data.apply(convert, axis=1))
 
 
 class Text(Element):
@@ -95,8 +117,7 @@ class Text(Element):
                  tag="p"):
         self.content = content
         self.tag = tag
-        self.style = "font-size:%(size)spx;font-style:%(style)s;color:" \
-                     "%(color)s;" % locals()
+        self.style = "font-size:%(size)spx;font-style:%(style)s;color:%(color)s;" % locals()
     
     @output
     def css(self, text=TEXT):
@@ -104,8 +125,7 @@ class Text(Element):
     
     @output
     def html(self, text=TEXT):
-        return ('<%(tag)s style="%(style)s">%(content)s</%(tag)s>' % \
-                self.__dict__).replace("\n", "<br>")
+        return ('<%(tag)s style="%(style)s">%(content)s</%(tag)s>' % self.__dict__).replace("\n", "<br>")
     
     @output
     def md(self, text=TEXT):
@@ -150,8 +170,7 @@ class Title(Text):
         i = self.tag[-1]
         if not i.isdigit():
             raise ValueError("Title tag should be \"h[1-6]\"")
-        return "%(prefix)s %(content)s" % {'prefix': "#" * int(i),
-                                           'content': self.content}
+        return "%(prefix)s %(content)s" % {'prefix': "#" * int(i), 'content': self.content}
 
 
 class Section(Title):

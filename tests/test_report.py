@@ -31,6 +31,7 @@ if PYTHON3:  # report module only available from Python3
                 Footer("test footer"),
                 Table([[1, 2]]),
                 Section("test section"),
+                Data({'test': "Test string", 'data': {'a': 1, 'b': 2}}),
                 Text("test text"),
                 Code("#test\nprint('hello')", language="python", hl_lines="1"),
                 Section("bad section", tag="a"),
@@ -47,9 +48,8 @@ if PYTHON3:  # report module only available from Python3
         
         def test_report_file_generation(self):
             r = Report(title="Test")
-            r.html(False)
-            r.html(False)
-            r.html(False)
+            for i in range(3):
+                r.html(False)
             remove("report.html")
             remove("report-2.html")
             remove("report-3.html")
@@ -58,3 +58,4 @@ if PYTHON3:  # report module only available from Python3
             self.assertRaises(ValueError, Report, theme="does_not_exist")
             self.assertIs(Report(css="does_not_exist").css, None)
             self.assertTrue(Report(css="tinyscript/report/default.css").css)
+            self.assertRaises(ValueError, Data, "BAD DATA ; SHOULD BE DICT")
