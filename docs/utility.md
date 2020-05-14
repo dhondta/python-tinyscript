@@ -132,6 +132,32 @@ This adds the `--progress` option to enable the progress mode.
 
 -----
 
+## Displaying notifications
+
+This can be achieved in two ways:
+
+- by passing a keyword argument `add_notify=True`
+
+```python hl_lines="3"
+    ...
+    initialize(...
+               add_notify=True,
+               ...)
+    ...
+```
+
+- by defining any of the related constant
+
+The notification constants are:
+
+- `NOTIFICATION_ICONS_PATH`: A path for notification icons.
+- `NOTIFICATION_LEVEL`: An integer as the logging level.
+- `NOTIFICATION_TIMEOUT`: An integer for the timeout of the displayed notification.
+
+This feature adds a `-n`/`--notify` option for displaying notifications while logging using the `NOTIFICATION_LEVEL`. It also makes the `notify` function (a shortcut to the `notification.notify` function from [`plyer`](https://github.com/kivy/plyer)) available into the global scope. Using this function directly is not affected by the `-n`/`--notify` option.
+
+-----
+
 ## Interacting during the execution
 
 This is achieved by passing a keyword argument `add_interact=[boolean]` to `initialize(...)`. It allows to interact with the program during its execution by spawning a Python interpreter. This feature relies on the built-in `code` module.
@@ -227,6 +253,7 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
     - [`demo`](#playing-a-demo)
     - [`help`](#short-long-help)
     - [`interact`](#interacting-during-the-execution)
+    - [`notify`](#notifications)
     - [`step`](#stepping-the-execution)
     - [`time`](#timing-the-execution)
     - [`usage`](#short-long-help)
