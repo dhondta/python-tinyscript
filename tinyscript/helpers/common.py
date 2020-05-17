@@ -167,3 +167,4 @@ def xor_file(filename, key, offset=0):
             f.seek(cursor)
             f.write(xor(data, b(key[:len(data)])))
             cursor += l
+

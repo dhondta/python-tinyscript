@@ -279,3 +279,4 @@ class Capture(object):
         sys.stderr.close()
         # restore original output file handles
         sys.stdout, sys.stderr = self._stdout, self._stderr
+

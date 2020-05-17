@@ -9,8 +9,7 @@ from subprocess import Popen, PIPE
 from threading import Thread
 
 
-__all__ = __features__ = ["execute", "process", "processes_clean", "thread",
-                          "threads_clean"]
+__all__ = __features__ = ["execute", "process", "processes_clean", "thread", "threads_clean"]
 
 
 PROCESSES = []
@@ -80,3 +79,4 @@ def threads_clean(timeout=None):
     for t in THREADS:
         t.join(timeout)
     THREADS = []
+

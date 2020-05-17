@@ -46,8 +46,7 @@ class BitArray(bitstring.BitArray):
     __doc__ = """
     Small improvement to the original bitstring.BitArray class.
     
-    It allows to set the number of bits per group (by default, 8, for
-     considering bytes).
+    It allows to set the number of bits per group (by default, 8, for considering bytes).
     
     """ + bitstring.BitArray.__doc__
     
@@ -82,19 +81,18 @@ class BitArray(bitstring.BitArray):
 
 def pad(string, padding=None, blocksize=8, raw=False):
     """
-    Custom string padding function relying on Tinyscript's data type check
-     functions and a few implemented padding algorithms.
+    Custom string padding function relying on Tinyscript's data type check functions and a few implemented padding
+     algorithms.
     
     NB: Default algorithm is the zero padding.
     
     :param padding:   padding characters or padding algorithm
     :param blocksize: block size to be considered for padding
-    :param raw:       whether the input string must be considered as a normal
-                       strint (it disables the check for hexstring)
+    :param raw:       whether the input string must be considered as a normal string (disables the check for hexstring)
     """
     s, bs = string, blocksize
     isb, ish = is_bin(s) and not raw, is_hex(s) and not raw
-    if (padding in PAD and isb) or (padding == "bit" and not isb):
+    if padding in PAD and isb or padding == "bit" and not isb:
         raise ValueError("Incompatible padding algorithm")
     if blocksize <= 0:
         raise ValueError("Block size must be a positive integer")
@@ -135,25 +133,23 @@ def pad(string, padding=None, blocksize=8, raw=False):
 
 def unpad(string, padding=None, blocksize=8, raw=False):
     """
-    Custom string unpadding function relying on Tinyscript's data type check
-     functions and a few implemented padding algorithms.
+    Custom string unpadding function relying on Tinyscript's data type check functions and a few implemented padding
+     algorithms.
     
     NB: Default algorithm is the zero padding.
     
     :param padding:   padding characters or padding algorithm
     :param blocksize: block size to be considered for padding
-    :param raw:       whether the input string must be considered as a normal
-                       string (it disables the check for hexstring)
+    :param raw:       whether the input string must be considered as a normal string (disables the check for hexstring)
     """
     s, bs = string, blocksize
     isb, ish = is_bin(s) and not raw, is_hex(s) and not raw
-    if (padding in PAD and isb) or (padding == "bit" and not isb):
+    if padding in PAD and isb or padding == "bit" and not isb:
         raise ValueError("Incompatible padding algorithm")
     if blocksize <= 0:
         raise ValueError("Block size must be a positive integer")
     to_char = lambda x: [chr(x), "{:0>2}".format(hex(x)[2:])][ish]
-    lastb = [litev("0x" + (s[i:i+2 or len(s)] or "0")) for i in \
-             range(-bs*2, 0, 2)] if ish else list(map(ord, s[-bs:]))
+    lastb = [litev("0x" + (s[i:i+2 or len(s)] or "0")) for i in range(-bs*2, 0, 2)] if ish else list(map(ord, s[-bs:]))
     n = lastb[-1]
     lp = [1, 2][ish]
     if padding == "ansic9.23":
@@ -184,6 +180,6 @@ def unpad(string, padding=None, blocksize=8, raw=False):
         if n <= bs:
             return s[:-n*lp or len(s)]
     else:
-        return s.rstrip("0") if isb else pad(s.rstrip("0"), "0", 2) \
-               if ish else s.rstrip("\x00")
+        return s.rstrip("0") if isb else pad(s.rstrip("0"), "0", 2) if ish else s.rstrip("\x00")
     return s
+

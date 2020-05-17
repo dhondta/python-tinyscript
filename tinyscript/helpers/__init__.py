@@ -34,8 +34,7 @@ from .text import __features__ as _text
 from .timeout import __features__ as _timeout
 
 
-__helpers__ = _common + _data + _decorators + _fexec + _inputs + _licenses + \
-              _path + _termsize + _text + _timeout
+__helpers__ = _common + _data + _decorators + _fexec + _inputs + _licenses + _path + _termsize + _text + _timeout
 
 ts = ModuleType("ts", """
     Tinyscript helpers

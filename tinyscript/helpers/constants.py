@@ -24,3 +24,4 @@ try:
     __IPYTHON__
 except NameError:
     IPYTHON = JUPYTER = False
+

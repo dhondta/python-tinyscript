@@ -11,8 +11,7 @@ except ImportError:
     from inspect import getargspec as getfullargspec
 
 
-__all__ = __features__ = ["applicable_to", "try_or_die", "try_and_pass",
-                          "try_and_warn"]
+__all__ = __features__ = ["applicable_to", "try_or_die", "try_and_pass", "try_and_warn"]
 
 
 class IncompatibleClassError(Exception):
@@ -27,8 +26,8 @@ def __is_method(f):
 
 def applicable_to(*classes):
     """
-    Class decorator for checking that a class is well inherited from any given
-     parent class. Used in checking mixins' compatibility.
+    Class decorator for checking that a class is well inherited from any given parent class. Used in checking mixins'
+     compatibility.
 
     :param classes: list of compatible parent bot classes
     """
@@ -39,8 +38,7 @@ def applicable_to(*classes):
                 self.__name__ = cls.__name__
                 valid = [c.__name__ for c in classes]
                 if all(c not in self.__class__.__mro__ for c in classes):
-                    msg = "This class is not compatible with the given parent" \
-                          " classes ({})".format(", ".join(valid))
+                    msg = "This class is not compatible with the given parent classes ({})".format(", ".join(valid))
                     raise IncompatibleClassError(msg)
                 super(NewClass, self).__init__(*args, **kwargs)
         return NewClass
@@ -54,9 +52,8 @@ def try_or_die(message, exc=Exception, trace=True, extra_info=""):
     :param message:    message to be displayed when crashing
     :param exc:        exception class on which the error is thrown
     :param trace:      display exception traceback
-    :param extra_info: class attribute name whose value is to be displayed as
-                        additional information (only applies when used with a
-                        method)
+    :param extra_info: class attribute name whose value is to be displayed as additional information (only applies when
+                        used with a method)
     """
     def _try_or_die(f):
         @wraps(f)
@@ -72,8 +69,7 @@ def try_or_die(message, exc=Exception, trace=True, extra_info=""):
                     l.exception(e)
                 if extra_info != "" and hasattr(self, extra_info):
                     l.info(getattr(self, extra_info))
-                # if the decorated method is part of a context manager, close it
-                #  with its __exit__ method and continue
+                # if the decorated method is part of a context manager, close it with its __exit__ method and continue
                 if hasattr(self, "__exit__"):
                     self.__exit__(*exc_info())
                 # re-raise the exception
@@ -84,8 +80,7 @@ def try_or_die(message, exc=Exception, trace=True, extra_info=""):
 
 def try_and_pass(exc=Exception):
     """
-    Decorator handling a try-except block that simply continue the execution
-     with no message in case of failure.
+    Decorator handling a try-except block that simply continue the execution with no message in case of failure.
 
     :param exc: exception class on which the error is thrown
     """
@@ -102,14 +97,12 @@ def try_and_pass(exc=Exception):
 
 def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
     """
-    Decorator handling a try-except block to log a warning and continue the
-     execution.
+    Decorator handling a try-except block to log a warning and continue the execution.
 
     :param message:    message to be displayed when crashing
     :param exc:        exception class on which the error is thrown
     :param trace:      display exception traceback
-    :param extra_info: class attribute name whose value is to be displayed as
-                        additional information
+    :param extra_info: class attribute name whose value is to be displayed as additional information
     """
     def _try_and_warn(f):
         @wraps(f)
@@ -127,3 +120,4 @@ def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
                     l.info(getattr(self, extra_info))
         return wrapper
     return _try_and_warn
+

@@ -15,8 +15,7 @@ class ClassProperty(object):
     """
     ClassProperty class for implementing @classproperty.
     
-    Inspired from: https://stackoverflow.com/questions/5189699/how-to-make-a-
-                    class-property
+    Inspired from: https://stackoverflow.com/questions/5189699/how-to-make-a-class-property
     """
     def __init__(self, fget=None, fset=None, doc=None):
         self.fget = fget
@@ -32,3 +31,4 @@ class ClassProperty(object):
             f = classmethod(f)
         self.fset = f
         return self
+

@@ -46,3 +46,4 @@ def timeout(seconds=10, message=None, stop=False):
                 return f(*a, **kw)
         return _wrapper2
     return _wrapper1
+

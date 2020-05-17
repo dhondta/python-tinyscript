@@ -82,8 +82,8 @@ class Path(BasePath):
             return f.write(u(data))
     
     def append_bytes(self, data):
-        """ Allows to append bytes to the file, as only write_bytes is available
-             in pathlib, overwritting the former bytes at each write. """
+        """ Allows to append bytes to the file, as only write_bytes is available in pathlib, overwritting the former
+             bytes at each write. """
         with self.open(mode='ab') as f:
             return f.write(memoryview(data))
     
@@ -97,8 +97,8 @@ class Path(BasePath):
             self.append_line(line)
     
     def append_text(self, text, encoding=None, errors=None):
-        """ Allows to append text to the file, as only write_text is available
-             in pathlib, overwritting the former text at each write. """
+        """ Allows to append text to the file, as only write_text is available in pathlib, overwritting the former text
+             at each write. """
         return self.__add_text(text, 'a', encoding, errors)
     
     def choice(self, *filetypes):
@@ -125,20 +125,16 @@ class Path(BasePath):
             if "*" not in name:
                 f = lambda p: p.basename == name
             else:
-                r = "^{}$".format(name.replace(".", "\\.").replace("?", "\\?")
-                                      .replace("-", "\\-").replace("+", "\\+")
-                                      .replace("[", "\\[").replace("]", "\\]")
-                                      .replace("(", "\\(").replace(")", "\\)")
-                                      .replace("{", "\\{").replace("}", "\\}")
-                                      .replace("*", ".*"))
+                r = "^{}$".format(name.replace(".", "\\.").replace("?", "\\?").replace("-", "\\-").replace("+", "\\+")
+                                      .replace("[", "\\[").replace("]", "\\]").replace("(", "\\(").replace(")", "\\)")
+                                      .replace("{", "\\{").replace("}", "\\}").replace("*", ".*"))
                 f = lambda p: search(r, p.basename) is not None
         else:
             f = lambda p: search(name, p.basename) is not None
         for item in self.walk(filter_func=f):
             yield item
     
-    def generate(self, prefix="", suffix="", length=8,
-                 alphabet="0123456789abcdef"):
+    def generate(self, prefix="", suffix="", length=8, alphabet="0123456789abcdef"):
         """ Generate a random folder name. """
         if not self.is_dir():
             return self
@@ -162,8 +158,7 @@ class Path(BasePath):
             return win32api.GetFileAttributes(p) & \
                    (win32con.FILE_ATTRIBUTE_HIDDEN | \
                     win32con.FILE_ATTRIBUTE_SYSTEM)
-        raise NotImplementedError("Cannot check for the hidden status on this"
-                                  " platform")
+        raise NotImplementedError("Cannot check for the hidden status on this platform")
     
     def is_samepath(self, otherpath):
         """ Check if both paths have the same parts. """
@@ -173,7 +168,7 @@ class Path(BasePath):
         """ List all files from the current directory. """
         for i in self.iterdir():
             if i.is_file() and (filetype is None or i.suffix == filetype):
-                    yield i.filename if filename_only else i
+                yield i.filename if filename_only else i
     
     def iterpubdir(self):
         """ List all visible subdirectories from the current directory. """
@@ -219,9 +214,8 @@ class Path(BasePath):
             os.remove(str(self))
     
     def walk(self, breadthfirst=True, filter_func=lambda p: True, sort=True):
-        """ Walk the current path for directories and files using os.listdir(),
-             breadth-first or depth-first, sorted or not, based on a filter
-             function. """
+        """ Walk the current path for directories and files using os.listdir(), breadth-first or depth-first, sorted or
+             not, based on a filter function. """
         if breadthfirst:
             for item in self.listdir(lambda p: not p.is_dir(), sort):
                 if filter_func(item):
@@ -244,8 +238,7 @@ class Path(BasePath):
 
 
 class MirrorPath(Path):
-    """ Extension of the class Path for handling a folder that can mirror
-         another one using symbolic links.
+    """ Extension of the class Path for handling a folder that can mirror another one using symbolic links.
     
     :param destination: destination folder where the structure is mirrored
     :param source:      source folder from which the structure is mirrored
@@ -278,8 +271,7 @@ class MirrorPath(Path):
 class TempPath(Path):
     """ Extension of the class Path for handling a temporary path.
     
-    :param length:   length for the folder name (if 0, do not generate a folder
-                      name, e.g. keeping /tmp)
+    :param length:   length for the folder name (if 0, do not generate a folder name, e.g. keeping /tmp)
     :param alphabet: character set to be used for generating the folder name
     """
     def __new__(cls, **kwargs):
@@ -304,3 +296,4 @@ class TempPath(Path):
         """ Create a NamedTemporaryFile in the TempPath. """
         kwargs.pop("dir", None)
         return TempFile(dir=str(self), **kwargs)
+

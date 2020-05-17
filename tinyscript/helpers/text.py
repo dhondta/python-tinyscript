@@ -10,9 +10,8 @@ from pypandoc import convert_text
 from .data.types.network import is_email, is_url
 
 
-__features__ = ["gt", "txt2blockquote", "txt2bold", "txt2email", "txt2italic",
-                "txt2olist", "txt2paragraph", "txt2title", "txt2ulist",
-                "txt2underline", "txt2url"]
+__features__ = ["gt", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist", "txt2paragraph",
+                "txt2title", "txt2ulist", "txt2underline", "txt2url"]
 __all__ = __features__ + ["DOCFORMAT_THEME"]
 
 DOCFORMAT = None
@@ -25,12 +24,10 @@ def __check(**kwargs):
         if k == 'email' and not is_email(v):
             raise ValueError("Invalid email address")
         elif k == 'format' and v not in FORMATS:
-            raise ValueError("Invalid format ; should be one of ({})"
-                             .format("|".join(map(str, FORMATS))))
+            raise ValueError("Invalid format ; should be one of ({})".format("|".join(map(str, FORMATS))))
         elif k == 'level' and v not in range(1, 7):
             raise ValueError("Invalid title level ; should belong to [1,6]")
-        elif k in ['bold', 'italic', 'ordered', 'underline'] and \
-           not isinstance(v, bool):
+        elif k in ['bold', 'italic', 'ordered', 'underline'] and not isinstance(v, bool):
             raise ValueError("Bad boolean value")
         elif k == 'url' and not is_url(v):
             raise ValueError("Invalid URL")
@@ -59,8 +56,7 @@ def txt_terminal_render(text, format=None):
         return text
     # collect whitespaces in argument lines and line indentations
     ARG_REGEX = re.compile(r"((?P<h>\-{1,2})[a-z][a-z0-9_]*(?:\s+[A-Z][A-Z_]*)?"
-                       r"(?:\,\s+(?P=h)\-[a-z][a-z0-9_]*(?:\s+[A-Z][A-Z_]*)?)?)"
-                       r"(\s+)(.*)$")
+                           r"(?:\,\s+(?P=h)\-[a-z][a-z0-9_]*(?:\s+[A-Z][A-Z_]*)?)?)(\s+)(.*)$")
     spaces = {}
     for line in text.split("\n"):
         s = ARG_REGEX.search(line)
@@ -73,8 +69,7 @@ def txt_terminal_render(text, format=None):
             if indent > 0:
                 spaces[tmp.strip()] = indent
     # convert here   
-    md = text if format == "md" else convert_text(text, "md", format=format) \
-                                     .replace("\\", "")
+    md = text if format == "md" else convert_text(text, "md", format=format).replace("\\", "")
     if format != "md":
         # bug corrections
         # 1. misaligned metadata fields
@@ -118,8 +113,7 @@ def txt_terminal_render(text, format=None):
             md += line + "\n"
         # 3. links incorrectly rendered with mdv after using pandoc
         for link in re.findall("(<(.*?)>)", md):
-            md = md.replace(link[0], "[{0}]({1}{0})"
-                           .format(link[1], ["", "mailto:"][is_email(link[1])]))
+            md = md.replace(link[0], "[{0}]({1}{0})".format(link[1], ["", "mailto:"][is_email(link[1])]))
     return mdv.main(md, display_links=True, theme=DOCFORMAT_THEME)
 
 
@@ -185,8 +179,7 @@ def _txt_style(text, format=None, bold=False, italic=False, underline=False):
     return text
 txt2bold = lambda text, format=None: _txt_style(text, format, bold=True)
 txt2italic = lambda text, format=None: _txt_style(text, format, italic=True)
-txt2underline = lambda text, format=None: _txt_style(text, format,
-                                                     underline=True)
+txt2underline = lambda text, format=None: _txt_style(text, format, underline=True)
 
 
 def txt2blockquote(text, format=None):
@@ -204,8 +197,7 @@ def txt2blockquote(text, format=None):
     elif format == "rst":
         text = "\n".join("\t{}".format(line) for line in text.splitlines())
     elif format == "textile":
-        text = "\n".join("" if line.strip() == "" else "bq. " + line \
-                         for line in text.splitlines())
+        text = "\n".join("" if line.strip() == "" else "bq. " + line for line in text.splitlines())
     return text
 
 
@@ -282,3 +274,4 @@ def txt2url(text, format=None, url=None):
             text = "$"
         text = "\"{}\":{}".format(text, url)
     return text
+

@@ -7,8 +7,7 @@ from six import binary_type, string_types, text_type, u
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["b", "binary_type", "byteindex", "execfile",
-                          "ensure_binary", "ensure_str", "iterbytes",
+__all__ = __features__ = ["b", "binary_type", "byteindex", "execfile", "ensure_binary", "ensure_str", "iterbytes",
                           "string_types", "text_type", "u"]
 
 
@@ -18,8 +17,8 @@ byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
 
 def b(s):
     """
-    Similar to six.b function, because the behavior of 'b' in Python2/3 is not
-     exactly the same. This makes 'b' behave in Python 3 like in Python 2.
+    Similar to six.b function, because the behavior of 'b' in Python2/3 is not exactly the same. This makes 'b' behave
+     in Python 3 like in Python 2.
     """
     if PYTHON3:
         try:
@@ -35,8 +34,7 @@ def b(s):
 
 def ensure_binary(s, encoding='utf-8', errors='strict'):
     """
-    Identical to six.ensure_binary. Copied here to avoid messing up with six
-     version errors.
+    Identical to six.ensure_binary. Copied here to avoid messing up with six version errors.
     """
     if isinstance(s, text_type):
         return s.encode(encoding, errors)
@@ -48,8 +46,7 @@ def ensure_binary(s, encoding='utf-8', errors='strict'):
 
 def ensure_str(s, encoding='utf-8', errors='strict'):
     """
-    Similar to six.ensure_str. Adapted here to avoid messing up with six version
-     errors.
+    Similar to six.ensure_str. Adapted here to avoid messing up with six version errors.
     """
     if not PYTHON3 and isinstance(s, text_type):
         return s.encode(encoding, errors)
@@ -73,10 +70,10 @@ if PYTHON3:
 
 def iterbytes(text):
     """
-    Bytes iterator. If a string is provided, it will automatically be converted
-     to bytes.
+    Bytes iterator. If a string is provided, it will automatically be converted to bytes.
     """
     if isinstance(text, string_types):
         text = b(text)
     for c in text:
         yield c if PYTHON3 else ord(c)
+

@@ -17,9 +17,9 @@ __all__ = __features__ = ["get_terminal_size"]
 
 def get_terminal_size():
     """ getTerminalSize()
-     - get width and height of console
-     - works on linux,os x,windows,cygwin(windows)
-     originally retrieved from:
+    - get width and height of console
+    - works on linux,os x,windows,cygwin(windows)
+    originally retrieved from:
      http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
     """
     current_os = platform.system()
@@ -44,9 +44,7 @@ def _get_terminal_size_windows():
         csbi = create_string_buffer(22)
         res = windll.kernel32.GetConsoleScreenBufferInfo(h, csbi)
         if res:
-            (bufx, bufy, curx, cury, wattr,
-             left, top, right, bottom,
-             maxx, maxy) = struct.unpack("hhhhHhhhhhh", csbi.raw)
+            bufx, bufy, curx, cury, wattr, left, top, right, bottom, maxx, maxy = struct.unpack("hhhhHhhhhhh", csbi.raw)
             sizex = right - left + 1
             sizey = bottom - top + 1
             return sizex, sizey
@@ -70,8 +68,7 @@ def _get_terminal_size_linux():
         try:
             import fcntl
             import termios
-            cr = struct.unpack('hh',
-                               fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
+            cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
             return cr
         except:
             pass
@@ -94,3 +91,4 @@ def _get_terminal_size_linux():
 
 if __name__ == "__main__":
     print("width = {}, height = {}".format(*get_terminal_size()))
+
