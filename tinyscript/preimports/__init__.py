@@ -15,6 +15,7 @@ from .codep import code
 from .hash import hashlib
 from .inspectp import inspect
 from .log import logging
+from .rand import random
 from .venv import virtualenv, PipPackage, VirtualEnv
 
 
@@ -28,6 +29,7 @@ __imports__ = {
         "hashlib",
         "inspect",
         "logging",
+        "random",
         "virtualenv",
     ],
     'standard': [
@@ -43,7 +45,6 @@ __imports__ = {
         "itertools",
         "os",
         "platform",
-        "random",
         "re",
         "shutil",
         "signal",
@@ -57,6 +58,7 @@ __imports__ = {
     'optional': [
         "bs4",
         "fs",
+        "loremipsum",
         "numpy",
         "pandas",
         "requests",
