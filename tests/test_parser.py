@@ -160,6 +160,11 @@ class TestParser(TestCase):
         self.assertEqual(str(args.host), "127.0.0.1")
         self.assertEqual(args.port, 12345)
     
+    def test_noargs_notify(self):
+        sys.argv[1:] = []
+        initialize(noargs_action="notify")
+        self.assertTrue(args.notify)
+    
     def test_noargs_progress(self):
         sys.argv[1:] = []
         initialize(noargs_action="progress")
