@@ -13,11 +13,12 @@ if PYTHON3:  # report module only available from Python3
     class TestReport(TestCase):
         def test_report_text_elements(self):
             for e in [Footer, Header, Text, Title, Section]:
-                self.assertTrue(e("test").css())
+                self.assertTrue(e("test").css)
             for e in [Text, Title, Section]:
                 o = e("test")
                 self.assertTrue(o.html())
                 self.assertTrue(o.md())
+            self.assertRaises(ValueError, Section, "bad section", tag="a")
         
         def test_report_table_element(self):
             t = Table([[1, 2]], ["test1", "test2"], ["test3"])
@@ -29,17 +30,17 @@ if PYTHON3:  # report module only available from Python3
                 Title("Test"),
                 Header("test header"),
                 Footer("test footer"),
+                Header("useless header"),
+                Footer("useless footer"),
+                List("item1", "itme2"),
                 Table([[1, 2]]),
                 Section("test section"),
+                Subsection("test subsection"),
                 Data({'test': "Test string", 'data': {'a': 1, 'b': 2}}),
                 Text("test text"),
                 Code("#test\nprint('hello')", language="python", hl_lines="1"),
-                Section("bad section", tag="a"),
                 "Free text",
-                noerror=False,
             )
-            self.assertRaises(ValueError, r.md)
-            r.noerror = True
             for fmt in ["csv", "html", "json", "md", "xml"]:
                 self.assertTrue(getattr(r, fmt)())
             r.pdf()
@@ -56,6 +57,6 @@ if PYTHON3:  # report module only available from Python3
         
         def test_report_assets(self):
             self.assertRaises(ValueError, Report, theme="does_not_exist")
-            self.assertIs(Report(css="does_not_exist").css, None)
             self.assertTrue(Report(css="tinyscript/report/default.css").css)
+            self.assertTrue(Report(theme="default").css)
             self.assertRaises(ValueError, Data, "BAD DATA ; SHOULD BE DICT")

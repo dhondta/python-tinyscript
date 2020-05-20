@@ -3,112 +3,125 @@
 
 """
 import logging
-from markdown2 import markdown
 from os import listdir
 from os.path import abspath, dirname, isfile, join, splitext
 from weasyprint import CSS, HTML
 
 from .base import *
 from .objects import *
-from ..helpers.data.transform import json2xml
+from ..helpers import ensure_str
+from ..preimports import logging
 
 
 __all__ = __features__ = ["Report"]
 
 PAGE_CSS = "@page{size:%(size)s;margin:%(margins)s;%(header)s%(footer)s}"
-THEMES = list(map(lambda f: splitext(f)[0], filter(lambda f: f.endswith(".css"), listdir(dirname(__file__)))))
 
 
 class Report(object):
     """ This class represents a whole report. """
     page_css = "@page{size:%(size)s;margin:%(margins)s;%(header)s%(footer)s}"
     
+    @logging.bindLogger
     def __init__(self, *pieces, **options):
-        self.css = options.get('css')
         self.filename = options.get('filename', "report") or "report"
-        self.logger = options.get('logger', logging.getLogger("main"))
-        self.margins = options.get('margins', "10.0mm 20.0mm 20.0mm 20.0mm")
-        self.noerror = options.get('noerror', True)
         self.size = options.get('size', "a4 portrait")
+        self.margins = options.get('margins', "10.0mm 20.0mm 20.0mm 20.0mm")
         self.theme = options.get('theme', "default")
-        if self.theme not in THEMES:
+        if self.theme not in self.themes:
             raise ValueError("PDF report CSS theme does not exist")
-        if self.css:
-            if not isfile(self.css):
-                self.css = None
-            else:
-                self.css = abspath(self.css)
+        self.css = options.get('css', join(dirname(abspath(__file__)), "{}.css".format(self.theme)))
+        self.css = abspath(self.css)
+        if not isfile(self.css):
+            raise ValueError("PDF report CSS file does not exist")
         self._pieces = []
         self.header = ""
         self.footer = ""
         title = options.get('title')
         if title:
-            self._pieces.append(Title(title))
-        for piece in pieces:
-            self._pieces.append(piece)
-    
-    def _dict_output(self):
-        table_count = 0
-        results = {}
-        for piece in self._pieces:
-            if isinstance(piece, Table):
-                table_count += 1
-                results['Table-%d' % table_count] = piece.json(True)
-            elif isinstance(piece, Data):
-                results.update(piece.json(True))
-        return results
-    
-    def _table_output(self, fmt):
-        results = []
-        for piece in self._pieces:
-            if not isinstance(piece, Table):
+            pieces = list(pieces)
+            pieces.insert(0, Title(title))
+        counts = {}
+        has_footer, has_header = False, False
+        for p in pieces:
+            if isinstance(p, Footer) and has_footer or isinstance(p, Header) and has_header:
                 continue
-            results.append(getattr(piece, fmt)(True))
-        return results
+            if not isinstance(p, Element):
+                p = Text(str(p))
+            c = p.__class__.__name__.lower()
+            counts.setdefault(c, 0)
+            counts[c] += 1
+            p.id = counts[c]
+            self._pieces.append(p)
+            if isinstance(p, Footer):
+                has_footer = True
+                self.footer = p.css
+            if isinstance(p, Header):
+                has_header = True
+                self.header = p.css
+        for p in self._pieces:
+            c = p.__class__.__name__.lower()
+            if p.name.endswith("-0"):
+                p.name = "%s-%d" % (c, p.id) if counts[c] > 1 else c
+    
+    @property
+    def themes(self):
+        return list(map(lambda f: splitext(f)[0], filter(lambda f: f.endswith(".css"), listdir(dirname(__file__)))))
     
     @output
     def csv(self, text=TEXT):
-        return self._table_output("csv")
-
-    @output
-    def html(self, text=TEXT):
-        """ Generate an HTML file from the report data. """
-        self.logger.debug("Generating the HTML report{}...".format(["", " (text only)"][text]))
-        html = []
-        for piece in self._pieces:
-            if isinstance(piece, string_types):
-                html.append(markdown(piece, extras=["tables"]))
-            elif isinstance(piece, Element) and hasattr(piece, "html"):
-                html.append(piece.html())
-        return "\n<br>\n".join(html).replace("\\\"", "\"")
+        return "\n\n".join(p.csv(True) for p in self._pieces if p.csv(True) != "")
     
     @output
-    def json(self, text=TEXT):
-        return self._dict_output()
+    def html(self, indent=4, text=TEXT):
+        """ Generate an HTML file from the report data. """
+        ind = (indent or 0) * " "
+        self.logger.debug("Generating the HTML report{}...".format(["", " (text only)"][text]))
+        r = []
+        for p in self._pieces:
+            h = p.html(indent=indent, text=True)
+            if h != "":
+                r.append(h)
+        nl = "" if indent is None else "\n"
+        h = (nl + "<br>" + nl).join(r).replace("\\\"", "\"")
+        r = []
+        for line in h.split("\n"):
+            r.append(2 * ind + line)
+        r = ["<html>", ind + "<body>"] + r + [ind + "</body>", "</html>"]
+        return nl.join(r)
+    
+    @output
+    def json(self, data_only=False, text=TEXT):
+        r = {}
+        for p in self._pieces:
+            if isinstance(p, (Data, List, Table)) or not data_only:
+                r.update(p.json(True))
+        return r
     
     @output
     def md(self, text=TEXT):
-        pieces = []
-        for piece in self._pieces:
-            if isinstance(piece, string_types):
-                pieces.append(piece)
-            elif isinstance(piece, Element) and hasattr(piece, "md"):
-                try:
-                    pieces.append(piece.md())
-                except ValueError as e:
-                    if not self.noerror:
-                        raise e
-        return "\n\n".join(pieces)
+        r = []
+        for p in self._pieces:
+            if p.md() != "":
+                r.append(p.md())
+        return "\n\n".join(r)
 
     @output
     def pdf(self, text=TEXT):
         """ Generate a PDF file from the report data. """
         self.logger.debug("Generating the PDF report...")
         html = HTML(string=self.html())
-        css_file = self.css or join(dirname(abspath(__file__)), "{}.css".format(self.theme))
-        css = [css_file, CSS(string=PAGE_CSS % self.__dict__)]
-        html.write_pdf("{}.pdf".format(self.filename), stylesheets=css)
+        html.write_pdf("%s.pdf" % self.filename, stylesheets=[self.css, CSS(string=PAGE_CSS % self.__dict__)])
     
     @output
-    def xml(self, text=TEXT):
-        return json2xml(self._dict_output())
+    def xml(self, indent=2, data_only=False, text=TEXT):
+        r = ["<report>"]
+        for p in self._pieces:
+            if isinstance(p, (Data, List, Table)) or not data_only:
+                out = ensure_str(p.xml(indent=indent, text=True))
+                for line in out.split("\n"):
+                    r.append((indent or 0) * " " + line)
+        r.append("</report>")
+        r = ("" if indent is None else "\n").join(r)
+        return r
+

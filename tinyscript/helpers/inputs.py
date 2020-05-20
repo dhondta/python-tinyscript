@@ -25,7 +25,7 @@ try:
     from pynput.keyboard import Controller, Key, Listener
     _keyboard = Controller()
     hotkeys_enabled = True
-except:
+except ImportError:
     _keyboard = None
     hotkeys_enabled = False
 

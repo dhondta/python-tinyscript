@@ -39,4 +39,42 @@ def output(f):
 
 class Element(object):
     """ This class is used to give a common type to report elements. """
-    pass
+    _style = {'size': 12, 'style': "normal", 'color': "black"}
+    id = 0
+    
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name', "%s-0" % self.__class__.__name__.lower())
+        for k, v in kwargs.items():
+            if k not in ['color', 'size', 'style']:
+                continue
+            self._style[k] = v
+        self.style = "font-size:%(size)spx;font-style:%(style)s;color:%(color)s;" % self._style
+        self._newline = "\n"
+    
+    def _set_indent(self, indent):
+        return ("", "") if indent is None else (indent * " ", "\n")
+    
+    @output
+    def css(self, text=TEXT):
+        return ""
+    
+    @output
+    def csv(self, text=TEXT):
+        return ""
+    
+    @output
+    def html(self, indent=4, text=TEXT):
+        return ""
+    
+    @output
+    def json(self, text=TEXT):
+        return {self.name: self.data}
+    
+    @output
+    def md(self, text=TEXT):
+        return ""
+    
+    @output
+    def xml(self, indent=2, text=TEXT):
+        return ("<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__).format(self._newline, str(self.data))
+
