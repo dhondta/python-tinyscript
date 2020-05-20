@@ -59,7 +59,7 @@ class LookupTable(dict):
             raise ValueError("Bad hashing algorithm")
         if not isinstance(ratio, float) or ratio <= 0. or ratio > 1.:
             raise ValueError("Bad ratio")
-        h = lambda x: getattr(hashlib, algorithm)((prefix or "") + x + (suffix or "")).hexdigest()
+        h = lambda x: getattr(hashlib, algorithm)(b(prefix or "") + b(x) + b(suffix or "")).hexdigest()
         with open(dict_path) as f:
             self.filtered = 0
             m = round(1 / float(ratio))
