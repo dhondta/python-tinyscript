@@ -11,6 +11,7 @@ exclude_lines =
     pragma: no cover
     # Python2/3 incompatibilities if/elif/else blocks
     (?m)(?P<indent>(?:\s+))if.*?PY(?:THON)?3.*?\:((?P=indent)\s+.*?)+(((?P=indent)else|elif).*?\:((?P=indent)\s+.*?)+)*$
+    (if|and) (?:not )?PY(?:THON)?3:?
     # __main__ logics
     if\s+__name__\s+==\s+(?P<q>(?:[\'\"]))__main__(?P=q)\s+:
     import ConfigParser
@@ -26,8 +27,14 @@ exclude_lines =
     if DARWIN:
     if WINDOWS:
     raise NotImplementedError
+    except NotImplementedError:
     # virtualenv package install
     elif line.startswith\(\"Successfully installed\"\):
     for top_level in __install
     def __deprecated
     def hotkeys(hotkeys, silent=True):
+    super\(NewClass\, self\)\.__init__
+    # optional packages not installed or different platform or cumbersome to test
+    if not hotkeys_enabled:
+    try:  # Windows
+    def stdin_pipe\(\):
