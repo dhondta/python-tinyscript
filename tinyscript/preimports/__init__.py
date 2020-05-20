@@ -59,8 +59,6 @@ __imports__ = {
         "bs4",
         "fs",
         "loremipsum",
-        "numpy",
-        "pandas",
         "requests",
     ]
 }
