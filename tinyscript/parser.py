@@ -255,8 +255,8 @@ def initialize(add_banner=False,
             glob['logger'].error(gt("Bad report generation function"))
         else:
             # lazily import report features
-            #  -> reason: they rely on pandas and weasyprint, which take time to be imported ; so, when report features
-            #              are not used in a script, report classes won't be loaded
+            #  -> reason: they rely on weasyprint, which take time to be imported ; so, when report features are not
+            #              used in a script, report classes won't be loaded
             all_list = __import__("tinyscript.report", fromlist=['__all__']).__all__
             report = __import__("tinyscript.report", fromlist=all_list)
             for f in all_list:
@@ -274,7 +274,7 @@ def initialize(add_banner=False,
                 r.add_argument("--filename", last=True, prefix="report", help=gt("report filename"))
     elif report_func is not None and not PYTHON3:
         report_func = None  # disable reporting in the at_exit handler
-        glob['logger'].warning(gt("Report generation is only for Python 3"))
+        glob['logger'].warning(gt("Report generation is only available with Python 3"))
     # extended logging features
     if ext_logging:
         i.add_argument("-f", "--logfile", last=True, help=gt("destination log file"))
