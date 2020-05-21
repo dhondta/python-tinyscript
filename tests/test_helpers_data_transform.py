@@ -126,7 +126,7 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, int2flags, HEX)
         self.assertEqual(int2flags(12), [True, True, False, False])
         # flags -> int
-        self.assertEqual([True, True, False, False], int2flags(12))
+        self.assertEqual(flags2int(True, True, False, False), 12)
 
     def test_data_conversion_from_str(self):
         # str -> bin
@@ -167,3 +167,43 @@ class TestHelpersDataTransform(TestCase):
         XML = json2xml(DICT)
         self.assertTrue(XML)
         self.assertTrue(xml2json(XML))
+        REPORT = """
+______________________________________
+            A NICE BANNER
+______________________________________
+
+[+] URL: http://www.example.com/
+[+] Started: Mon Jan 01 12:34:56 3020
+
+Findings:
+
+[+] http://www.example.com/abc
+ | Key: Value
+
+[+] http://www.example.com/def
+ | Found By: Test
+ | List entries:
+ |  - /ghi/
+ |  - /jkl/
+ |
+ | Version: 1
+
+[+] Test1
+[+] Test1
+
+[i] Other findings:
+
+[+] test
+ | Location: http://www.example.com/something
+ | Last Updated: 3020-01-01T12:34:57.000Z
+ |
+ | Found By: Test
+
+[+] Finished: Mon Jan 01 12:34:58 3020
+[+] Tests Done: 20
+
+++++++++++++++++++++++++++++
+          Footer
+++++++++++++++++++++++++++++
+        """
+        self.assertTrue(report2objects(REPORT, header_sep="_", footer_sep="+"))

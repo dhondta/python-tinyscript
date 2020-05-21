@@ -1,17 +1,14 @@
 # -*- coding: UTF-8 -*-
-"""Common utility functions.
+"""Common data transformation functions.
 
 """
 import binascii
-import xmltodict
-from dicttoxml import dicttoxml
 from functools import wraps
-from json2html import json2html as j2h
 from math import ceil
 
-from .types import is_bin, is_bytes, is_hex, is_int, is_pos_int, is_str
-from .utils import BitArray as Bits
-from ..compat import b, ensure_str
+from ..types import is_bin, is_bytes, is_hex, is_int, is_pos_int, is_str
+from ..utils import BitArray as Bits
+from ...compat import b, ensure_str
 
 
 __all__ = __features__ = [
@@ -209,9 +206,9 @@ for f in __features__:
 
 # add multi-input conversion functions
 def __items2something(f):
-    """ This decorates infmt2outfmt functions to make intfmtS2outfmt (taking multiple inputs and producing a single
-         output. """
+    """ Decorate infmt2outfmt functions to make intfmtS2outfmt (taking multiple inputs, producing a single output. """
     infmt, outfmt = f.__name__.split("2")
+    @wraps(f)
     def _wrapper(*args, **kwargs):
         r = [] if outfmt == "int" else ""
         for arg in args:
@@ -227,9 +224,9 @@ def __items2something(f):
 
 
 def __something2items(f):
-    """ This decorates infmt2outfmt functions to make intfmt2outfmtS (taking a single input and producing multiple
-         outputs. """
+    """ Decorate infmt2outfmt functions to make intfmt2outfmtS (taking a single input, producing multiple outputs. """
     infmt, outfmt = f.__name__.split("2")
+    @wraps(f)
     def _wrapper(data, **kwargs):
         func = f
         n = kwargs.pop('n_chunks', None)
@@ -277,7 +274,7 @@ for fname in __features__[:]:
 __features__ += ["flags2int", "int2flags"]
 
 
-def flags2int(flags):
+def flags2int(*flags):
     """ Convert a list of booleans to an integer representing binary flags. """
     return int("".join(map(lambda x: "01"[bool(x)], flags)), 2)
 
@@ -288,11 +285,3 @@ def int2flags(integer):
     __validation(i=i)
     return list(map(lambda x: x == "1", bin(i)[2:]))
 
-
-# Others
-__features__ += ["json2html", "json2xml", "xml2json"]
-
-
-json2html = j2h.convert
-json2xml  = dicttoxml
-xml2json  = xmltodict.parse
