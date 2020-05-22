@@ -159,17 +159,15 @@ class LFSR(__Base):
             cc = c[1:l + 1]
             d = (bs[i] + sum(map(operator.mul, v, cc))) % 2
             if d == 1:
-                _ = [x for x in c]
-                p = [0 for i in range(n)]
+                tmp = [x for x in c]
+                p = [0 for k in range(n)]
                 for j in range(0, l):
                     if b[j] == 1:
                         p[j + i - m] = 1
                 for k in range(len(c)):
                     c[k] = (c[k] + p[k]) % 2
-                if l <= 0.5 * i:
-                    l = i + 1 - l
-                    m = i
-                    b = _
+                if l <= .5 * i:
+                    l, m, b = i + 1 - l, i, tmp
             i += 1
         c = [i for i, x in enumerate(c) if x == 1]
         c.remove(0)
