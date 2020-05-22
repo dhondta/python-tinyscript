@@ -58,3 +58,4 @@ class TestHelpersClassProp(TestCase):
         t2.val1 = S2
         self.assertEqual(t2.val1, S2)
         self.assertEqual(UselessClass.val1, S1)
+

@@ -11,7 +11,7 @@ from utils import TestCase
 class TestHelpersDataTransform(TestCase):
     def setUp(self):
         global BIN, BIN_LE, HEX, INT, STR
-        BIN =    "01110100011001010111001101110100"
+        BIN = "01110100011001010111001101110100"
         BIN_LE = "01110100011100110110010101110100"
         HEX = "74657374"
         INT = 1952805748
@@ -52,6 +52,7 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, bin2int, BIN, unsigned="bad")
         # bin -> str
         self.assertEqual(bin2str("100000"), " ")
+        self.assertEqual(bin2str(str2lst("100000")), " ")
         self.assertEqual(bin2str(BIN), STR)
         self.assertEqual(bin2str(BIN, 2),
             "\x01\x03\x01\x00\x01\x02\x01\x01\x01\x03\x00\x03\x01\x03\x01\x00")
@@ -144,6 +145,14 @@ class TestHelpersDataTransform(TestCase):
         self.assertRaises(ValueError, hex2strs, HEX, n_chunks=-1)
         self.assertRaises(ValueError, int2strs, INT, len_in=-1)
         self.assertRaises(ValueError, bin2strs, BIN, len_out=-1)
+        # str <-> lst
+        self.assertEqual(str2lst("abc"), ['a', 'b', 'c'])
+        self.assertEqual(str2lst("123"), [1, 2, 3])
+        self.assertRaises(ValueError, str2lst, INT)
+        self.assertEqual(lst2str(['a', 'b', 'c']), "a,b,c")
+        self.assertEqual(lst2str(['a', 'b', 'c'], ""), "abc")
+        self.assertEqual(lst2str([1, 2, 3], sep=""), "123")
+        self.assertRaises(ValueError, lst2str, INT)
     
     def test_data_conversion_back_and_forth(self):
         for i in range(8, 12):
@@ -207,3 +216,4 @@ Findings:
 ++++++++++++++++++++++++++++
         """
         self.assertTrue(report2objects(REPORT, header_sep="_", footer_sep="+"))
+

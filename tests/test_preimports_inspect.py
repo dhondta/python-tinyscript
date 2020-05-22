@@ -18,5 +18,5 @@ class TestPreimportsInspect(TestCase):
         self.assertTrue(is_module(m))
         self.assertIn(m.__name__, ["__main__", "pytest"])
         self.assertIsNotNone(inspect.getmainframe())
-        self.assertIn(('__name__', "__main__"),
-                      inspect.getmainglobals().items())
+        self.assertIn(('__name__', "__main__"), inspect.getmainglobals().items())
+

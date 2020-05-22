@@ -22,3 +22,4 @@ class TestHotkeys(TestCase):
             set_hotkeys({'HOTKEYS': ("default", {'l': "TEST"})})
             _keyboard.press("l")
             self.assertRaises(ValueError, set_hotkeys, {'HOTKEYS': "BAD"})
+

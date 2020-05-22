@@ -84,3 +84,4 @@ class TestHelpersPath(TestCase):
         self.assertFalse(p.joinpath("test").exists())
         self.assertFalse(p.joinpath("test2.txt").exists())
         PATH2.remove()
+

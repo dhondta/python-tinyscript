@@ -45,3 +45,4 @@ class TestLogging(TestCase):
         delattr(args, "verbose")
         configure_logger(globals(), True)
         self.assertIs(logger.critical("test"), None)
+

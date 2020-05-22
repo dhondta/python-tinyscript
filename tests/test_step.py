@@ -37,3 +37,4 @@ class TestStepping(TestCase):
         self.assertIs(step(), None)
         temp_stdin(self, "\n")
         self.assertIs(step("test"), None)
+

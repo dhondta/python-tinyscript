@@ -107,3 +107,4 @@ class _FakeParserAction(Action):
 args = FakeNamespace()
 logger = logging.getLogger()
 logger.addHandler(logging.NullHandler())
+

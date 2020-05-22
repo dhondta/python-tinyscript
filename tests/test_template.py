@@ -43,3 +43,4 @@ class TestTemplate(TestCase):
         self.assertRaises(ValueError, new, "test")
         self.assertRaises(ValueError, new, "script", "bad.library")
         self.assertRaises(ValueError, new, "script", name="bad/name")
+

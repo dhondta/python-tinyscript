@@ -38,3 +38,4 @@ class TestPreimportsVirtualenv(TestCase):
             self.assertRaises(AttributeError, getattr, venv, "does_not_exist")
         virtualenv.teardown(VENV)
         self.assertRaises(Exception, virtualenv.PipPackage, "os")
+

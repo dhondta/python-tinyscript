@@ -75,3 +75,4 @@ class TestHelpersDecorators(TestCase):
         #self.assertRaises(Exception, func1)
         self.assertIsNone(func2())
         self.assertIsNone(func3())
+

@@ -253,3 +253,4 @@ class TestHelpersDataTypes(TestCase):
         self.assertFalse(is_long_opt("-t"))
         self.assertTrue(is_short_opt("-t"))
         self.assertFalse(is_short_opt("--test"))
+

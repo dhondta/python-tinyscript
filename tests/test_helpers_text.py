@@ -4,8 +4,7 @@
 
 """
 from tinyscript.helpers.text import *
-from tinyscript.helpers.text import configure_docformat, txt_terminal_render, \
-                                    _txt_list, _txt_style
+from tinyscript.helpers.text import configure_docformat, txt_terminal_render, _txt_list, _txt_style
 
 from utils import *
 
@@ -117,19 +116,15 @@ class TestHelpersText(TestCase):
         self.assertEqual(txt2ulist(TXT, None), TXT)
         self.assertEqual(txt2underline(TXT, None), TXT)
         # html format
-        self.assertEqual(txt2blockquote(TXT, "html"), 
-                         "<blockquote>{}</blockquote>".format(TXT))
+        self.assertEqual(txt2blockquote(TXT, "html"), "<blockquote>{}</blockquote>".format(TXT))
         self.assertEqual(txt2bold(TXT, "html"), "<b>{}</b>".format(TXT))
-        self.assertEqual(txt2email(EML, "html"), "<a href=\"mailto:{0}\">{0}"
-                                                 "</a>".format(EML))
+        self.assertEqual(txt2email(EML, "html"), "<a href=\"mailto:{0}\">{0}</a>".format(EML))
         self.assertEqual(txt2italic(TXT, "html"), "<i>{}</i>".format(TXT))
         self.assertEqual(txt2paragraph(TXT, "html"), "<p>{}</p>".format(TXT))
         self.assertEqual(txt2title(TXT, "html"), "<h2>{}</h2>".format(txt))
-        self.assertEqual(txt2ulist(TXT, "html"), "<ul>\n<li>{}</li>\n</ul>"
-                                                 .format(TXT))
+        self.assertEqual(txt2ulist(TXT, "html"), "<ul>\n<li>{}</li>\n</ul>".format(TXT))
         self.assertEqual(txt2underline(TXT, "html"), "<u>{}</u>".format(TXT))
-        self.assertEqual(txt2url(URL, "html"), "<a href=\"{0}\">{0}</a>"
-                                               .format(URL))
+        self.assertEqual(txt2url(URL, "html"), "<a href=\"{0}\">{0}</a>".format(URL))
         # markdown format
         self.assertEqual(txt2blockquote(TXT, "md"), "> " + TXT)
         self.assertEqual(txt2bold(TXT, "md"), "**{}**".format(TXT))
@@ -151,8 +146,7 @@ class TestHelpersText(TestCase):
         self.assertEqual(txt2url(URL, "rst"), URL)
         # textile format
         self.assertEqual(txt2blockquote(TXT, "textile"), "bq. " + TXT)
-        self.assertEqual(txt2email(EML, "textile"), "\"{0}\":mailto:{0}"
-                                                     .format(EML))
+        self.assertEqual(txt2email(EML, "textile"), "\"{0}\":mailto:{0}".format(EML))
         self.assertEqual(txt2olist(TXT, "textile"), "# " + TXT)
         self.assertEqual(txt2paragraph(TXT, "textile"), "\n" + TXT)
         self.assertEqual(txt2title(TXT, "textile"), "h2. " + txt)
@@ -174,6 +168,6 @@ class TestHelpersText(TestCase):
         self.assertEqual(txt_terminal_render(TXT), TXT)
         self.assertRaises(ValueError, txt2email, TXT)
         self.assertRaises(ValueError, txt2url, TXT)
-        for help, fmt in zip([HTML, MD, RST, TEXTILE],
-                        ["html", "md", "rst", "textile"]):
+        for help, fmt in zip([HTML, MD, RST, TEXTILE], ["html", "md", "rst", "textile"]):
             self.assertIsNotNone(txt_terminal_render(help, fmt))
+

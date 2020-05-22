@@ -40,3 +40,4 @@ class TestPreimportsHashlib(TestCase):
         self.assertRaises(ValueError, hashlib.LookupTable, "does_not_exist")
         self.assertRaises(ValueError, hashlib.LookupTable, FILE, "bad_hash_algorithm")
         self.assertRaises(ValueError, hashlib.LookupTable, FILE, "md5", "bad_ratio")
+

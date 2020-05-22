@@ -53,3 +53,4 @@ class TestPreimportsLogging(TestCase):
         f_with_logging(self, logger=logging.getLogger("other"))
         LoggingInFunc().f1(self)
         LoggingInFunc().f2(self, logger=logging.getLogger("other"))
+

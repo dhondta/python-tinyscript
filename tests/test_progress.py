@@ -33,3 +33,4 @@ class TestProgress(TestCase):
             continue
         for i in progressbar([1, 2, 3]):
             continue
+

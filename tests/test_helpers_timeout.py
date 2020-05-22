@@ -16,3 +16,4 @@ class TestHelpersTimeout(TestCase):
         self.assertRaises(TimeoutError, test)
         test = timeout(3)(dummy_sleep)
         self.assertEqual(test(), "TEST")
+

@@ -18,3 +18,4 @@ class TestPreimports(TestCase):
             self.assertIn(m, globals().keys())
         for m in __imports__['bad']:
             self.assertNotIn(m, globals().keys())
+

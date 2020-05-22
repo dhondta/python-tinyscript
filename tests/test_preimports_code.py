@@ -8,7 +8,8 @@ from tinyscript.preimports import code
 from utils import *
 
 
-def dummy1(): return 1
+def dummy1():
+    return 1
 
 
 def dummy2():
@@ -58,8 +59,7 @@ class TestPreimportsCode(TestCase):
         self.assertRaises(code.PatchError, code.delete_lines, dummy2, 0, 0)
         # this will add some non-indented lines and check the new function
         code.add_line(dummy2, -1, "return 2*42")
-        code.add_lines(dummy2, -1, "return 12345",
-                               -2, "# this return will not execute")
+        code.add_lines(dummy2, -1, "return 12345", -2, "# this return will not execute")
         self.assertEqual(len(code.source(dummy2).split("\n")), 6)
         self.assertEqual(dummy2(), 84)
         code.add_line(dummy2, 1, "return 3*42")
@@ -97,3 +97,4 @@ class TestPreimportsCode(TestCase):
         code.restore(dummy3)
         self.assertIn("version: 1", code.source(dummy3))
         self.assertEqual(dummy3(), 1)
+

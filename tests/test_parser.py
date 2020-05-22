@@ -22,9 +22,8 @@ arg2 = True"""
 class TestParser(TestCase):
     @classmethod
     def setUpClass(cls):
-        # collect ProxyArgumentParser object reference from the scope of
-        #  tinyscript to reuse it afterwards (as it will be overwritten with the
-        #  reference of a real parser each time initialize(...) is called)
+        # collect ProxyArgumentParser object reference from the scope of tinyscript to reuse it afterwards (as it will
+        #  be overwritten with the reference of a real parser each time initialize(...) is called)
         global proxy_parser
         proxy_parser = parser
         cls.argv = sys.argv[1:]  # backup input arguments
@@ -55,9 +54,8 @@ class TestParser(TestCase):
         test.add_argument("-b", "--arg2")
         if PYTHON3:
             initialize()
-        else:  # with Python2, an error occurs with the overwritten sys.argv
-               #  and "subtest" is not parsed, hence throwing SystemExit with
-               #  code 2 as the subparser selection is missing
+        else:  # with Python2, an error occurs with the overwritten sys.argv and "subtest" is not parsed, hence throwing
+               #  SystemExit with code 2 as the subparser selection is missing
             self.assertRaises(SystemExit, initialize, globals())
     
     def test_argument_conflicts(self):
@@ -149,8 +147,7 @@ class TestParser(TestCase):
     def test_noargs_help(self):
         temp_stdout(self)
         sys.argv[1:] = []
-        # SystemExit is raised with code 0 as the help message is displayed then
-        #  it exits
+        # SystemExit is raised with code 0 as the help message is displayed then it exits
         self.assertRaises(SystemExit, initialize, noargs_action="help")
     
     def test_noargs_interact(self):
@@ -183,16 +180,14 @@ class TestParser(TestCase):
     
     def test_noargs_usage(self):
         sys.argv[1:] = []
-        # SystemExit is raised with code 0 as the usage is displayed then it
-        #  exits
+        # SystemExit is raised with code 0 as the usage is displayed then it exits
         with self.assertRaises(SystemExit):
             initialize(noargs_action="usage")
     
     def test_noargs_version(self):
         temp_stdout(self)
         sys.argv[1:] = []
-        # SystemExit is raised with code 0 as the version is displayed then it
-        #  exits
+        # SystemExit is raised with code 0 as the version is displayed then it exits
         with self.assertRaises(SystemExit):
             initialize(noargs_action="version")
     
@@ -262,3 +257,4 @@ class TestParser(TestCase):
         self.assertIsNone(validate(('arg1', "False", "message", "default")))
         globals()['args'] = None
         self.assertIsNone(validate())
+

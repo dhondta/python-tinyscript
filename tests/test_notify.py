@@ -16,9 +16,8 @@ NOTIFICATION_LEVEL   = 10  # logging.DEBUG
 class TestNotify(TestCase):    
     @classmethod
     def setUpClass(cls):
-        # collect ProxyArgumentParser object reference from the scope of
-        #  tinyscript to reuse it afterwards (as it will be overwritten with the
-        #  reference of a real parser each time initialize(...) is called)
+        # collect ProxyArgumentParser object reference from the scope of tinyscript to reuse it afterwards (as it will
+        #  be overwritten with the reference of a real parser each time initialize(...) is called)
         cls.argv = sys.argv[1:]  # backup input arguments
         sys.argv[1:] = ["--notify"]
         initialize()
@@ -33,7 +32,6 @@ class TestNotify(TestCase):
         self.assertIn("notify", g)
 
     def test_notifications(self):
-        #notify("TITLE", "TEST", "PYTEST", "info", 1)
         logger.info("test message")
         logger.warning("test message")
         logger.error("test message")
@@ -46,3 +44,4 @@ class TestNotify(TestCase):
         g['NOTIFICATION_LEVEL']   = 10
         g['NOTIFICATION_ICONS_PATH'] = "/path/does/not/exist"
         self.assertRaises(ValueError, set_notify_items, g)
+

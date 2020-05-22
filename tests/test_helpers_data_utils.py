@@ -32,5 +32,5 @@ class TestHelpersDataUtils(TestCase):
             for l in range(5, 15):
                 self.assertEqual(unpad(pad(STR, padding, l), padding, l), STR)
                 self.assertEqual(unpad(pad(HEX, padding, l), padding, l), HEX)
-                self.assertEqual(unpad(pad(HEX, padding, l, True),
-                                       padding, l, True), HEX)
+                self.assertEqual(unpad(pad(HEX, padding, l, True), padding, l, True), HEX)
+

@@ -50,3 +50,4 @@ class TestTiming(TestCase):
         self.assertFalse(get_time("test"))
         self.assertFalse(get_time_since_last())
         self.assertFalse(get_time_since_last("test"))
+

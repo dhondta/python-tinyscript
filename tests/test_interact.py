@@ -41,3 +41,4 @@ class TestInteraction(TestCase):
         temp_stdin(self, "\n")
         with InteractiveConsole() as console:
             console.interact()
+

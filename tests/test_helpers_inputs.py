@@ -76,3 +76,4 @@ class TestHelpersInputs(TestCase):
             hotkeys({'ctrl': ("CTRL", ts_logger.info)})
             from tinyscript.helpers.inputs import Key
             _keyboard.press(Key.ctrl)
+

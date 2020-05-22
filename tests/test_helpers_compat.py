@@ -22,3 +22,4 @@ class TestHelpersCompat(TestCase):
         self.assertRaises(TypeError, ensure_binary, [])
         self.assertEqual(ensure_binary("test"), b("test"))
         self.assertEqual(ensure_binary(b"test"), b("test"))
+

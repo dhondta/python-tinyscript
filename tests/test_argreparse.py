@@ -3,8 +3,8 @@
 """Argreparse module assets' tests.
 
 """
-from tinyscript.argreparse import ArgumentParser, HelpFormatter, Namespace, \
-                                  SUPPRESS as SUP, _NewSubParsersAction
+from tinyscript.argreparse import ArgumentParser, HelpFormatter, Namespace, SUPPRESS as SUP, _NewSubParsersAction
+
 from utils import *
 
 
@@ -137,8 +137,7 @@ class TestArgreparse(TestCase):
         
     def test_subparser_action(self):
         subparsers = self.p.add_subparsers(dest="command")
-        test = subparsers.add_parser("subtest", aliases=["test2"], help="test",
-                                     parents=[self.p])
+        test = subparsers.add_parser("subtest", aliases=["test2"], help="test", parents=[self.p])
         test.add_argument("--test")
         a = self.p._actions[0]
         temp_stdin(self, "\n")
@@ -150,8 +149,7 @@ class TestArgreparse(TestCase):
         self.p._set_arg(a, c=True)
     
     def test_bad_action(self):
-        self.assertRaises(ValueError, self.p.add_argument, "-a",
-                          action="does_not_exist")
+        self.assertRaises(ValueError, self.p.add_argument, "-a", action="does_not_exist")
         self.p.register('action', "does_not_exist", _FakeParserAction)
         self.p.add_argument("-a", dest="test", action="does_not_exist")
         a = list(self.p._filtered_actions("does_not_exist"))[0]
@@ -179,9 +177,8 @@ class TestArgreparse(TestCase):
             self.assertRaises(SystemExit, self.p.parse_args)
     
     def test_help_formatter(self):
-        self.p.add_argument("--test", default=",".join(["A"]*30), choices=[1],
-                            type=list, help="test", note="special argument",
-                            dest=SUP)
+        self.p.add_argument("--test", default=",".join(["A"]*30), choices=[1], type=list, help="test", 
+                            note="special argument", dest=SUP)
         self.p.parse_args()
         self.p.print_help()
         self.p.print_extended_help(3)
@@ -223,3 +220,4 @@ class TestArgreparse(TestCase):
             self.assertEqual(p.description.split()[0], val)
         f['SCRIPTNAME_FORMAT'] = "does_not_exist"
         self.assertRaises(ValueError, ArgumentParser, f)
+

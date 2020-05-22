@@ -7,10 +7,8 @@ import threading
 
 from tinyscript import *
 from tinyscript.handlers import *
-from tinyscript.handlers import signal, SIGINT, SIGUSR1, SIGTERM, _hooks, \
-                                __interrupt_handler as ih, \
-                                __pause_handler as ph, \
-                                __terminate_handler as th
+from tinyscript.handlers import signal, SIGINT, SIGUSR1, SIGTERM, _hooks, __interrupt_handler as ih, \
+                                __pause_handler as ph, __terminate_handler as th
 
 from utils import *
 
@@ -116,3 +114,4 @@ class TestHandlers(TestCase):
         self.assertRaises(SystemExit, th)
         self.assertIsNot(signal(SIGTERM, th), None)
         self.assertRaises(SystemExit, _hooks.exit)
+
