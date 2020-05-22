@@ -6,14 +6,17 @@ import binascii
 from functools import wraps
 from math import ceil
 
-from ..types import is_bin, is_bytes, is_hex, is_int, is_pos_int, is_str
+from ..types import is_bin, is_bytes, is_hex, is_int, is_list, is_pos_int, is_str
 from ..utils import BitArray as Bits
 from ...compat import b, ensure_str
 
 
 __all__ = __features__ = [
-    "bin2bin", "bin2int", "bin2hex", "bin2str", "hex2bin", "hex2int", "hex2str",
-    "int2bin", "int2hex", "int2str", "int2uni", "str2bin", "str2int", "str2hex",
+    "bin2bin", "bin2int", "bin2hex", "bin2str",
+    "hex2bin", "hex2int", "hex2str",
+    "int2bin", "int2hex", "int2str", "int2uni",
+    "lst2str",
+    "str2bin", "str2int", "str2hex", "str2lst",
 ]
 
 
@@ -29,6 +32,9 @@ def __validation(**kwargs):
         elif k == "i":
             if not is_int(v):
                 raise ValueError("Bad input integer {}".format(v))
+        elif k == "l":
+            if not is_list(v):
+                raise ValueError("Bad input list {}".format(v))
         elif k in ["n_b", "n_B", "n_c", "n_g"]:
             if not is_pos_int(v, zero=False):
                 raise ValueError("Number of {} must be a positive int, not {}"
@@ -49,10 +55,18 @@ def __validation(**kwargs):
                 raise ValueError("{} must be a positive int, not {}".format(k, v))
 
 
-# BINARY STRING <=> *
+# BINARY STRING ==> *
+def __ensure_bitstring(binary):
+    """ Ensure that an input valid binary data is converted to a bitstring. A valid binary data can be a bitstring, a
+         list of integer ones/zeros or a list of string ones/zeros. """
+    if is_list(binary):
+        binary = lst2str(binary, "")
+    return binary
+
+
 def bin2bin(binary_string, nbits_in=8, nbits_out=8):
     """ Convert a binary string with groups of nbits_in bits to a binary string with groups of nbits_out bits. """
-    bs = binary_string
+    bs = __ensure_bitstring(binary_string)
     __validation(b=bs, n_b=nbits_in, n_B=nbits_out)
     bs = Bits(bs, nbits=nbits_in)
     bs.nbits = nbits_out
@@ -62,28 +76,30 @@ def bin2bin(binary_string, nbits_in=8, nbits_out=8):
 def bin2hex(binary_string, nbits_in=8, nbits_out=8):
     """ Convert a binary string (eventually using a separator) to a hexadecimal string, using a given number of bits and
          in little or big endian. """
-    return Bits(bin2bin(binary_string, nbits_in, nbits_out)).hex
+    bs = __ensure_bitstring(binary_string)
+    return Bits(bin2bin(bs, nbits_in, nbits_out)).hex
 
 
 def bin2int(binary_string, nbits_in=8, nbits_out=8, order="big", unsigned=True):
     """ Convert a binary string (eventually using a separator) to an integer, using a given number of bits and in little
          or big endian. """
-    __validation(o=order, u=unsigned)
-    bs = Bits(bin2bin(binary_string, nbits_in, nbits_out))
+    bs = __ensure_bitstring(binary_string)
+    __validation(b=bs, o=order, u=unsigned)
+    bs = Bits(bin2bin(bs, nbits_in, nbits_out))
     pref = ["", "u"][unsigned]
     return getattr(bs, pref + ("intle" if order == "little" else "intbe"))
 
 
 def bin2str(binary_string, nbits_in=8, nbits_out=8):
     """ Convert a binary string to string of 8-bits characters, using a given number of bits. """
-    bs = binary_string
+    bs = __ensure_bitstring(binary_string)
     __validation(b=bs, n_b=nbits_in, n_B=nbits_out)
     bs = Bits(bs, nbits=nbits_in)
     bs.nbits = nbits_out
     return bs.bytes
 
 
-# HEXADECIMAL STRING <=> *
+# HEXADECIMAL STRING ==> *
 def hex2bin(hex_string, nbits_in=8, nbits_out=8):
     """ Convert a hexadecimal string to a binary string. """
     h = hex_string
@@ -112,7 +128,7 @@ def hex2str(hex_string):
     return binascii.unhexlify(b(hex_string))
 
 
-# INTEGER <=> *
+# INTEGER ==> *
 def int2bin(integer, nbits_in=8, nbits_out=8, order="big", unsigned=True):
     """ Convert an integer to a binary string in little or big endian. """
     i = integer
@@ -158,7 +174,14 @@ def int2uni(integer):
     return b("\\u{:0>4}".format(hex(i)[2:])).decode('unicode-escape')
 
 
-# 8-BITS CHARACTERS <=> *
+# LIST OF ITEMS ==> STRING
+def lst2str(lst, sep=","):
+    """ Convert a list of items to a string. """
+    __validation(l=lst)
+    return sep.join(map(str, lst))
+
+
+# 8-BITS CHARACTERS ==> *
 def str2bin(chars_string, nbits_in=8, nbits_out=8):
     """ Convert a string of 8-bits characters to a binary string. """
     s = chars_string
@@ -187,6 +210,13 @@ def str2int(chars_string, order="big", unsigned=True):
     return getattr(bs, pref + ("intle" if order == "little" else "intbe"))
 
 
+def str2lst(chars_string):
+    """ Convert a string of 8-bits characters to a list of items, converted into integers if relevant. """
+    s = chars_string
+    __validation(s=s)
+    return [int(c) if is_str(c) and c.isdigit() else c for c in s]
+
+
 # make conversion functions compatible with input/output strings/bytes
 def __fix_inout_formats(f):
     @wraps(f)
@@ -199,7 +229,7 @@ def __fix_inout_formats(f):
 
 
 for f in __features__:
-    if f == "int2uni":
+    if f in ["int2uni", "str2lst"]:
         continue
     globals()[f] = __fix_inout_formats(globals()[f])
 

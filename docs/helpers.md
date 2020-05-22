@@ -384,6 +384,18 @@ The currently supported functions are:
         >>> ts.hex2str("7465737420737472696e67")
         'test string'
 
+- List <=> String: `ts.lst2str` / `ts.str2lst`
+
+        :::python
+        >>> ts.lst2str([1, 2, 3, 4])
+        '1,2,3,4'
+        >>> ts.lst2str([1, 2, 3, 4], sep="")
+        '1234'
+        >>> ts.str2lst("abc")
+        ['a', 'b', 'c']
+        >>> ts.str2lst("123")
+        [1, 2, 3]
+
 - Others: `ts.json2html` (relying on [`json2html`](https://pypi.org/project/json2html/)) / `ts.json2xml` (relying on [`dicttoxml`](https://pypi.org/project/dicttoxml/)) / `ts.xml2json`  (relying on [`xmltodict`](https://pypi.org/project/xmltodict/))
 
 -----
