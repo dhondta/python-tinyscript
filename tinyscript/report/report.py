@@ -18,7 +18,7 @@ __all__ = __features__ = ["Report"]
 PAGE_CSS = "@page{size:%(size)s;margin:%(margins)s;%(header)s%(footer)s}"
 
 
-class Report(object):
+class Report(list):
     """ This class represents a whole report. """
     page_css = "@page{size:%(size)s;margin:%(margins)s;%(header)s%(footer)s}"
     
@@ -34,35 +34,79 @@ class Report(object):
         self.css = abspath(self.css)
         if not isfile(self.css):
             raise ValueError("PDF report CSS file does not exist")
-        self._pieces = []
+        self.title = options.get('title')
+        self.clear()
+        self.append(*pieces)
+    
+    def __handle(self, piece):
+        p = piece
+        if p.__class__.__name__ == "Footer":
+            if self.footer:
+                return
+            self.footer = p.css
+        elif p.__class__.__name__ == "Header":
+            if self.header:
+                return
+            self.header = p.css
+        elif not isinstance(p, Element):
+            p = Text(str(p))
+        c = p.__class__.__name__.lower()
+        self.__counts.setdefault(c, 0)
+        self.__counts[c] += 1
+        p.id = self.__counts[c]
+        if self.__counts[c] > 1:
+            if self.__counts[c] == 2:
+                for p2 in self:
+                    if p2.__class__.__name__.lower() == p2.name == c:
+                        p2.name += "-%d" % p2.id
+            if p.name == c:
+                p.name += "-%d" % p.id
+        return p
+    
+    def append(self, *pieces):
+        for p in pieces:
+            p = self.__handle(p)
+            if p:
+                super(Report, self).append(p)
+    
+    def clear(self):
+        self.__counts = {}
         self.header = ""
         self.footer = ""
-        title = options.get('title')
-        if title:
-            pieces = list(pieces)
-            pieces.insert(0, Title(title))
-        counts = {}
-        has_footer, has_header = False, False
-        for p in pieces:
-            if isinstance(p, Footer) and has_footer or isinstance(p, Header) and has_header:
-                continue
-            if not isinstance(p, Element):
-                p = Text(str(p))
-            c = p.__class__.__name__.lower()
-            counts.setdefault(c, 0)
-            counts[c] += 1
-            p.id = counts[c]
-            self._pieces.append(p)
-            if isinstance(p, Footer):
-                has_footer = True
-                self.footer = p.css
-            if isinstance(p, Header):
-                has_header = True
-                self.header = p.css
-        for p in self._pieces:
-            c = p.__class__.__name__.lower()
-            if p.name.endswith("-0"):
-                p.name = "%s-%d" % (c, p.id) if counts[c] > 1 else c
+        if self.title:
+            self.insert(0, Title(self.title))
+    
+    def copy(self):
+        r = Report(**self.__dict__)
+        r.append(*self)
+        return r
+    
+    def count(self, piece_class):
+        return self.__counts[piece_class.lower()]
+    
+    def extend(self, pieces):
+        self.append(*pieces)
+    
+    def index(self, name):
+        for p in self:
+            if p.name == name:
+                return p
+        raise ValueError("'{}' is not in list".format(name))
+    
+    def insert(self, index, piece):
+        p = self.__handle(piece)
+        if p:
+            super(Report, self).insert(index, p)
+    
+    def prepend(self, *pieces):
+        for p in pieces[::-1]:
+            p = self.__handle(p)
+            if p:
+                super(Report, self).insert(0, p)
+    
+    @property
+    def counts(self):
+        return self.__counts
     
     @property
     def themes(self):
@@ -70,7 +114,7 @@ class Report(object):
     
     @output
     def csv(self, text=TEXT):
-        return "\n\n".join(p.csv(True) for p in self._pieces if p.csv(True) != "")
+        return "\n\n".join(p.csv(True) for p in self if p.csv(True) != "")
     
     @output
     def html(self, indent=4, text=TEXT):
@@ -78,7 +122,7 @@ class Report(object):
         ind = (indent or 0) * " "
         self.logger.debug("Generating the HTML report{}...".format(["", " (text only)"][text]))
         r = []
-        for p in self._pieces:
+        for p in self:
             h = p.html(indent=indent, text=True)
             if h != "":
                 r.append(h)
@@ -93,7 +137,7 @@ class Report(object):
     @output
     def json(self, data_only=False, text=TEXT):
         r = {}
-        for p in self._pieces:
+        for p in self:
             if isinstance(p, (Data, List, Table)) or not data_only:
                 r.update(p.json(True))
         return r
@@ -101,7 +145,7 @@ class Report(object):
     @output
     def md(self, text=TEXT):
         r = []
-        for p in self._pieces:
+        for p in self:
             if p.md() != "":
                 r.append(p.md())
         return "\n\n".join(r)
@@ -116,7 +160,7 @@ class Report(object):
     @output
     def xml(self, indent=2, data_only=False, text=TEXT):
         r = ["<report>"]
-        for p in self._pieces:
+        for p in self:
             if isinstance(p, (Data, List, Table)) or not data_only:
                 out = ensure_str(p.xml(indent=indent, text=True))
                 for line in out.split("\n"):

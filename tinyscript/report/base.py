@@ -43,7 +43,8 @@ class Element(object):
     id = 0
     
     def __init__(self, **kwargs):
-        self.name = kwargs.get('name', "%s-0" % self.__class__.__name__.lower())
+        self.name = kwargs.get('name', self.__class__.__name__.lower())
+        self.css = ""
         for k, v in kwargs.items():
             if k not in ['color', 'size', 'style']:
                 continue
@@ -51,12 +52,11 @@ class Element(object):
         self.style = "font-size:%(size)spx;font-style:%(style)s;color:%(color)s;" % self._style
         self._newline = "\n"
     
+    def __repr__(self):
+        return "<{}: {}>".format(self.__class__.__name__, self.name)
+    
     def _set_indent(self, indent):
         return ("", "") if indent is None else (indent * " ", "\n")
-    
-    @output
-    def css(self, text=TEXT):
-        return ""
     
     @output
     def csv(self, text=TEXT):

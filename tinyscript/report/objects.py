@@ -2,8 +2,6 @@
 """Module for defining report element classes.
 
 """
-import io
-
 from .base import *
 from ..helpers.data.transform import json2html, json2xml
 
@@ -114,7 +112,7 @@ class Table(Element):
         self.index = row_headers == "indices"
         self.column_headers = list(map(str, range(len(data[0])))) if column_headers == "indices" else column_headers
         self.column_footers = column_footers
-        self.row_headers = list(map(str, range(len(data[0])))) if row_headers == "indices" else row_headers
+        self.row_headers = list(map(str, range(len(data)))) if row_headers == "indices" else row_headers
         if self.row_headers and len(data) != len(self.row_headers):
             raise ValueError("Bad row headers length")
         if self.column_headers and len(data[0]) != len(self.column_headers):
@@ -168,9 +166,9 @@ class Table(Element):
         return nl.join(r)
     
     @output
-    def md(self, text=TEXT, float_format="%.2g"):
+    def md(self, float_format="%.2g", text=TEXT):
         """ Generate Markdown from the table data. """
-        r = [" | ".join(self.column_headers or list(range(len(self.data[0]))))]
+        r = [" | ".join(self.column_headers or list(map(str, range(len(self.data[0])))))]
         r.append(" | ".join("---" for i in range(len(self.data[0]))))
         for row in self._format():
             r.append(" | ".join(row))
