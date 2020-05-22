@@ -43,8 +43,7 @@ def __activate(venv_dir):
     site_packages = j(venv_dir, "Lib", "site-packages") if JYTHON else \
                     j(venv_dir, "site-packages") if PYPY else \
                     j(venv_dir, "Lib", "site-packages") if WINDOWS else \
-                    j(venv_dir, "lib", "python{}.{}".format(*sys.version_info),
-                      "site-packages")
+                    j(venv_dir, "lib", "python{}.{}".format(*sys.version_info), "site-packages")
     old = set(__ORIGINAL_SYSPATH)
     site.addsitedir(site_packages)
     new = list(sys.path)
@@ -55,8 +54,8 @@ def __activate(venv_dir):
 
 def __check_pip_req_tracker():
     """
-    This checks if the temporary folder of the Pip requirements tracker still
-     exists and corrects the related environment variable accordingly.
+    This checks if the temporary folder of the Pip requirements tracker still exists and corrects the related
+     environment variable accordingly.
     """
     pip_reqt = os.environ.get('PIP_REQ_TRACKER')
     if pip_reqt is not None and not os.path.exists(pip_reqt):
@@ -77,8 +76,7 @@ def __deactivate():
     try:
         # from a normal environment, this key should not exist
         delattr(sys, "real_prefix")
-        # but it is important to also reset it if the script was itself run from
-        #  a virtual environment
+        # but it is important to also reset it if the script was itself run from a virtual environment
         if __ORIGINAL_SYSRPREFIX is not None:
             sys.real_prefix = __ORIGINAL_SYSRPREFIX
     except:
@@ -88,8 +86,7 @@ def __deactivate():
 
 def __get_virtualenv(error=True):
     """
-    This gets the currently defined virtual environment or raises an error if no
-     environment is defined.
+    This gets the currently defined virtual environment or raises an error if no environment is defined.
     """
     venv = os.environ.get('VIRTUAL_ENV', "")
     if venv == "" and error:
@@ -119,8 +116,7 @@ def __install(package, *args, **kwargs):
             print(l)
         if not error:
             continue
-        if l.startswith("pip._internal.exceptions") or \
-           l.startswith("DistributionNotFound"):
+        if l.startswith("pip._internal.exceptions") or l.startswith("DistributionNotFound"):
             pip_proc.kill()
             raise PipError(l.split(": ", 1)[1])
         elif l.startswith("Successfully installed"):
@@ -135,22 +131,21 @@ def __is_installed(package, *args, **kwargs):
     This checks if a given package is installed in the virtual environment.
     
     :param package: package name
-    :param args:     options to be used with the pip list command
-    :param kwargs:   keyword-arguments to be used with the pip list command
+    :param args:    options to be used with the pip list command
+    :param kwargs:  keyword-arguments to be used with the pip list command
     """
     found = False
     for name, version in __list_packages(*args, **kwargs):
-        if isinstance(package, string_types) and package == name or \
-           isinstance(package, (list, tuple, set)) and package[0] == name and \
-           package[1] == version:
+        if isinstance(package, string_types) and package == name or isinstance(package, (list, tuple, set)) and \
+           package[0] == name and package[1] == version:
             found = True
+            break
     return found
 
 
 def __list_packages(*args, **kwargs):
     """
-    This lists the packages installed in the currently activated or the given
-     virtual environment.
+    This lists the packages installed in the currently activated or the given virtual environment.
     
     :param venv_dir: virtual environment's directory
     :param args:     options to be used with the pip list command
@@ -158,8 +153,7 @@ def __list_packages(*args, **kwargs):
     """
     cmd = ["list"] + __parse_args(*args, **kwargs)
     for line in __pip_run(cmd, False):
-        if not ("Package" in line and "Version" in line or \
-           "-------" in line or line.strip() == ""):
+        if not ("Package" in line and "Version" in line or "-------" in line or line.strip() == ""):
             yield tuple(_.strip() for _ in line.split(" ", 1))
 
 
@@ -182,8 +176,7 @@ def __parse_args(*args, **kwargs):
 
 def __pip_run(cmd, error=True):
     """
-    This runs a Pip command using the binary from the current virtual
-     environment.
+    This runs a Pip command using the binary from the current virtual environment.
     
     :param cmd: the Pip command and its parameters as a list
     """
@@ -198,12 +191,11 @@ def __pip_run(cmd, error=True):
 
 def __setup(venv_dir, requirements=None, verbose=False):
     """
-    This creates (if relevant) and activates a virtual environment. It also
-     allows to define requirements to be installed in this environment.
+    This creates (if relevant) and activates a virtual environment. It also allows to define requirements to be
+     installed in this environment.
     
     :param venv_dir:     virtual environment's directory
-    :param requirements: list of required package OR path of the requirements
-                          file to be used
+    :param requirements: list of required package OR path of the requirements file to be used
     :param verbose:      displayed Pip output while installing packages
     """
     __deactivate()
@@ -232,8 +224,7 @@ def __setup(venv_dir, requirements=None, verbose=False):
 
 def __teardown(venv_dir=None):
     """
-    This deactivates and removes the given virtual environment or the one
-     defined in the related environment variable.
+    This deactivates and removes the given virtual environment or the one defined in the related environment variable.
 
     :param venv_dir: virtual environment's directory
     """
@@ -264,8 +255,7 @@ class PipPackage(object):
                     continue
             if hasattr(self, "version") or venv == "":
                 break
-            else: # after the first guess, if the package was not found in the
-                  #  virtual environment, deactivate it to retry with main Pip
+            else: # after the first guess, if the package was not found, deactivate it to retry with main Pip
                 globals()['__deactivate']()
         # afterwards, re-enable the virtual environment if relevant
         if venv != "":
@@ -288,14 +278,11 @@ class VirtualEnv(object):
     This context manager simplifies the use of a virtual environment.
     
     :param venvdir:      virtual environment's directory
-    :param requirements: list of required package OR path of the requirements
-                          file to be used
-    :param remove:       whether the virtual environment is to be removed after
-                          the entered context
+    :param requirements: list of required package OR path of the requirements file to be used
+    :param remove:       whether the virtual environment is to be removed after the entered context
     :param verbose:      displayed Pip output while installing packages
     """
-    def __init__(self, venvdir=None, requirements=None, remove=False,
-                 verbose=False):
+    def __init__(self, venvdir=None, requirements=None, remove=False, verbose=False):
         self.__remove = remove
         self.__requirements = requirements
         self.__venv_dir = venvdir or __get_virtualenv()
@@ -312,8 +299,7 @@ class VirtualEnv(object):
         try:
             return getattr(virtualenv, name)
         except AttributeError:
-            raise AttributeError("object 'VirtualEnv' has no attribute '{}'"
-                                 .format(name))
+            raise AttributeError("object 'VirtualEnv' has no attribute '{}'".format(name))
 
 
 class NotAVirtualEnv(Exception):
@@ -333,3 +319,4 @@ virtualenv.setup         = __setup
 virtualenv.teardown      = __teardown
 virtualenv.PipPackage    = PipPackage
 virtualenv.VirtualEnv    = VirtualEnv
+

@@ -5,23 +5,23 @@
 import operator
 import random
 import struct
-from binascii import hexlify, unhexlify
-from ..helpers.data.types import *
+
+from ..helpers.compat import b
+from ..helpers.data import *
 
 
 class __Base(object):
     """ Class holding some common methods for other classes of this module """
-    def next_block(self, output_format="str", update=False):
+    def next_block(self, output_format="str", update=True):
         """
         Get the next 32bits-block of data.
         
         :param output_format: output format (string, hexadecimal or binary)
         :param update:        update the state of the generator
         """
-        update = self.update or update
         return self.next_blocks(1, output_format, update)
 
-    def next_blocks(self, n, output_format="str", update=False):
+    def next_blocks(self, n, output_format="str", update=True):
         """
         Get the n next 32bits-blocks of data.
         
@@ -29,7 +29,6 @@ class __Base(object):
         :param output_format: output format (string, hexadecimal or binary)
         :param update:        update the state of the generator
         """
-        update = self.update or update
         l = len(getattr(self, "target", None) or "")
         s = self.get(l + n * self.n, output_format, update)
         if output_format == "str":
@@ -62,11 +61,10 @@ class Geffe(__Base):
         (1, 2, 3, 7, 12, 14, 15, 32),
     ]
     
-    def __init__(self, key=None, seeds=(0, 0, 0), update=False):
-        seeds = Geffe.format_param(key, seeds)
+    def __init__(self, key=None, seeds=(0, 0, 0)):
+        seeds = Geffe._format_param(key, seeds)
         self._lfsrs = [LFSR(s, t, 32) for s, t in zip(seeds, Geffe.taps)]
         self.target = self._lfsrs[0].target
-        self.update = update
     
     def get(self, length=None, output_format="str", update=False):
         """
@@ -76,17 +74,16 @@ class Geffe(__Base):
         :param output_format: output format (string, hexadecimal or binary)
         :param update:        update the state of the generator
         """
-        update = self.update or update
         if output_format not in ["str", "hex", "bin"]:
             raise ValueError("Bad output format")
         stream = []
-        for bits in zip(self._lfsrs[0].get(length, "bin", update), self._lfsrs[1].get(length, "bin", update),
-                        self._lfsrs[2].get(length, "bin", update)):
+        lfsr_get = lambda i: self._lfsrs[i].get(length, "bin", update)
+        for bits in zip(lfsr_get(0), lfsr_get(1), lfsr_get(2)):
             stream.append(Geffe.F(*bits))
         if output_format == "str":
             return bin2str(stream)
         elif output_format == "hex":
-            return hexlify(bin2str(stream))
+            return bin2hex(stream)
         else:
             return stream
         
@@ -95,24 +92,24 @@ class Geffe(__Base):
         return (x1 & x2) ^ (int(not x1) & x3)
     
     @staticmethod
-    def format_param(key, seeds):
+    def _format_param(key, seeds):
         if key is not None:
-            l, err = len(key), "Bad key format ({})"
+            l = len(key)
             if is_str(key):
-                if l == 12:
-                    seeds = struct.unpack("iii", key)
+                if l <= 12:
+                    seeds = struct.unpack("iii", b(pad(key, "incremental", 12)[:12]))
                 elif l == 96 and is_bin(key):
-                    seeds = tuple([bin2int(key[i:i+32]) for i in \
-                                   range(0, 96, 32)])
+                    seeds = tuple([bin2int(key[i:i+32]) for i in range(0, 96, 32)])
+                else:
+                    raise ValueError("Bad key length ({}) ; should be 12".format(l))
             elif is_list(key):
                 if l == 3 and all(is_str(s) for s in key):
-                    seeds = tuple(map(lambda s: struct.unpack("i", s), key))
+                    seeds = tuple(map(lambda s: struct.unpack("i", b(s).ljust(4, b"\x00"))[0], key))
                 elif l == 96 and is_bin(key):
                     bits = ''.join(list(map(str, key)))
-                    seeds = map(lambda x: int("0b" + x, 2), \
-                                [bits[i:i+32] for i in range(0, 96, 32)])
-        if len(seeds) != 3 or any(not is_pos_int(i) or i.bit_length() > 32 for i in seeds):
-            raise ValueError("Invalid seeds")
+                    seeds = tuple(map(lambda x: int("0b" + x, 2), [bits[i:i+32] for i in range(0, 96, 32)]))
+        if len(seeds) != 3 or any(not is_pos_int(i, False) or i.bit_length() > 32 for i in seeds):
+            raise ValueError("Invalid seeds (should be a 3-tuple of 32-bits integers)")
         return seeds
 
 
@@ -135,19 +132,15 @@ class LFSR(__Base):
       >>> l = random.LFSR("0123456789abcdef")
       >>> print(l.next_block())
     """
-    def __init__(self, seed=0, taps=None, nbits=None, target=None, update=False):
-        if any(x is None for x in [seed, taps, nbits]) and target is None:
-            raise ValueError("Either (seed, taps, nbits) or target must be set")
-        self.target = target
+    def __init__(self, seed=0, taps=None, nbits=None, target=None):
         if target is not None and (taps is None or nbits is None):
-            self.target = LFSR.format_target(target)
+            self.target = LFSR._format_target(target)
             self.__berlekamp_massey_algorithm()
         else:
-            self.seed, self.taps, self.n = LFSR.format_param(seed, taps, nbits)
+            self.seed, self.taps, self.n = LFSR._format_param(seed, taps, nbits)
             self.target = [b for b in self.seed]
         # test if parameters are correct
         self.test()
-        self.update = update
     
     def __berlekamp_massey_algorithm(self):
         """
@@ -171,7 +164,8 @@ class LFSR(__Base):
                 for j in range(0, l):
                     if b[j] == 1:
                         p[j + i - m] = 1
-                c = (c + p) % 2
+                for k in range(len(c)):
+                    c[k] = (c[k] + p[k]) % 2
                 if l <= 0.5 * i:
                     l = i + 1 - l
                     m = i
@@ -179,7 +173,7 @@ class LFSR(__Base):
             i += 1
         c = [i for i, x in enumerate(c) if x == 1]
         c.remove(0)
-        self.seed, self.taps, self.n = LFSR.format_param(self.target[:l], c, l)
+        self.seed, self.taps, self.n = LFSR._format_param(self.target[:l], c, l)
     
     def get(self, length=None, output_format="str", update=False):
         """
@@ -194,7 +188,7 @@ class LFSR(__Base):
         length = length or (1 if self.target is None else len(self.target))
         stream = [b for b in self.seed]
         # generate length - nbits (from the starting stream) bits
-        for _ in xrange(length - self.n):
+        for _ in range(length - self.n):
             bit = 0
             for tap in self.taps:
                 bit ^= stream[-tap]
@@ -207,47 +201,48 @@ class LFSR(__Base):
         if output_format == "str":
             return bin2str(stream)
         elif output_format == "hex":
-            return hexlify(bin2str(stream))
+            return bin2hex(stream)
         return stream
     
     def test(self, target=None):
-        target = target or self.target
-        if self.target is None:
-            raise ValueError("Target not defined")
-        target = LFSR.format_target(target)
-        if target != self.get(len(target), output_format="bin"):
+        """ Test the current target result against an input target. """
+        target = LFSR._format_target(target or self.target)
+        if target != self.get(len(target), "bin", False):
             raise ValueError("Target and generated bits do not match")
     
     @staticmethod
-    def format_param(seed, taps, nbits):
+    def _format_param(seed, taps, nbits):
         """ Ensure that:
             - seed is formatted as a list of bits
             - taps is a list of integers <= nbits
             - nbits is an integer """
+        if not is_pos_int(nbits, False):
+            raise ValueError("Bad number of bits ({}) ; should be a non-null positive integer".format(nbits))
+        if not is_list(taps) or any(not is_pos_int(i, False) or i > nbits for i in taps):
+            raise ValueError("Bad taps ({}) ; should be a list of integers belonging to [1,nbits]".format(taps))
         if isinstance(seed, int):
-            seed = int2bin(seed, nbits)
+            seed = int2bin(seed, nbits_in=nbits, nbits_out=nbits)
         elif is_str(seed) and not is_bin(seed):
             if is_hex(seed):
-                seed = unhexlify(seed)
-            seed = str2bin(seed)
-        seed = [int(b) for b in seed]
+                seed = hex2str(seed)
+            seed = str2bin(seed).zfill(nbits)
         if not is_bin(seed):
-            raise ValueError("Bad input format for seed")
-        if not is_pos_int(nbits):
-            raise ValueError("Bad input format for number of bits")
-        if not is_list(taps) or any(not is_pos_int(i) or i > nbits for i in taps):
-            raise ValueError("Bad input format for taps")
-        return seed, taps, nbits
+            raise ValueError("Bad seed ({}) ; should be a list of bits".format(seed))
+        elif bin2int(seed) == 0:
+            raise ValueError("Bad seed ; should not be null")
+        elif len(seed) != nbits:
+            raise ValueError("Bad seed ({} bits) ; should be {} bits".format(len(seed), nbits))
+        return [int(b) for b in seed], taps, nbits
     
     @staticmethod
-    def format_target(target):
+    def _format_target(target):
         """ Ensure that target is formatted as a list of bits """
         if is_str(target) and not is_bin(target):
             if is_hex(target):
-                target = unhexlify(target)
+                target = hex2str(target)
             target = [int(b) for b in str2bin(target)]
         if not is_bin(target):
-            raise ValueError("Bad input format for target")
+            raise ValueError("Bad target ({}) ; should be a list of bits".format(target))
         return target
 
 
