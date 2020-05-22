@@ -6,6 +6,7 @@ import re
 import xmltodict
 from collections import OrderedDict
 from dicttoxml import dicttoxml
+from inspect import currentframe
 from json2html import json2html as j2h
 
 
@@ -19,7 +20,8 @@ xml2json = xml2dict = xmltodict.parse
 
 def report2objects(text, header_sep=None, footer_sep=None):
     """ Convert a raw text report (i.e. WPScan-like) to Tinyscript report objects. """
-    o = []
+    glob = currentframe().f_back.f_globals
+    o = glob.get('Report', list)()
     if header_sep:
         parts = re.split("[" + re.escape(header_sep) + "]{10,}", text)
         if len(parts) > 1:
@@ -27,7 +29,8 @@ def report2objects(text, header_sep=None, footer_sep=None):
             while len(parts) > 0 and header == "":
                 header = parts.pop(0).strip()
             if header != "":
-                o.append(("Header", header))
+                Header = glob.get('Header', None)
+                o.append(("Header", header) if Header is None else Header(header))
                 text = parts[0]
     if footer_sep:
         parts = re.split("[" + re.escape(footer_sep) + "]{10,}", text)
@@ -36,7 +39,8 @@ def report2objects(text, header_sep=None, footer_sep=None):
             while len(parts) > 0 and footer == "":
                 footer = parts.pop().strip()
             if footer != "":
-                o.append(("Footer", footer))
+                Footer = glob.get('Footer', None)
+                o.append(("Footer", footer) if Footer is None else Footer(footer))
                 text = parts[0]
     blocks = list(re.split(r"(?:\r?\n){2,}", text))
     for i, block in enumerate(blocks):
@@ -44,10 +48,13 @@ def report2objects(text, header_sep=None, footer_sep=None):
         lines = re.split(r"\r?\n", block)
         if len(lines) == 1:
             if re.match(r"\[.\]\s", block):
-                o.append(("Subsection", block[4:]))
+                Subsection = glob.get('Subsection', None)
+                o.append(("Subsection", block[4:]) if Subsection is None else Subsection(block[4:]))
             else:
-                o.append(("Section", block))
+                Section = glob.get('Section', None)
+                o.append(("Section", block) if Section is None else Section(block))
         else:
-            o.append(("Text", block))
+            Text = glob.get('Text', None)
+            o.append(("Text", block) if Text is None else Text(block))
     return o
 

@@ -12,7 +12,10 @@ HEAD_CSS = "@%(pos)s-left{%(left)s};@%(pos)s-center{%(center)s};@%(pos)s-right{%
 
 
 class Data(Element):
-    """ This class represents a data dictionary. """
+    """ This class represents a data dictionary.
+    
+    :param data: data dictionary
+    """
     filename = "data"
     
     def __init__(self, data, **kwargs):
@@ -38,7 +41,12 @@ class Data(Element):
 
 
 class Footer(Element):
-    """ This class represents the footer of a report. """
+    """ This class represents the footer of a report.
+    
+    :param left:   left-side section of the footer
+    :param center: center section of the footer
+    :param right:  right-side section of the footer
+    """
     _style = {'size': 9, 'style': "normal", 'color': "black"}
     pos = "bottom"
     
@@ -65,12 +73,21 @@ class Footer(Element):
 
 
 class Header(Footer):
-    """ This class represents the header of a report. """
+    """ This class represents the header of a report.
+    
+    :param left:   left-side section of the header
+    :param center: center section of the header
+    :param right:  right-side section of the header
+    """
     pos = "top"
 
 
 class List(Element):
-    """ This class represents a list of items, ordered or not. """
+    """ This class represents a list of items, ordered or not.
+    
+    :param items:   list's items
+    :param ordered: whether the list is to be ordered or not
+    """
     def __init__(self, *items, **kwargs):
         super(List, self).__init__(**kwargs)
         self.data = items
@@ -104,7 +121,14 @@ class List(Element):
 
 
 class Table(Element):
-    """ This class represents a table. """
+    """ This class represents a table.
+    
+    :param data:           table data
+    :param column_headers: list of column headers or "indices" or None ; if "indices", it is replaced accordingly
+    :param row_headers:    list of row headers or "indices" or None ; if "indices", it is replaced accordingly
+    :param column_footers: list of column footers or None
+    :param flt_fmt:        float format to be displayed when generating the output
+    """
     filename = "table"
     
     def __init__(self, data, column_headers="indices", row_headers=None, column_footers=None, flt_fmt="%.2g", **kwargs):
@@ -202,7 +226,11 @@ class Table(Element):
 
 
 class Text(Element):
-    """ Text area report element. """
+    """ Text area report element.
+    
+    :param content: text content
+    :param tag:     HTML tag to be used
+    """
     def __init__(self, content, tag="p", **kwargs):
         super(Text, self).__init__(**kwargs)
         self.data = content
@@ -217,7 +245,12 @@ class Text(Element):
 
 
 class Code(Text):
-    """ Code block report element. """
+    """ Code block report element.
+    
+    :param code:     code content
+    :param language: code's language
+    param hl_lines:  lines to be highlighted
+    """
     _style = {'size': 10, 'style': "normal", 'color': "grey"}
     
     def __init__(self, code, language=None, hl_lines=None, **kwargs):
@@ -244,7 +277,11 @@ class Code(Text):
 
 
 class Title(Text):
-    """ Title report element. """
+    """ Title report element.
+    
+    :param title: title content
+    :param tag:   HTML tag to be used
+    """
     def __init__(self, title, tag="h1", **kwargs):
         if tag not in ["h1", "h2", "h3", "h4", "h5", "h6"]:
             raise ValueError("Title tag should be \"h[1-6]\", not \"{}\"".format(tag))
@@ -256,13 +293,21 @@ class Title(Text):
 
 
 class Section(Title):
-    """ Section report element. """
+    """ Section report element.
+    
+    :param title: title content
+    :param tag:   HTML tag to be used
+    """
     def __init__(self, title, tag="h2", **kwargs):
         super(Section, self).__init__(title, tag, **kwargs)
 
 
 class Subsection(Title):
-    """ Subsection report element. """
+    """ Subsection report element.
+    
+    :param title: title content
+    :param tag:   HTML tag to be used
+    """
     def __init__(self, title, tag="h3", **kwargs):
         super(Subsection, self).__init__(title, tag, **kwargs)
 
