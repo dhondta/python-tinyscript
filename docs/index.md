@@ -44,6 +44,22 @@ $ python script.py "Hello World!"
 
 -----
 
+## Setup
+
+This library is available on [PyPi](https://pypi.python.org/pypi/tinyscript/) and can be simply installed using Pip:
+
+```sh
+pip install --user tinyscript
+```
+
+or
+
+```sh
+pip3 install --user tinyscript
+```
+
+-----
+
 ## Rationale
 
 This library is born from the need of quickly building efficient scripts and tools without caring for redefining various things or rewritting/setting the same functionalities like the logging or parsing of input arguments.
