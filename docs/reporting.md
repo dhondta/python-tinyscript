@@ -10,6 +10,10 @@ r.append(Text("test"))
 r.append(List("item1", "item2", name="mylist")
 ```
 
+!!! note "Free text"
+
+    Note that free text can also be used. In this case, it will be handled as a `Text` element instance.
+
 New elements can be:
     - Appended: `report.append(*elements)` ; note that, on the contrary of `list.append`, it can take multiple inputs.
     - Prepended: `report.prepend(*elements)`.
@@ -24,7 +28,7 @@ And just like with the `list`, we can also `copy()` or `clear()` a `Report` inst
 
 -----
 
-## Object
+## Objects
 
 Multiple report elements can be defined:
 
@@ -32,8 +36,8 @@ Multiple report elements can be defined:
 --- | --- | ---
 `Code(c)` | `pre` | Code block, taking 1 argument: the [c]ode
 `Data(d)` |  | Data [d]ictionary ; its HTML is generated using [json2html](https://pypi.org/project/json2html/)
-`Footer(l,c,r)` |  | Footer text, split into 3 sections: [l]eft, [c]enter and [r]ight
-`Header(l,c,r)` |  | Header text, split into 3 sections: [l]eft, [c]enter and [r]ight
+`Footer(l,c,r)` |  | Footer text for displaying on every page, split into 3 sections: [l]eft, [c]enter and [r]ight ; center's default is the page numbering (format: `#page/#pages`)
+`Header(l,c,r)` |  | Header text for displaying on every page, split into 3 sections: [l]eft, [c]enter and [r]ight
 `List(*i)` | `ol`, `ul` | List of [i]tems that can be ordered or not
 `Table(d,ch,rh,cf)` | `table` | Table with column and row headers, taking 3 arguments : a list of rows as the [d]ata, a list of [c]olumn [h]eaders, a list of [r]ow [h]eaders and a list of [c]olumn [f]ooters
 `Text(c,t)` | `p` | Text paragraph, takin 1 argument : the [c]ontent to be displayed as a paragraph or any user-defined [t]ag
@@ -57,7 +61,7 @@ Multiple report elements can be defined:
 
 -----
 
-## Generation
+## Output formats
 
 The `Report` class aims to model a report for generating it to multiple common formats such as HTML or XML. The following formats are available:
 
