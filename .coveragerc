@@ -12,6 +12,8 @@ exclude_lines =
     # Python2/3 incompatibilities if/elif/else blocks
     (?m)(?P<indent>(?:\s+))if.*?PY(?:THON)?3.*?\:((?P=indent)\s+.*?)+(((?P=indent)else|elif).*?\:((?P=indent)\s+.*?)+)*$
     (if|and) (?:not )?PY(?:THON)?3:?
+    if pdf_generation:
+    pdf_generation
     # __main__ logics
     if\s+__name__\s+==\s+(?P<q>(?:[\'\"]))__main__(?P=q)\s+:
     import ConfigParser
@@ -38,3 +40,4 @@ exclude_lines =
     if not hotkeys_enabled:
     try:  # Windows
     def stdin_pipe\(\):
+    Xlib.error.DisplayConnectionError
