@@ -46,11 +46,20 @@ A context manager is also available:
 `logging` is slightly enhanced with a few things:
 
 - `addLogLevel`: adds a custom log level (with a color).
-- `bindLogger`: decorates a function or method to provide a logger inside (`self.logger` for a method, `logger` for a function).
+- `bindLogger`: decorates a function or method to provide a logger (`self.logger` for a method, global `logger` for a function).
 - `delLevelName`: deletes a level from the registry by its name or integer.
 - `delLogLevel`: deletes a log level, that is, its complete definition.
 - `nullLogger`: a ready-to-use null logger.
 - `setLogger` / `setLoggers`: sets respectively one or multiple loggers using Tinyscript's logger configuration.
+
+-----
+
+## `random`
+
+`random` is slightly enhanced with a few new classes:
+
+- `LFSR`: adds an implementation of the Linear-Feedback Shifting Register stream generator, with the possibility of recovering its parameters by setting a target and using the Berlekamp-Massey algorithm.
+- `Geffe`: adds an implementation of the Geffe stream generator.
 
 -----
 

@@ -396,7 +396,7 @@ The currently supported functions are:
         >>> ts.str2lst("123")
         [1, 2, 3]
 
-- Others: `ts.json2html` (relying on [`json2html`](https://pypi.org/project/json2html/)) / `ts.json2xml` (relying on [`dicttoxml`](https://pypi.org/project/dicttoxml/)) / `ts.xml2json`  (relying on [`xmltodict`](https://pypi.org/project/xmltodict/))
+- Others: `ts.json2html` (relying on [`json2html`](https://pypi.org/project/json2html/)) / `ts.json2xml` (relying on [`dicttoxml`](https://pypi.org/project/dicttoxml/)) / `ts.xml2json`  (relying on [`xmltodict`](https://pypi.org/project/xmltodict/)) / `ts.report2objects` (transforms a WPScan-like report to a Tinyscript [`Report`](reporting.html#report))
 
 -----
 

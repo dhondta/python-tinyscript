@@ -262,9 +262,13 @@ This is achieved by passing a keyword argument `noargs_action="[action]"` to `in
 
 -----
 
-## Easy reporting (Python 3 only)
+## Easy reporting
 
-This is achieved by passing a keyword argument `report_func=[function]` to `initialize(...)`. It allows to trigger a user-provided report generation function which must use Tinyscript's report objects.
+This is achieved by passing a keyword argument `report_func=[function]` to `initialize(...)`. It allows to trigger a user-provided report generation function processing Tinyscript's report objects.
+
+!!! warning "Python 3 only"
+    
+    Report generation relies on [`weasyprint`](https://pypi.org/project/WeasyPrint/) which is only supported on Python 3.5+, therefore not available for Python 2.
 
 ```python hl_lines="2 6 7 8 9 14"
 ...
@@ -287,13 +291,13 @@ def make_report():
 
 This adds multiple options:
 
-- `--output`: report output format (defaults to `pdf`, see [available formats here](usage.md))
+- `--output`: report output format (defaults to `pdf`, see [available formats here](reporting.html#generation))
 - `--title`: report title
 - `--css`: report stylesheet
 - `--theme`: report theme (overridden by `--css`)
 - `--filename`: report filename
 
-For more detailed information about this feature, see [this section](usage.html#reporting).
+For more detailed information about this feature, see [this section](reporting.html).
 
 -----
 
