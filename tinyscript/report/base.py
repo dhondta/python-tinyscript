@@ -2,6 +2,7 @@
 """Module for defining common functions for report elements.
 
 """
+from functools import wraps
 from os.path import exists, splitext
 from six import string_types
 
@@ -14,7 +15,9 @@ TEXT = True
 def output(f):
     """ This decorator allows to choose to return an output as text or to save
          it to a file. """
-    def wrapper(self, *args, **kwargs):
+    f._output = True
+    @wraps(f)
+    def _wrapper(self, *args, **kwargs):
         try:
             text = kwargs.get('text') or args[0]
         except IndexError:
@@ -34,7 +37,7 @@ def output(f):
                 filename = "{}-{}".format(name, i) + ext
             with open(filename, 'w') as out:
                 out.write(r)
-    return wrapper
+    return _wrapper
 
 
 class Element(object):

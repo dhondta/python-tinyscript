@@ -263,7 +263,7 @@ def initialize(add_banner=False,
                 glob[f] = globals()[f] = getattr(report, f)
             # now populate the parser with report-related arguments
             r = p.add_argument_group("report arguments")
-            output_func = list(filter(lambda x: not x[0].startswith('_'), getmembers(Report, predicate=isfunction)))
+            output_func = list(filter(lambda x: getattr(x[1], '_output', False), getmembers(Report)))
             choices = list(map(lambda x: x[0], output_func))
             if r.add_argument("--output", choices=choices, default="pdf", last=True, prefix="report",
                               help=gt("report output format")):
