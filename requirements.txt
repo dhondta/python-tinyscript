@@ -19,5 +19,5 @@ python-slugify
 six
 tqdm
 virtualenv
-weasyprint; python_version>='3.4'
+weasyprint; python_version>='3.5'
 xmltodict
