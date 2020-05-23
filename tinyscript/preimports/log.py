@@ -148,6 +148,23 @@ def lastLogRecord():
 logging.lastLogRecord = lastLogRecord
 
 
+def renameLogger(old_name, new_name):
+    """
+    Rename a logger with a different name. If the new name exists in the dictionary of loggers, it raises an exception.
+    
+    :param old_name: old logger name
+    :param new_name: new logger name
+    """
+    if old_name not in logging.root.manager.loggerDict.keys():
+        raise ValueError("Logger name does not exist")
+    if new_name in logging.root.manager.loggerDict.keys():
+        raise ValueError("New logger name already exists")
+    logger = logging.root.manager.loggerDict.pop(old_name)
+    logger.name = new_name
+    logging.root.manager.loggerDict[new_name] = logger
+logging.renameLogger = renameLogger
+
+
 def setLogger(name=None):
     """
     Set up the logger with the given name according to Tinyscript's logging configuration.
@@ -184,6 +201,39 @@ def setLoggers(*names):
         # disable propagation from the sublogger so that it does not duplicate log messages
         logger.propagate = False
 logging.setLoggers = setLoggers
+
+
+def unsetLogger(name, force=False):
+    """
+    Remove a logger. If the name does not exist in the dictionary of loggers, it raises an exception.
+    
+    :param name: logger name
+    """
+    logger = logging.root.manager.loggerDict.get(name)
+    if name is None or not isinstance(logger, logging.Logger):
+        raise ValueError("Logger name does not exist")
+    children = []
+    for n, l in logging.root.manager.loggerDict.items():
+        if n != name and isinstance(l, logging.Logger) and l.parent == logger:
+            children.append(n)
+    if len(children) > 0 and not force:
+        raise ValueError("This logger is the parent of '{}'".format("', '".join(children)))
+    for n in children:
+        logging.getLogger(n).name = None
+    logging.root.manager.loggerDict.pop(name)
+logging.unsetLogger = unsetLogger
+
+
+def unsetLoggers(*names, **kwargs):
+    """
+    Remove loggers. If a name does not exist in the dictionary of loggers, it raises an exception.
+    
+    :param names: logger names
+    """
+    force = kwargs.get('force', False)
+    for name in names:
+        unsetLogger(name)
+logging.unsetLoggers = unsetLoggers
 
 
 class InterceptionHandler(logging.Handler):

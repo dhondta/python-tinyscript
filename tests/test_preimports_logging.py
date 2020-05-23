@@ -42,7 +42,7 @@ class TestPreimportsLogging(TestCase):
         self.assertIsNone(logging.addLevelName(100, levelname))
         self.assertIsNone(logging.delLevelName(levelname))
     
-    def test_set_loggers(self):
+    def test_manipulate_loggers(self):
         l = logging.getLogger("test")
         h = logging.StreamHandler()
         l.addHandler(h)
@@ -53,4 +53,17 @@ class TestPreimportsLogging(TestCase):
         f_with_logging(self, logger=logging.getLogger("other"))
         LoggingInFunc().f1(self)
         LoggingInFunc().f2(self, logger=logging.getLogger("other"))
+        logging.renameLogger("test", "test2")
+        self.assertEqual(l.name, "test2")
+        self.assertRaises(ValueError, logging.renameLogger, "test", "test2")
+        self.assertRaises(ValueError, logging.renameLogger, "test2", "test2")
+        self.assertRaises(ValueError, logging.unsetLogger, "test")
+        l2 = logging.getLogger("test3")
+        l2.parent = l
+        self.assertRaises(ValueError, logging.unsetLoggers, "test2")
+        self.assertIsNone(logging.unsetLogger("test2", force=True))
+        k = list(logging.root.manager.loggerDict.keys())
+        self.assertNotIn("test", k)
+        self.assertNotIn("test2", k)
+        self.assertIn("test3", k)
 
