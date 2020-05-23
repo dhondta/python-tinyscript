@@ -44,7 +44,7 @@ def getparentframe(**kwargs):
     frame = inspect.stack()[0][0]
     while frame is not None:
         frame = frame.f_back
-        if all(frame.f_globals.get(k) == v for k, v in kwargs.items()):
+        if frame and all(frame.f_globals.get(k) == v for k, v in kwargs.items()):
             break
     return frame
 inspect.getparentframe = getparentframe
