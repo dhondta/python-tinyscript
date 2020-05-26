@@ -72,11 +72,14 @@ It also provides some other utility functions:
  
 **Name** | **Description**
 :---: | :---:
+`ts.BitArray` | slightly extended `BitArray` class from [`bitstring`](https://github.com/scott-griffiths/bitstring)
 `ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
 `ts.bruteforce_mask` | generator for bruteforcing according to a given mask (similar to this used in HashCat)
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
+`ts.entropy` | computation function for the Shannon entropy of a string
 `ts.get_terminal_size` | cross-platform terminal size function
+`ts.pad` | String padding function, supporting `ansic9.23`, `incremental`, `iso7816-4`, `pkcs5`, `pkcs7` and `w3c` algorithms
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
 `ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
 `ts.stdin_pipe` | Python2/3-compatible iterator of STDIN lines
@@ -85,6 +88,7 @@ It also provides some other utility functions:
 `ts.timeout` | decorator for applying a timeout to a function
 `ts.Timeout` | context manager for applying a timeout to a code block
 `ts.TimeoutError` | custom exception for handling a timeout (as it is natively available in Python 3 but not in Python 2)
+`ts.unpad` | String unpadding function (complementary of `ts.pad`)
 `ts.xor` | repeated XOR function, also allowing to apply an ordinal offset on XORed characters
 `ts.xor_file` | XOR a file with a given key
 

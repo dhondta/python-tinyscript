@@ -33,4 +33,8 @@ class TestHelpersDataUtils(TestCase):
                 self.assertEqual(unpad(pad(STR, padding, l), padding, l), STR)
                 self.assertEqual(unpad(pad(HEX, padding, l), padding, l), HEX)
                 self.assertEqual(unpad(pad(HEX, padding, l, True), padding, l, True), HEX)
+        self.assertEqual(entropy(STR), 1.5)
+        self.assertEqual(entropy(STR), entropy(list(map(ord, STR))))
+        self.assertRaises(TypeError, entropy, 1)
+        self.assertRaises(TypeError, entropy, pad)
 

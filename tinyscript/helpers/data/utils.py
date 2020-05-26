@@ -7,12 +7,13 @@ import bitstring
 import patchy
 import re
 from ast import literal_eval as litev
+from math import log2
 from random import randint
 
 from .types import *
 
 
-__all__ = __features__ = ["BitArray", "pad", "unpad"]
+__all__ = __features__ = ["BitArray", "entropy", "pad", "unpad"]
 
 
 PAD = ["ansic9.23", "incremental", "iso7816-4", "pkcs5", "pkcs7", "w3c"]
@@ -77,6 +78,14 @@ class BitArray(bitstring.BitArray):
             nb += group
         self.bin = nb
         self._nbits = n
+
+
+def entropy(string):
+    """
+    Shannon entropy computation function.
+    """
+    s = string
+    return - sum([p * log2(p) for p in [float(s.count(c)) / len(s) for c in set(s)]])
 
 
 def pad(string, padding=None, blocksize=8, raw=False):
