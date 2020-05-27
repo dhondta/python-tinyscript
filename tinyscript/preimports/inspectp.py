@@ -17,7 +17,7 @@ def getmainframe():
     """
     Return __main__'s frame object.
     """
-    return getparentframe(__name__="__main__")
+    return getparentframe(__name__="__main__") or inspect.currentframe()
 inspect.getmainframe = getmainframe
 
 
