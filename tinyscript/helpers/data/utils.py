@@ -7,7 +7,7 @@ import bitstring
 import patchy
 import re
 from ast import literal_eval as litev
-from math import log2
+from math import log
 from random import randint
 
 from .types import *
@@ -85,7 +85,7 @@ def entropy(string):
     Shannon entropy computation function.
     """
     s = string
-    return - sum([p * log2(p) for p in [float(s.count(c)) / len(s) for c in set(s)]])
+    return - sum([p * log(p, 2) for p in [float(s.count(c)) / len(s) for c in set(s)]])
 
 
 def pad(string, padding=None, blocksize=8, raw=False):
