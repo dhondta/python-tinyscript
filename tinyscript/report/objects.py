@@ -20,8 +20,8 @@ class Data(Element):
     
     def __init__(self, data, **kwargs):
         super(Data, self).__init__(**kwargs)
-        if not isinstance(data, dict):
-            raise ValueError("'data' argument shall be a dictionary")
+        if not isinstance(data, (dict, list, set, tuple)):
+            raise ValueError("'data' argument shall be a dictionary or a list (got {})".format(type(data)))
         self.data = data
     
     @output
@@ -282,6 +282,8 @@ class Title(Text):
     :param title: title content
     :param tag:   HTML tag to be used
     """
+    _style = {}
+    
     def __init__(self, title, tag="h1", **kwargs):
         if tag not in ["h1", "h2", "h3", "h4", "h5", "h6"]:
             raise ValueError("Title tag should be \"h[1-6]\", not \"{}\"".format(tag))

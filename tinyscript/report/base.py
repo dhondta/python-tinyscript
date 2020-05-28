@@ -52,7 +52,10 @@ class Element(object):
             if k not in ['color', 'size', 'style']:
                 continue
             self._style[k] = v
-        self.style = "font-size:%(size)spx;font-style:%(style)s;color:%(color)s;" % self._style
+        self.style = ""
+        for s, k in zip(["font-size:%spx", "font-style:%s", "color:%s"], ['size', 'style', 'color']):
+            if k in self._style.keys():
+                self.style += s % str(self._style[k]) + ";"
         self._newline = "\n"
     
     def __repr__(self):
