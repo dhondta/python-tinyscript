@@ -3,6 +3,7 @@
 
 """
 from functools import wraps
+from inspect import stack
 from os.path import exists, splitext
 from six import string_types
 
@@ -42,7 +43,7 @@ def output(f):
 
 class Element(object):
     """ This class is used to give a common type to report elements. """
-    _style = {'size': 12, 'style': "normal", 'color': "black"}
+    _style = {}
     id = 0
     
     def __init__(self, **kwargs):
@@ -52,10 +53,6 @@ class Element(object):
             if k not in ['color', 'size', 'style']:
                 continue
             self._style[k] = v
-        self.style = ""
-        for s, k in zip(["font-size:%spx", "font-style:%s", "color:%s"], ['size', 'style', 'color']):
-            if k in self._style.keys():
-                self.style += s % str(self._style[k]) + ";"
         self._newline = "\n"
     
     def __repr__(self):
@@ -63,6 +60,22 @@ class Element(object):
     
     def _set_indent(self, indent):
         return ("", "") if indent is None else (indent * " ", "\n")
+    
+    @property
+    def data(self):
+        return Element.format_data(self._data, stack()[1][3])
+    
+    @property
+    def style(self):
+        r = ""
+        for s, k in zip(["font-size:%spx", "font-style:%s", "color:%s"], ['size', 'style', 'color']):
+            if self._style.get(k):
+                r += s % str(self._style[k]) + ";"
+        return r
+    
+    @data.setter
+    def data(self, data):
+        self._data = data
     
     @output
     def csv(self, text=TEXT):
@@ -83,4 +96,19 @@ class Element(object):
     @output
     def xml(self, indent=2, text=TEXT):
         return ("<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__).format(self._newline, str(self.data))
+    
+    @staticmethod
+    def format_data(data, fmt):
+        if isinstance(data, Element):
+            return getattr(data, fmt, lambda: str(data))()
+        if isinstance(data, (list, set, tuple)):
+            t = type(data)
+            data = list(data)
+            for i, subdata in enumerate(data):
+                data[i] = Element.format_data(subdata, fmt)
+            data = t(data)
+        elif isinstance(data, dict):
+            for k, subdata in data.items():
+                data[k] = Element.format_data(subdata, fmt)
+        return data
 

@@ -31,12 +31,14 @@ class TestReport(TestCase):
         r.insert(r.index("header"), Footer("useless footer"))
         self.assertTrue(r.count("footer"))
         l = []
-        for e in [List("item1", "itme2", color="grey"),
+        for e in [List("item1", Text("item2"), color="grey"),
                   Table([[1, 2]], ["test1", "test2"], ["test3"]),
                   Section("test section", useless=None),
                   Subsection("test subsection", does_not_throw="error"),
                   Data({'test': "Test string", 'data': {'a': 1, 'b': 2}}),
                   Text("test text", size="10"),
+                  Image("test_image.png", width="50%"),
+                  Blockquote("test blockquote", size=11),
                   Code("#test\nprint('hello')", language="python", hl_lines="1")]:
             self.__try_formats(e)
             l.append(e)

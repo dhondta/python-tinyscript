@@ -6,7 +6,8 @@ from .base import *
 from ..helpers.data.transform import json2html, json2xml
 
 
-__all__ = __features__ = ["Code", "Data", "Footer", "Header", "List", "Section", "Subsection", "Table", "Text", "Title"]
+__all__ = __features__ = ["Blockquote", "Code", "Data", "Footer", "Header", "Image", "List", "Section", "Subsection",
+                          "Table", "Text", "Title"]
 
 HEAD_CSS = "@%(pos)s-left{%(left)s};@%(pos)s-center{%(center)s};@%(pos)s-right{%(right)s};"
 
@@ -21,22 +22,19 @@ class Data(Element):
     def __init__(self, data, **kwargs):
         super(Data, self).__init__(**kwargs)
         if not isinstance(data, (dict, list, set, tuple)):
-            raise ValueError("'data' argument shall be a dictionary or a list (got {})".format(type(data)))
+            raise ValueError("'data' argument shall be a dictionary or a list (got {})".format(type(data).__name__))
         self.data = data
     
     @output
     def html(self, indent=4, text=TEXT):
-        """ Generate an HTML table from the data dictionary. """
-        return json2html(self.data)
+        return json2html(self.data).replace("\"", "'")
     
     @output
     def json(self, text=TEXT):
-        """ Return the original JSON object. """
         return self.data
     
     @output
     def xml(self, indent=2, text=TEXT):
-        """ Generate an XML output from the data dictionary. """
         return json2xml(self.data)
 
 
@@ -82,6 +80,40 @@ class Header(Footer):
     pos = "top"
 
 
+class Image(Element):
+    """ This class represents an image.
+    
+    :param source: image's source path
+    """
+    def __init__(self, source, title=None, width=None, height=None, **kwargs):
+        super(Image, self).__init__(**kwargs)
+        self.data = {'source': source, 'title': title or "", 'width': width or "", 'height': height or ""}
+    
+    @output
+    def html(self, indent=4, text=TEXT):
+        img = "<img src='%s'" % self.data['source']
+        for k in ['title', 'width', 'height']:
+            v = self.data.get(k)
+            if v:
+                img += " %s='%s'" % (k, v)
+        return img + "/>"
+    
+    @output
+    def md(self, text=TEXT):
+        return "![%(title)s](%(source)s)" % self.data
+    
+    @output
+    def xml(self, indent=2, text=TEXT):
+        ind, nl = self._set_indent(indent)
+        xml = "<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__
+        attrs = ind + "<source>%s</source>" % self.data['source']
+        for k in ['title', 'width', 'height']:
+            v = self.data.get(k)
+            if v:
+                attrs += nl + ind + "<%s>" % k + v + "</%s>" % k
+        return xml.format(nl, attrs)
+
+
 class List(Element):
     """ This class represents a list of items, ordered or not.
     
@@ -96,25 +128,25 @@ class List(Element):
     
     @output
     def csv(self, text=TEXT):
-        """ Generate a dummy CSV table from the list. """
         return "\n".join(self.data)
     
     @output
     def html(self, indent=4, text=TEXT):
         ind, nl = self._set_indent(indent)
-        s = '<%(tag)s style="%(style)s">' % self.__dict__ + nl
+        s = "<%s" % self.tag
+        if self.style:
+            s += " style='%s'" % self.style
+        s += ">" + nl
         for i in self.data:
             s += ind + "<li>%s</li>" % i + nl
         return s + "</%s>" % self.tag
     
     @output
     def md(self, text=TEXT):
-        """ Generate Markdown from the list. """
         return "\n".join("%s %s" % (["-", "%d." % (n+1)][self.ordered], i) for n, i in enumerate(self.data))
     
     @output
     def xml(self, indent=2, text=TEXT):
-        """ Generate an XML output from the list. """
         ind, nl = self._set_indent(indent)
         xml = "<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__
         return xml.format(nl, "\n".join(ind + "<item>%s</item>" % i for i in self.data))
@@ -146,55 +178,59 @@ class Table(Element):
         self.data = data
         self.float_fmt = flt_fmt
     
-    def _format(self):
-        data = []
-        for i, row in enumerate(self.data):
+    def _format(self, data):
+        d = []
+        for i, row in enumerate(data):
             row = list(map(lambda x: self.float_fmt % x if isinstance(x, float) else str(x), row))
             if self.row_headers is not None:
                 row.insert(0, self.row_headers[i])
-            data.append(row)
-        return data
+            d.append(row)
+        return d
     
     @output
     def csv(self, text=TEXT, sep=','):
-        """ Generate a CSV table from the table data. """
         r = "" if self.column_headers is None else sep.join(self.column_headers)
-        for row in self._format():
+        for row in self._format(self.data):
             r += "\n" + sep.join(row)
         return r
     
     @output
     def html(self, indent=4, text=TEXT):
-        """ Generate an HTML table from the table data. """
         ind, nl = self._set_indent(indent)
-        r = ['<table id="%(name)s" style="%(style)s">' % self.__dict__]
+        t = "<table id='%s'" % self.name
+        if self.style:
+            t += " style='%s'" % self.style
+        r = [t + ">"]
         if self.column_headers is not None:
             r.append(ind + "<thead>")
+            r.append(2 * ind + "<tr>")
             for h in self.column_headers:
-                r.append(2 * ind + "<th>%s</th>" % h)
+                r.append(3 * ind + "<th>%s</th>" % h)
+            r.append(2 * ind + "</tr>")
             r.append(ind + "</thead>")
         r.append(ind + "<tbody>")
-        for row in self._format():
-            r.append(ind + "<tr>")
+        for row in self._format(self.data):
+            r.append(2 * ind + "<tr>")
             for i, v in enumerate(row):
                 xml = "<{0}>%s</{0}>".format(["td", "th"][i == 0 and self.row_headers is not None])
-                r.append(2 * ind + xml % v)
-            r.append(ind + "</tr>")
+                r.append(3 * ind + xml % v)
+            r.append(2 * ind + "</tr>")
         r.append(ind + "</tbody>")
         if self.column_footers is not None:
             r.append(ind + "<tfoot>")
+            r.append(2 * ind + "<tr>")
             for h in self.column_footers:
-                r.append(2 * ind + "<th>%s</th>" % h)
+                r.append(3 * ind + "<th>%s</th>" % h)
+            r.append(2 * ind + "</tr>")
             r.append(ind + "</tfoot>")
         r.append("</table>")
         return nl.join(r)
     
     @output
     def md(self, float_format="%.2g", text=TEXT):
-        """ Generate Markdown from the table data. """
         r = [" | ".join(self.column_headers or list(map(str, range(len(self.data[0])))))]
         r.append(" | ".join("---" for i in range(len(self.data[0]))))
-        for row in self._format():
+        for row in self._format(self.data):
             r.append(" | ".join(row))
         if self.column_footers is not None:
             r.append(" | ".join(map(lambda x: "**%s**" % x, self.column_footers)))
@@ -202,7 +238,6 @@ class Table(Element):
     
     @output
     def xml(self, indent=2, text=TEXT):
-        """ Generate an XML output from the report data. """
         ind, nl = self._set_indent(indent)
         r = ["<%s>" % self.name]
         for row in self.data:
@@ -235,13 +270,33 @@ class Text(Element):
         super(Text, self).__init__(**kwargs)
         self.data = content
         self.tag = tag
+    
     @output
     def html(self, indent=4, text=TEXT):
-        return ('<%(tag)s style="%(style)s">%(data)s</%(tag)s>' % self.__dict__).replace("\n", "<br>")
+        h = "<%s" % self.tag
+        if self.style:
+            h += " style='%s'" % self.style
+        h += ">%s</%s>" % (self.data, self.tag)
+        return h.replace("\n", "<br>")
     
     @output
     def md(self, text=TEXT):
         return self.data
+
+
+class Blockquote(Text):
+    """ Text area report element.
+    
+    :param content: text content
+    """
+    def __init__(self, content, **kwargs):
+        super(Text, self).__init__(**kwargs)
+        self.data = content
+        self.tag = "blockquote"
+    
+    @output
+    def md(self, text=TEXT):
+        return "\n".join("> " + l for l in self.data.split("\n"))
 
 
 class Code(Text):
@@ -262,8 +317,9 @@ class Code(Text):
     def html(self, indent=4, text=TEXT):
         s = "<pre"
         if self.language:
-            s += ' class="%s hljs"' % self.language
-        s += ' style="%s">' % self.style
+            s += " class='%s hljs'" % self.language
+        if self.style:
+            s += " style='%s'>" % self.style
         return s + str(self.data).replace("\n", "<br>") + "</pre>"
     
     @output

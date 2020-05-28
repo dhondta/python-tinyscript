@@ -34,10 +34,12 @@ Multiple report elements can be defined:
 
 **Class** | **HTML tag** | **Description**
 --- | --- | ---
+`Blockquote(c)` | `blockquote` | Quoted text block, taking 1 argument: the [c]ontent
 `Code(c)` | `pre` | Code block, taking 1 argument: the [c]ode
 `Data(d)` |  | Data [d]ictionary ; its HTML is generated using [json2html](https://pypi.org/project/json2html/)
 `Footer(l,c,r)` |  | Footer text for displaying on every page, split into 3 sections: [l]eft, [c]enter and [r]ight ; center's default is the page numbering (format: `#page/#pages`)
 `Header(l,c,r)` |  | Header text for displaying on every page, split into 3 sections: [l]eft, [c]enter and [r]ight
+`Image(s,d,w,h)` | `img` | Image reference, taking up to 4 arguments: the [s]ource and optionally a [d]escription, the [w]idth and the [h]eight
 `List(*i)` | `ol`, `ul` | List of [i]tems that can be ordered or not
 `Table(d,ch,rh,cf)` | `table` | Table with column and row headers, taking 3 arguments : a list of rows as the [d]ata, a list of [c]olumn [h]eaders, a list of [r]ow [h]eaders and a list of [c]olumn [f]ooters
 `Text(c,t)` | `p` | Text paragraph, takin 1 argument : the [c]ontent to be displayed as a paragraph or any user-defined [t]ag
@@ -47,11 +49,13 @@ Multiple report elements can be defined:
 
 !!! note "Styling"
     
-    All these elements can have the following styling arguments:
+    All these elements can have the following styling keyword-arguments:
     
     - `size`: font size ; defaults to `12`
     - `color`: font color ; defaults to "`black`"
     - `style`: font style attribute (`bold`, `italic`, ...) ; default to "`normal`"
+    
+    Note that the aforementioned default values do not apply for particular size-dependent elements (e.g. `h1`, `h2`, ...) but using the size can still be forced by using the related keyword-argument.
 
 !!! note "Element naming convention and assignment"
     
