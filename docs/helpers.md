@@ -73,8 +73,6 @@ It also provides some other utility functions:
 **Name** | **Description**
 :---: | :---:
 `ts.BitArray` | slightly extended `BitArray` class from [`bitstring`](https://github.com/scott-griffiths/bitstring)
-`ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
-`ts.bruteforce_mask` | generator for bruteforcing according to a given mask (similar to this used in HashCat)
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `ts.entropy` | computation function for the Shannon entropy of a string
@@ -91,6 +89,33 @@ It also provides some other utility functions:
 `ts.unpad` | String unpadding function (complementary of `ts.pad`)
 `ts.xor` | repeated XOR function, also allowing to apply an ordinal offset on XORed characters
 `ts.xor_file` | XOR a file with a given key
+
+A few utility functions related to bruteforcing are also available:
+
+**Name** | **Description**
+:---: | :---:
+`ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
+`ts.bruteforce_mask` | generator for bruteforcing according to a given mask (either a string or a list of alphabets per character position)
+`ts.expand_mask` | string expansion function for computing a bruteforce mask
+
+!!! note "Bruteforce mask groups"
+    
+    For `ts.bruteforce_mask` or `ts.expand_mask`, a mask similar to this used in HashCat can be provided. The available groups are:
+    
+    - `?*`: all ordinals (0 to 255)
+    - `<`: left bracket derivates `([{<`
+    - `>`: right bracket derivates `)]}>`
+    - `c`: lowercase consonants
+    - `C`: uppercase consonants
+    - `d`: digits
+    - `h`: lowercase hexadecimal
+    - `H`: uppercase hexadecimal
+    - `l`: lowercase letters
+    - `L`: uppercase letters
+    - `p`: printable characters
+    - `s`: punctuation characters and whitespace
+    - `v`: lowercase vowels
+    - `V`: uppercase vowels
 
 -----
 
