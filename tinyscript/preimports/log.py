@@ -253,3 +253,4 @@ __handler = logging.StreamHandler()
 __formatter = logging.Formatter('\r%(asctime)s [%(levelname)s] %(message)s')
 __handler.setFormatter(__formatter)
 __logger.addHandler(__handler)
+

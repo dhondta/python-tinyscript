@@ -54,6 +54,7 @@ __imports__ = {
         "sys",
         "time",
         "types",
+        "uuid",
     ],
     'optional': [
         "bs4",

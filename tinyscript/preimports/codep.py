@@ -10,11 +10,11 @@ from functools import wraps
 from six import string_types
 
 
-BLOCK_KW = ["class", "def", "elif", "else", "except", "finally", "for", "if",
-            "try", "while", "with"]
+BLOCK_KW = ["class", "def", "elif", "else", "except", "finally", "for", "if", "try", "while", "with"]
 N_MODIF  = 3
 
 is_function  = lambda f: isinstance(f, types.FunctionType)
+is_method    = lambda f: isinstance(f, types.MethodType)
 
 code.patch   = patchy.patch
 code.unpatch = patchy.unpatch
@@ -48,8 +48,7 @@ def __get_indent_chars(code_lines):
         l1, l2 = l2, code_lines[n]
         indent = l2[:len(l2)-len(l2.lstrip())]
         prev = new
-        new = len(indent) if len(l2.strip()) == 0 or \
-                             not l2.lstrip().startswith("#") else prev
+        new = len(indent) if len(l2.strip()) == 0 or not l2.lstrip().startswith("#") else prev
         n -= 1
     return l1[new:prev]
     
@@ -67,14 +66,12 @@ def __get_block_indent(code_lines, n):
     indent = l[:len(l) - len(l.lstrip())]
     # if a block keyword is present, return block's indentation ; otherwise,
     #  return the same indentation
-    return indent + __get_indent_chars(code_lines) \
-        if any(l.lstrip().startswith(kw) for kw in BLOCK_KW) else indent
+    return indent + __get_indent_chars(code_lines) if any(l.lstrip().startswith(kw) for kw in BLOCK_KW) else indent
 
 
 def __sort_int_text_pairs(text, lst, item):
-    """ Check that l only consists of flattened (int, str or None) pairs and 
-         that integers are within the range of the input text. Then output the
-         list of sorted pairs. """
+    """ Check that l only consists of flattened (int, str or None) pairs and that integers are within the range of the
+         input text. Then output the list of sorted pairs. """
     l = len(text.split("\n"))
     s = "Bad code {}s".format(item)
     if len(lst) % 2 != 0:
@@ -105,7 +102,7 @@ def __sort_int_text_pairs(text, lst, item):
 
 def __validate(f):
     """ Simple validation for validating that the input is a function. """
-    if not is_function(f):
+    if not is_function(f) and not is_method(f):
         raise ValueError("{} is not a function".format(f))
 
 
@@ -129,11 +126,9 @@ def _cache(f):
 
 def code_add_block(func, index, block, after=False):
     """
-    Additional modification function to allow adding a block of code at a
-     specific place in the code of a function. The input block is automatically
-     reindented relatively to its insertion position. Therefore, successive
-     distinct blocks of code with dedented levels SHALL NOT be added in the same
-     block value through this function but well separately.
+    Additional modification function to allow adding a block of code at a specific place in the code of a function. The
+     input block is automatically reindented relatively to its insertion position. Therefore, successive distinct blocks
+     of code with dedented levels SHALL NOT be added in the same block value through this function but well separately.
     
     :param func:  function object to be modified
     :param index: position where the block of code is to be added
@@ -166,8 +161,7 @@ code.add_line = code.insert_line = code_add_line
 @_cache
 def code_add_lines(func, *additions, **kwargs):
     """
-    Additional modification function to allow adding lines at specific places in
-     the code of a function.
+    Additional modification function to allow adding lines at specific places in the code of a function.
     
     :param func:      function object to be modified
     :param additions: list of additions - pairs (line_index, new_line)
@@ -203,8 +197,7 @@ code.delete_line = code.remove_line = code_delete_line
 
 def code_delete_lines(func, *indices):
     """
-    Additional function to allow deleting only specific lines in the code of a
-     function.
+    Additional function to allow deleting only specific lines in the code of a function.
     
     :param func:    function object to be modified
     :param indices: list of line indices for removal
@@ -221,8 +214,8 @@ code.delete_lines = code.remove_lines = code_delete_lines
 @_cache
 def code_replace(func, *replacements):
     """
-    Slight modification to original replace function to allow replacing only
-     part(s) of code and not necessarily using whole function's code.
+    Slight modification to original replace function to allow replacing only part(s) of code and not necessarily using
+     whole function's code.
     
     :param func:         function object to be modified
     :param replacements: list of replacements - pairs (str_to_repl, replac)
@@ -232,8 +225,7 @@ def code_replace(func, *replacements):
     try:
         patchy.replace(func, *replacements)
         old_code, new_code = replacements
-    # if normal handling fails, get whole function's code first, apply
-    #  replacement then retry
+    # if normal handling fails, get whole function's code first, apply replacement then retry
     except:
         if len(replacements) % 2 != 0:
             raise PatchError("Bad code replacement")
@@ -259,8 +251,7 @@ code.replace_line = code_replace_line
 @_cache
 def code_replace_lines(func, *replacements):
     """
-    Additional replace function to allow replacing only specific lines in the
-     code of a function.
+    Additional replace function to allow replacing only specific lines in the code of a function.
     
     :param func:         function object to be modified
     :param replacements: list of replacements - pairs (line_index, replac)
@@ -329,7 +320,5 @@ code.source = code_source
 
 
 # disable source AST check to avoid Python compatibility errors
-code_replace(patchy.api._assert_ast_equal,
-             "current_ast = ast.parse",
-             "return #current_ast = ast.parse",
-             cache=False)
+code_replace(patchy.api._assert_ast_equal, "current_ast = ast.parse", "return #current_ast = ast.parse", cache=False)
+
