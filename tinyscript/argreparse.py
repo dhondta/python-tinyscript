@@ -681,7 +681,7 @@ class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
             choices_str = ', '.join([str(c) for c in params['choices']])
             params['choices'] = choices_str
         if params.get('default') is not None:
-            s = str(params['default'])
+            s = repr(params['default']).strip("'")
             # if the default value string representation is too long, reduce it
             if len(s) > DEFAULT_MAX_LEN:
                 p = s.split(',')
