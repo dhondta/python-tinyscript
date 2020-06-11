@@ -15,8 +15,8 @@ __all__ = __features__ = []
 
 
 # network-related check functions
-__all__ += ["is_asn", "is_defgw", "is_domain", "is_email", "is_gw", "is_hostname", "is_ifaddr", "is_ip", "is_ipv4",
-            "is_ipv6", "is_mac", "is_netif", "is_port", "is_url"]
+__all__ += ["is_asn", "is_defgw", "is_domain", "is_email", "is_gw", "is_hostname", "is_ifaddr", "is_ip", "is_ipnet",
+            "is_ipv4", "is_ipv4net", "is_ipv6", "is_ipv6net", "is_mac", "is_netif", "is_port", "is_url"]
 is_asn      = lambda a:   __as_number(a, False) is not None
 is_defgw    = lambda gw:  __gateway_address(gw, True, False) is not None
 is_domain   = lambda n:   __domain_name(n, False, False) is not None
@@ -25,8 +25,11 @@ is_gw       = lambda gw:  __gateway_address(gw, False, False) is not None
 is_hostname = lambda h:   __hostname(h, False) is not None
 is_ifaddr   = lambda ip:  __interface_address(ip, False) is not None
 is_ip       = lambda ip:  __ip_address(ip, None, False) is not None
+is_ipnet    = lambda n:   __ip_address_list([n], None, fail=False) is not None
 is_ipv4     = lambda ip:  __ip_address(ip, 4, False) is not None
+is_ipv4net  = lambda n:   __ip_address_list([n], 4, fail=False) is not None
 is_ipv6     = lambda ip:  __ip_address(ip, 6, False) is not None
+is_ipv6net  = lambda n:   __ip_address_list([n], 6, fail=False) is not None
 is_mac      = lambda mac: __mac_address(mac, False) is not None
 is_netif    = lambda nif: __network_interface(nif, False) is not None
 is_port     = lambda p:   isinstance(p, int) and 0 < p < 2**16
@@ -146,7 +149,7 @@ ipv4_address = lambda ip: __ip_address(ip, 4)
 ipv6_address = lambda ip: __ip_address(ip, 6)
 
 
-def __ip_address_list(ips, version=None, filter_bad=False):
+def __ip_address_list(ips, version=None, filter_bad=False, fail=True):
     """ IP address range validation and expansion. """
     ips = _str2list(ips)
     # consider it as an ipaddress.IPv[4|6]Network instance and expand it
@@ -161,7 +164,7 @@ def __ip_address_list(ips, version=None, filter_bad=False):
         try:
             l.append(netaddr.IPNetwork(ip, version=version))
         except (ValueError, netaddr.core.AddrFormatError) as e:
-            if not filter_bad:
+            if not filter_bad and fail:
                 raise ValueError(str(e))
     # make a generator with the parsed IP addresses/networks
     def __generator():
@@ -176,7 +179,7 @@ ip_address_list            = lambda ips: __ip_address_list(ips)
 ip_address_filtered_list   = lambda ips: __ip_address_list(ips, None, True)
 ipv4_address_list          = lambda ips: __ip_address_list(ips, 4)
 ipv4_address_filtered_list = lambda ips: __ip_address_list(ips, 4, True)
-ipv6_address_list          = lambda ips: __ip_address_list(ips, 6)()
+ipv6_address_list          = lambda ips: __ip_address_list(ips, 6)
 ipv6_address_filtered_list = lambda ips: __ip_address_list(ips, 6, True)
 ip_address_network         = lambda net: __ip_address_list([net], None)
 ipv4_address_network       = lambda net: __ip_address_list([net], 4)
@@ -271,3 +274,4 @@ def port_number_range(prange):
     except (AttributeError, TypeError):
         raise ValueError("Bad port number range")
     return list(range(bounds[0], bounds[1] + 1))
+
