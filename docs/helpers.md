@@ -244,7 +244,8 @@ And for network-related data:
 `ts.is_gw` | gateway
 `ts.is_hostname` | hostname
 `ts.is_ifaddr` | interface address
-`ts.is_ip` / `ts.is_ipv4` / `ts.is_ipv6` | IPv4 or IPv6 address
+`ts.is_ip` / `ts.is_ipv4` / `ts.is_ipv6` | IPv4 or IPv6 address ; integer addresses are supported
+`ts.is_ipnet` / `ts.is_ipv4net` / `ts.is_ipv6net` | IPv4 or IPv6 network (i.e. in CIDR notation) ; integer addresses are supported
 `ts.is_mac` | MAC address
 `ts.is_netif` | network interface
 `ts.is_port` | port number
