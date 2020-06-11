@@ -12,6 +12,7 @@ exclude_lines =
     # Python2/3 incompatibilities if/elif/else blocks
     (?m)(?P<indent>(?:\s+))if.*?PY(?:THON)?3.*?\:((?P=indent)\s+.*?)+(((?P=indent)else|elif).*?\:((?P=indent)\s+.*?)+)*$
     (if|and) (?:not )?PY(?:THON)?3:?
+    if sys\.version_info \< \(3\,\)\:
     if pdf_generation:
     pdf_generation
     # __main__ logics
