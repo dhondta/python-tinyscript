@@ -12,6 +12,7 @@ except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
     import ConfigParser as configparser
 
 from .codep import code
+from .ftools import functools
 from .hash import hashlib
 from .inspectp import inspect
 from .log import logging
@@ -26,6 +27,7 @@ __imports__ = {
     'bad': [],
     'enhanced': [
         "code",
+        "functools",
         "hashlib",
         "inspect",
         "logging",
