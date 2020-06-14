@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Compatibility functions' tests.
+"""Common utility functions' tests.
 
 """
 from tinyscript.helpers.common import *
@@ -10,8 +10,6 @@ from utils import remove, TestCase
 
 class TestHelpersCommon(TestCase):
     def test_common_utility_functions(self):
-        self.assertEqual(list(bruteforce(2, "ab")), ["a", "b", "aa", "ab", "ba", "bb"])
-        self.assertEqual(list(bruteforce(2, "ab", repeat=False)), ["a", "b", "ab", "ba"])
         self.assertEqual(xor("this is a test", " "), "THIS\x00IS\x00A\x00TEST")
         self.assertEqual(list(strings("this is a \x00 test")), ["this is a ", " test"])
         FILE, CONTENT = ".test_strings", b"this is a \x00 test"
@@ -23,20 +21,4 @@ class TestHelpersCommon(TestCase):
             self.assertEqual(f.read(), CONTENT)
         self.assertEqual(list(strings_from_file(FILE)), ["this is a ", " test"])
         remove(FILE)
-    
-    def test_mask_string_expansion(self):
-        self.assertIsNotNone(expand_mask("???c?(abc)"))
-        self.assertRaises(ValueError, expand_mask, "?(")
-        self.assertRaises(ValueError, expand_mask, "?()")
-        self.assertRaises(ValueError, expand_mask, "?(v()")
-        self.assertIsNotNone(expand_mask("??(v()"))
-        self.assertRaises(ValueError, expand_mask, "?z")
-        self.assertEqual(expand_mask("?z", {'z': "xyz"}), ["xyz"])
-        self.assertEqual(expand_mask("?v"), ["aeiouy"])
-        self.assertEqual(expand_mask("?v", {'v': "abc"}), ["abc"])
-        self.assertEqual(list(bruteforce_mask("ab?l", {'l': "cde"})), ["abc", "abd", "abe"])
-        self.assertEqual(list(bruteforce_mask(["a", "b", "cde"])), ["abc", "abd", "abe"])
-        g = bruteforce_mask(12345)
-        self.assertIsNotNone(g)
-        self.assertRaises(ValueError, list, g)
 

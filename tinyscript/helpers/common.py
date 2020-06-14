@@ -2,119 +2,15 @@
 """Common utility functions.
 
 """
-from itertools import cycle, permutations, product
+from itertools import cycle
 from plyer import notification
-from string import printable, punctuation
+from string import printable
 
-from .compat import b, ensure_str
+from .compat import b
 from .constants import PYTHON3
-from .data import is_list, is_str
 
 
-__all__ = __features__ = ["bruteforce", "bruteforce_mask", "expand_mask", "notify", "strings", "strings_from_file",
-                          "xor", "xor_file"]
-
-
-MASKS = {
-    '*': "".join(chr(i) for i in range(256)),
-    '<': "([{<",
-    '>': ")]}>",
-    'c': "bcdfghjklmnpqrstvwxz",
-    'C': "BCDFGHJKLMNPQRSTVWXZ",
-    'd': "0123456789",
-    'h': "0123456789abcdef",
-    'H': "0123456789ABCDEF",
-    'l': "abcdefghijklmnopqrstuvwxyz",
-    'L': "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    'p': printable,
-    's': " " + punctuation,
-    'v': "aeiouy",
-    'V': "AEIOUY",
-}
-
-
-def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1, repeat=True):
-    """
-    Generator for bruteforcing according to minimum and maximum lengths and an alphabet.
-    
-    :param maxlen:   maximum bruteforce entry length
-    :param alphabet: bruteforce alphabet to be used
-    :param minlen:   minimum bruteforce entry length (optional)
-    :param repeat:   whether alphabet characters can be repeated or not
-    :yield:          bruteforce entry
-    """
-    for i in range(minlen, maxlen + 1):
-        if repeat:
-            for c in product(alphabet, repeat=i):
-                yield c if isinstance(c[0], int) else ''.join(c)
-        else:
-            for c in permutations(alphabet, i):
-                yield c if isinstance(c[0], int) else ''.join(c)
-
-
-def bruteforce_mask(mask, charsets=None):
-    """
-    Generator for bruteforcing according to a given mask (mostly similar to this used in hashcat).
-    
-    :param mask:     bruteforce mask
-    :param charsets: custom alphabets for use with the mask
-    """
-    if is_str(mask):
-        mask = expand_mask(mask, charsets)
-    if not is_list(mask) or any(not is_str(x) for x in mask):
-        raise ValueError("Bad mask ; should be a string or a list of strings, got {}".format(type(mask)))
-    for c in product(*mask):
-        yield c if isinstance(c[0], int) else ''.join(c)
-
-
-def expand_mask(mask, charsets=None):
-    """
-    Function for applying string expansion based on the following formats:       ?.              ?(...)
-                                                                                  ^                 ^
-                                                                            single group     multiple groups
-    :param mask:     bruteforce mask
-    :param charsets: custom alphabets for use with the mask
-    """
-    mask = ensure_str(mask)
-    iterables, tmp_chars, charset, group = [], "", False, False
-    masks = {k: v for k, v in MASKS.items()}
-    masks.update(charsets or {})
-    for i, c in enumerate(mask):
-        if charset:
-            if c == "?" and len(tmp_chars) == 0 and not group:
-                charset = False
-                iterables.append(c)
-            elif c == "(":
-                if len(tmp_chars) == 0 and not group:
-                    group = True
-                else:
-                    raise ValueError("Bad mask ; unbalanced parenthesis in group starting at position {}".format(k))
-            elif c == ")":
-                if len(tmp_chars) > 0:
-                    iterables.append(tmp_chars)
-                    charset = False
-                else:
-                    raise ValueError("Bad mask ; empty group at position {}".format(k))
-            elif group:
-                try:
-                    tmp_chars += masks[c]
-                except KeyError:
-                    tmp_chars += c
-            else:
-                try:
-                    iterables.append(masks[c])
-                except KeyError:
-                    raise ValueError("Bad mask ; non-existing group '{}' at position {}".format(c, k))
-                charset = False
-            continue
-        if c == "?":
-            charset = True
-            k = i
-            continue
-        iterables.append(c)
-    if charset:
-        raise ValueError("Bad mask ; unbalanced parenthesis in group starting at position {}".format(k))
-    return iterables
+__all__ = __features__ = ["notify", "strings", "strings_from_file", "xor", "xor_file"]
 
 
 def notify(title="", message="", app="", icon="", timeout=5, ticker=""):

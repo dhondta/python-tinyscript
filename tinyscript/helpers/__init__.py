@@ -5,6 +5,7 @@
 from pprint import pprint
 from types import ModuleType
 
+from .attack import *
 from .classprop import *
 from .common import *
 from .compat import *
@@ -19,6 +20,7 @@ from .termsize import *
 from .text import *
 from .timeout import *
 
+from .attack import __features__ as _attack
 from .classprop import __features__ as _classprop
 from .common import __features__ as _common
 from .compat import __features__ as _compat
@@ -29,12 +31,12 @@ from .fexec import __features__ as _fexec
 from .inputs import __features__ as _inputs
 from .licenses import __features__ as _licenses
 from .path import __features__ as _path
-from .termsize import __features__ as _termsize
+from .termsize import __features__ as _tsize
 from .text import __features__ as _text
 from .timeout import __features__ as _timeout
 
 
-__helpers__ = _common + _data + _decorators + _fexec + _inputs + _licenses + _path + _termsize + _text + _timeout
+__helpers__ = _attack + _common + _data + _decorators + _fexec + _inputs + _licenses + _path + _tsize + _text + _timeout
 
 ts = ModuleType("ts", """
     Tinyscript helpers
