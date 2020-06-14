@@ -7,12 +7,13 @@ from six import binary_type, string_types, text_type, u
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["b", "binary_type", "byteindex", "execfile", "ensure_binary", "ensure_str", "iterbytes",
-                          "string_types", "text_type", "u"]
+__all__ = __features__ = ["b", "binary_type", "byteindex", "execfile", "ensure_binary", "ensure_str", "ensure_unicode",
+                          "iterbytes", "string_types", "text_type", "u"]
 
 
 # see: http://python3porting.com/problems.html
 byteindex = lambda d, i=None: d[i] if PYTHON3 else ord(d[i])
+ensure_unicode = text_type
 
 
 def b(s):
