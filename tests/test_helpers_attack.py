@@ -15,8 +15,8 @@ class TestHelpersAttack(TestCase):
         DICT = ".test-dictionary-attack.txt"
         with open(DICT, 'wt') as f:
             f.write("password\ntest")
-        self.assertEqual(list(dictionary("dict.txt")), ['password', 'test'])
-        self.assertEqual(list(dictionary("dict.txt", rules="i,sta[0]")), ['password', 'Password0', 'test', 'Test0'])
+        self.assertEqual(list(dictionary(DICT)), ['password', 'test'])
+        self.assertEqual(list(dictionary(DICT, rules="i,sta[0]")), ['password', 'Password0', 'test', 'Test0'])
         remove(DICT)
     
     def test_mask_string_expansion(self):
