@@ -82,19 +82,38 @@ class TestHelpersDataTypes(TestCase):
         self.assertRaises(ValueError, str_contains, "ABCD", 1.1)
     
     def test_config_related_types(self):
-        for ctype in ["ini", "json", "toml", "yaml"]:
-            config_const = globals()[ctype.upper()]
-            config_func = globals()["{}_config".format(ctype)]
-            config_is_func = globals()["is_{}".format(ctype)]
-            config_isf_func = globals()["is_{}_file".format(ctype)]
-            self.assertTrue(config_is_func(config_const))
-            self.assertRaises(ValueError, config_func, "does_not_exist")
-            self.assertFalse(config_isf_func("does_not_exist"))
-            cfg = CFNAME + ctype
-            with open(cfg, 'wt') as f:
-                f.write(config_const)
-            self.assertIsNotNone(config_func(cfg))
-            remove(cfg)
+        self.assertRaises(ValueError, ini_config, "does_not_exist")
+        self.assertTrue(is_ini(INI))
+        self.assertFalse(is_ini_file("does_not_exist"))
+        cfg = CFNAME + "ini"
+        with open(cfg, 'wt') as f:
+            f.write(INI)
+        self.assertIsNotNone(ini_config(cfg))
+        remove(cfg)
+        self.assertRaises(ValueError, json_config, "does_not_exist")
+        self.assertTrue(is_json(JSON))
+        self.assertFalse(is_json_file("does_not_exist"))
+        cfg = CFNAME + "json"
+        with open(cfg, 'wt') as f:
+            f.write(JSON)
+        self.assertIsNotNone(json_config(cfg))
+        remove(cfg)
+        self.assertRaises(ValueError, toml_config, "does_not_exist")
+        self.assertTrue(is_toml(TOML))
+        self.assertFalse(is_toml_file("does_not_exist"))
+        cfg = CFNAME + "toml"
+        with open(cfg, 'wt') as f:
+            f.write(TOML)
+        self.assertIsNotNone(toml_config(cfg))
+        remove(cfg)
+        self.assertRaises(ValueError, yaml_config, "does_not_exist")
+        self.assertTrue(is_yaml(YAML))
+        self.assertFalse(is_yaml_file("does_not_exist"))
+        cfg = CFNAME + "yaml"
+        with open(cfg, 'wt') as f:
+            f.write(YAML)
+        self.assertIsNotNone(yaml_config(cfg))
+        remove(cfg)
     
     def test_hash_related_types(self):
         self.assertIsNotNone(any_hash("0" * 32))
