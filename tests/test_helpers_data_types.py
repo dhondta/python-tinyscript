@@ -10,6 +10,13 @@ from tinyscript.helpers.data.types import *
 from utils import *
 
 
+CFNAME = ".test-data-types-config."
+INI    = '[section1]\ntest = "data"\nbool = true\n\n[section2]\ntest = "data"'
+JSON   = '{"test":"data"}'
+TOML   = 'title="test"\n\n[section1]\nfield = "data"\nbool = true\n\n[section2]\ntest = "data"'
+YAML   = "test:\n  - data: test\ntest2:\n  data: test"
+
+
 class TestHelpersDataTypes(TestCase):
     def test_file_related_types(self):
         tf = "test_folder"
@@ -73,6 +80,21 @@ class TestHelpersDataTypes(TestCase):
         self.assertEqual(str_contains("ABCD")("ADDCBABB"), "ADDCBABB")
         self.assertRaises(ValueError, str_contains, "ABCD", -.1)
         self.assertRaises(ValueError, str_contains, "ABCD", 1.1)
+    
+    def test_config_related_types(self):
+        for ctype in ["ini", "json", "toml", "yaml"]:
+            config_const = globals()[ctype.upper()]
+            config_func = globals()["{}_config".format(ctype)]
+            config_is_func = globals()["is_{}".format(ctype)]
+            config_isf_func = globals()["is_{}_file".format(ctype)]
+            self.assertTrue(config_is_func(config_const))
+            self.assertRaises(ValueError, config_func, "does_not_exist")
+            self.assertFalse(config_isf_func("does_not_exist"))
+            cfg = CFNAME + ctype
+            with open(cfg, 'wt') as f:
+                f.write(config_const)
+            self.assertIsNotNone(config_func(cfg))
+            remove(cfg)
     
     def test_hash_related_types(self):
         self.assertIsNotNone(any_hash("0" * 32))
@@ -219,7 +241,7 @@ class TestHelpersDataTypes(TestCase):
         self.assertTrue(is_ipv4net("192.168.1.0/24"))
         self.assertTrue(is_ipnet("fe00::/24"))
         self.assertTrue(is_ipv6net("fe00::/24"))
-        self.assertFalse(is_ipvnet("abc"))
+        self.assertFalse(is_ipnet("abc"))
         self.assertFalse(is_ipv4net("abc"))
         self.assertFalse(is_ipv6net("abc"))
         self.assertTrue(is_ipv6net("dead::babe"))
