@@ -16,7 +16,9 @@ plyer
 pynput
 pypandoc
 python-slugify
+pyyaml
 six
+toml
 tqdm
 virtualenv
 weasyprint; python_version>='3.5'
