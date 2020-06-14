@@ -28,6 +28,7 @@ It also defines a few compatibility/utility functions for working with the same 
 `byteindex` | selects the byte value from a string at the given index
 `ensure_binary` | identical to `six.ensure_binary`
 `ensure_str` | similar to `six.ensure_str`
+`ensure_unicode` | dummy alias for `six.text_type`, by analogy to `ensure_binary` and `ensure_unicode`
 `execfile` | added in Python3 for backward-compatibility
 `iterbytes` | iterates over the bytes of a string (trivial in Python3 but
 `u` | alias for `six.u`
@@ -96,7 +97,9 @@ A few utility functions related to bruteforcing are also available:
 :---: | :---:
 `ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
 `ts.bruteforce_mask` | generator for bruteforcing according to a given mask (either a string or a list of alphabets per character position)
+`ts.dictionary` | generator for parsing a dictionary, applying rules if provided
 `ts.expand_mask` | string expansion function for computing a bruteforce mask
+`ts.parse_rule` | rule parsing function, for checking if it is valid and returning a generator of transformation functions to apply to the input text
 
 !!! note "Bruteforce mask groups"
     
@@ -116,6 +119,26 @@ A few utility functions related to bruteforcing are also available:
     - `s`: punctuation characters and whitespace
     - `v`: lowercase vowels
     - `V`: uppercase vowels
+
+!!! note "Dictionary entry transformation rules"
+    
+    For `ts.dictionary` (`rules` keyword-argument holding a comma-separated list of rules) and `ts.parse_rule`, a rule chaining multiple operations can be provided. The available string operations are:
+    
+    - `a[]`: append
+    - `p[]`: prepend
+    - `c`: capitalize
+    - `i`: identity
+    - `l`: lowercase
+    - `r`: reverse
+    - `s`: swapcase
+    - `t`: title
+    - `u`: uppercase
+    
+    For instance, the following rules will produce:
+    
+    - `ru`: reverse uppercase string ; "`test`" becomes "`TSET`"
+    - `sa[123]`: swapcase and append "`123`" ; "`Test`" becomes "`tEST123`"
+    - `i,r,u`: identity then reverse then uppercase ; "`test`" will produce `["test", "tset", "TEST"]`
 
 -----
 
@@ -222,6 +245,15 @@ Also for various objects:
 `ts.is_module` | module object (relying on `types.ModuleType`)
 `ts.is_type` | type definition
 
+For config-related data:
+
+**Function** | **Description**
+:---: | :---:
+`ts.is_ini` / `ts.is_ini_file` | INI configuration content/file
+`ts.is_json` / `ts.is_json_file` | JSON configuration content/file
+`ts.is_toml` / `ts.is_toml_file` | YAML configuration content/file
+`ts.is_yaml` / `ts.is_yaml_file` | TOML configuration content/file
+
 For hash-related data:
 
 **Function** | **Description**
@@ -270,6 +302,15 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `ts.pos_ints` / `positive_ints` | `list(int)` | list of positive integers
 `ts.str_contains(alphabet, threshold)` | `str` | string that contains characters with a percentage of at least `threshold`
 `ts.str_matches(pattern, flags)` | `str` | string that matches the given pattern with the given flags
+
+For config-related types:
+
+**Function** | **Description**
+:---: | :---:
+`ts.ini_config` | INI configuration file
+`ts.json_config` | JSON configuration file
+`ts.toml_config` | TOML configuration file
+`ts.yaml_config` | YAML configuration file
 
 For hash-related types:
 
