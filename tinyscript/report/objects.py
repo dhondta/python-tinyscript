@@ -2,6 +2,8 @@
 """Module for defining report element classes.
 
 """
+from inspect import stack
+
 from .base import *
 from ..helpers.data.transform import json2html, json2xml
 
@@ -23,7 +25,7 @@ class Data(Element):
         super(Data, self).__init__(**kwargs)
         if not isinstance(data, (dict, list, set, tuple)):
             raise ValueError("'data' argument shall be a dictionary or a list (got {})".format(type(data).__name__))
-        self.data = data
+        self._data = data
     
     @output
     def html(self, indent=4, text=TEXT):
@@ -122,7 +124,7 @@ class List(Element):
     """
     def __init__(self, *items, **kwargs):
         super(List, self).__init__(**kwargs)
-        self.data = items
+        self._data = items
         self.ordered = kwargs.get('ordered', False)
         self.tag = ["ul", "ol"][self.ordered]
     
@@ -175,15 +177,16 @@ class Table(Element):
             raise ValueError("Bad column headers length")
         if self.column_headers is not None and self.row_headers is not None:
             self.column_headers = [""] + self.column_headers
-        self.data = data
+        self._data = data
         self.float_fmt = flt_fmt
     
     def _format(self, data):
         d = []
+        output_format = stack()[1][3]  # get the calling output format method name from the stack
         for i, row in enumerate(data):
             row = list(map(lambda x: self.float_fmt % x if isinstance(x, float) else str(x), row))
             if self.row_headers is not None:
-                row.insert(0, self.row_headers[i])
+                row.insert(0, Element.format_data(self.row_headers[i], output_format))
             d.append(row)
         return d
     
@@ -268,7 +271,7 @@ class Text(Element):
     """
     def __init__(self, content, tag="p", **kwargs):
         super(Text, self).__init__(**kwargs)
-        self.data = content
+        self._data = content
         self.tag = tag
     
     @output

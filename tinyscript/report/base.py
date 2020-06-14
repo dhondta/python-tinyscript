@@ -63,7 +63,8 @@ class Element(object):
     
     @property
     def data(self):
-        return Element.format_data(self._data, stack()[1][3])
+        output_format = stack()[1][3]  # get the calling output format method name from the stack
+        return Element.format_data(self._data, output_format)
     
     @property
     def style(self):
