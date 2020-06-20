@@ -9,11 +9,18 @@ from subprocess import Popen, PIPE
 from threading import Thread
 
 
-__all__ = __features__ = ["execute", "process", "processes_clean", "thread", "threads_clean"]
+__all__ = __features__ = ["apply", "execute", "process", "processes_clean", "thread", "threads_clean"]
 
 
 PROCESSES = []
 THREADS   = []
+
+
+def apply(functions, args=(), kwargs={}):
+    """
+    Shortcut to apply a list of functions to the given arguments and keyword-arguments.
+    """
+    return [f(*args, **kwargs) for f in functions]
 
 
 def execute(cmd, **kwargs):

@@ -83,7 +83,7 @@ class TestHelpersDataTypes(TestCase):
     
     def test_config_related_types(self):
         self.assertRaises(ValueError, ini_config, "does_not_exist")
-        #self.assertTrue(is_ini(INI))
+        #self.assertTrue(is_ini(INI))  # FIXME: this test fails on Travis CI
         self.assertFalse(is_ini_file("does_not_exist"))
         cfg = CFNAME + "ini"
         with open(cfg, 'wt') as f:

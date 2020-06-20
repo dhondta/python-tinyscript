@@ -25,4 +25,5 @@ class TestHelpersFexec(TestCase):
         self.assertIsNotNone(test2())
         self.assertIsNone(processes_clean())
         self.assertIsNone(threads_clean())
+        self.assertEqual(apply([lambda x: x+1, lambda x: x+2], (1, )), [2, 3])
 

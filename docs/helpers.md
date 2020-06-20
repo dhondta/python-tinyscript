@@ -63,6 +63,7 @@ It also provides some simple execution functions:
 
 **Name** | **Description**
 :---: | :---:
+`ts.apply` | convenience function for applying a list of functions to the given arguments and keyword-arguments
 `ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
 `ts.process` | decorator for turning a function into a process
 `ts.processes_clean` | cleanup function for joining processes opened with `ts.process`
@@ -79,6 +80,7 @@ It also provides some other utility functions:
 `ts.entropy` | computation function for the Shannon entropy of a string
 `ts.get_terminal_size` | cross-platform terminal size function
 `ts.pad` | String padding function, supporting `ansic9.23`, `incremental`, `iso7816-4`, `pkcs5`, `pkcs7` and `w3c` algorithms
+`ts.shorten` | String shortening function, taking by default the terminal width, otherwise a length of 40 characters (unless user-defined), and using an end token (by default "`...`")
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
 `ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
 `ts.stdin_pipe` | Python2/3-compatible iterator of STDIN lines
