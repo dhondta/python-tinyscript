@@ -8,10 +8,9 @@ from gettext import gettext as gt
 from pypandoc import convert_text
 
 from .data.types.network import is_email, is_url
-from .termsize import get_terminal_size
 
 
-__features__ = ["gt", "shorten", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist", "txt2paragraph",
+__features__ = ["gt", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist", "txt2paragraph",
                 "txt2title", "txt2ulist", "txt2underline", "txt2url"]
 __all__ = __features__ + ["DOCFORMAT_THEME"]
 
@@ -181,21 +180,6 @@ def _txt_style(text, format=None, bold=False, italic=False, underline=False):
 txt2bold = lambda text, format=None: _txt_style(text, format, bold=True)
 txt2italic = lambda text, format=None: _txt_style(text, format, italic=True)
 txt2underline = lambda text, format=None: _txt_style(text, format, underline=True)
-
-
-def shorten(string, length=None, end="..."):
-    """
-    Simple string shortening function for user-friendlier display.
-    
-    :param string: the string to be shortened
-    :param length: maximum length of the string
-    """
-    if length is None:
-        ts = get_terminal_size()
-        length = ts[0] if ts is not None else 40
-    if not isinstance(length, int):
-        raise ValueError("Invalid length '{}'".format(length))
-    return string if len(string) <= length else string[:length-len(end)] + end
 
 
 def txt2blockquote(text, format=None):

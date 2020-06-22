@@ -17,6 +17,7 @@ from .hash import hashlib
 from .inspectp import inspect
 from .log import logging
 from .rand import random
+from .stringp import string
 from .venv import virtualenv, PipPackage, VirtualEnv
 
 
@@ -32,6 +33,7 @@ __imports__ = {
         "inspect",
         "logging",
         "random",
+        "string",
         "virtualenv",
     ],
     'standard': [
@@ -108,3 +110,4 @@ def load(module, optional=False):
 
 
 _load_preimports()
+

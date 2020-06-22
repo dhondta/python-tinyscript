@@ -157,13 +157,6 @@ class TestHelpersText(TestCase):
         self.assertRaises(ValueError, _txt_list, TXT, "md", ordered="not_bool")
         self.assertRaises(ValueError, txt2title, TXT, "rst", level="not_int")
         self.assertRaises(ValueError, txt2url, TXT, "md", url="bad_url")
-        # others
-        STR = "this is a test"
-        self.assertEqual(shorten(STR), STR)
-        self.assertTrue(len(shorten(100 * STR)) < len(100 * STR))
-        self.assertTrue(shorten(100 * STR).endswith("..."))
-        self.assertTrue(shorten(100 * STR, end="|||").endswith("|||"))
-        self.assertRaises(ValueError, shorten, "test", "BAD_LENGTH")
     
     def test_text_rendering(self):
         configure_docformat({'__docformat__': "html"})

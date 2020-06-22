@@ -67,6 +67,13 @@ A context manager is also available:
 
 -----
 
+## `string`
+
+`random` is slightly enhanced with a new function:
+
+- `shorten`: shortens a string, taking by default the terminal width, otherwise a length of 40 characters (unless user-defined), and using an end token (by default "`...`").
+
+
 ## `virtualenv`
 
 `virtualenv`, while imported with Tinyscript, is enhanced with convenient functions for setting up a virtual environment.
