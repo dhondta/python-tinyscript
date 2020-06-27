@@ -1,4 +1,4 @@
-asciistuff
+asciistuff>=1.0.7
 bitstring
 codext
 coloredlogs
