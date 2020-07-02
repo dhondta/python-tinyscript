@@ -17,6 +17,7 @@ from .hash import hashlib
 from .inspectp import inspect
 from .log import logging
 from .rand import random
+from .regex import re
 from .stringp import string
 from .venv import virtualenv, PipPackage, VirtualEnv
 
@@ -33,6 +34,7 @@ __imports__ = {
         "inspect",
         "logging",
         "random",
+        "re",
         "string",
         "virtualenv",
     ],
@@ -49,7 +51,6 @@ __imports__ = {
         "itertools",
         "os",
         "platform",
-        "re",
         "shutil",
         "signal",
         "string",
