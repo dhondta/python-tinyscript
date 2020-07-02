@@ -18,6 +18,8 @@ class TestHelpersAttack(TestCase):
         self.assertEqual(list(dictionary(DICT)), ['password', 'test'])
         self.assertEqual(list(dictionary(DICT, rules="i,sta[0]")), ['password', 'Password0', 'test', 'Test0'])
         remove(DICT)
+        self.assertEqual(sorted(list(bruteforce(3, "abc"))), sorted(list(bruteforce_re(r"[a-c]{1,3}"))))
+        self.assertRaises(ValueError, list, bruteforce_re(1234))
     
     def test_mask_string_expansion(self):
         self.assertIsNotNone(expand_mask("???c?(abc)"))

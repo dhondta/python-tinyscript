@@ -10,7 +10,7 @@ from .compat import b, ensure_str
 from .data import is_file, is_list, is_str
 
 
-__all__ = __features__ = ["bruteforce", "bruteforce_mask", "dictionary", "expand_mask", "parse_rule"]
+__all__ = __features__ = ["bruteforce", "bruteforce_mask", "bruteforce_re", "dictionary", "expand_mask", "parse_rule"]
 
 
 MASKS = {
@@ -73,6 +73,26 @@ def bruteforce_mask(mask, charsets=None):
     if not is_list(mask) or any(not is_str(x) for x in mask):
         raise ValueError("Bad mask ; should be a string or a list of strings, got {}".format(type(mask)))
     for c in product(*mask):
+        yield c if isinstance(c[0], int) else ''.join(c)
+
+
+def bruteforce_re(regex):
+    """
+    Generator for bruteforcing according to a given regular expression.
+    
+    Important note: due to the way the regex is handled, memory consumption can be really cumbersome with this function,
+                     e.g. consider regex r"[a-c]{1,3}" ; in order to generate from 1 to 3 chars, it is necessary to
+                           generate a single list with all possibilities of 1 to 3 chars (39 elements), to be put in the
+                           product(...) for generating the output
+                          so, if a larger alphabet and a greater upper limit are used, it can be very heavy for the
+                           memory ; e.g. r"[a-zA-Z0-9]{1,8}" would generate >200T occurrences, which is of course
+                           unsustainable for the memory
+    
+    :param regex: regular expression
+    """
+    if not is_str(regex):
+        raise ValueError("Bad regex ; should be a string")
+    for c in re.strings(regex):
         yield c if isinstance(c[0], int) else ''.join(c)
 
 
