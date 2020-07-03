@@ -88,9 +88,11 @@ A context manager is also available:
 
 ## `string`
 
-`random` is slightly enhanced with a new function:
+`string` is slightly enhanced with a few new functions:
 
 - `shorten`: shortens a string, taking by default the terminal width, otherwise a length of 40 characters (unless user-defined), and using an end token (by default "`...`").
+- `sort_natural`: sort a list of strings taking numbers into account (returns nothing)
+- `sorted_natural`: return a list of strings taking numbers into account
 
 
 ## `virtualenv`

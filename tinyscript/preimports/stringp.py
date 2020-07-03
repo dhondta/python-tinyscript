@@ -2,9 +2,38 @@
 """Module for enhancing string preimport.
 
 """
+import re
 import string
 
 from ..helpers.termsize import get_terminal_size
+
+
+def _natural_keys(text):
+    tokens = []
+    for s in re.split(r"(\d+|\D+)", text):
+        tokens.append(int(s) if s.isdigit() else s)
+    return tokens
+
+
+def sort_natural(strings):
+    """
+    Simple function to sort a list of strings with numbers inside.
+    
+    :param strings: list of strings
+    """
+    strings.sort(key=_natural_keys)
+string.sort_natural = sort_natural
+
+
+def sorted_natural(lst):
+    """
+    Simple function to return a sorted list of strings with numbers inside.
+    
+    :param strings: list of strings
+    :return:        list of strings sorted based on numbers inside
+    """
+    return sorted(lst, key=_natural_keys)
+string.sorted_natural = sorted_natural
 
 
 def shorten(string, length=None, end="..."):

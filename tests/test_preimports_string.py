@@ -16,4 +16,9 @@ class TestPreimportsString(TestCase):
         self.assertTrue(string.shorten(100 * STR).endswith("..."))
         self.assertTrue(string.shorten(100 * STR, end="|||").endswith("|||"))
         self.assertRaises(ValueError, string.shorten, "test", "BAD_LENGTH")
+        LST = ["base1", "base2", "base10", "base30", "base200"]
+        l = sorted(LST)
+        string.sort_natural(l)
+        self.assertEqual(tuple(LST), tuple(l))
+        self.assertEqual(tuple(LST), tuple(string.sorted_natural(l)))
 
