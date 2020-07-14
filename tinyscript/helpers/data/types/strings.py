@@ -66,6 +66,21 @@ __all__ += ["is_long_opt", "is_short_opt"]
 is_long_opt  = lambda o: is_str(o) and re.match(r"^--[a-z]+(-[a-z]+)*$", o, re.I)
 is_short_opt = lambda o: is_str(o) and re.match(r"^-[a-z]$", o, re.I)
 
+# another useful check function
+__all__ += ["is_regex", "regular_expression"]
+is_regex = lambda s: __regex(s, False) is not None
+
+
+def __regex(regex, fail=True):
+    """ Regular expression validation. """
+    try:
+        re.sre_parse.parse(regex)
+        return regex
+    except re.sre_parse.error:
+        if fail:
+            raise ValueError("Bad regular expression")
+regular_expression = lambda s: __regex(s)
+
 
 # -------------------- STRING FORMAT ARGUMENT TYPES --------------------
 __all__ += ["str_contains", "str_matches"]
@@ -74,7 +89,7 @@ __all__ += ["str_contains", "str_matches"]
 def str_contains(alphabet, threshold=1.0):
     """ Counts the characters of a string and determines, given an alphabet, if the string has enough valid characters.
     """
-    if threshold < 0.0 or threshold > 1.0:
+    if not 0.0 < threshold <= 1.0:
         raise ValueError("Bad threshold (should be between 0 and 1)")
     def _validation(s):
         p = sum(int(c in alphabet) for c in s) / float(len(s))
