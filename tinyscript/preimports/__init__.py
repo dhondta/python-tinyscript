@@ -15,6 +15,7 @@ from .codep import code
 from .ftools import functools
 from .hash import hashlib
 from .inspectp import inspect
+from .itools import itertools
 from .log import logging
 from .rand import random
 from .regex import re
@@ -32,6 +33,7 @@ __imports__ = {
         "functools",
         "hashlib",
         "inspect",
+        "itertools",
         "logging",
         "random",
         "re",
@@ -48,7 +50,6 @@ __imports__ = {
         "configparser",
         "ctypes",
         "fileinput",
-        "itertools",
         "os",
         "platform",
         "shutil",

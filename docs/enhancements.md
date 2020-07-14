@@ -41,6 +41,17 @@ A context manager is also available:
 
 -----
 
+## `itertools`
+
+`itertools` is extended with the following items:
+
+- `product2`: this is an improvement of the original `product`, also handling generators
+- `reset`: given a generator function decorated by `resettable`, this functions can reset a generator instantiated by this function
+- `resettable`: decorator for registering the reference to the generator function and its arguments used to make a generator, then making resettable each generator made by this function
+- `NonResettableGeneratorException`: specific exception for handling a generator not decorated by `resettable` thrown while trying to reset it with the `reset` function
+
+-----
+
 ## `logging`
 
 `logging` is slightly enhanced with a few things:
@@ -94,6 +105,7 @@ A context manager is also available:
 - `sort_natural`: sort a list of strings taking numbers into account (returns nothing)
 - `sorted_natural`: return a list of strings taking numbers into account
 
+-----
 
 ## `virtualenv`
 
