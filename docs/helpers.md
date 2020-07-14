@@ -230,6 +230,7 @@ For string-related data:
 `ts.is_lowercase` | the given string has only lowercase characters
 `ts.is_printable` | the given string has only printable characters
 `ts.is_punctuation` | the given string has only punctuation characters
+`ts.is_regex` | the given string can be parsed as a regular expression
 `ts.is_uppercase` | the given string has only uppercase characters
 
 !!! note "Character percentage threshold"
@@ -248,6 +249,7 @@ Also for various objects:
 `ts.is_generator` | generator object (relying on `inspect.isgenerator`)
 `ts.is_generatorfunc` | generator function (relying on `inspect.isgeneratorfunction`)
 `ts.is_instance` | instance of `object` or a specific class
+`ts.is_iterable` | iterable object (relying on `collections.Iterable`)
 `ts.is_lambda` | lazy function (relying on `types.LambdaType`)
 `ts.is_method` | method of an object (relying on `types.[Builtin]MethodType`)
 `ts.is_module` | module object (relying on `types.ModuleType`)
@@ -308,6 +310,7 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `ts.neg_ints` / `negative_ints` | `list(int)` | list of negative integers
 `ts.pos_int` / `positive_int` | `int` | single positive integer
 `ts.pos_ints` / `positive_ints` | `list(int)` | list of positive integers
+`ts.regular_expression` | `str` | string that can be parsed as a regular expression
 `ts.str_contains(alphabet, threshold)` | `str` | string that contains characters with a percentage of at least `threshold`
 `ts.str_matches(pattern, flags)` | `str` | string that matches the given pattern with the given flags
 

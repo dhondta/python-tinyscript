@@ -80,6 +80,8 @@ class TestHelpersDataTypes(TestCase):
         self.assertEqual(str_contains("ABCD")("ADDCBABB"), "ADDCBABB")
         self.assertRaises(ValueError, str_contains, "ABCD", -.1)
         self.assertRaises(ValueError, str_contains, "ABCD", 1.1)
+        self.assertEqual(regular_expression(r"^[abc]$"), r"^[abc]$")
+        self.assertRaises(ValueError, regular_expression, r"^[abc")
     
     def test_config_related_types(self):
         self.assertRaises(ValueError, ini_config, "does_not_exist")
@@ -211,6 +213,8 @@ class TestHelpersDataTypes(TestCase):
         self.assertTrue(is_printable("test1234!"))
         self.assertFalse(is_lowercase("Test"))
         self.assertTrue(is_lowercase("Test", .75))
+        self.assertTrue(is_regex("test(ok)"))
+        self.assertFalse(is_regex("test("))
         self.assertTrue(is_lambda(dummy_lambda))
         self.assertFalse(is_lambda(True))
         self.assertTrue(is_function(dummy_lambda))
