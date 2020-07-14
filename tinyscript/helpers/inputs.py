@@ -8,7 +8,6 @@ import re
 import signal
 import sys
 from ast import literal_eval
-from getpass import getuser
 from six import StringIO
 
 from .compat import ensure_str
@@ -18,7 +17,7 @@ from .data.types import is_function, is_lambda, is_str
 # fix to Xlib.error.DisplayConnectionError: Can't connect to display ":0": No protocol specified
 # however, it does not fix the error while testing with Travis CI
 if LINUX:
-    os.system("xhost +SI:localuser:{} > /dev/null 2>&1".format(getuser()))
+    os.system("xhost +SI:localuser:{} > /dev/null 2>&1".format(USER))
 os.environ['DISPLAY'] = os.environ.get('DISPLAY') or os.environ.get('REMOTE_DISPLAY', ":0")
 
 try:
