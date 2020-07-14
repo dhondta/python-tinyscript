@@ -3,31 +3,13 @@
 
 """
 from itertools import cycle
-from plyer import notification
 from string import printable
 
 from .compat import b
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["notify", "strings", "strings_from_file", "xor", "xor_file"]
-
-
-def notify(title="", message="", app="", icon="", timeout=5, ticker=""):
-    """
-    Shortcut to plyer.notification.notify, not considering the 'toast' option, and fail-safe.
-    
-    :param title:   title of the notification
-    :param message: message of the notification
-    :param app:     name of the app launching this notification
-    :param icon:    name or path of the icon to be displayed along with the message
-    :param timeout: time to display the message for
-    :param ticker:  text to display on status bar as the notification arrives
-    """
-    try:
-        notification.notify(title, message, app, icon, timeout, ticker)
-    except NotImplementedError:
-        pass
+__all__ = __features__ = ["strings", "strings_from_file", "xor", "xor_file"]
 
 
 def strings(data, minlen=4, alphabet=printable):

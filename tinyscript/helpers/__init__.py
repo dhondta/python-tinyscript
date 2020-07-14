@@ -15,28 +15,30 @@ from .decorators import *
 from .fexec import *
 from .inputs import *
 from .licenses import *
+from .notify import *
 from .path import *
 from .termsize import *
 from .text import *
 from .timeout import *
 
 from .attack import __features__ as _attack
-from .classprop import __features__ as _classprop
+from .classprop import __features__ as _clsprop
 from .common import __features__ as _common
 from .compat import __features__ as _compat
-from .constants import __features__ as _constants
+from .constants import __features__ as _csts
 from .data import __features__ as _data
-from .decorators import __features__ as _decorators
+from .decorators import __features__ as _dec
 from .fexec import __features__ as _fexec
 from .inputs import __features__ as _inputs
-from .licenses import __features__ as _licenses
+from .licenses import __features__ as _lic
+from .notify import __features__ as _notify
 from .path import __features__ as _path
 from .termsize import __features__ as _tsize
 from .text import __features__ as _text
-from .timeout import __features__ as _timeout
+from .timeout import __features__ as _to
 
 
-__helpers__ = _attack + _common + _data + _decorators + _fexec + _inputs + _licenses + _path + _tsize + _text + _timeout
+__helpers__ = _attack + _common + _data + _dec + _fexec + _inputs + _lic + _notify + _path + _tsize + _text + _to
 
 ts = ModuleType("ts", """
     Tinyscript helpers
@@ -84,4 +86,4 @@ ts = ModuleType("ts", """
 for h in __helpers__:
     setattr(ts, h, globals()[h])
 
-__all__ = __features__ = ["pprint", "ts"] + _classprop + _compat + _constants
+__all__ = __features__ = ["pprint", "ts"] + _clsprop + _compat + _csts

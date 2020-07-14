@@ -5,7 +5,7 @@
 """
 from os.path import dirname, isfile, join
 
-from ..helpers.common import notify
+from ..helpers.notify import notify
 from ..helpers.constants import LINUX
 from ..helpers.data.types import folder_exists, positive_int
 from ..preimports import logging

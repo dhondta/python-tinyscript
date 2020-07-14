@@ -1,6 +1,9 @@
 [run]
+cover_pylib = false
 source = tinyscript
 omit =
+    /home/travis/virtualenv/*
+    */site-packages/*
     tinyscript/hotkeys.py
     tinyscript/warnings.py
     tinyscript/helpers/termsize.py
@@ -42,3 +45,4 @@ exclude_lines =
     try:  # Windows
     def stdin_pipe\(\):
     Xlib.error.DisplayConnectionError
+    def send_mail
