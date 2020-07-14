@@ -10,7 +10,7 @@ from utils import *
 
 class TestPreimportsRe(TestCase):
     def test_re_strings_generation(self):
-        self.assertEqual(list(re.randstrs(None)), [])
+        self.assertEqual(list(re.strings(None)), [])
         self.assertTrue(re.randstr(r"abc").startswith("abc"))
         word = re.randstr(r"abc(def|ghi|jkl)")
         self.assertTrue(any(s in word for s in ["def", "ghi", "jkl"]))
@@ -18,17 +18,22 @@ class TestPreimportsRe(TestCase):
             self.assertEqual(re.randstr(r"[a]"), "a")
             self.assertTrue("a" not in re.randstr(r"[^a]"))
         self.assertEqual(len(list(re.randstrs(r"\D", 10))), 10)
-        self.assertEqual(len(list(re.randstrs(r"[a]", 10))), 1)
-        self.assertEqual(len(list(re.randstrs(r"[ab]", 10))), 2)
+        self.assertEqual(len(list(re.strings(r"[a]"))), 1)
+        self.assertEqual(len(list(re.randstrs(r"[a]", 10))), 10)
+        self.assertEqual(len(list(re.strings(r"[ab]"))), 2)
+        self.assertEqual(len(list(re.strings(r"^[a]?$"))), 2)
+        self.assertEqual(len(list(re.randstrs(r"[ab]", 10))), 10)
         self.assertEqual(len(list(re.strings(r"[ab]{2}"))), 4)
         self.assertEqual(len(list(re.strings(r"[ab]{1,2}"))), 6)
-        self.assertTrue(all(s.startswith("a") and any(s.endswith(c) for c in "bcd") for s in re.randstrs(r"a(b|c|d)")))
-        self.assertIsNotNone(list(re.randstrs(r"[ab]{1,3}")))
-        self.assertIsNotNone(list(re.randstrs(r"(?<=ab)cd")))
-        self.assertIsNotNone(list(re.randstrs(r"(?<=-)\w+")))
-        self.assertIsNotNone(list(re.randstrs(r"([^\s])\1")))
-        self.assertIsNotNone(list(re.randstrs(r"[^\\]")))
-        self.assertIsNotNone(list(re.randstrs(r"(|[0-5])?")))
-        self.assertIsNotNone(list(re.randstrs(r"^\S{10,30}")))
-        self.assertIsNotNone(list(re.randstrs(r"[^a].[a]*", 10)))
+        self.assertTrue(all(s.startswith("a") and any(s.endswith(c) for c in "bcd") for s in re.strings(r"a(b|c|d)")))
+        self.assertEqual(re.size(None), 0)
+        self.assertEqual(re.size(r".*", "inf"), float("inf"))
+        self.assertEqual(re.size(r"(test)*\1", "inf"), float("inf"))
+        self.assertEqual(re.size(r"(?:a|b)+", "inf"), float("inf"))
+        self.assertEqual(re.size(r"[a-z]*", "inf"), float("inf"))
+        for regex in [r"[ab]{1,3}.", r"(?<=ab)cd", r"(?<=-)\w+", r"([^\s])\1", r"[^\\]", r"(|[0-5])?", r"^\S{10,20}"]:
+            g = re.strings(regex)
+            for i in range(min(100, re.size(regex))):
+                self.assertIsNotNone(next(g))
+                self.assertEqual(len(list(re.strings(regex, 1))), re.size(regex, 1))
 
