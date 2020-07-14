@@ -4,6 +4,7 @@
 """
 import inspect
 import types
+from collections import Iterable
 from six import integer_types
 
 from .strings import _str2list
@@ -22,7 +23,7 @@ is_neg_int   = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
 is_pos_int   = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
 
 __all__ += ["is_class", "is_coroutine", "is_coroutinefunc", "is_frame", "is_function", "is_generator",
-            "is_generatorfunc", "is_instance", "is_lambda", "is_method", "is_module", "is_type"]
+            "is_generatorfunc", "is_instance", "is_iterable", "is_lambda", "is_method", "is_module", "is_type"]
 is_class         = lambda c: inspect.isclass(c)
 is_coroutine     = lambda c: inspect.iscoroutine(c)
 is_coroutinefunc = lambda c: inspect.iscoroutinefunction(c)
@@ -30,7 +31,8 @@ is_frame         = lambda f: isinstance(f, types.FrameType)
 is_function      = lambda f, builtin=False: isinstance(f, getattr(types, ["", "Builtin"][builtin] + "FunctionType"))
 is_generator     = lambda g: inspect.isgenerator(g)
 is_generatorfunc = lambda g: inspect.isgeneratorfunction(g)
-is_instance      = lambda i, cls=None: isinstance(i, cls or object)
+is_instance      = lambda i, cls=object: isinstance(i, cls)
+is_iterable      = lambda i: isinstance(i, Iterable)
 is_lambda        = lambda l: isinstance(l, types.LambdaType)
 is_method        = lambda m, builtin=False: isinstance(m, getattr(types, ["", "Builtin"][builtin] + "MethodType"))
 is_module        = lambda m: isinstance(m, types.ModuleType)
