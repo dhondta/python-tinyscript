@@ -73,6 +73,10 @@ class TestHelpersPath(TestCase):
         self.assertNotEqual(len(list(PATH.find("te*"))), 0)
         self.assertEqual(len(list(PATH.find("test2.+", True))), 0)
     
+    def test_pathlib_configpath(self):
+        PATH = ConfigPath("test-app", file=True)
+        self.assertTrue(str(PATH).endswith("test-app.conf"))
+    
     def test_pathlib_mirrorpath(self):
         PATH2 = Path(TEST + "2", expand=True, create=True)
         PATH2.joinpath("test.txt").touch()

@@ -13,7 +13,7 @@ from .constants import *
 from .compat import u
 
 
-__all__ = __features__ = ["Path", "MirrorPath", "TempPath"]
+__all__ = __features__ = ["Path", "ConfigPath", "MirrorPath", "TempPath"]
 
 
 class Path(BasePath):
@@ -235,6 +235,24 @@ class Path(BasePath):
     def write_text(self, data, encoding=None, errors=None):
         """ Fix to non-existing method in Python 2. """
         return self.__add_text(data, 'w', encoding, errors)
+
+
+class ConfigPath(Path):
+    """ Extension of the class Path for handling a temporary path.
+    
+    :param app:  application name for naming the config file or folder
+    :param file: whether the target should be a config file or folder
+    """
+    def __new__(cls, app, **kwargs):
+        isfile = kwargs.pop('file', False)
+        kwargs['create'] = not isfile
+        kwargs["expand"] = True
+        path = os.path.join(os.environ['LOCALAPPDATA'], [app, app + ".conf"][isfile]) if WINDOWS else \
+               os.path.join("Library", "Application Support", [app, app + ".conf"][isfile]) if DARWIN else \
+               [os.path.join(".config", app.lower()), "." + app.lower() + ".conf"][isfile]
+        self = super(ConfigPath, cls).__new__(cls, os.path.join("~", path), **kwargs)
+        self._isfile = isfile
+        return self
 
 
 class MirrorPath(Path):

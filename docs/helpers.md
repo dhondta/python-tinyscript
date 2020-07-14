@@ -185,6 +185,10 @@ Tinyscript also provides 2 `pathlib`-related functions:
     - `size`: returns path's size (recursively computed if it is a folder)
     - `text`: returns file's content as text
 
+- `ts.ConfigPath`: additional class for handling configuration files or folders
+    
+    This subclass of `Path` takes an `application` name and a `file` boolean as arguments and makes configuration items depending on the OS (e.g. on Windows, using `%APPDATA%` or on Linux, user's home folder). If `file` is `True`, then make a config file path, otherwise create a config folder.
+    
 - `ts.MirrorPath`: additional class for handling mirrored files and folders
     
     This mirrors an item, that is, if the given source does not exist in the given destination, it creates a symbolic link and recurses if it is a folder.
