@@ -7,12 +7,9 @@ import random
 import re
 import shlex
 import sys
-from argparse import _ActionsContainer, _ArgumentGroup, \
-                     _MutuallyExclusiveGroup, _AttributeHolder, \
-                     _SubParsersAction, ArgumentDefaultsHelpFormatter, \
-                     Action, ArgumentError, RawTextHelpFormatter, SUPPRESS, \
-                     _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, \
-                     ArgumentParser as BaseArgumentParser
+from argparse import _ActionsContainer, _ArgumentGroup, _MutuallyExclusiveGroup, _AttributeHolder, _SubParsersAction, \
+                     ArgumentDefaultsHelpFormatter, Action, ArgumentError, RawTextHelpFormatter, SUPPRESS, \
+                     _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, ArgumentParser as BaseArgumentParser
 from os import environ
 from os.path import abspath, basename, dirname, splitext
 from stat import S_IXUSR
@@ -24,8 +21,7 @@ except ImportError:
 from .helpers.constants import PYTHON3
 from .helpers.inputs import user_input
 from .helpers.licenses import *
-from .helpers.data.types import is_executable, is_long_opt, is_pos_int, \
-                                is_short_opt
+from .helpers.data.types import is_executable, is_long_opt, is_pos_int, is_short_opt
 from .helpers.text import *
 from .helpers.text import configure_docformat, txt_terminal_render
 from .loglib import logger
@@ -34,26 +30,23 @@ from .loglib import logger
 __all__ = ["ArgumentParser", "DUNDERS", "SCRIPTNAME_FORMAT", "SUPPRESS"]
 
 
-BASE_DUNDERS = ['__author__', '__copyright__', '__credits__', '__license__',
-                '__reference__', '__source__', '__training__']
+BASE_DUNDERS = ['__author__', '__copyright__', '__credits__', '__license__', '__reference__', '__source__',
+                '__training__']
 DUNDERS = BASE_DUNDERS + [
-    '__date__', '__details__', '__description__', '__doc__', '__docformat__',
-    '__email__', '__examples__', '__functions__', '__maximum_python_version__',
-    '__minimum_python_version__', '__priority__', '__product__', '__script__',
-    '__status__', '__version__',
+    '__date__', '__details__', '__description__', '__doc__', '__docformat__', '__email__', '__examples__',
+    '__functions__', '__maximum_python_version__', '__minimum_python_version__', '__priority__', '__product__',
+    '__script__', '__status__', '__version__',
 ]
 
 DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
 SCRIPTNAME_FORMAT   = "slugified"
 SCRIPTNAME_FORMATS  = {
-    'acronym':   lambda s: "".join(x.strip()[0].upper() for x in \
-                           re.split(r"[ -_]", s)) \
+    'acronym':   lambda s: "".join(x.strip()[0].upper() for x in re.split(r"[ -_]", s)) \
                            if len(re.split(r"[ -_]", s)) > 1 else s.upper(),
     'as_is':     lambda s: s,
     'none':      lambda s: s,
-    'slugified': lambda s: "".join(x.strip().capitalize() \
-                                   for x in re.split(r"[ -_]", s)),
+    'slugified': lambda s: "".join(x.strip().capitalize() for x in re.split(r"[ -_]", s)),
 }
 
 
@@ -63,10 +56,8 @@ class _ConfigAction(Action):
     Custom action for handling an INI configuration file.
     """
     def __init__(self, option_strings, dest=None, default=None, help=None):
-        super(_ConfigAction, self).__init__(option_strings=option_strings,
-                                            dest=SUPPRESS, default=default,
-                                            nargs=1, help=gt(help),
-                                            metavar="INI")
+        super(_ConfigAction, self).__init__(option_strings=option_strings, dest=SUPPRESS, default=default, nargs=1,
+                                            help=gt(help), metavar="INI")
 
     def __call__(self, parser, namespace, values, option_string=None):
         conf = values[0]
@@ -82,9 +73,8 @@ class _DemoAction(Action):
     Custom action for triggering the execution of an example.
     """
     def __init__(self, option_strings, dest=SUPPRESS, help=None):
-        super(_DemoAction, self).__init__(option_strings=option_strings,
-                                          dest=SUPPRESS, default=SUPPRESS,
-                                          nargs=0, help=gt(help))
+        super(_DemoAction, self).__init__(option_strings=option_strings, dest=SUPPRESS, default=SUPPRESS, nargs=0,
+                                          help=gt(help))
 
     def __call__(self, parser, namespace, values, option_string=None):
         parser.demo_args()
@@ -104,8 +94,8 @@ class _ExtendAction(Action):
 
 class _NewSubParsersAction(_SubParsersAction):
     """
-    Modified version of argparse._SubParsersAction for handling formatters of
-     subparsers, inheriting from this of the main parser.
+    Modified version of argparse._SubParsersAction for handling formatters of subparsers, inheriting from this of the
+     main parser.
     """
     last = False
     
@@ -125,16 +115,12 @@ class _NewSubParsersAction(_SubParsersAction):
             args = (name, aliases, help) if PYTHON3 else (name, help)
             choice_action = self._ChoicesPseudoAction(*args)
             self._choices_actions.append(choice_action)
-        # create the parser, but with another formatter and separating the help
-        #  into an argument group
-        parser = self._parser_class(ArgumentParser.globals_dict, add_help=False,
-                                    **kwargs)
+        # create the parser, but with another formatter and separating the help into an argument group
+        parser = self._parser_class(ArgumentParser.globals_dict, add_help=False, **kwargs)
         parser.name = name
         i = parser.add_argument_group(txt2title(gt("extra arguments")))
-        i.add_argument("-h", action="usage", prefix="show",
-                       help=gt("show usage message and exit"))
-        i.add_argument("--help", action="help", prefix="show",
-                       help=gt("show this help message and exit"))
+        i.add_argument("-h", action="usage", prefix="show", help=gt("show usage message and exit"))
+        i.add_argument("--help", action="help", prefix="show", help=gt("show this help message and exit"))
         # add it to the map
         self._name_parser_map[name] = parser
         # make parser available under aliases also (Python3 only ; see before)
@@ -148,9 +134,8 @@ class _UsageAction(Action):
     Custom action for displaying the usage message.
     """
     def __init__(self, option_strings, dest=SUPPRESS, help=None):
-        super(_UsageAction, self).__init__(option_strings=option_strings,
-                                           dest=SUPPRESS, default=SUPPRESS,
-                                           nargs=0, help=gt(help))
+        super(_UsageAction, self).__init__(option_strings=option_strings, dest=SUPPRESS, default=SUPPRESS, nargs=0,
+                                           help=gt(help))
 
     def __call__(self, parser, namespace, values, option_string=None):
         parser.print_usage()
@@ -162,9 +147,8 @@ class _WizardAction(Action):
     Custom action for triggering the wizard, asking for argument values.
     """
     def __init__(self, option_strings, dest=SUPPRESS, help=None):
-        super(_WizardAction, self).__init__(option_strings=option_strings,
-                                            dest=SUPPRESS, default=SUPPRESS,
-                                            nargs=0, help=gt(help))
+        super(_WizardAction, self).__init__(option_strings=option_strings, dest=SUPPRESS, default=SUPPRESS, nargs=0,
+                                            help=gt(help))
 
     def __call__(self, parser, namespace, values, option_string=None):
         parser.input_args()
@@ -173,8 +157,7 @@ class _WizardAction(Action):
 # ------------------------------ CUSTOM ENTITIES -------------------------------
 class _NewActionsContainer(_ActionsContainer):
     """
-    Modified version of argparse._ActionsContainer for handling a new "note"
-     keyword argument.
+    Modified version of argparse._ActionsContainer for handling a new "note" keyword argument.
     """
     def __init__(self, *args, **kwargs):
         super(_NewActionsContainer, self).__init__(*args, **kwargs)
@@ -195,10 +178,8 @@ class _NewActionsContainer(_ActionsContainer):
         prefix = new_kw.pop('prefix', None)
         suffix = new_kw.pop('suffix', None)
         try:
-            # define the action based on argparse, with only argparse-known
-            #  keyword-arguments
-            action = super(_NewActionsContainer, self).add_argument(*args,
-                                                                    **new_kw)
+            # define the action based on argparse, with only argparse-known keyword-arguments
+            action = super(_NewActionsContainer, self).add_argument(*args, **new_kw)
             # now set Tinyscript-added keyword-arguments
             action.note = None if note is None else gt(note)
             action.last = last
@@ -217,18 +198,15 @@ class _NewActionsContainer(_ActionsContainer):
                 args.remove(short_opt[0])
                 if len(args) > 0:
                     return self.add_argument(*args, **kwargs)
-            # otherwise, retry after modifying the long option string with the
-            #  precedence to the prefix (if set) then the suffix (if set)
+            # otherwise, retry after modifying the long option string with the precedence to the prefix (if set) then
+            #  the suffix (if set)
             long_opt = list(filter(is_long_opt, args))
             if len(long_opt) > 0:
                 long_opt = args.pop(args.index(long_opt[0]))
-                if kwargs.get('action') in \
-                    [None, 'store', 'append', 'store_const', 'append_const']:
-                    # set metavar only if no choices given ; otherwise, it
-                    #  takes the precedence on choices in the help message
+                if kwargs.get('action') in [None, 'store', 'append', 'store_const', 'append_const']:
+                    # set metavar only if no choices given ; otherwise, it takes the precedence on choices in the help
                     kwargs['metavar'] = kwargs.get('metavar') or \
-                                        (long_opt.lstrip('-').upper() \
-                                         if not kwargs.get('choices') else None)
+                                        (long_opt.lstrip('-').upper() if not kwargs.get('choices') else None)
                 curr_opt = long_opt.lstrip("-")
                 kwargs['orig'] = curr_opt.replace("-", "_")
                 if prefix:
@@ -253,41 +231,36 @@ class _NewActionsContainer(_ActionsContainer):
 
 class _NewArgumentGroup(_ArgumentGroup, _NewActionsContainer):
     """
-    Modified version of argparse._ArgumentGroup for modifying arguments groups
-     handling in the modified ActionsContainer.
+    Modified version of argparse._ArgumentGroup for modifying argument groups handling in the modified ActionsContainer.
     """
     pass
         
 
 class _NewMutuallyExclusiveGroup(_MutuallyExclusiveGroup, _NewArgumentGroup):
     """
-    Modified version of argparse._MutuallyExclusiveGroup for modifying arguments
-     mutually exclusive groups handling in the modified ActionsContainer.
+    Modified version of argparse._MutuallyExclusiveGroup for modifying arguments mutually exclusive groups handling in
+     the modified ActionsContainer.
     """
     pass
         
 
 class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     """
-    Modified version of argparse.ArgumentParser, based on the modified
-     ActionsContainer.
+    Modified version of argparse.ArgumentParser, based on the modified ActionsContainer.
     
     :param globals_dict: globals() dictionary from the calling script/tool
-                         NB: this is only for help formatting purpose ;
-                             therefore this is NOT propagated through subparsers
+                         NB: only for help formatting purpose ; therefore this is NOT propagated through subparsers
     :param args:         arguments applicable for argparse.ArgumentParser
     :param kwargs:       kwarguments applicable for argparse.ArgumentParser
                          NB: 'prog' set to preformatted program name
                              'add_help' set to False (customized)
-                             'conflict_handler' set to "error" (cfr tuning of
-                                                                add_argument)
+                             'conflict_handler' set to "error" (cfr tuning of add_argument)
                              'formatter_class' set to custom HelpFormatter
                              'epilog' set to preformatted usage message
                              'description' set to preformatted help message
     """
     _config = ConfigParser()
-    is_action = lambda s, a, *l: any(type(a) is s._registry_get('action', n) \
-                                     for n in l)
+    is_action = lambda s, a, *l: any(type(a) is s._registry_get('action', n) for n in l)
     name = "main"
     
     def __init__(self, globals_dict=None, *args, **kwargs):
@@ -302,9 +275,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             path = abspath(script)
             root = dirname(path)
             script = basename(script)
-            kwargs['prog'] = "python{} ".format(["", "3"][PYTHON3]) + \
-                          script if not is_executable(path) else "./" + script \
-                          if root not in environ['PATH'].split(":") else script
+            kwargs['prog'] = "python{} ".format(["", "3"][PYTHON3]) + script if not is_executable(path) else "./" + \
+                             script if root not in environ['PATH'].split(":") else script
             ArgumentParser.prog = kwargs['prog']
             script, _ = splitext(script)
         kwargs['add_help'] = False
@@ -315,14 +287,11 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             _ = ["{} {}".format(ArgumentParser.prog, e) for e in self.examples]
             _ = list(filter(lambda x: x.startswith(kwargs['prog']), _))
             if len(_) > 0:
-                kwargs['epilog'] = txt2title(gt("Usage example{}"
-                                   .format(["", "s"][len(_) > 1])) + ":")
-                e = '\n'.join(["\n", "  "][self._docfmt is None] + \
-                              txt2paragraph(e) for e in _)
+                kwargs['epilog'] = txt2title(gt("Usage example{}".format(["", "s"][len(_) > 1])) + ":")
+                e = '\n'.join(["\n", "  "][self._docfmt is None] + txt2paragraph(e) for e in _)
                 kwargs['epilog'] += "\n" + e
-        # adapt the script name ; if SCRIPTNAME is provided, it supersedes
-        #  SCRIPTNAME_FORMAT, otherwise compute the name according to the
-        #  format specified in SCRIPTNAME_FORMAT
+        # adapt the script name ; if SCRIPTNAME is provided, it supersedes SCRIPTNAME_FORMAT, otherwise compute the name
+        #  according to the format specified in SCRIPTNAME_FORMAT
         sname = gd.get('__script__')
         if sname is None:
             sname_fmt  = gd.get('SCRIPTNAME_FORMAT', SCRIPTNAME_FORMAT)
@@ -331,8 +300,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 sname = sname_func(script)
             else:
                 l = "\n- ".join(sorted(SCRIPTNAME_FORMATS.keys()))
-                raise ValueError("Bad script name format ; please use one of "
-                                 "the followings:\n{}".format(l))
+                raise ValueError("Bad script name format ; please use one of the followings:\n{}".format(l))
         self.scriptname = gd['__scriptname__'] = sname
         # format the description message
         d = sname
@@ -341,8 +309,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         v = gd.get('__status__')
         if v:
             d += " (" + v + ")"
-        l = max(list(map(lambda x: len(txt2italic(x.strip('_'))),
-                         BASE_DUNDERS)))
+        l = max(list(map(lambda x: len(txt2italic(x.strip('_'))), BASE_DUNDERS)))
         for k in BASE_DUNDERS:
             m = gd.get(k)
             if m:
@@ -352,8 +319,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                     m = copyright(*m)
                 elif k == '__license__':
                     m = license(m, True) or m
-                meta = ("{: <%d}: {}" % l) \
-                       .format(txt2italic(k.strip('_').capitalize()), m)
+                meta = ("{: <%d}: {}" % l).format(txt2italic(k.strip('_').capitalize()), m)
                 if k == '__author__':
                     e = gd.get('__email__')
                     if e:
@@ -399,8 +365,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         elif self.is_action(a, 'store_false'):
             return user_input(prompt, (gt("(Y)es"), gt("(N)o")), "y", **r)
         elif self.is_action(a, 'count'):
-            return user_input(prompt, is_pos_int, 0, gt("positive integer"),
-                   **r)
+            return user_input(prompt, is_pos_int, 0, gt("positive integer"), **r)
         elif self.is_action(a, 'parsers'):
             pmap = a._name_parser_map
             _ = list(pmap.keys())
@@ -408,8 +373,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         raise NotImplementedError(gt("Unknown argparse action"))
     
     def _reset_args(self):
-        args = [_ for _ in self._reparse_args['pos']] + \
-               [_ for _ in self._reparse_args['opt']]
+        args = [_ for _ in self._reparse_args['pos']] + [_ for _ in self._reparse_args['opt']]
         for sp in self._reparse_args['sub']:
             args += sp._reset_args()
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
@@ -426,8 +390,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         # if action of an argument that suppresses any other, just return
         if a.dest is SUPPRESS or a.default is SUPPRESS:
             return
-        # check if an option string is used for this action in sys.argv ;
-        #  if so, simply return as it will be parsed normally
+        # check if an option string is used for this action in sys.argv ; if so, return as it will be parsed normally
         if any(o in sys.argv[1:] for o in a.option_strings):
             return
         # in case of non-null config, get the value from the config object
@@ -439,8 +402,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 item = "setting" if isinstance(e, NoOptionError) else "section"
                 # if the argument is required, just ask for the value
                 value = self._input_arg(a) if a.required else default
-                logger.debug(gt("{} {} not present in config (set to {})")
-                             .format(a.dest, item, value))
+                logger.debug(gt("{} {} not present in config (set to {})").format(a.dest, item, value))
         # in case of null config, just ask for the value
         else:
             value = self._input_arg(a)
@@ -490,14 +452,11 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         """
         Generate the sorted list of actions based on the "last" attribute.
         """
-        for a in filter(lambda _: not _.last and \
-                        not self.is_action(_, 'parsers'), self._actions):
+        for a in filter(lambda _: not _.last and not self.is_action(_, 'parsers'), self._actions):
             yield a
-        for a in filter(lambda _: _.last and \
-                        not self.is_action(_, 'parsers'), self._actions):
+        for a in filter(lambda _: _.last and not self.is_action(_, 'parsers'), self._actions):
             yield a
-        for a in filter(lambda _: self.is_action(_, 'parsers'),
-                        self._actions):
+        for a in filter(lambda _: self.is_action(_, 'parsers'), self._actions):
             yield a
     
     def config_args(self, section="main"):
@@ -529,11 +488,10 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     
     def error(self, message):
         """
-        Prints a usage message incorporating the message to stderr and exits in
-         the case when no new arguments to be reparsed, that is when no special
-         action like _DemoAction (triggering parser.demo_args()) or 
-         _WizardAction (triggering input_args()) was called. Otherwise, it
-         simply does not stop execution so that new arguments can be reparsed.
+        Prints a usage message incorporating the message to stderr and exits in the case when no new arguments to be
+         reparsed, that is when no special action like _DemoAction (triggering parser.demo_args()) or _WizardAction
+         (triggering input_args()) was called. Otherwise, it simply does not stop execution so that new arguments can be
+         reparsed.
         """
         if all(len(x) == 0 for x in self._reparse_args.values()):
             # normal behavior with argparse
@@ -560,28 +518,23 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             for i, line in enumerate(actions.splitlines()):
                 s, dedent = line.lstrip(), 0
                 if i == 0:
-                    # action_group.title has ":" added after txt2title(...)
-                    #  causing an extra ":" to be appended
+                    # action_group.title has ":" added after txt2title(...) causing an extra ":" to be appended
                     if self._docfmt == "html":
-                        # for markup languages with tags, ":" appears behind
-                        #  the title tag
+                        # for markup languages with tags, ":" appears behind the title tag
                         a += line.rstrip(":") + "\n"
                     else:
-                        # for other markup languages without tags, ":"
-                        #  appears at the end in duplicate
+                        # for other markup languages without tags, ":" appears at the end in duplicate
                         a += line.rstrip(":") + ":\n"
                     continue
                 if i == 1 and self._docfmt == "rst":
-                    # action_group.title has ":" added after txt2title(...)
-                    #  causing an extra ":" to be appended behind the
-                    #  underline, making rendering fail
+                    # action_group.title has ":" added after txt2title(...) causing an extra ":" to be appended behind
+                    #  the underline, making rendering fail
                     a = a.rstrip("\n") + "\n" + line.rstrip(":") + "\n"
                     continue
                 if self._docfmt and s[0] in "-*":
                     dedent = len(line) - len(s)
-                a += (line + "\n\n") if line.rstrip()[-1] == ":" else \
-                     (txt2paragraph(line[dedent:]) + \
-                     ["\n\n", "\n"][self._docfmt is None])
+                a += (line + "\n\n") if line.rstrip()[-1] == ":" else (txt2paragraph(line[dedent:]) + \
+                                                                       ["\n\n", "\n"][self._docfmt is None])
             text += a + "\n"
         # epilog
         formatter = self._get_formatter()
@@ -592,13 +545,11 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     
     def format_usage(self):
         formatter = self._get_formatter()
-        formatter.add_usage(self.usage, self._actions,
-                            self._mutually_exclusive_groups)
+        formatter.add_usage(self.usage, self._actions, self._mutually_exclusive_groups)
         text = formatter.format_help()
         if self._docfmt:
             title, usage = text.split(": ", 1)
-            text = txt2title(title + ":") + "\n\n" + \
-                   txt2paragraph(usage.rstrip("\n")) + "\n"
+            text = txt2title(title + ":") + "\n\n" + txt2paragraph(usage.rstrip("\n")) + "\n"
         return text
     
     def input_args(self):
@@ -610,8 +561,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     
     def parse_args(self, args=None, namespace=None):
         """
-        Reparses new arguments when _DemoAction (triggering parser.demo_args())
-         or _WizardAction (triggering input_args()) was called.
+        Reparses new arguments when _DemoAction (triggering parser.demo_args()) or _WizardAction (triggering
+         input_args()) was called.
         """
         if not namespace:  # use the new Namespace class for handling _config
             namespace = Namespace(self)
@@ -619,8 +570,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             self.print_usage()
             self.exit()
         namespace = super(ArgumentParser, self).parse_args(args, namespace)
-        if len(self._reparse_args['pos']) > 0 or \
-           len(self._reparse_args['opt']) > 0 or \
+        if len(self._reparse_args['pos']) > 0 or len(self._reparse_args['opt']) > 0 or \
            len(self._reparse_args['sub']) > 0:
             args = self._reset_args()
             namespace = super(ArgumentParser, self).parse_args(args, namespace)
@@ -640,8 +590,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             self._print_message(message, file or sys.stdout)
     
     def print_usage(self, file=None):
-        self._print_message(txt_terminal_render(self.format_usage()),
-                            file or sys.stdout)
+        self._print_message(txt_terminal_render(self.format_usage()), file or sys.stdout)
     
     @classmethod
     def add_to_config(cls, section, name, value):
@@ -664,10 +613,9 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
 
 class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
     """
-    Help message formatter for appending a custom note (as input through the
-     add_argument method of CustomArgumentParser) to argument help. It also
-     allows to reduce long default values (e.g. a list of integers) to something
-     readable.
+    Help message formatter for appending a custom note (as input through the add_argument method of
+     CustomArgumentParser) to argument help. It also allows to reduce long default values (e.g. a list of integers) to
+     something readable.
     """
     def _expand_help(self, action):
         params = dict(vars(action), prog=self._prog)
@@ -692,8 +640,7 @@ class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
 
     def _get_help_string(self, action):
         help = super(HelpFormatter, self)._get_help_string(action)
-        if '%(note)' not in help and hasattr(action, "note") and \
-            action.note is not None:
+        if '%(note)' not in help and hasattr(action, "note") and action.note is not None:
             help += '\n NB: %(note)s'
         return help
 
@@ -706,27 +653,23 @@ class Namespace(BaseNamespace):
     #  used for Tinyscript-related processing (e.g. _current_parser)
     __privdict__ = {}
     # exclude list for saving options in a ConfigParser object
-    excludes = ["_current_parser", "_debug_level", "_collisions",
-                "_subparsers", "read_config", "write_config"]
+    excludes = ["_current_parser", "_debug_level", "_collisions", "_subparsers", "read_config", "write_config"]
     
     def __init__(self, parser):
         self._current_parser = parser.name
-        self._collisions = {a.orig: a.dest for a in parser._actions \
-                            if getattr(a, "orig", None)}
+        self._collisions = {a.orig: a.dest for a in parser._actions if getattr(a, "orig", None)}
         self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
     
     def __getattr__(self, name):
         # handle __privdict__ entry first
-        if (name.startswith("_") or name in self.excludes) and \
-            name in self.__privdict__:
+        if (name.startswith("_") or name in self.excludes) and name in self.__privdict__:
             return self.__privdict__[name]
         # then get the attribute the normal way
         return self.__getattribute__(name)
     
     def __setattr__(self, name, value):
         # handle __privdict__ entry first
-        if (name.startswith("_") or name in self.excludes) and \
-            name != "_debug_level":
+        if (name.startswith("_") or name in self.excludes) and name != "_debug_level":
             self.__privdict__[name] = value
         else:
             super(Namespace, self).__setattr__(name, value)
@@ -744,3 +687,4 @@ class Namespace(BaseNamespace):
             return self.__getattr__(name)
         except AttributeError:
             return
+

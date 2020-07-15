@@ -6,9 +6,9 @@ import json
 import toml
 import yaml
 try:
-    import configparser as ini
-except ImportError:
     import ConfigParser as ini
+except ImportError:
+    import configparser as ini
 from six import u
 
 

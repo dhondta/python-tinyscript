@@ -34,7 +34,6 @@ def set_notify_items(glob):
             ipath = join(icon_path, icon) + ".png"
             if isfile(ipath):
                 icon = ipath
-            print(title, record.msg, appname, icon, timeout, record.levelname)
             notify(title, record.msg, appname, icon, timeout, title + " " + record.levelname)
     
     if enabled and not any(type(h) is __NotificationHandler for h in glob['logger'].handlers):
@@ -42,3 +41,4 @@ def set_notify_items(glob):
         nh.setLevel(level)
         glob['logger'].addHandler(nh)
     glob['notify'] = notify
+

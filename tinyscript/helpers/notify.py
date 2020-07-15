@@ -71,9 +71,9 @@ def send_mail(from_mail, to_mail, subject, body, *attachments, **kwargs):
     domain = (auth_user or from_mail).split("@")[-1]
     # parameters validation
     if not is_email(from_mail):
-        raise ValueError("Bad sender email")
+        raise ValueError("Bad sender email address")
     if not is_email(to_mail):
-        raise ValueError("Bad recipient email")
+        raise ValueError("Bad recipient email address")
     if srv is None and domain in SERVERS.keys():
         try:
             host, port = SERVERS[domain]
