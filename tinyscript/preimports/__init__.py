@@ -47,6 +47,7 @@ __imports__ = {
         "binascii",
         "codecs",
         "collections",
+        "colorful",
         "configparser",
         "ctypes",
         "fileinput",

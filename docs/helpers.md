@@ -26,6 +26,7 @@ It also defines a few compatibility/utility functions for working with the same 
 :---: | :---:
 `b` | bytes conversion function, overloading `six.b` for a better compatibility
 `byteindex` | selects the byte value from a string at the given index
+`colored` | allows to color text in a similar way to [`termcolor.colored`](https://pypi.org/project/termcolor/) (which is NOT in Tinyscript's requirements) but relying on [`colorful`](https://pypi.org/project/colorful/) (which is in Tinyscript's requirements)
 `ensure_binary` | identical to `six.ensure_binary`
 `ensure_str` | similar to `six.ensure_str`
 `ensure_unicode` | dummy alias for `six.text_type`, by analogy to `ensure_binary` and `ensure_unicode`

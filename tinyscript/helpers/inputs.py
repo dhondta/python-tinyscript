@@ -8,6 +8,7 @@ import re
 import signal
 import sys
 from ast import literal_eval
+from colorful.core import COLOR_PALETTE
 from six import StringIO
 
 from .compat import ensure_str
@@ -29,8 +30,10 @@ except Exception:  # catch ImportError but also Xlib.error.DisplayConnectionErro
     hotkeys_enabled = False
 
 
-__all__ = __features__ = ["capture", "clear", "confirm", "hotkeys", "pause", "silent", "std_input", "stdin_flush",
-                          "stdin_pipe", "user_input", "Capture"]
+__all__ = ["capture", "clear", "confirm", "hotkeys", "pause", "silent", "std_input", "stdin_flush", "stdin_pipe",
+           "user_input", "Capture"]
+__features__ = [x for x in __all__]
+__all__ += ["colored"]
 
 pause = lambda *a, **kw: std_input("Press Enter to continue", *a, **kw) or None
 
@@ -55,6 +58,54 @@ def clear():
         system("clear")
     elif WINDOWS:
         system("cls")
+
+
+def colored(text, color=None, on_color=None, attrs=None, style=None, palette=None):
+    """
+    Colorize text.
+    
+    :param text:     text to be colorized
+    :param color:    text color
+    :param on_color: background color
+    :param attrs:    single styling attribute or list of styling attributes
+    :param style:    colorful styling function, e.g. red_on_green (for green foreground and red background colors)
+    :param palette:  predefined palette's name (e.g. 'monokai')
+    :return:         styled string
+    
+    Available styling attributes:
+      blinkrapid, blinkslow, bold, concealed, dimmed, inversed, italic, reset, struckthrough, underlined
+    
+    Available palettes:
+      monokai, solarized
+    """
+    if isinstance(style, (list, tuple)):
+        style = "_".join(style)
+    s = style or ""
+    if palette:
+        colorful.use_style(palette)
+    if s == "":
+        if attrs:
+            if not isinstance(attrs, list):
+                attrs = [attrs]
+            for attr in attrs:
+                if attr not in colorful.ansi.MODIFIERS.keys():
+                    raise ValueError("Bad ANSI modifier '%s'" % attr)
+                s += str(attr) + "_"
+        if color:
+            if color not in colorful.colorpalette.keys():
+                raise ValueError("Bad color '%s'" % color)
+            s += str(color) + "_"
+        if on_color:
+            if on_color not in colorful.colorpalette.keys():
+                raise ValueError("Bad color '%s'" % on_color)
+            s += "on_" + str(on_color)
+    if s != "":
+        c = getattr(colorful, s.rstrip("_"))
+    try:
+        return c(text).styled_string if s and TTY else text
+    finally:
+        # ensure that the palette is restored
+        colorful.use_palette(COLOR_PALETTE)
 
 
 def confirm(prompt="Are you sure ?", style="bold"):
@@ -156,11 +207,11 @@ def std_input(prompt="", style=None, palette=None):
     :param style:   colorful styling function, e.g. red_on_green (for green foreground and red background colors)
     :param palette: dictionary for defining new styles
     """
-    colorful.update_palette(palette or {})
     if style is not None:
+        colorful.update_palette(palette or {})
         if isinstance(style, (list, tuple, set)):
             style = "_".join(style)
-        prompt = getattr(colorful, style)(prompt)
+        prompt = colored(prompt, style=style)
     return (input(prompt) if PYTHON3 else raw_input(prompt)).strip()
 
 

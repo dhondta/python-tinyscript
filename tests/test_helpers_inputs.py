@@ -4,6 +4,7 @@
 
 """
 from tinyscript.helpers.compat import b
+from tinyscript.helpers.constants import TTY
 from tinyscript.helpers.inputs import *
 from tinyscript.helpers.inputs import _keyboard, hotkeys_enabled
 from tinyscript.loglib import logger as ts_logger
@@ -76,4 +77,26 @@ class TestHelpersInputs(TestCase):
             hotkeys({'ctrl': ("CTRL", ts_logger.info)})
             from tinyscript.helpers.inputs import Key
             _keyboard.press(Key.ctrl)
+    
+    def test_styling_functions(self):
+        STR = "test string"
+        self.assertIsNotNone(colored(STR, "green"))
+        self.assertRaises(ValueError, colored, STR, "BAD_COLOR")
+        self.assertRaises(ValueError, colored, STR, "bold")
+        self.assertIsNotNone(colored(STR, "black", "green"))
+        self.assertRaises(ValueError, colored, STR, "black", "BAD_COLOR")
+        self.assertRaises(ValueError, colored, STR, "black", "bold")
+        self.assertIsNotNone(colored(STR, "black", "green", "bold"))
+        self.assertRaises(ValueError, colored, STR, "black", "green", "BAD_MODIFIER")
+        self.assertRaises(ValueError, colored, STR, "black", "green", "red")
+        self.assertRaises(ValueError, colored, STR, "black", "green", ["bold", "BAD_MODIFIER"])
+        self.assertIsNotNone(colored(STR, style="bold_on_green"))
+        self.assertIsNotNone(colored(STR, style=["bold", "underlined", "green"]))
+        self.assertIsNotNone(colored(STR, palette="solarized"))
+        # style argument has precedence on color, on_color and attrs
+        a = getattr(self, "assert%sEqual" % ["", "Not"][TTY])
+        a(colored(STR, "black", "green", "bold"), colored(STR, "black", "green", "bold", "bold_yellow_on_red"))
+        self.assertIsNotNone(colored(STR, "bold", style="bold_yellow_on_red"))
+        if TTY:
+            self.assertRaises(AttributeError, colored, STR, style="BAD_STYLE")
 

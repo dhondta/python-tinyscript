@@ -86,4 +86,5 @@ ts = ModuleType("ts", """
 for h in __helpers__:
     setattr(ts, h, globals()[h])
 
-__all__ = __features__ = ["pprint", "ts"] + _clsprop + _compat + _csts
+__all__ = __features__ = ["colored", "pprint", "ts"] + _clsprop + _compat + _csts
+
