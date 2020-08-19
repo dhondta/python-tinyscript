@@ -8,8 +8,8 @@ from .base import *
 from ..helpers.data.transform import json2html, json2xml
 
 
-__all__ = __features__ = ["Blockquote", "Code", "Data", "Footer", "Header", "Image", "List", "Section", "Subsection",
-                          "Table", "Text", "Title"]
+__all__ = __features__ = ["Blockquote", "Code", "Data", "Footer", "Header", "Image", "List", "Rule", "Section",
+                          "Subsection", "Table", "Text", "Title"]
 
 HEAD_CSS = "@%(pos)s-left{%(left)s};@%(pos)s-center{%(center)s};@%(pos)s-right{%(right)s};"
 
@@ -87,9 +87,10 @@ class Image(Element):
     
     :param source: image's source path
     """
-    def __init__(self, source, title=None, width=None, height=None, **kwargs):
+    def __init__(self, source, title=None, alt=None, width=None, height=None, **kwargs):
         super(Image, self).__init__(**kwargs)
-        self.data = {'source': source, 'title': title or "", 'width': width or "", 'height': height or ""}
+        self.data = {'source': source, 'title': title or "", 'alt': alt or "",
+                     'width': width or "", 'height': height or ""}
     
     @output
     def html(self, indent=4, text=TEXT):
@@ -103,6 +104,14 @@ class Image(Element):
     @output
     def md(self, text=TEXT):
         return "![%(title)s](%(source)s)" % self.data
+    
+    @output
+    def rst(self, text=TEXT):
+        s = ".. image:: %(source)s" % self.data
+        for attr, val in self.data.items():
+            if attr != "source" and val:
+                s += "\n    :%s: %s" % (attr, val)
+        return s
     
     @output
     def xml(self, indent=2, text=TEXT):
@@ -129,7 +138,7 @@ class List(Element):
         self.tag = ["ul", "ol"][self.ordered]
     
     @output
-    def csv(self, text=TEXT):
+    def csv(self, sep=',', text=TEXT):
         return "\n".join(self.data)
     
     @output
@@ -146,12 +155,37 @@ class List(Element):
     @output
     def md(self, text=TEXT):
         return "\n".join("%s %s" % (["-", "%d." % (n+1)][self.ordered], i) for n, i in enumerate(self.data))
+    rst = md
     
     @output
     def xml(self, indent=2, text=TEXT):
         ind, nl = self._set_indent(indent)
         xml = "<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__
         return xml.format(nl, "\n".join(ind + "<item>%s</item>" % i for i in self.data))
+
+
+class Rule(Element):
+    """ This class represents an horizontal rule. """    
+    @output
+    def html(self, indent=4, text=TEXT):
+        ind, nl = self._set_indent(indent)
+        s = "<hr"
+        if self.style:
+            s += " style='%s'" % self.style
+        return s + ">"
+    
+    @output
+    def json(self, text=TEXT):
+        return {}
+    
+    @output
+    def md(self, text=TEXT, n=5, char="-"):
+        return n * char
+    rst = md
+    
+    @output
+    def xml(self, indent=2, text=TEXT):
+        return ""
 
 
 class Table(Element):
@@ -165,7 +199,8 @@ class Table(Element):
     """
     filename = "table"
     
-    def __init__(self, data, column_headers="indices", row_headers=None, column_footers=None, flt_fmt="%.2g", **kwargs):
+    def __init__(self, data, column_headers="indices", row_headers=None, column_footers=None, title=None,
+                 flt_fmt="%.2g", **kwargs):
         super(Table, self).__init__(**kwargs)
         self.index = row_headers == "indices"
         self.column_headers = list(map(str, range(len(data[0])))) if column_headers == "indices" else column_headers
@@ -179,6 +214,7 @@ class Table(Element):
             self.column_headers = [""] + self.column_headers
         self._data = data
         self.float_fmt = flt_fmt
+        self.title = title or ""
     
     def _format(self, data):
         d = []
@@ -191,7 +227,7 @@ class Table(Element):
         return d
     
     @output
-    def csv(self, text=TEXT, sep=','):
+    def csv(self, sep=',', text=TEXT):
         r = "" if self.column_headers is None else sep.join(self.column_headers)
         for row in self._format(self.data):
             r += "\n" + sep.join(row)
@@ -240,6 +276,22 @@ class Table(Element):
         return "\n".join(r)
     
     @output
+    def rst(self, float_format="%.2g", text=TEXT):
+        def fmt(v):
+            try:
+                float(v)
+                return str(v)
+            except:
+                return "\"{}\"".format(v)
+        
+        r = ".. csv-table: %s\n" % self.title
+        if self.column_headers:
+            r += "    :header: %s\n" % ", ".join(fmt(v) for v in self.column_headers)
+        for row in self._format(self.data):
+            r += "\n    " + ", ".join(fmt(v) for v in row)
+        return r
+    
+    @output
     def xml(self, indent=2, text=TEXT):
         ind, nl = self._set_indent(indent)
         r = ["<%s>" % self.name]
@@ -285,6 +337,7 @@ class Text(Element):
     @output
     def md(self, text=TEXT):
         return self.data
+    rst = md
 
 
 class Blockquote(Text):
@@ -300,6 +353,10 @@ class Blockquote(Text):
     @output
     def md(self, text=TEXT):
         return "\n".join("> " + l for l in self.data.split("\n"))
+    
+    @output
+    def rst(self, text=TEXT):
+        return "\n".join("    " + l for l in self.data.split("\n"))
 
 
 class Code(Text):
@@ -333,6 +390,16 @@ class Code(Text):
         if self.hl_lines:
             s += " hl_lines=\"%s\"" % self.hl_lines
         return s + "\n%s\n```" % self.data
+    
+    @output
+    def rst(self, text=TEXT):
+        s = ".. code-block:"
+        if self.language:
+            s += " %s" + self.language
+        s += "\n    "
+        for l in self.data.split("\n"):
+            s += "\n    " + l
+        return s
 
 
 class Title(Text):
@@ -351,6 +418,14 @@ class Title(Text):
     @output
     def md(self, text=TEXT):
         return "%(prefix)s %(content)s" % {'prefix': "#" * int(self.tag[-1]), 'content': self.data}
+    
+    @output
+    def rst(self, text=TEXT):
+        i = int(self.tag[-1])
+        if i <= 2:
+            return "%(line)s\n%(content)s\n%(line)s" % {'line': len(self.data) * "#*"[i-1], 'content': self.data}
+        elif i <= 6:
+            return "%(content)s\n%(line)s" % {'line': len(self.data) * "=-~^"[i-1], 'content': self.data}
 
 
 class Section(Title):

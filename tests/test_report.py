@@ -10,7 +10,7 @@ from utils import *
 
 class TestReport(TestCase):
     def __try_formats(self, element):
-        for fmt in ["csv", "html", "json", "md", "xml"]:
+        for fmt in ["csv", "html", "json", "md", "rst", "xml"]:
             self.assertIsNotNone(getattr(element, fmt)())
     
     def test_report_text_elements(self):
@@ -39,6 +39,7 @@ class TestReport(TestCase):
                   Text("test text", size="10"),
                   Image("test_image.png", width="50%"),
                   Blockquote("test blockquote", size=11),
+                  Rule(),
                   Code("#test\nprint('hello')", language="python", hl_lines="1")]:
             self.__try_formats(e)
             l.append(e)

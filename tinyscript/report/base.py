@@ -50,9 +50,8 @@ class Element(object):
         self.name = kwargs.get('name', self.__class__.__name__.lower())
         self.css = ""
         for k, v in kwargs.items():
-            if k not in ['color', 'size', 'style']:
-                continue
-            self._style[k] = v
+            if k in ['color', 'size', 'style']:
+                self._style[k] = v
         self._newline = "\n"
     
     def __repr__(self):
@@ -79,7 +78,7 @@ class Element(object):
         self._data = data
     
     @output
-    def csv(self, text=TEXT):
+    def csv(self, sep=',', text=TEXT):
         return ""
     
     @output
@@ -93,6 +92,7 @@ class Element(object):
     @output
     def md(self, text=TEXT):
         return ""
+    rst = md
     
     @output
     def xml(self, indent=2, text=TEXT):

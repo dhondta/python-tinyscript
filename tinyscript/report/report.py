@@ -118,7 +118,7 @@ class Report(list):
     
     @output
     def csv(self, text=TEXT):
-        return "\n\n".join(p.csv(True) for p in self if p.csv(True) != "")
+        return "\n\n".join(p.csv(text=True) for p in self if p.csv(text=True) != "")
     
     @output
     def html(self, indent=4, text=TEXT):
@@ -143,15 +143,23 @@ class Report(list):
         r = {}
         for p in self:
             if isinstance(p, (Data, List, Table)) or not data_only:
-                r.update(p.json(True))
+                r.update(p.json(text=True))
         return r
     
     @output
     def md(self, text=TEXT):
         r = []
         for p in self:
-            if p.md() != "":
+            if p.md().strip() != "":
                 r.append(p.md())
+        return "\n\n".join(r)
+    
+    @output
+    def rst(self, text=TEXT):
+        r = []
+        for p in self:
+            if p.rst().strip() != "":
+                r.append(p.rst())
         return "\n\n".join(r)
 
     @output
