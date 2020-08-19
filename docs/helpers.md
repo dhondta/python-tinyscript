@@ -266,8 +266,8 @@ For config-related data:
 :---: | :---:
 `ts.is_ini` / `ts.is_ini_file` | INI configuration content/file
 `ts.is_json` / `ts.is_json_file` | JSON configuration content/file
-`ts.is_toml` / `ts.is_toml_file` | YAML configuration content/file
-`ts.is_yaml` / `ts.is_yaml_file` | TOML configuration content/file
+`ts.is_toml` / `ts.is_toml_file` | TOML configuration content/file
+`ts.is_yaml` / `ts.is_yaml_file` | YAML configuration content/file (note: this uses `yaml.safe_load(...)`)
 
 For hash-related data:
 

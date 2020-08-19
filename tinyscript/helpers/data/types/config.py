@@ -51,7 +51,7 @@ def __check_config(c, ctype, fail=True, is_file=True):
             if is_file:
                 with open(c, 'rb') as f:
                     c = f.read()
-            cfg = yaml.load(c)
+            cfg = yaml.safe_load(c)
         return cfg
     except Exception as e:
         if fail:
