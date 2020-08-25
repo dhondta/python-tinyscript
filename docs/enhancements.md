@@ -71,8 +71,9 @@ A context manager is also available:
 
 ## `random`
 
-`random` is slightly enhanced with a few new classes:
+`random` is slightly enhanced with a few new items:
 
+- `randstr`: allows to generate a random string with a given length and alphabet
 - `LFSR`: adds an implementation of the Linear-Feedback Shifting Register stream generator, with the possibility of recovering its parameters by setting a target and using the Berlekamp-Massey algorithm.
 - `Geffe`: adds an implementation of the Geffe stream generator.
 

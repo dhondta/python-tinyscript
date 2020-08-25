@@ -4,10 +4,26 @@
 """
 import operator
 import random
+import string
 import struct
 
 from ..helpers.compat import b
 from ..helpers.data import *
+
+
+def __randstr(n=8, alphabet=string.ascii_lowercase+string.ascii_uppercase+string.digits):
+    """
+    Compose a random string of the given length with the given alphabet.
+    """
+    if n < 0:
+        raise ValueError("Bad random string length")
+    if len(alphabet) == 0:
+        raise ValueError("Bad alphabet")
+    s = ""
+    for i in range(n):
+        s += random.choice(alphabet)
+    return s
+random.randstr = __randstr
 
 
 class __Base(object):

@@ -79,6 +79,7 @@ It also provides some other utility functions:
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `ts.entropy` | computation function for the Shannon entropy of a string
+`ts.entropy_bits` | same as `entropy`, but returning the number of bits of entropy
 `ts.get_terminal_size` | cross-platform terminal size function
 `ts.pad` | String padding function, supporting `ansic9.23`, `incremental`, `iso7816-4`, `pkcs5`, `pkcs7` and `w3c` algorithms
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function

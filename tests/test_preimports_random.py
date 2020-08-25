@@ -9,6 +9,15 @@ from utils import *
 
 
 class TestPreimportsRandom(TestCase):
+    def test_utility_functions(self):
+        self.assertIsNotNone(random.randstr())
+        self.assertEqual(random.randstr(0), "")
+        self.assertEqual(len(random.randstr()), 8)
+        self.assertEqual(len(random.randstr(20)), 20)
+        self.assertNotIn("e", random.randstr(alphabet="abcd"))
+        self.assertRaises(ValueError, random.randstr, -1)
+        self.assertRaises(ValueError, random.randstr, 8, "")
+    
     def test_random_lfsr(self):
         l = random.LFSR(target="0123456789abcdef")
         self.assertEqual(l.next_block("hex", update=False), "9617f3cf")

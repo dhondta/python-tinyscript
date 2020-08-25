@@ -13,7 +13,7 @@ from random import randint
 from .types import *
 
 
-__all__ = __features__ = ["BitArray", "entropy", "pad", "unpad"]
+__all__ = __features__ = ["BitArray", "entropy", "entropy_bits", "pad", "unpad"]
 
 
 PAD = ["ansic9.23", "incremental", "iso7816-4", "pkcs5", "pkcs7", "w3c"]
@@ -86,6 +86,13 @@ def entropy(string):
     """
     s = string
     return - sum([p * log(p, 2) for p in [float(s.count(c)) / len(s) for c in set(s)]])
+
+
+def entropy_bits(string):
+    """
+    Number of bits of Shannon entropy.
+    """
+    return int(2 ** entropy(string))
 
 
 def pad(string, padding=None, blocksize=8, raw=False):
