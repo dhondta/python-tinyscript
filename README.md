@@ -15,6 +15,12 @@ This library is aimed to provide useful features and to shorten required lines o
     <img src="https://dhondta.github.io/python-tinyscript/docs/demos/simple-script.svg">
 </p>
 
+## Setup
+
+```sh
+pip install tinyscript
+```
+
 ## Example tools
 
 ### Security
