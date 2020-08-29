@@ -12,6 +12,9 @@ class TestHelpersAttack(TestCase):
     def test_attack_functions(self):
         self.assertEqual(list(bruteforce(2, "ab")), ["a", "b", "aa", "ab", "ba", "bb"])
         self.assertEqual(list(bruteforce(2, "ab", repeat=False)), ["a", "b", "ab", "ba"])
+        self.assertRaises(ValueError, list, bruteforce(-1))
+        self.assertRaises(ValueError, list, bruteforce(2, minlen=-1))
+        self.assertRaises(ValueError, list, bruteforce(1, minlen=3))
         DICT = ".test-dictionary-attack.txt"
         with open(DICT, 'wt') as f:
             f.write("password\ntest")
@@ -20,6 +23,9 @@ class TestHelpersAttack(TestCase):
         remove(DICT)
         self.assertEqual(sorted(list(bruteforce(3, "abc"))), sorted(list(bruteforce_re(r"[a-c]{1,3}"))))
         self.assertRaises(ValueError, list, bruteforce_re(1234))
+        for i in range(1, 5):
+            self.assertEqual(len(list(bruteforce_pin(i))), 10 ** i)
+        self.assertRaises(ValueError, list, bruteforce_pin(0))
     
     def test_mask_string_expansion(self):
         self.assertIsNotNone(expand_mask("???c?(abc)"))

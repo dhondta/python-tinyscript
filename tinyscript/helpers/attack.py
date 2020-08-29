@@ -4,13 +4,14 @@
 """
 import re
 from itertools import permutations, product
-from string import printable, punctuation
+from string import digits, printable, punctuation
 
 from .compat import b, ensure_str
 from .data import is_file, is_list, is_str
 
 
-__all__ = __features__ = ["bruteforce", "bruteforce_mask", "bruteforce_re", "dictionary", "expand_mask", "parse_rule"]
+__all__ = __features__ = ["bruteforce", "bruteforce_mask", "bruteforce_pin", "bruteforce_re", "dictionary",
+                          "expand_mask", "parse_rule"]
 
 
 MASKS = {
@@ -52,6 +53,10 @@ def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1, repeat=Tr
     :param repeat:   whether alphabet characters can be repeated or not
     :yield:          bruteforce entry
     """
+    if maxlen < 1:
+        raise ValueError("Bad bruteforce maximum length")
+    if minlen < 0 or minlen > maxlen:
+        raise ValueError("Bad bruteforce minimum length")
     for i in range(minlen, maxlen + 1):
         if repeat:
             for c in product(alphabet, repeat=i):
@@ -74,6 +79,60 @@ def bruteforce_mask(mask, charsets=None):
         raise ValueError("Bad mask ; should be a string or a list of strings, got {}".format(type(mask)))
     for c in product(*mask):
         yield c if isinstance(c[0], int) else ''.join(c)
+
+
+def bruteforce_pin(length=4):
+    """
+    Generator for bruteforcing a PIN code according to the blog article titled "PIN analysis", available at:
+     https://datagenetics.com/blog/september32012/
+    Note: This generator generalizes to any length of PIN code.
+    
+    :param length: PIN code length
+    """
+    if length <= 0:
+        raise ValueError("Bad PIN code length")
+    
+    def _top20():
+        n, l = int(.5 + length / 2.0), length
+        yield "".join(str(i+1)[-1] for i in range(l))
+        yield "1" * l
+        yield "0" * l
+        yield ("12" * n)[:l]
+        yield "7" * l
+        yield ("1" + max(0, l-2) * "0" + "4")[:l]
+        yield "2" + max(0, l-1) * "0"
+        yield "4" * l
+        yield "2" * l
+        yield ("69" * n)[:l]
+        yield "9" * l
+        yield "3" * l
+        yield "5" * l
+        yield "6" * l
+        yield ("1" * n + "2" * n)[:l]
+        yield ("13" * n)[:l]
+        yield "8" * l
+        yield "".join(str(i+1)[-1] for i in range(l))[::-1]
+        yield ("2" + max(0, l-2) * "0" + "1")[:l]
+        yield ("10" * n)[:l]
+    
+    done = []
+    for code in _top20():
+        if code in done:
+            continue
+        done.append(code)
+        yield code
+    # if length is 4, consider year-like PIN codes first
+    if length == 4:
+        for prefix in ["19", "20"]:
+            for suffix in bruteforce(2, [digits, digits[::-1]][prefix == "19"], minlen=2):
+                code = prefix + suffix
+                if code not in done:
+                    yield code
+    for code in bruteforce(length, digits, minlen=length):
+        if code in done:
+            continue
+        if length != 4 or not any(code.startswith(p) for p in ["19", "20"]):
+            yield code
 
 
 def bruteforce_re(regex):

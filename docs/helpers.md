@@ -79,7 +79,7 @@ It also provides some other utility functions:
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `ts.entropy` | computation function for the Shannon entropy of a string
-`ts.entropy_bits` | same as `entropy`, but returning the number of bits of entropy
+`ts.entropy_bits` | computation function for the number of bits of entropy (i.e. for a password)
 `ts.get_terminal_size` | cross-platform terminal size function
 `ts.pad` | String padding function, supporting `ansic9.23`, `incremental`, `iso7816-4`, `pkcs5`, `pkcs7` and `w3c` algorithms
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
@@ -100,6 +100,7 @@ A few utility functions related to bruteforcing are also available:
 :---: | :---:
 `ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
 `ts.bruteforce_mask` | generator for bruteforcing according to a given mask (either a string or a list of alphabets per character position)
+`ts.bruteforce_pin` | generator for bruteforcing a variable-length PIN code (by default, length is 4) starting with a public top-20 most common PIN values
 `ts.bruteforce_re` | generator for bruteforcing according to a given regular expression
 `ts.dictionary` | generator for parsing a dictionary, applying rules if provided
 `ts.expand_mask` | string expansion function for computing a bruteforce mask
