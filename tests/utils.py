@@ -13,11 +13,15 @@ from six import StringIO
 from time import sleep
 from tinyscript.helpers.constants import PYTHON3
 from unittest import TestCase
+try:
+    from unittest.mock import patch as mock_patch
+except ImportError:
+    from mock import patch as mock_patch
 
 
 __all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep", "exists", "join", "logger", "logging",
-           "makedirs", "remove", "rmdir", "rmtree", "sleep", "sys", "temp_stdin", "touch", "temp_stdout", "tmpf",
-           "FakeLogRecord", "FakeNamespace", "TestCase", "PYTHON3", "_FakeParserAction", "FIXTURES"]
+           "makedirs", "mock_patch", "remove", "rmdir", "rmtree", "sleep", "sys", "temp_stdin", "touch", "temp_stdout",
+           "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase", "PYTHON3", "_FakeParserAction", "FIXTURES"]
 
 
 FIXTURES = {

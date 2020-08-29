@@ -20,6 +20,33 @@ A context manager is also available:
 
 -----
 
+## `getpass`
+
+`getpass` is enhanced with a new function:
+
+- `getcompliantpass`: it relies on `getpass` and allows to enforce a policy on the input password defined as a dictionary with the following keys:
+
+    - `allowed`: the allowed characters set, that can be defined according to some mask modifiers (defaults to `?l?L?d?s`,  that is, lower- and uppercase, digits and special characters)
+    - `entropy`: the minimum number of entropy bits required (defaults to `32`)
+    - `length`: a 2-tuple with the minimum and maximum lengths (defaults to `(8, 40)`)
+    - `required`: the required characters set, defined like the `allowed` set, cannot contain a mask modifier that is not in the `allowed` set (defaults to `?l?L?d`)
+    - `rules`: set of string modification rules, as of [defined here](helpers.html#useful-general-purpose-functions)
+    - `wordlists`: a dictionary of wordlists with keys being the filenames and their values being the lists of potential locations where they can be found (defaults to `{'password.lst': ["./", "~/"], 'rockyou.txt': ["./", "~/"]}`)
+
+!!! note "Password policy mask groups"
+    
+    A mask similar to this used in HashCat can be provided. The allowed groups are:
+    
+    - `d`: digits
+    - `h`: lowercase hexadecimal
+    - `H`: uppercase hexadecimal
+    - `l`: lowercase letters
+    - `L`: uppercase letters
+    - `p`: printable characters
+    - `s`: punctuation characters and whitespace
+
+-----
+
 ## `hashlib`
     
 `hashlib`, while imported with Tinyscript, is enhanced with additional functions so that these must not be rewritten in many applications, that is:

@@ -9,8 +9,10 @@ import re
 from ast import literal_eval as litev
 from math import log
 from random import randint
+from string import punctuation
 
 from .types import *
+from ..compat import ensure_str
 
 
 __all__ = __features__ = ["BitArray", "entropy", "entropy_bits", "pad", "unpad"]
@@ -90,9 +92,18 @@ def entropy(string):
 
 def entropy_bits(string):
     """
-    Number of bits of Shannon entropy.
+    Number of bits of entropy.
     """
-    return int(2 ** entropy(string))
+    string = ensure_str(string)
+    pool_len = 0
+    for r, n in zip([r"[a-z]", r"[A-Z]", r"\d"], [26, 26, 10]):
+        if re.search(r, string):
+            pool_len += n
+    if any(c in punctuation for c in string):
+        pool_len += len(punctuation)
+    if " " in string:
+        pool_len += 1
+    return int(log(max(pool_len, 1) ** len(string), 2) + .5)
 
 
 def pad(string, padding=None, blocksize=8, raw=False):

@@ -37,9 +37,7 @@ class TestHelpersDataUtils(TestCase):
         self.assertEqual(entropy(STR), entropy(list(map(ord, STR))))
         self.assertRaises(TypeError, entropy, 1)
         self.assertRaises(TypeError, entropy, pad)
-        self.assertEqual(entropy_bits(STR), 2)
-        self.assertEqual(entropy_bits(list(STR)), 2)
-        self.assertEqual(entropy_bits(STR), entropy_bits(list(map(ord, STR))))
+        self.assertEqual(entropy_bits(STR), 19)
         self.assertRaises(TypeError, entropy_bits, 1)
         self.assertRaises(TypeError, entropy_bits, pad)
 

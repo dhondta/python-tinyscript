@@ -8,7 +8,7 @@ try:  # will work in Python 3
     from importlib import reload
     import configparser
 except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
-    reload = reload
+    reload = reload  # this declaration is required to get "reload" in the global scope for inclusion in __all__
     import ConfigParser as configparser
 
 from .codep import code
@@ -17,6 +17,7 @@ from .hash import hashlib
 from .inspectp import inspect
 from .itools import itertools
 from .log import logging
+from .pswd import getpass
 from .rand import random
 from .regex import re
 from .stringp import string
@@ -31,6 +32,7 @@ __imports__ = {
     'enhanced': [
         "code",
         "functools",
+        "getpass",
         "hashlib",
         "inspect",
         "itertools",
