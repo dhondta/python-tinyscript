@@ -104,13 +104,10 @@ def __install(package, *args, **kwargs):
     """
     global pip_proc
     __check_pip_req_tracker()
-    if "-v" in args or "--verbose" in args:
-        verbose = True
-    else:
-        verbose = False
-        args += ("-v", )
+    verbose = "-v" in args or "--verbose" in args
     error = kwargs.pop("error", False)
-    cmd = ["install", "-U"] + __parse_args(*args, **kwargs) + [package.strip()]
+    package = package.strip()
+    cmd = ["install", "-U"] + __parse_args(*args, **kwargs) + [package]
     for l in __pip_run(cmd):
         if verbose:
             print(l)
@@ -189,14 +186,16 @@ def __pip_run(cmd, error=True):
         yield line[:-1]
 
 
-def __setup(venv_dir, requirements=None, verbose=False):
+def __setup(venv_dir, requirements=None, force_reinstall=False, no_cache=True, verbose=False):
     """
     This creates (if relevant) and activates a virtual environment. It also allows to define requirements to be
      installed in this environment.
     
-    :param venv_dir:     virtual environment's directory
-    :param requirements: list of required package OR path of the requirements file to be used
-    :param verbose:      displayed Pip output while installing packages
+    :param venv_dir:        virtual environment's directory
+    :param requirements:    list of required package OR path of the requirements file to be used
+    :param force_reinstall: force the reinstallation of required packages
+    :param no_cache:        disable the cache
+    :param verbose:         displayed Pip output while installing packages
     """
     __deactivate()
     venv_dir = os.path.abspath(venv_dir)
@@ -211,7 +210,13 @@ def __setup(venv_dir, requirements=None, verbose=False):
         with open(requirements) as f:
             requirements = [l.strip() for l in f]
     if isinstance(requirements, (tuple, list, set)):
-        args = ["-v"] if verbose else []
+        args = []
+        if force_reinstall:
+            args.append("--force-reinstall")
+        if no_cache:
+            args.append("--no-cache-dir")
+        if verbose:
+            args.append("-v")
         kwargs = {'prefix': venv_dir}
         for req in requirements:
             pkg = __install(req, *args, **kwargs)
@@ -279,17 +284,21 @@ class VirtualEnv(object):
     
     :param venvdir:      virtual environment's directory
     :param requirements: list of required package OR path of the requirements file to be used
+    :param reinstall:    force the reinstallation of required packages
+    :param no_cache:     disable the cache
     :param remove:       whether the virtual environment is to be removed after the entered context
     :param verbose:      displayed Pip output while installing packages
     """
-    def __init__(self, venvdir=None, requirements=None, remove=False, verbose=False):
+    def __init__(self, venvdir=None, requirements=None, remove=False, reinstall=False, no_cache=False, verbose=False):
+        self.__no_cache = no_cache
+        self.__reinstall = reinstall
         self.__remove = remove
         self.__requirements = requirements
         self.__venv_dir = venvdir or __get_virtualenv()
         self.__verbose = verbose
 
     def __enter__(self):
-        self.setup(self.__venv_dir, self.__requirements, self.__verbose)
+        self.setup(self.__venv_dir, self.__requirements, self.__reinstall, self.__no_cache, self.__verbose)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

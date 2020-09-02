@@ -29,8 +29,10 @@ if __name__ == '__main__':
         new_script(args.name, args.target)
     elif args.command == "install":
         # install from a source where the tool can be found
+        raise NotImplementedError
     elif args.command == "search":
         # search for a tool
+        raise NotImplementedError
     elif args.command == "update":
         with open(ts.ConfigPath("Tinyscript").join("sources.conf")) as f:
             for l in f:
