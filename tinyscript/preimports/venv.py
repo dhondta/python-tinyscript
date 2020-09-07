@@ -105,6 +105,8 @@ def __install(package, *args, **kwargs):
     global pip_proc
     __check_pip_req_tracker()
     verbose = "-v" in args or "--verbose" in args
+    if not verbose:
+        args += ("-v", )
     error = kwargs.pop("error", False)
     package = package.strip()
     cmd = ["install", "-U"] + __parse_args(*args, **kwargs) + [package]
