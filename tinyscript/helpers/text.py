@@ -102,7 +102,7 @@ def txt_terminal_render(text, format=None):
             # restore spaces between arguments and their help messages
             s = ARG_REGEX.search(line)
             if s:
-                l = spaces[s.group(1)]
+                l = spaces.get(s.group(1), 0)
                 line = ARG_REGEX.sub(r"\1{}\4".format(" " * l), line)
             # restore indentations
             else:

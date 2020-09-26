@@ -1,21 +1,191 @@
 language: python
-sudo: required
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-  - "3.7"
-  - "3.8"
+jobs:
+  allow_failures:
+    - arch: arm64
+    - os: osx
+    - python: nightly
+  fast_finish: true
+  include:
+    - python: 2.7
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.5
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.6
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.7
+      dist: focal
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.8
+      dist: focal
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: nightly
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python2 --version 2.7.18
+        - choco install pandoc
+        - choco install microsoft-visual-cpp-build-tools
+      env:
+       - PATH=/c/Python27:/c/Python27/Scripts:$PATH
+        - VS90COMNTOOLS=%VS140COMNTOOLS%
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.5.4
+        - choco install pandoc
+        - choco install microsoft-visual-cpp-build-tools
+      env:
+        - PATH=/c/Python35:/c/Python35/Scripts:$PATH
+        - VS90COMNTOOLS=%VS140COMNTOOLS%
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.6.8
+        - choco install pandoc
+        - choco install microsoft-visual-cpp-build-tools
+      env:
+        - PATH=/c/Python36:/c/Python36/Scripts:$PATH
+        - VS90COMNTOOLS=%VS140COMNTOOLS%
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.7.6
+        - choco install pandoc
+        - choco install microsoft-visual-cpp-build-tools
+      env:
+        - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+        - VS90COMNTOOLS=%VS140COMNTOOLS%
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.8.1
+        - choco install pandoc
+        - choco install microsoft-visual-cpp-build-tools
+      env:
+        - PATH=/c/Python38:/c/Python38/Scripts:$PATH
+        - VS90COMNTOOLS=%VS140COMNTOOLS%
+    - python: 2.7
+      arch: arm64
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.5
+      arch: arm64
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.6
+      arch: arm64
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.7
+      arch: arm64
+      dist: focal
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.8
+      arch: arm64
+      dist: focal
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: nightly
+      arch: arm64
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - os: osx
+      osx_image: xcode9.2
+      language: shell
+      env:
+        - PATH=/Users/travis/.pyenv/shims:$PATH
+        - PYENV_VERSION=2.7.18
+      before_install: travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
+      addons:
+        homebrew:
+          packages:
+            - pandoc
+    - os: osx
+      osx_image: xcode9.2
+      language: shell
+      env:
+        - PATH=/Users/travis/.pyenv/shims:$PATH
+        - PYENV_VERSION=3.5.2
+      before_install: travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
+      addons:
+        homebrew:
+          packages:
+            - pandoc
+    - os: osx
+      osx_image: xcode9.2
+      language: shell
+      env:
+        - PATH=/Users/travis/.pyenv/shims:$PATH
+        - PYENV_VERSION=3.6.8
+      before_install: travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
+      addons:
+        homebrew:
+          packages:
+            - pandoc
+    - os: osx
+      osx_image: xcode10.1
+      language: shell
+      env:
+        - PATH=/Users/travis/.pyenv/shims:$PATH
+        - PYENV_VERSION=3.7.6
+      before_install: travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
+      addons:
+        homebrew:
+          packages:
+            - pandoc
+    - os: osx
+      osx_image: xcode10.2
+      language: shell
+      env:
+        - PATH=/Users/travis/.pyenv/shims:$PATH
+        - PYENV_VERSION=3.8.1
+      before_install: travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
+      addons:
+        homebrew:
+          packages:
+            - pandoc
 cache: pip
-before_install:
-  - sudo apt-get -q update
-  - sudo apt-get -y install pandoc
 install:
+  - python -m pip install --upgrade pip
+  - pip install pandoc
+  - pip install nose
   - pip install coveralls
   - pip install cairocffi>=1.0.0
   - pip install -r requirements.txt
-  - python setup.py install
-script:
-  - nosetests -v --with-coverage --cover-tests --cover-package tinyscript tests
-after_success:
-  - coveralls
+  - pip install .
+script: nosetests -v --with-coverage --cover-tests --cover-package tinyscript tests
+after_success: coveralls
