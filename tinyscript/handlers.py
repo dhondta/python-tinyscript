@@ -4,14 +4,12 @@
 
 """
 import sys
-from signal import getsignal, siginterrupt, signal, \
-                   SIG_IGN, SIGINT, SIGTERM, SIGUSR1
+from signal import getsignal, signal, SIG_IGN, SIGINT, SIGTERM
 
 from .helpers.inputs import user_input
 
 
-__features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate",
-                "DisableSignals"]
+__features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate", "DisableSignals"]
 __all__ = ["_hooks"] + __features__
 
 
@@ -20,8 +18,7 @@ class DisableSignals(object):
     Context manager that disable signal handlers.
 
     :param signals: list of signal identifiers
-    :param fail:    whether execution should fail or not when a bad signal ID is
-                     encountered
+    :param fail:    whether execution should fail or not when a bad signal ID is encountered
     """
     def __init__(self, *signals, **kwargs):
         self.__handlers = {}
@@ -41,10 +38,9 @@ class DisableSignals(object):
             signal(s, h)
 
 
+# https://stackoverflow.com/questions/9741351/how-to-find-exit-code-or-reason-when-atexit-callback-is-called-in-python
 class ExitHooks(object):
     sigint_actions = ["confirm", "continue", "exit"]
-    # inspired from: https://stackoverflow.com/questions/9741351/how-to-find-exi
-    #                 t-code-or-reason-when-atexit-callback-is-called-in-python
     def __init__(self):
         self.__sigint_action = "exit"
         self._orig_exit = sys.exit
@@ -63,8 +59,7 @@ class ExitHooks(object):
     
     def quit(self, code=0):
         if self.__sigint_action == "confirm" and \
-           user_input("Do you really want to interrupt execution ?",
-                      ["(Y)es", "(N)o"], "y", style="bold") == "yes":
+           user_input("Do you really want to interrupt execution ?", ["(Y)es", "(N)o"], "y", style="bold") == "yes":
             self.__sigint_action = "exit"
         if self.state != "INTERRUPTED" or self.__sigint_action == "exit":
             self.exit(code)
@@ -80,8 +75,7 @@ class ExitHooks(object):
     @sigint_action.setter
     def sigint_action(self, value):
         if value not in self.sigint_actions:
-            raise ValueError("Bad interrupt action ; should be one of {}"
-                             .format("|".join(self.sigint_actions)))
+            raise ValueError("Bad interrupt action ; should be one of {}".format("|".join(self.sigint_actions)))
         self.__sigint_action = value
 
 _hooks = ExitHooks()
@@ -101,14 +95,16 @@ def __interrupt_handler(*args):
 signal(SIGINT, __interrupt_handler)
 
 
-def __pause_handler(*args):
-    """
-    Execution pause handler.
-    """
-    _hooks.pause()
-# bind to user-defined signal
-signal(SIGUSR1, __pause_handler)
-siginterrupt(SIGUSR1, False)
+if "win" not in sys.platform:
+    from signal import siginterrupt, SIGUSR1
+    def __pause_handler(*args):
+        """
+        Execution pause handler.
+        """
+        _hooks.pause()
+    # bind to user-defined signal
+    signal(SIGUSR1, __pause_handler)
+    siginterrupt(SIGUSR1, False)
 
 
 def __terminate_handler(*args):
@@ -129,3 +125,4 @@ at_exit          = lambda: None
 at_graceful_exit = lambda: None
 at_interrupt     = lambda: None
 at_terminate     = lambda: None
+

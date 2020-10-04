@@ -59,3 +59,4 @@ def set_hotkeys(glob):
                     r[key] = actions
             return hotkeys(r)
         raise ValueError("Invalid HOTKEYS dictionary")
+
