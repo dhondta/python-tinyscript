@@ -1,4 +1,6 @@
 language: python
+env:
+  global: PIP_ARGS="--upgrade --use-feature=2020-resolver"
 jobs:
   allow_failures:
     - arch: arm64
@@ -43,6 +45,7 @@ jobs:
       language: shell
       before_install:
         - choco install python2 --version 2.7.18
+        - choco install vcpython27
         - choco install pandoc
         - choco install microsoft-visual-cpp-build-tools
       env:
@@ -181,11 +184,11 @@ jobs:
 cache: pip
 install:
   - python -m pip install --upgrade pip
-  - pip install pandoc
-  - pip install nose
-  - pip install coveralls
-  - pip install cairocffi>=1.0.0
-  - pip install -r requirements.txt
-  - pip install .
+  - pip install $PIP_ARGS pandoc
+  - pip install $PIP_ARGS nose
+  - pip install $PIP_ARGS coveralls
+  - pip install $PIP_ARGS cairocffi>=1.0.0
+  - pip install $PIP_ARGS -r requirements.txt
+  - pip install $PIP_ARGS .
 script: nosetests -v --with-coverage --cover-tests --cover-package tinyscript tests
 after_success: coveralls
