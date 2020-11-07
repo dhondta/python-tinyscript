@@ -141,7 +141,7 @@ def hotkeys(hotkeys, silent=True):
     except NameError:
         pass
     # replace string keys to Key.[...] objects (e.g. 'ctrl')
-    for k, v in hotkeys.items():
+    for k, v in list(hotkeys.items()):
         try:
             k_obj = getattr(Key, k)
             hotkeys[k_obj] = v

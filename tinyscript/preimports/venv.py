@@ -207,6 +207,9 @@ def __setup(venv_dir, requirements=None, force_reinstall=False, no_cache=True, v
             virtualenv.create_environment(venv_dir)
         except AttributeError:
             virtualenv.cli_run([venv_dir])
+        # other issue: https://github.com/pypa/pipenv/issues/4518
+        #  for Python3, ImportError when using virtualenv installed with pip ;
+        #  works while installed with apt (python3-virtualenv)
     __activate(venv_dir)
     if isinstance(requirements, string_types):
         with open(requirements) as f:
