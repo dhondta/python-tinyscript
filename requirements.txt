@@ -13,6 +13,7 @@ patchy
 pathlib
 pip>=19.2
 plyer
+pygments
 pynput
 pypandoc
 python-slugify

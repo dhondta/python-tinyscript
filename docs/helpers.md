@@ -182,11 +182,11 @@ This package also provides some CLI layout objects:
 
 -----
 
-## Extended `pathlib` classes
+## Extended `pathlib`-like classes
 
 Tinyscript also provides 2 `pathlib`-related functions:
 
-- `ts.Path`: Extended Python2/3-compatible path class
+- `ts.Path`: extended Python2/3-compatible path class
 
     It fixes multiple compatibility issues between Python 2 and 3, namely `mkdir`'s `exist_ok` argument or methods `expanduser`, `read_text` and `write_text`.
     
@@ -229,6 +229,18 @@ Tinyscript also provides 2 `pathlib`-related functions:
     - `unmirror()`: removes the created symbolic links
     
     Basically, a path can be mirrored this way: `MirrorPath(destination, source)`. However, it can also be defined as `p = MirrorPath(destination)` and the `p.mirror(source)` method can then be used.
+
+- `ts.PyFolderPath`: new class for loading all Python modules within a given folder
+    
+    This allows to dynamically load Python modules at runtime given a folder containing the target modules. The `modules` attribute holds the list of all loaded modules.
+
+- `ts.PyModulePath`: new class for dynamically loading a Python module
+    
+    This dynamically loads a Python file. It has the following useful methods:
+    
+    - `get_classes(base_cls)`: for getting the list of all classes from the given Python module
+    - `has_baseclass(base_cls)`: for checking whether the given Python module has a class inheriting the given base class
+    - `has_class(cls)`: for checking whether the given Python module has the given class
 
 - `ts.TempPath`: additional class for handling temporary folder
     

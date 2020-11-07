@@ -11,16 +11,29 @@ from tinyscript.helpers.path import *
 from utils import *
 
 
+"""#!/usr/bin/env python
+import os
+
+class TestClass:
+    pass
+"""
+
+
 class TestHelpersPath(TestCase):
     @classmethod
     def setUpClass(cls):
-        global FILE, PATH, SPATH, TEST, TPATH1, TPATH2
+        global FILE, MODULE, PATH, SPATH, TEST, TPATH1, TPATH2
         TEST = "test_dir"
         PATH = Path(TEST, expand=True, create=True)
         SPATH = PATH.joinpath("test")
         SPATH.mkdir(parents=True, exist_ok=True)
         TPATH1 = TempPath()
         TPATH2 = TempPath(prefix="tinyscript-test_", length=8)
+        m = TPATH2.joinpath("modules")
+        m.mkdir()
+        f, MODULE = m.joinpath("test1.py"), m.joinpath("test2.py")
+        f.write_text("#!/usr/bin/env python\nimport os")
+        MODULE.write_text("#!/usr/bin/env python\nimport os\n\nclass Test(object): pass")
         FILE = PATH.joinpath("test.txt")
         FILE.touch()
         SPATH.joinpath("test.txt").touch()
@@ -30,7 +43,7 @@ class TestHelpersPath(TestCase):
         PATH.remove()
         TPATH2.remove()
     
-    def test_pathlib_file_extensions(self):
+    def test_file_extensions(self):
         self.assertEqual(FILE.filename, "test.txt")
         FILE.append_bytes(b"1234")
         self.assertIsInstance(FILE.bytes, bytes)
@@ -50,7 +63,7 @@ class TestHelpersPath(TestCase):
         self.assertEqual(FILE.generate(), FILE)
         self.assertRaises(TypeError, FILE.append_text, 0)
     
-    def test_pathlib_folder_extensions(self):
+    def test_folder_extensions(self):
         self.assertEqual(str(PATH), str(Path(TEST).absolute()))
         self.assertEqual(Path(TEST).child, Path("."))
         self.assertEqual(SPATH.size, 4096)
@@ -60,12 +73,6 @@ class TestHelpersPath(TestCase):
         self.assertEqual(list(PATH.iterfiles()), [FILE.absolute()])
         self.assertEqual(list(PATH.iterfiles(".py")), [])
         self.assertEqual(list(PATH.iterpubdir()), [SPATH])
-        self.assertTrue(TPATH1.exists())
-        self.assertEqual(str(TPATH1), gettempdir())
-        self.assertTrue(TPATH2.exists())
-        self.assertNotEqual(str(TPATH2), gettempdir())
-        with TPATH2.tempfile() as tf:
-            self.assertTrue(Path(tf.name).exists())
         self.assertNotEqual(len(list(PATH.walk())), 0)
         self.assertNotEqual(len(list(PATH.walk(False))), 0)
         self.assertNotEqual(len(list(PATH.find())), 0)
@@ -73,11 +80,11 @@ class TestHelpersPath(TestCase):
         self.assertNotEqual(len(list(PATH.find("te*"))), 0)
         self.assertEqual(len(list(PATH.find("test2.+", True))), 0)
     
-    def test_pathlib_configpath(self):
+    def test_config_path(self):
         PATH = ConfigPath("test-app", file=True)
         self.assertTrue(str(PATH).endswith("test-app.conf"))
     
-    def test_pathlib_mirrorpath(self):
+    def test_mirror_path(self):
         PATH2 = Path(TEST + "2", expand=True, create=True)
         PATH2.joinpath("test.txt").touch()
         PATH.joinpath("test2.txt").touch()
@@ -88,4 +95,34 @@ class TestHelpersPath(TestCase):
         self.assertFalse(p.joinpath("test").exists())
         self.assertFalse(p.joinpath("test2.txt").exists())
         PATH2.remove()
+    
+    def test_py_folder_path(self):
+        p = PyFolderPath(TPATH2)
+        self.assertEqual(len(p.modules), 2)
+        m1 = [m for m in p.modules if "test1.py" in str(m)]
+        m2 = [m for m in p.modules if "test2.py" in str(m)]
+        self.assertFalse(hasattr(m1, "Test"))
+        self.assertTrue(hasattr(m2, "Test"))
+    
+    def test_py_module_path(self):
+        p = PyModulePath(FILE)
+        self.assertFalse(p.is_pymodule)
+        self.assertEqual(list(p.get_classes()), [])
+        self.assertIsNone(p.has_class(object))
+        self.assertIsNone(p.has_baseclass(object))
+        p = PyModulePath(MODULE)
+        self.assertTrue(p.is_pymodule)
+        l = list(p.get_classes())
+        self.assertEqual(len(l), 1)
+        self.assertEqual(l[0].__name__, "Test")
+        self.assertFalse(p.has_baseclass(l[0]))
+        self.assertTrue(p.has_class(l[0]))
+    
+    def test_temp_path(self):
+        self.assertTrue(TPATH1.exists())
+        self.assertEqual(str(TPATH1), gettempdir())
+        self.assertTrue(TPATH2.exists())
+        self.assertNotEqual(str(TPATH2), gettempdir())
+        with TPATH2.tempfile() as tf:
+            self.assertTrue(Path(tf.name).exists())
 

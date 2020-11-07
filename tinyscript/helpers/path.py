@@ -3,6 +3,8 @@ import ctypes
 import os
 from importlib import import_module
 from pathlib import Path as BasePath
+from pkgutil import ImpImporter
+from pygments.lexers import Python2Lexer
 from random import choice
 from re import search
 from shutil import rmtree
@@ -13,7 +15,11 @@ from .constants import *
 from .compat import u
 
 
-__all__ = __features__ = ["Path", "ConfigPath", "MirrorPath", "TempPath"]
+__all__ = __features__ = ["Path", "ConfigPath", "MirrorPath", "PyFolderPath", "PyModulePath", "TempPath"]
+
+
+# NB: PythonLexer.analyse_text only relies on shebang !
+_lexer = Python2Lexer()
 
 
 class Path(BasePath):
@@ -27,12 +33,12 @@ class Path(BasePath):
     def __new__(cls, *parts, **kwargs):
         expand = kwargs.pop("expand", False)
         create = kwargs.pop("create", False)
-        _ = super(Path, cls).__new__(cls, *parts, **kwargs)
+        p = super(Path, cls).__new__(cls, *parts, **kwargs)
         if expand:
-            _ = _.expanduser().absolute()
-        if create and not _.exists():
-            _.mkdir(parents=True)  # exist_ok does not work in Python 2
-        return _
+            p = p.expanduser().absolute()
+        if create and not p.exists():
+            p.mkdir(parents=True)  # exist_ok does not work in Python 2
+        return p
     
     @property
     def basename(self):
@@ -286,9 +292,65 @@ class MirrorPath(Path):
             self.unlink()
 
 
+class PyFolderPath(Path):
+    """ Path extension for handling the dynamic import of every Python module inside the given folder. """
+    def __init__(self, path):
+        super(PyFolderPath, self).__init__()
+        self.modules = []
+        if self.is_dir():
+            for root, dirs, files in os.walk(str(path)):
+                for f in files:
+                    if f.endswith(".py"):
+                        p = PyModulePath(Path(root).joinpath(f))
+                        if p.is_pymodule:
+                            self.modules.append(p.module)
+
+
+class PyModulePath(Path):
+    """ Path extension for handling the dynamic import of a Python module. """
+    def __init__(self, path):
+        super(PyModulePath, self).__init__()
+        self.is_pymodule = self.is_file() and _lexer.analyse_text(self.open().read()) == 1.0
+        if self.is_pymodule:
+            self.module = ImpImporter(str(self.resolve().parent)).find_module(self.stem).load_module(self.stem)
+    
+    def get_classes(self, *base_cls):
+        """ Yield a list of all subclasses inheriting from the given class from the Python module. """
+        if not self.is_pymodule:
+            return
+        if not base_cls:
+            base_cls = (object, )
+        for n in dir(self.module):
+            cls = getattr(self.module, n)
+            try:
+                if issubclass(cls, base_cls) and cls not in base_cls:
+                    yield cls
+            except TypeError:
+                pass
+    
+    def has_baseclass(self, base_cls):
+        """ Check if the Python module has the given base class. """
+        return self.has_class(base_cls, False)
+    
+    def has_class(self, cls, self_cls=True):
+        """ Check if the Python module has the given class. """
+        if not self.is_pymodule:
+            return
+        for n in dir(self.module):
+            try:
+                c = getattr(self.module, n)
+                if issubclass(c, cls) and (self_cls or c is not cls):
+                    return True
+            except TypeError:
+                pass
+        return False
+
+
 class TempPath(Path):
     """ Extension of the class Path for handling a temporary path.
     
+    :param prefix:   prefix for the temporary folder name
+    :param suffix:   suffix for the temporary folder name
     :param length:   length for the folder name (if 0, do not generate a folder name, e.g. keeping /tmp)
     :param alphabet: character set to be used for generating the folder name
     """
@@ -313,5 +375,7 @@ class TempPath(Path):
     def tempfile(self, **kwargs):
         """ Create a NamedTemporaryFile in the TempPath. """
         kwargs.pop("dir", None)
-        return TempFile(dir=str(self), **kwargs)
+        tf = TempFile(dir=str(self), **kwargs)
+        tf.folder = self
+        return tf
 
