@@ -104,7 +104,7 @@ When a developper writes a script/tool relying on Tyniscript, every argument or 
 List of "*extra*" arguments and options:
 
 **Option strings** | **Description** | **If strings clash**
-:---: | :---: | :---:
+--- | --- | ---
 `--demo` | start a demo of a random example | `--play-demo`
 `-h`, `--help` | show the help message | `--show-help`
 `--step` | stepping mode | `--step-mode`
@@ -115,7 +115,7 @@ List of "*extra*" arguments and options:
 List of "*interaction*" arguments and options:
 
 **Option strings** | **Description** | **If strings clash**
-:---: | :---: | :---:
+--- | --- | ---
 `--interact` | interaction mode | `--interact-mode`
 `--host` | remote interacting host | `--remote-host`
 `--port` | remote interacting host | `--remote-port`
@@ -123,14 +123,14 @@ List of "*interaction*" arguments and options:
 List of "*timing*" arguments and options:
 
 **Option strings** | **Description** | **If strings clash**
-:---: | :---: | :---:
+--- | --- | ---
 `--stats` | time statistics display (at end) | `--time-stats`
 `--timings` | timing display mode | `--timings-mode`
 
 List of "*report*" arguments and options:
 
 **Option strings** | **Description** | **If strings clash**
-:---: | :---: | :---:
+--- | --- | ---
 `--output` | report output format | `--report-output`
 `--title` | report title | `--report-title`
 `--css` | report stylesheet file | `--report-css`

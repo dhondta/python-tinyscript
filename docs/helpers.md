@@ -3,7 +3,7 @@
 Tinyscript provides some predefined boolean constants, handy in some use cases:
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `DARWIN` | Darwin platform
 `JYTHON` | Java implementation of Python
 `LINUX` | `Linux platform
@@ -14,7 +14,7 @@ Tinyscript provides some predefined boolean constants, handy in some use cases:
 It also provides some other constants:
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `ENCODING` | system encoding
 `LANGUAGE` | system language code
 
@@ -23,7 +23,7 @@ It defines a `classproperty` decorator for setting a property to the class level
 It also defines a few compatibility/utility functions for working with the same code either in Python 2 or 3.
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `b` | bytes conversion function, overloading `six.b` for a better compatibility
 `byteindex` | selects the byte value from a string at the given index
 `colored` | allows to color text in a similar way to [`termcolor.colored`](https://pypi.org/project/termcolor/) (which is NOT in Tinyscript's requirements) but relying on [`colorful`](https://pypi.org/project/colorful/) (which is in Tinyscript's requirements)
@@ -52,7 +52,7 @@ It also defines a few compatibility/utility functions for working with the same 
 According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) philosophy, Tinyscript provides a few predefined user interaction functions:
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `ts.clear` | multi-platform clear screen function
 `ts.confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
 `ts.notify` | shortcut to the `notification.notify` function of [`plyer`](https://github.com/kivy/plyer)
@@ -63,7 +63,7 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 It also provides some simple execution functions:
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `ts.apply` | convenience function for applying a list of functions to the given arguments and keyword-arguments
 `ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
 `ts.process` | decorator for turning a function into a process
@@ -74,7 +74,7 @@ It also provides some simple execution functions:
 It also provides some other utility functions:
  
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `ts.BitArray` | slightly extended `BitArray` class from [`bitstring`](https://github.com/scott-griffiths/bitstring)
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
@@ -97,7 +97,7 @@ It also provides some other utility functions:
 A few utility functions related to bruteforcing are also available:
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `ts.bruteforce` | generator for making strings using a given alphabet from a minimum to a maximum length
 `ts.bruteforce_mask` | generator for bruteforcing according to a given mask (either a string or a list of alphabets per character position)
 `ts.bruteforce_pin` | generator for bruteforcing a variable-length PIN code (by default, length is 4) starting with a public top-20 most common PIN values
@@ -158,7 +158,7 @@ A few utility functions related to bruteforcing are also available:
 Some particular data structures are provided:
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `ts.ClassRegistry` | special dictionary whose keys are (base) classes and values are lists of related subclasses (e.g. `{Base: [Sub1, Sub2]}`) ; subclasses can be accessed by using the base class name and the subclass name, e.g. `d["base", "sub1"]`
 `ts.ExpiringDict(max_age, sort_by_time)` | dictionary with expiring keys ; configured using the `max_age` argument (by default `0` meaning no expiration) and `sort_by_time` (allowing to sort keys either by time, if set to `True`, or in alphabetical order)
 `ts.PathBasedDict` | particular dictionary where the keys are defined like a path (a dictionary is created for each base) ; e.g. `d['path/to/key'] = ...` will give `{'path': {'to': {'key': ...}}}`
@@ -166,7 +166,7 @@ Some particular data structures are provided:
 Also related to this, the following helper functions are provided:
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `ts.merge_dictionaries` | useful function for merging two or more dictionaries, either updating the first input dictionary (if `new` is `False` ; this is the default) or creating a new one, also updating the resulting dictionary with the latest input dictionaries (if `update` is `True` ; this is the default) or not, dealing with the duplicate values (when iterable) by merging them (related to the `duplicates` boolean)
 
 -----
@@ -176,7 +176,7 @@ Also related to this, the following helper functions are provided:
 This package also provides some CLI layout objects:
 
 **Name** | **Description**
-:---: | :---:
+--- | ---
 `ts.BorderlessTable` | borderless table based on an input data matrix, either with a heading line or not (`header` keyword-argument) ; relies on [`terminaltables`](https://pypi.org/project/terminaltables/)
 `ts.NameDescription` | indented name-description line, with optional details (`details` third positional argument) ; also relies on [`terminaltables`](https://pypi.org/project/terminaltables/)
 
@@ -243,7 +243,7 @@ Tinyscript also provides 2 `pathlib`-related functions:
 Tinyscript provides some type checking functions, for common data:
 
 **Function** | **Description**
-:---: | :---:
+--- | ---
 `ts.is_bin` | binary string (with or without `\W` separators)
 `ts.is_bool` | boolean
 `ts.is_dict` | dictionary
@@ -260,7 +260,7 @@ Tinyscript provides some type checking functions, for common data:
 For string-related data:
 
 **Function** | **Description**
-:---: | :---:
+--- | ---
 `ts.is_digits` | the given string has only digits
 `ts.is_letters` | the given string has only letters
 `ts.is_lowercase` | the given string has only lowercase characters
@@ -276,7 +276,7 @@ For string-related data:
 Also for various objects:
 
 **Function** | **Description**
-:---: | :---:
+--- | ---
 `ts.is_class` | class definition (relying on `inspect.isclass`)
 `ts.is_coroutine` | coroutine (relying on `inspect.iscoroutine`)
 `ts.is_coroutinefunc` | coroutine function (relying on `inspect.iscoroutinefunction`)
@@ -294,7 +294,7 @@ Also for various objects:
 For config-related data:
 
 **Function** | **Description**
-:---: | :---:
+--- | ---
 `ts.is_ini` / `ts.is_ini_file` | INI configuration content/file
 `ts.is_json` / `ts.is_json_file` | JSON configuration content/file
 `ts.is_toml` / `ts.is_toml_file` | TOML configuration content/file
@@ -303,7 +303,7 @@ For config-related data:
 For hash-related data:
 
 **Function** | **Description**
-:---: | :---:
+--- | ---
 `ts.is_hash` | hash string, among MD5/SHA1/SHA224/SHA256/SHA512
 `ts.is_md5` | MD5 hash
 `ts.is_sha1` | SHA1 hash
@@ -314,7 +314,7 @@ For hash-related data:
 And for network-related data:
 
 **Function** | **Description**
-:---: | :---:
+--- | ---
 `ts.is_asn` | 2-byte or 4-byte AS number
 `ts.is_defgw` | default gateway
 `ts.is_domain` | domain name
@@ -334,7 +334,7 @@ And for network-related data:
 While adding arguments to the parser (relying on `argparse`), Tinyscript provides some useful common type validation functions that can be used with the `type` keyword argument, namely (returning `ValueError` when the validation fails):
 
 **Type** | **Output** | **Description**
-:---: | :---: | :---:
+--- | --- | ---
 `ts.file_does_not_exist` | `str` | non-existing file path
 `ts.file_exists` | `str` | existing file path
 `ts.files_list` | `list(str)` | list of only existing file paths
@@ -353,7 +353,7 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 For config-related types:
 
 **Function** | **Description**
-:---: | :---:
+--- | ---
 `ts.ini_config` | INI configuration file
 `ts.json_config` | JSON configuration file
 `ts.toml_config` | TOML configuration file
@@ -362,7 +362,7 @@ For config-related types:
 For hash-related types:
 
 **Type** | **Output** | **Description**
-:---: | :---: | :---:
+--- | --- | ---
 `ts.any_hash` | `str` | any valid hash amongst MD5|SHA1|SHA224|SHA256|SHA512
 `ts.md5_hash` | `str` | MD5 hash
 `ts.sha1_hash` | `str` | SHA1 hash
@@ -373,7 +373,7 @@ For hash-related types:
 And for network-related types:
 
 **Type** | **Output** | **Description**
-:---: | :---: | :---:
+--- | --- | ---
 `ts.as_number` | `int` or `str` | valid 2-byte or 4-byte AS number
 `ts.default_gateway_address` | `str` | valid default gateway address
 `ts.domain_name` | `str`  | valid domain name
