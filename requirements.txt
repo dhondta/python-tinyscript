@@ -18,6 +18,7 @@ pypandoc
 python-slugify
 pyyaml>=5.3.1
 six
+terminaltables
 toml
 tqdm
 virtualenv

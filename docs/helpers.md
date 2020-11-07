@@ -153,6 +153,35 @@ A few utility functions related to bruteforcing are also available:
 
 -----
 
+## Data structures
+
+Some particular data structures are provided:
+
+**Name** | **Description**
+:---: | :---:
+`ts.ClassRegistry` | special dictionary whose keys are (base) classes and values are lists of related subclasses (e.g. `{Base: [Sub1, Sub2]}`) ; subclasses can be accessed by using the base class name and the subclass name, e.g. `d["base", "sub1"]`
+`ts.ExpiringDict(max_age, sort_by_time)` | dictionary with expiring keys ; configured using the `max_age` argument (by default `0` meaning no expiration) and `sort_by_time` (allowing to sort keys either by time, if set to `True`, or in alphabetical order)
+`ts.PathBasedDict` | particular dictionary where the keys are defined like a path (a dictionary is created for each base) ; e.g. `d['path/to/key'] = ...` will give `{'path': {'to': {'key': ...}}}`
+
+Also related to this, the following helper functions are provided:
+
+**Name** | **Description**
+:---: | :---:
+`ts.merge_dictionaries` | useful function for merging two or more dictionaries, either updating the first input dictionary (if `new` is `False` ; this is the default) or creating a new one, also updating the resulting dictionary with the latest input dictionaries (if `update` is `True` ; this is the default) or not, dealing with the duplicate values (when iterable) by merging them (related to the `duplicates` boolean)
+
+-----
+
+## CLI layout objects
+
+This package also provides some CLI layout objects:
+
+**Name** | **Description**
+:---: | :---:
+`ts.BorderlessTable` | borderless table based on an input data matrix, either with a heading line or not (`header` keyword-argument) ; relies on [`terminaltables`](https://pypi.org/project/terminaltables/)
+`ts.NameDescription` | indented name-description line, with optional details (`details` third positional argument) ; also relies on [`terminaltables`](https://pypi.org/project/terminaltables/)
+
+-----
+
 ## Extended `pathlib` classes
 
 Tinyscript also provides 2 `pathlib`-related functions:

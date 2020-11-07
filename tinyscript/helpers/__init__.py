@@ -12,8 +12,10 @@ from .compat import *
 from .constants import *
 from .data import *
 from .decorators import *
+from .dictionaries import *
 from .fexec import *
 from .inputs import *
+from .layout import *
 from .licenses import *
 from .notify import *
 from .path import *
@@ -28,8 +30,10 @@ from .compat import __features__ as _compat
 from .constants import __features__ as _csts
 from .data import __features__ as _data
 from .decorators import __features__ as _dec
+from .dictionaries import __features__ as _dict
 from .fexec import __features__ as _fexec
 from .inputs import __features__ as _inputs
+from .layout import __features__ as _layout
 from .licenses import __features__ as _lic
 from .notify import __features__ as _notify
 from .path import __features__ as _path
@@ -38,7 +42,8 @@ from .text import __features__ as _text
 from .timeout import __features__ as _to
 
 
-__helpers__ = _attack + _common + _data + _dec + _fexec + _inputs + _lic + _notify + _path + _tsize + _text + _to
+__helpers__ = _attack + _common + _data + _dec + _dict + _fexec + _inputs + _layout + _lic + _notify + _path + \
+              _tsize + _text + _to
 
 ts = ModuleType("ts", """
     Tinyscript helpers
