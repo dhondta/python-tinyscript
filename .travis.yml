@@ -5,6 +5,7 @@ jobs:
   allow_failures:
     - arch: arm64
     - os: osx
+    - os: windows
     - python: nightly
   fast_finish: true
   include:
