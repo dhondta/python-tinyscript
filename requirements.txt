@@ -14,6 +14,7 @@ pathlib
 pip>=19.2
 plyer
 pygments
+pyminizip
 pynput
 pypandoc
 python-slugify
