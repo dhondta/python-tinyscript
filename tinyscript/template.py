@@ -49,8 +49,7 @@ if __name__ == '__main__':
 
 
 def new(name, target=None):
-    """
-    Function for creating a template script.
+    """ Function for creating a template script.
     
     :param name:     name of the new script/tool
     :param target:   type of script to be created, a value among TARGETS' keys

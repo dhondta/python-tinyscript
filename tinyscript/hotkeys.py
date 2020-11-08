@@ -33,8 +33,7 @@ BASE_HOTKEYS = {
 
 
 def set_hotkeys(glob):
-    """
-    This function registers the hotkeys got from the global scope.
+    """ This function registers the hotkeys got from the global scope.
     
     :param glob: main script's global scope dictionary reference
     """

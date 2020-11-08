@@ -11,3 +11,4 @@ def __deprecated(old, new=None):
     if new is not None:
         msg += ", please use '{}'".format(new)
     raise DeprecationWarning(msg)
+

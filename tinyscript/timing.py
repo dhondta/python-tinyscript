@@ -17,9 +17,7 @@ TO_MSG = strerror(ETIME)
 
 
 def set_time_items(glob):
-    """
-    This function prepares the benchmark items for inclusion in main script's
-     global scope.
+    """ This function prepares the benchmark items for inclusion in main script's global scope.
     
     :param glob: main script's global scope dictionary reference
     """
@@ -51,12 +49,10 @@ def set_time_items(glob):
         return t - (start or 0)
     # Time context manager, for easilly benchmarking a block of code
     class Timer(object):
-        def __init__(self, description=None, message=TO_MSG, timeout=None,
-                     fail_on_timeout=False):
+        def __init__(self, description=None, message=TO_MSG, timeout=None, fail_on_timeout=False):
             self.fail = fail_on_timeout
             self.id = len(manager.times)
-            self.descr = "#" + str(self.id) + \
-                         (": " + (description or "")).rstrip(": ")
+            self.descr = "#" + str(self.id) + (": " + (description or "")).rstrip(": ")
             self.message = message
             self.start = _take_time()
             self.timeout = timeout
@@ -87,10 +83,10 @@ def set_time_items(glob):
     # timing function for getting a measure from the start of the execution
     def get_time(message=None, start=manager.start):
         if manager._timings:
-            l.time("> {}: {} seconds".format(message or "Time elapsed since "
-                                          "execution start", _take_time(start)))
+            l.time("> {}: {} seconds".format(message or "Time elapsed since execution start", _take_time(start)))
     glob['get_time'] = get_time
     # timing function for getting a measure since the last one
     def get_time_since_last(message=None):
         get_time(message or "Time elapsed since last measure", manager.last)
     glob['get_time_since_last'] = get_time_since_last
+

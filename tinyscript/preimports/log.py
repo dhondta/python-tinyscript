@@ -30,8 +30,7 @@ def __del(d, k):
 
 
 def addLogLevel(levelName, color, level, bold=True):
-    """
-    Add a new log level.
+    """ Add a new log level.
     
     :param levelName: name for the new level
     :param color:     related message color
@@ -69,11 +68,10 @@ logging.addLogLevel = addLogLevel
 
 
 def bindLogger(f):
-    """
-    This decorators allows either to bind a logger to self if f is a method or to bind a logger in the local scope of f
-     if it is a function. It tries first to get the logger from kwargs, or then tries to get the logger from caller's
-     globals or finally sets a null logger. This way, the logger can be used inside the function without caring to get a
-     logger itself.
+    """ This decorators allows either to bind a logger to self if f is a method or to bind a logger in the local scope
+         of f if it is a function. It tries first to get the logger from kwargs, or then tries to get the logger from
+         caller's globals or finally sets a null logger. This way, the logger can be used inside the function without
+         caring to get a logger itself.
     
     Inspired from: https://stackoverflow.com/questions/17862185/how-to-inject-variable-into-scope-with-a-decorator
     """
@@ -103,9 +101,7 @@ logging.bindLogger = bindLogger
 
 
 def delLevelName(level):
-    """
-    Remove association of 'levelName' with 'level'.
-    """
+    """ Remove association of 'levelName' with 'level'. """
     logging._acquireLock()
     if isinstance(level, int):
         levelName = logging._levelToName[level] if PY3 else logging._levelNames[level]
@@ -121,9 +117,7 @@ logging.delLevelName = delLevelName
 
 
 def delLogLevel(levelName):
-    """
-    Remove a log level.
-    """
+    """ Remove a log level. """
     n, N = levelName, levelName.upper()
     if not hasattr(logging, N):
         raise ValueError("Log level '{}' does not exist".format(n))
@@ -136,9 +130,7 @@ logging.delLogLevel = delLogLevel
 
 
 def lastLogRecord():
-    """
-    Display the last log record.
-    """
+    """ Display the last log record. """
     rec = getattr(logging, "_last_record", None)
     if rec:
         lastrec = logging.getLogger("__last_record__")
@@ -149,8 +141,8 @@ logging.lastLogRecord = lastLogRecord
 
 
 def renameLogger(old_name, new_name):
-    """
-    Rename a logger with a different name. If the new name exists in the dictionary of loggers, it raises an exception.
+    """ Rename a logger with a different name. It raises an exception if the new name exists in the native dictionary of
+         loggers.
     
     :param old_name: old logger name
     :param new_name: new logger name
@@ -166,8 +158,7 @@ logging.renameLogger = renameLogger
 
 
 def setLogger(name=None):
-    """
-    Set up the logger with the given name according to Tinyscript's logging configuration.
+    """ Set up the logger with the given name according to Tinyscript's logging configuration.
     
     :param name: logger name
     """
@@ -176,8 +167,7 @@ logging.setLogger = setLogger
 
 
 def setLoggers(*names):
-    """
-    Set up the loggers with the given names according to Tinyscript's logging configuration.
+    """ Set up the loggers with the given names according to Tinyscript's logging configuration.
     
     :param names: logger names
     """
@@ -204,8 +194,7 @@ logging.setLoggers = setLoggers
 
 
 def unsetLogger(name, force=False):
-    """
-    Remove a logger. If the name does not exist in the dictionary of loggers, it raises an exception.
+    """ Remove a logger. If the name does not exist in the dictionary of loggers, it raises an exception.
     
     :param name: logger name
     """
@@ -225,8 +214,7 @@ logging.unsetLogger = unsetLogger
 
 
 def unsetLoggers(*names, **kwargs):
-    """
-    Remove loggers. If a name does not exist in the dictionary of loggers, it raises an exception.
+    """ Remove loggers. If a name does not exist in the dictionary of loggers, it raises an exception.
     
     :param names: logger names
     """

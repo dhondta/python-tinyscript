@@ -96,3 +96,4 @@ def configure_logger(glob, multi_level, relative=False, logfile=None, syslog=Fal
     lastrec.addHandler(handler)
     lastrec.setLevel(1)
     coloredlogs.install(1, logger=lastrec, fmt="\r" + lfmt, datefmt=dfmt, milliseconds=gtms)
+

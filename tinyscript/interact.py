@@ -6,17 +6,14 @@
 import readline
 import socket
 import sys
-from code import compile_command, interact as base_interact, \
-                 InteractiveConsole as BaseInteractiveConsole
+from code import compile_command, interact as base_interact, InteractiveConsole as BaseInteractiveConsole
 
 
 __all__ = ["set_interact_items"]
 
 
 def set_interact_items(glob):
-    """
-    This function prepares the interaction items for inclusion in main script's
-     global scope.
+    """ This function prepares the interaction items for inclusion in main script's global scope.
     
     :param glob: main script's global scope dictionary reference
     """
@@ -25,18 +22,15 @@ def set_interact_items(glob):
     if enabled:
         readline.parse_and_bind('tab: complete')
 
-    # InteractiveConsole as defined in the code module, but handling a banner
-    #  using the logging of tinyscript
+    # InteractiveConsole as defined in the code module, but handling a banner using the logging of tinyscript
     class InteractiveConsole(BaseInteractiveConsole, object):
-        def __init__(self, banner=None, namespace=None, filename='<console>',
-                     exitmsg=None):
+        def __init__(self, banner=None, namespace=None, filename='<console>', exitmsg=None):
             if enabled:
                 self.banner = banner
                 self.exitmsg = exitmsg
                 ns = glob
                 ns.update(namespace or {})
-                super(InteractiveConsole, self).__init__(locals=ns,
-                                                         filename=filename)
+                super(InteractiveConsole, self).__init__(locals=ns, filename=filename)
             
         def __enter__(self):
             if enabled and self.banner is not None:
@@ -65,11 +59,9 @@ def set_interact_items(glob):
 
     glob['interact'] = interact
     
-    glob['compile_command'] = compile_command if enabled else \
-                              lambda *a, **kw: None
+    glob['compile_command'] = compile_command if enabled else lambda *a, **kw: None
 
-    # ConsoleSocket for handling duplicating std*** to a socket for the
-    #  RemoteInteractiveConsole
+    # ConsoleSocket for handling duplicating std*** to a socket for the RemoteInteractiveConsole
     host = getattr(a, a._collisions.get("host") or "host", None)
     port = getattr(a, a._collisions.get("port") or "port", None)
 
@@ -81,8 +73,7 @@ def set_interact_items(glob):
         def write(self, *args, **kwargs):
             return self.send(*args, **kwargs)
 
-    # RemoteInteractiveConsole as defined in the code module, but handling 
-    #  interaction through a socket
+    # RemoteInteractiveConsole as defined in the code module, but handling interaction through a socket
     class RemoteInteractiveConsole(InteractiveConsole):
         def __init__(self, *args, **kwargs):
             if enabled:
@@ -112,3 +103,4 @@ def set_interact_items(glob):
                 sys.stderr = self.__stderr
 
     glob['RemoteInteractiveConsole'] = RemoteInteractiveConsole
+

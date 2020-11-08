@@ -646,11 +646,9 @@ class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
 
 
 class Namespace(BaseNamespace):
-    """
-    Modified Namespace class for handling ArgumentParser._config.
-    """
-    # private __dict__, so that vars() can still be used with no "junk" variable
-    #  used for Tinyscript-related processing (e.g. _current_parser)
+    """ Modified Namespace class for handling ArgumentParser._config. """
+    # private __dict__, so that vars() can still be used with no "junk" variable used for Tinyscript-related processing
+    #  (e.g. _current_parser)
     __privdict__ = {}
     # exclude list for saving options in a ConfigParser object
     excludes = ["_current_parser", "_debug_level", "_collisions", "_subparsers", "read_config", "write_config"]
@@ -676,9 +674,8 @@ class Namespace(BaseNamespace):
         # then save the entry to the ConfigParser object if not excluded
         if name not in self.excludes:
             ArgumentParser.add_to_config(self._current_parser, name, value)
-        # finally switch the current parser value if the option name is part of
-        #  a subparser's list of options ; this new name will allow to save new
-        #  options in a new section of the ConfigParser object
+        # finally switch the current parser value if the option name is part of a subparser's list of options ; this new
+        #  name will allow to save new options in a new section of the ConfigParser object
         if hasattr(self, "_subparsers") and name in self._subparsers and value:
             self._current_parser = name
     

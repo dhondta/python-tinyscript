@@ -10,8 +10,7 @@ __all__ = ["set_progress_items"]
 
 
 def set_progress_items(glob):
-    """
-    This function prepares the progress items for inclusion in main script's global scope.
+    """ This function prepares the progress items for inclusion in main script's global scope.
     
     :param glob: main script's global scope dictionary reference
     """
@@ -62,3 +61,4 @@ def set_progress_items(glob):
         except TypeError as te:
             return manager.range(*args, **kwargs)
     glob['progressbar'] = progressbar
+
