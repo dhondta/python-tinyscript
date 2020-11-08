@@ -1,41 +1,40 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Preimports getpass assets' tests.
+"""Password input function tests.
 
 """
-from tinyscript.preimports import getpass
+from tinyscript.helpers.password import getpass
 
 from utils import *
 
 
-class TestPreimportsGetpass(TestCase):
-    def test_getcompliantpass(self):
+class TestHelpersPassword(TestCase):
+    def test_getpass(self):
         # test the policy
-        self.assertRaises(ValueError, getpass.getcompliantpass, policy="BAD")
-        self.assertRaises(ValueError, getpass.getcompliantpass, policy={'allowed': "BAD"})
-        self.assertRaises(ValueError, getpass.getcompliantpass, policy={'allowed': "?l", 'required': "?L"})
-        self.assertRaises(ValueError, getpass.getcompliantpass, policy={'wordlists': "BAD"})
+        self.assertRaises(ValueError, getpass, policy="BAD")
+        self.assertRaises(ValueError, getpass, policy={'allowed': "BAD"})
+        self.assertRaises(ValueError, getpass, policy={'allowed': "?l", 'required': "?L"})
+        self.assertRaises(ValueError, getpass, policy={'wordlists': "BAD"})
         for l in [(-1, 10), (10, -1), (10, 1)]:
-            self.assertRaises(ValueError, getpass.getcompliantpass, policy={'length': l})
+            self.assertRaises(ValueError, getpass, policy={'length': l})
         # test a few bad passwords
         WORDLIST = "./.wordlist"
         with open(WORDLIST, 'wt') as f:
             f.write("Test4321!")
-        kwargs = {'once': True, 'policy': {'wordlists': ["wl_does_not_exist"]}}
+        kwargs = {'policy': {'wordlists': ["wl_does_not_exist"]}}
         for i, p in enumerate(["test", "Test1", "Test1!", "Testtest", "testtesttest", "\x01\x02\x03", "Test4321!",
                                "Th1s 1s 4 l0ng, v3ry l0ng, t00 l0ng c0mpl3x s3nt3nc3!"]):
             if i > 2:
                 kwargs['policy'] = {'wordlists': [WORDLIST]}
             with mock_patch("getpass.getpass", return_value=p):
-                pswd = getpass.getcompliantpass(**kwargs)
-            self.assertIsNone(pswd)
+                self.assertRaises(ValueError, getpass, **kwargs)
         remove(WORDLIST)
         # test a few good passwords
-        kwargs = {'once': True}
+        kwargs = {}
         for i, p in enumerate(["Test1234!", "Th1s 1s 4 l0ng s3nt3nc3!"]):
             if i > 1:
                 kwargs['policy'] = {'wordlists': None}
             with mock_patch("getpass.getpass", return_value=p):
-                pswd = getpass.getcompliantpass(**kwargs)
+                pswd = getpass(**kwargs)
             self.assertEqual(pswd, p)
 

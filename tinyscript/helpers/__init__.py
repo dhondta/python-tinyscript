@@ -18,6 +18,7 @@ from .inputs import *
 from .layout import *
 from .licenses import *
 from .notify import *
+from .password import *
 from .path import *
 from .termsize import *
 from .text import *
@@ -36,13 +37,14 @@ from .inputs import __features__ as _inputs
 from .layout import __features__ as _layout
 from .licenses import __features__ as _lic
 from .notify import __features__ as _notify
+from .password import __features__ as _pswd
 from .path import __features__ as _path
 from .termsize import __features__ as _tsize
 from .text import __features__ as _text
 from .timeout import __features__ as _to
 
 
-__helpers__ = _attack + _common + _data + _dec + _dict + _fexec + _inputs + _layout + _lic + _notify + _path + \
+__helpers__ = _attack + _common + _data + _dec + _dict + _fexec + _inputs + _layout + _lic + _notify + _path + _pswd + \
               _tsize + _text + _to
 
 ts = ModuleType("ts", """

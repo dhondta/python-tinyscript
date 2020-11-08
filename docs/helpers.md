@@ -55,6 +55,7 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 --- | ---
 `ts.clear` | multi-platform clear screen function
 `ts.confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
+`ts.getpass` | `getpass.getpass`-based function that allows to enter a policy for making compliant passwords (see [`getpass` enhancement](enhancements.html#getpass) for more details about how a policy can be described)
 `ts.notify` | shortcut to the `notification.notify` function of [`plyer`](https://github.com/kivy/plyer)
 `ts.pause` | Python2/3-compatible dummy input function, waiting for a key to be pressed (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
 `ts.std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
@@ -231,17 +232,25 @@ Tinyscript also provides 2 `pathlib`-related functions:
     
     Basically, a path can be mirrored this way: `MirrorPath(destination, source)`. However, it can also be defined as `p = MirrorPath(destination)` and the `p.mirror(source)` method can then be used.
 
-- `ts.PyFolderPath`: new class for loading all Python modules within a given folder
+- `ts.ProjectPath`: new class for managing a project, given a structure
     
-    This allows to dynamically load Python modules at runtime given a folder containing the target modules. The `modules` attribute holds the list of all loaded modules.
+    This class allows to manage a project folder in a handy manner using the following methods:
+    
+    - `archive`: this method allows to archive the project folder to a ZIP file in a given destination path, optionally encrypted using a given password (`password` argument) or by asking the user to enter one (with `ask=True`) ; by default, the project folder is removed after compression (this behavior can be disabled by using `remove=False`) and this method returns a new `ProjectPath` with the new path (to the ZIP file)
+    - `create`: this creates the project structure given a dictionary describing it ; each key is a folder (with its content described with a subdictionary) or a file (if the value is `None`, meaning that an empty file is to be created, or the content of it)
+    - `load` (the complementary method of `archive`): this allows to unzip an archive to a given destination given a password or by asking it ; by default, the ZIP archive is removed after decompression (this behavior can be disabled by using `remove=False`)
+    
+    The `todo` attribute allows to get a dictionary of all the "`#TODO: `" markers contained in the project.
 
-- `ts.PyModulePath`: new class for dynamically loading a Python module
+- `ts.PythonPath`: new class for dynamically loading Python modules, either directly from a file or from a folder
     
-    This dynamically loads a Python file. It has the following useful methods:
+    This dynamically loads Python files in the given path. It has the following useful methods:
     
     - `get_classes(base_cls)`: for getting the list of all classes from the given Python module
     - `has_baseclass(base_cls)`: for checking whether the given Python module has a class inheriting the given base class
     - `has_class(cls)`: for checking whether the given Python module has the given class
+    
+    When a file is given as argument, the `module` attribute holds the related Python module (if the given file is indeed a Python source file). When a folder is given, the `modules` attribute holds a list of all the loaded modules within that path.
 
 - `ts.TempPath`: additional class for handling temporary folder
     
