@@ -25,7 +25,8 @@ class TestHelpersPath(TestCase):
         m.mkdir()
         f, MODULE = m.joinpath("test1.py"), m.joinpath("test2.py")
         f.write_text("#!/usr/bin/env python\nimport os")
-        MODULE.write_text("#!/usr/bin/env python\nimport os\n\nclass Test(object):\n   pass")
+        MODULE.write_text("#!/usr/bin/env python\nimport os\n\nclass Test(object):\n   pass\n\n"
+                          "def test(): pass #TODO: test")
         FILE = PATH.joinpath("test.txt")
         FILE.touch()
         SPATH.joinpath("test.txt").touch()
@@ -33,7 +34,7 @@ class TestHelpersPath(TestCase):
     @classmethod
     def tearDownClass(cls):
         PATH.remove()
-        TPATH2.remove()
+        #TPATH2.remove()
     
     def test_file_extensions(self):
         self.assertEqual(FILE.filename, "test.txt")
@@ -89,18 +90,29 @@ class TestHelpersPath(TestCase):
         self.assertFalse(p.joinpath("test2.txt").exists())
         PATH2.remove()
     
-    def test_py_folder_path(self):
-        p = PyFolderPath(TPATH2)
+    def test_project_path(self):
+        self.assertRaises(ValueError, ProjectPath, FILE)
+        p = ProjectPath(str(TPATH2), {'README': "#TODO: test", 'folder': {'file1': "test file", 'file2': None}})
+        self.assertEqual(p.todo, {str(Path(str(TPATH2)).joinpath("README")) + ':1': "test",
+                                  str(Path(str(TPATH2)).joinpath("modules", "test2.py")) + ':Test:7': "test"})
+        self.assertRaises(ValueError, p.load)
+        p2 = p.archive()
+        self.assertFalse(p.exists())
+        self.assertTrue(p2.exists())
+        self.assertRaises(ValueError, p2.archive)
+        p = p2.load()
+        self.assertFalse(p2.exists())
+        self.assertTrue(p.exists())
+    
+    def test_python_path(self):
+        p = PythonPath(TPATH2)
         self.assertEqual(len(p.modules), 2)
         self.assertTrue(any(hasattr(m, "Test") for m in p.modules))
-    
-    def test_py_module_path(self):
-        p = PyModulePath(FILE)
+        self.assertEqual(len(list(p.get_classes())), 1)
+        p = PythonPath(FILE)
         self.assertFalse(p.is_pymodule)
         self.assertEqual(list(p.get_classes()), [])
-        self.assertIsNone(p.has_class(object))
-        self.assertIsNone(p.has_baseclass(object))
-        p = PyModulePath(MODULE)
+        p = PythonPath(MODULE)
         self.assertTrue(p.is_pymodule)
         l = list(p.get_classes())
         self.assertEqual(len(l), 1)

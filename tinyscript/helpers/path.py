@@ -1,10 +1,15 @@
 # -*- coding: UTF-8 -*-
+"""Path-oriented structures derived from pathlib.Path.
+
+"""
 import ctypes
+import imp
+import importlib
 import os
-from importlib import import_module
+from mimetypes import guess_type
 from pathlib import Path as BasePath
-from pkgutil import ImpImporter
 from pygments.lexers import Python2Lexer
+from pyminizip import compress_multiple, uncompress
 from random import choice
 from re import search
 from shutil import rmtree
@@ -13,10 +18,13 @@ from tempfile import gettempdir, NamedTemporaryFile as TempFile
 
 from .constants import *
 from .compat import u
+from .password import getpass
 
 
-__all__ = __features__ = ["Path", "ConfigPath", "MirrorPath", "PyFolderPath", "PyModulePath", "TempPath"]
+__all__ = __features__ = ["Path", "ConfigPath", "MirrorPath", "ProjectPath", "PythonPath", "TempPath"]
 
+
+MARKER = "#TODO:"
 
 # NB: PythonLexer.analyse_text only relies on shebang !
 _lexer = Python2Lexer()
@@ -65,6 +73,11 @@ class Path(BasePath):
     def filename(self):
         """ Get the file name, without the complete path. """
         return self.stem + self.suffix
+    
+    @property
+    def mime_type(self):
+        """ Get the MIME type of the current Path object. """
+        return guess_type(str(self))[0]
     
     @property
     def size(self):
@@ -159,16 +172,14 @@ class Path(BasePath):
     def is_hidden(self):
         """ Check if the current path is hidden. """
         if DARWIN:
-            fnd = import_module("Foundation")
+            fnd = importlib.import_module("Foundation")
             u, f = fnd.NSURL.fileURLWithPath_(str(self)), fnd.NSURLIsHiddenKey
             return u.getResourceValue_forKey_error_(None, f, None)[1]
         elif LINUX:
             return self.stem.startswith(".")
         elif WINDOWS:
             import win32api, win32con
-            return win32api.GetFileAttributes(p) & \
-                   (win32con.FILE_ATTRIBUTE_HIDDEN | \
-                    win32con.FILE_ATTRIBUTE_SYSTEM)
+            return win32api.GetFileAttributes(p) & (win32con.FILE_ATTRIBUTE_HIDDEN | win32con.FILE_ATTRIBUTE_SYSTEM)
         raise NotImplementedError("Cannot check for the hidden status on this platform")
     
     def is_samepath(self, otherpath):
@@ -231,24 +242,24 @@ class Path(BasePath):
         else:
             os.remove(str(self))
     
-    def walk(self, breadthfirst=True, filter_func=lambda p: True, sort=True):
+    def walk(self, breadthfirst=True, filter_func=lambda p: True, sort=True, base_cls=True):
         """ Walk the current path for directories and files using os.listdir(), breadth-first or depth-first, sorted or
              not, based on a filter function. """
         if breadthfirst:
             for item in self.listdir(lambda p: not p.is_dir(), sort):
                 if filter_func(item):
-                    yield item
+                    yield Path(str(item)) if base_cls else item
         for item in self.listdir(lambda p: p.is_dir(), sort):
             if breadthfirst and filter_func(item):
-                yield item
+                yield Path(str(item)) if base_cls else item
             for subitem in item.walk(breadthfirst, filter_func):
-                yield subitem
+                yield Path(str(subitem)) if base_cls else subitem
             if not breadthfirst and filter_func(item):
-                yield item
+                yield Path(str(item)) if base_cls else item
         if not breadthfirst:
             for item in self.listdir(lambda p: not p.is_dir(), sort):
                 if filter_func(item):
-                    yield item
+                    yield Path(str(item)) if base_cls else item
     
     def write_text(self, data, encoding=None, errors=None):
         """ Fix to non-existing method in Python 2. """
@@ -304,41 +315,147 @@ class MirrorPath(Path):
             self.unlink()
 
 
-class PyFolderPath(Path):
-    """ Path extension for handling the dynamic import of every Python module inside the given folder. """
+class ProjectPath(Path):
+    def __new__(cls, root=".", structure=None, **kwargs):
+        self = super(ProjectPath, cls).__new__(cls, root, **kwargs)
+        if self.mime_type == "application/zip":
+            self.is_archive = True
+        elif self.is_file():
+            raise ValueError("Bad project archive file ; should be ZIP")
+        else:
+            self.is_archive = False
+            structure = structure or {}
+            self.create(structure, root)
+        return self
+    
+    def archive(self, path=None, password=None, ask=False, remove=True, **kwargs):
+        """ This function compresses the content of the given source path into the given archive as the destination
+             path, eventually given a password.
+
+        :param path:     path to the project folder to be archived
+        :param password: password string to be passed
+        :param ask:      whether a password should be asked or not
+        :param remove:   remove after compression
+        """
+        if self.is_archive:
+            raise ValueError("Already an archive")
+        password = getpass() if ask else password
+        dst = Path(path or (str(self) + ".zip"))
+        src_list, dst_list = [], []
+        for f in self.walk(filter_func=lambda p: p.is_file()):
+            src_list.append(str(f))
+            dst_list.append(str(f.relative_to(self).dirname))
+        # Pyminizip changes the current working directory after creation of an archive ; so backup the current
+        #  working directory to restore it after compression
+        cwd = os.getcwd()
+        compress_multiple(src_list, dst_list, str(dst), password or "", 9)
+        os.chdir(cwd)
+        if remove:
+            self.remove()
+        return ProjectPath(dst)
+    
+    def create(cls, structure, root="."):
+        p = Path(root, create=True)
+        for k, v in structure.items():
+            sp = p.joinpath(k)
+            if isinstance(v, dict):
+                cls.create(v, sp)
+            elif v is None:
+                sp.touch()
+            else:
+                sp.write_text(str(v))
+    
+    def load(self, path=None, password=None, ask=False, remove=True, **kwargs):
+        """ This function decompresses the given archive, eventually given a password.
+
+        :param path:     path to the archive to be extracted
+        :param password: password string to be passed
+        :param ask:      whether a password should be asked or not
+        :param remove:   remove after decompression
+        """
+        if not self.is_archive:
+            raise ValueError("Not an archive")
+        password = getpass() if ask else password
+        dst = Path(path or str(self.dirname.joinpath(self.stem)), create=True)
+        # Pyminizip changes the current working directory after extraction of an archive ; so backup the current
+        #  working directory to restore it after decompression
+        cwd = os.getcwd()
+        uncompress(str(self), password or "", str(dst), False)
+        os.chdir(cwd)
+        if remove:
+            self.remove()
+        return ProjectPath(dst)
+    
+    @property
+    def todo(self):
+        """ Walk the folder for TODO statements. """
+        todo = {}
+        for p in self.walk(filter_func=lambda p: p.is_file()):
+            current_cls, line_number = None, None
+            with p.open() as f:
+                for i, l in enumerate(f):
+                    if "class " in l:
+                        current_cls = l.split("class ")[1].split("(")[0].strip()
+                    if "def " in l:
+                        line_number = str(i + 1)
+                    if MARKER in l:
+                        m = str(Path(p))
+                        if current_cls is not None:
+                            m += ":" + current_cls
+                        m += ":" + (line_number or str(i + 1))
+                        todo[m] = l.split(MARKER, 1)[1].strip()
+        return todo
+
+
+class PythonPath(Path):
+    """ Path extension for handling the dynamic import of Python modules. """
     def __init__(self, path):
-        super(PyFolderPath, self).__init__()
-        self.modules = []
+        super(PythonPath, self).__init__()
+        try:
+            self.is_pymodule = self.is_file() and _lexer.analyse_text(self.open().read()) == 1.0
+        except UnicodeDecodeError:
+            self.is_pymodule = False
         if self.is_dir():
-            for root, dirs, files in os.walk(str(path)):
-                for f in files:
-                    if f.endswith(".py"):
-                        p = PyModulePath(Path(root).joinpath(f))
-                        if p.is_pymodule:
-                            self.modules.append(p.module)
-
-
-class PyModulePath(Path):
-    """ Path extension for handling the dynamic import of a Python module. """
-    def __init__(self, path):
-        super(PyModulePath, self).__init__()
-        self.is_pymodule = self.is_file() and _lexer.analyse_text(self.open().read()) == 1.0
-        if self.is_pymodule:
-            self.module = ImpImporter(str(self.resolve().parent)).find_module(self.stem).load_module(self.stem)
+            self.modules = []
+            for p in self.walk(base_cls=False):
+                p = PythonPath(p)
+                if p.is_pymodule:
+                    self.modules.append(p.module)
+        else:
+            if self.is_pymodule:
+                if PYTHON3:
+                    spec = importlib.util.spec_from_file_location(self.stem, str(self))
+                    self.module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(self.module)
+                else:
+                    self.module = imp.load_source(self.stem, str(self))
+    
+    @property
+    def classes(self):
+        if hasattr(self, "module"):
+            modules = [self.module]
+        elif hasattr(self, "modules"):
+            modules = self.modules
+        else:
+            return
+        l = []
+        for m in modules:
+            for n in dir(m):
+                c = getattr(m, n)
+                try:
+                    issubclass(c, c)
+                    l.append(c)
+                except TypeError:
+                    pass
+        return l
     
     def get_classes(self, *base_cls):
         """ Yield a list of all subclasses inheriting from the given class from the Python module. """
-        if not self.is_pymodule:
-            return
-        if not base_cls:
+        if len(base_cls) == 0:
             base_cls = (object, )
-        for n in dir(self.module):
-            cls = getattr(self.module, n)
-            try:
-                if issubclass(cls, base_cls) and cls not in base_cls:
-                    yield cls
-            except TypeError:
-                pass
+        for c in self.classes or []:
+            if issubclass(c, base_cls) and c not in base_cls:
+                yield c
     
     def has_baseclass(self, base_cls):
         """ Check if the Python module has the given base class. """
@@ -346,15 +463,9 @@ class PyModulePath(Path):
     
     def has_class(self, cls, self_cls=True):
         """ Check if the Python module has the given class. """
-        if not self.is_pymodule:
-            return
-        for n in dir(self.module):
-            try:
-                c = getattr(self.module, n)
-                if issubclass(c, cls) and (self_cls or c is not cls):
-                    return True
-            except TypeError:
-                pass
+        for c in self.classes or []:
+            if issubclass(c, cls) and (self_cls or c is not cls):
+                return True
         return False
 
 
@@ -366,11 +477,11 @@ class TempPath(Path):
     :param length:   length for the folder name (if 0, do not generate a folder name, e.g. keeping /tmp)
     :param alphabet: character set to be used for generating the folder name
     """
-    def __new__(cls, path=None, **kwargs):
+    def __new__(cls, *parts, **kwargs):
         kwargs["create"] = True   # force creation
         kwargs["expand"] = False  # expansion is not necessary
         p = Path(gettempdir())
-        if path is None:
+        if len(parts) == 0:
             kw = {}
             kw["prefix"]   = kwargs.pop("prefix", "")
             kw["suffix"]   = kwargs.pop("suffix", "")
@@ -385,9 +496,9 @@ class TempPath(Path):
                 return super(TempPath, cls).__new__(cls, tmp, **kwargs)
             return super(TempPath, cls).__new__(cls, p, **kwargs)
         else:
-            sp = Path(path)
+            sp = Path(*parts)
             if sp.is_under(p):
-                return super(TempPath, cls).__new__(cls, sp, **kwargs)
+                return super(TempPath, cls).__new__(cls, sp if sp.is_dir() else sp.dirname, **kwargs)
             raise ValueError("The given path shall be under '{}'".format(p))
     
     def tempfile(self, filename=None, **kwargs):
