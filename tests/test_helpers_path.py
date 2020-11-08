@@ -11,14 +11,6 @@ from tinyscript.helpers.path import *
 from utils import *
 
 
-"""#!/usr/bin/env python
-import os
-
-class TestClass:
-    pass
-"""
-
-
 class TestHelpersPath(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -33,7 +25,7 @@ class TestHelpersPath(TestCase):
         m.mkdir()
         f, MODULE = m.joinpath("test1.py"), m.joinpath("test2.py")
         f.write_text("#!/usr/bin/env python\nimport os")
-        MODULE.write_text("#!/usr/bin/env python\nimport os\n\nclass Test(object): pass")
+        MODULE.write_text("#!/usr/bin/env python\nimport os\n\nclass Test(object):\n   pass")
         FILE = PATH.joinpath("test.txt")
         FILE.touch()
         SPATH.joinpath("test.txt").touch()
@@ -62,6 +54,7 @@ class TestHelpersPath(TestCase):
         self.assertEqual(FILE.choice(), FILE)
         self.assertEqual(FILE.generate(), FILE)
         self.assertRaises(TypeError, FILE.append_text, 0)
+        self.assertTrue(FILE.is_under(FILE))
     
     def test_folder_extensions(self):
         self.assertEqual(str(PATH), str(Path(TEST).absolute()))
@@ -99,10 +92,7 @@ class TestHelpersPath(TestCase):
     def test_py_folder_path(self):
         p = PyFolderPath(TPATH2)
         self.assertEqual(len(p.modules), 2)
-        m1 = [m for m in p.modules if "test1.py" in str(m)]
-        m2 = [m for m in p.modules if "test2.py" in str(m)]
-        self.assertFalse(hasattr(m1, "Test"))
-        self.assertTrue(hasattr(m2, "Test"))
+        self.assertTrue(any(hasattr(m, "Test") for m in p.modules))
     
     def test_py_module_path(self):
         p = PyModulePath(FILE)
@@ -123,6 +113,7 @@ class TestHelpersPath(TestCase):
         self.assertEqual(str(TPATH1), gettempdir())
         self.assertTrue(TPATH2.exists())
         self.assertNotEqual(str(TPATH2), gettempdir())
-        with TPATH2.tempfile() as tf:
-            self.assertTrue(Path(tf.name).exists())
+        self.assertEqual(str(TempPath(str(TPATH2))), str(TPATH2))
+        self.assertRaises(ValueError, TempPath, Path(".").absolute().root)
+        self.assertIsNotNone(TPATH2.tempfile())
 

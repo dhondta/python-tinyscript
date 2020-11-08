@@ -57,6 +57,11 @@ class Path(BasePath):
         return Path(*self.parts[1:])
     
     @property
+    def dirname(self):
+        """ Get the directory name. """
+        return self if self.is_dir() else self.parent
+    
+    @property
     def filename(self):
         """ Get the file name, without the complete path. """
         return self.stem + self.suffix
@@ -169,6 +174,13 @@ class Path(BasePath):
     def is_samepath(self, otherpath):
         """ Check if both paths have the same parts. """
         return self.absolute().parts == Path(otherpath).absolute().parts
+    
+    def is_under(self, parentpath):
+        """ Check if the path is under a parent path. """
+        p = Path(parentpath)
+        if not p.is_dir():
+            p = Path(p.dirname)
+        return p in self.parents
     
     def iterfiles(self, filetype=None, filename_only=False):
         """ List all files from the current directory. """
@@ -354,28 +366,31 @@ class TempPath(Path):
     :param length:   length for the folder name (if 0, do not generate a folder name, e.g. keeping /tmp)
     :param alphabet: character set to be used for generating the folder name
     """
-    def __new__(cls, **kwargs):
-        kw = {}
-        kw["prefix"]   = kwargs.pop("prefix", "")
-        kw["suffix"]   = kwargs.pop("suffix", "")
-        kw["length"]   = kwargs.pop("length", 0)
-        kw["alphabet"] = kwargs.pop("alphabet", "0123456789abcdef")
-        _ = Path(gettempdir())
+    def __new__(cls, path=None, **kwargs):
         kwargs["create"] = True   # force creation
         kwargs["expand"] = False  # expansion is not necessary
-        if kw["length"] > 0:
-            while True:
-                # ensure this is a newly generated path
-                tmp = _.generate(**kw)
-                if not tmp.exists():
-                    break
-            return super(TempPath, cls).__new__(cls, tmp, **kwargs)
-        return super(TempPath, cls).__new__(cls, _, **kwargs)
+        p = Path(gettempdir())
+        if path is None:
+            kw = {}
+            kw["prefix"]   = kwargs.pop("prefix", "")
+            kw["suffix"]   = kwargs.pop("suffix", "")
+            kw["length"]   = kwargs.pop("length", 0)
+            kw["alphabet"] = kwargs.pop("alphabet", "0123456789abcdef")
+            if kw["length"] > 0:
+                while True:
+                    # ensure this is a newly generated path
+                    tmp = p.generate(**kw)
+                    if not tmp.exists():
+                        break
+                return super(TempPath, cls).__new__(cls, tmp, **kwargs)
+            return super(TempPath, cls).__new__(cls, p, **kwargs)
+        else:
+            sp = Path(path)
+            if sp.is_under(p):
+                return super(TempPath, cls).__new__(cls, sp, **kwargs)
+            raise ValueError("The given path shall be under '{}'".format(p))
     
-    def tempfile(self, **kwargs):
-        """ Create a NamedTemporaryFile in the TempPath. """
-        kwargs.pop("dir", None)
-        tf = TempFile(dir=str(self), **kwargs)
-        tf.folder = self
-        return tf
+    def tempfile(self, filename=None, **kwargs):
+        """ Instantiate a NamedTemporaryFile or use an existing file in the TempPath and return it as a Path object. """
+        return Path(TempFile(dir=str(self), **kwargs).name) if filename is None else self.joinpath(filename)
 

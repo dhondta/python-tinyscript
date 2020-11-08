@@ -201,6 +201,7 @@ Tinyscript also provides 2 `pathlib`-related functions:
     - `generate(prefix:str, suffix:str, length:int, alphabet:str)`: generates a random folder name (guaranteed to be non-existent) using the given prefix, suffix, length and alphabet, and returns the joined path
     - `is_hidden()`: checks whether the current file/folder is hidden
     - `is_samepath(other_path:str|Path)`: checks whether the given path is the same
+    - `is_under(path:str|Path)`: checks whether the path is under the given parent path
     - `iterfiles()`: iterates over files only
     - `iterpubdir()`: iterates over visible directories only
     - `listdir(filter_func:lambda, sort:bool)`: list the current path based on a filter function, sorted or not
@@ -244,9 +245,9 @@ Tinyscript also provides 2 `pathlib`-related functions:
 
 - `ts.TempPath`: additional class for handling temporary folder
     
-    This automatically creates a folder with a randomly generated name in OS' temporary location using a prefix, suffix, length and alphabet (like for `Path.generate(...)`).
+    This automatically creates a folder with a randomly generated name in OS' temporary location using a prefix, suffix, length and alphabet (like for `Path.generate(...)`). A `path` argument can also be given to retrieve a previously created temporary folder.
     
-    - `tempfile(**kwargs)`: passes `kwargs` to `tempfile.NamedTemporaryFile` and returns a temporary file descriptor under the current `TempPath` folder
+    - `tempfile(**kwargs)`: passes `kwargs` to `tempfile.NamedTemporaryFile` and returns a `Path` object with a generated filename under the current `TempPath` folder ; an optional `path` argument can be given to get a previously generated file
 
 -----
 
