@@ -46,3 +46,4 @@ exclude_lines =
     def stdin_pipe\(\):
     Xlib.error.DisplayConnectionError
     def send_mail
+    except KeyboardInterrupt:
