@@ -82,6 +82,7 @@ It also provides some other utility functions:
 `ts.entropy` | computation function for the Shannon entropy of a string
 `ts.entropy_bits` | computation function for the number of bits of entropy (i.e. for a password)
 `ts.get_terminal_size` | cross-platform terminal size function
+`ts.human_readable_size` | simple function to convert a size in bytes to a relevant shorter size in kilobytes, megabytes, ...
 `ts.pad` | String padding function, supporting `ansic9.23`, `incremental`, `iso7816-4`, `pkcs5`, `pkcs7` and `w3c` algorithms
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
 `ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
@@ -94,6 +95,29 @@ It also provides some other utility functions:
 `ts.unpad` | String unpadding function (complementary of `ts.pad`)
 `ts.xor` | repeated XOR function, also allowing to apply an ordinal offset on XORed characters
 `ts.xor_file` | XOR a file with a given key
+
+-----
+
+## Handy decorators
+
+Tinyscript defines a few handy function/method decorators:
+
+**Name** | **Description**
+--- | ---
+`ts.failsafe` | very simple decorator that prevents a function from raising any exception, returning `None` if it failed
+`ts.try_and_pass` | `try` function/method's code, catching the given class (by default, `Exception`), and simply passing if this class of exception was raised
+`ts.try_and_warn` | `try` function/method's code warning the user with the defined message for an error caught based on the given class (by default, `Exception`), displaying the full trace if relevant (by default, `trace=False`) and eventually pre-defined extra information based on the `extra_info` keyword-argument designating an attribute from the class whose function is decorated (e.g. can be "`__doc__`" for displaying class' docstring when the decorated method fails)
+`ts.try_or_die` | sams as for `ts.try_and_warn`, but raises the caught exception and exits
+
+Tinyscript defines a few handy class decorators:
+
+**Name** | **Description**
+--- | ---
+`ts.applicable_to` | this can be used for instance to check that a decorated mixin class is well applicable to one or more classes
+
+-----
+
+## Security-related helpers
 
 A few utility functions related to bruteforcing are also available:
 
@@ -168,7 +192,8 @@ Also related to this, the following helper functions are provided:
 
 **Name** | **Description**
 --- | ---
-`ts.merge_dictionaries` | useful function for merging two or more dictionaries, either updating the first input dictionary (if `new` is `False` ; this is the default) or creating a new one, also updating the resulting dictionary with the latest input dictionaries (if `update` is `True` ; this is the default) or not, dealing with the duplicate values (when iterable) by merging them (related to the `duplicates` boolean)
+`ts.flatten_dict` | function aimed to flatten a dictionary of dictionaries ; if it encounters duplicate keys, it merges them by joining the strings with the "`/`" separator
+`ts.merge_dict` | useful function for merging two or more dictionaries, either updating the first input dictionary (if `new` is `False` ; this is the default) or creating a new one, also updating the resulting dictionary with the latest input dictionaries (if `update` is `True` ; this is the default) or not, dealing with the duplicate values (when iterable) by merging them (related to the `duplicates` boolean)
 
 -----
 
@@ -239,8 +264,9 @@ Tinyscript also provides 2 `pathlib`-related functions:
     - `archive`: this method allows to archive the project folder to a ZIP file in a given destination path, optionally encrypted using a given password (`password` argument) or by asking the user to enter one (with `ask=True`) ; by default, the project folder is removed after compression (this behavior can be disabled by using `remove=False`) and this method returns a new `ProjectPath` with the new path (to the ZIP file)
     - `create`: this creates the project structure given a dictionary describing it ; each key is a folder (with its content described with a subdictionary) or a file (if the value is `None`, meaning that an empty file is to be created, or the content of it)
     - `load` (the complementary method of `archive`): this allows to unzip an archive to a given destination given a password or by asking it ; by default, the ZIP archive is removed after decompression (this behavior can be disabled by using `remove=False`)
+    - `search`: this methods walks the file tree of the project path searching for matches based on the given pattern
     
-    The `todo` attribute allows to get a dictionary of all the "`#TODO: `" markers contained in the project.
+    The `fixme` and `todo` attributes allow to get a dictionary of respectively all the "`#FIXME: `" and "`#TODO: `" markers contained in the project.
 
 - `ts.PythonPath`: new class for dynamically loading Python modules, either directly from a file or from a folder
     
