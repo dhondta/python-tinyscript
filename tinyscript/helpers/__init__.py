@@ -13,6 +13,7 @@ from .constants import *
 from .data import *
 from .decorators import *
 from .dictionaries import *
+from .docstring import *
 from .fexec import *
 from .inputs import *
 from .layout import *
@@ -32,6 +33,7 @@ from .constants import __features__ as _csts
 from .data import __features__ as _data
 from .decorators import __features__ as _dec
 from .dictionaries import __features__ as _dict
+from .docstring import __features__ as _docs
 from .fexec import __features__ as _fexec
 from .inputs import __features__ as _inputs
 from .layout import __features__ as _layout
@@ -44,8 +46,8 @@ from .text import __features__ as _text
 from .timeout import __features__ as _to
 
 
-__helpers__ = _attack + _common + _data + _dec + _dict + _fexec + _inputs + _layout + _lic + _notify + _path + _pswd + \
-              _tsize + _text + _to
+__helpers__ = _attack + _common + _data + _dec + _dict + _docs + _fexec + _inputs + _layout + _lic + _notify + _path + \
+              _pswd + _tsize + _text + _to
 
 ts = ModuleType("ts", """
     Tinyscript helpers
