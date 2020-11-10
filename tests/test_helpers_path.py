@@ -95,6 +95,8 @@ class TestHelpersPath(TestCase):
         p = ProjectPath(str(TPATH2), {'README': "#TODO: test", 'folder': {'file1': "test file", 'file2': None}})
         self.assertEqual(p.todo, {str(Path(str(TPATH2)).joinpath("README")) + ':1': "test",
                                   str(Path(str(TPATH2)).joinpath("modules", "test2.py")) + ':Test:7': "test"})
+        self.assertEqual(p.fixme, {})
+        self.assertIsNotNone(p.search("Test"))
         self.assertRaises(ValueError, p.load)
         p2 = p.archive()
         self.assertFalse(p.exists())

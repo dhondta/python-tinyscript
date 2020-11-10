@@ -6,6 +6,7 @@ import ctypes
 import imp
 import importlib
 import os
+import re
 from mimetypes import guess_type
 from pathlib import Path as BasePath
 from pygments.lexers import Python2Lexer
@@ -386,10 +387,9 @@ class ProjectPath(Path):
             self.remove()
         return ProjectPath(dst)
     
-    @property
-    def todo(self):
-        """ Walk the folder for TODO statements. """
-        todo = {}
+    def search(self, pattern):
+        """ Walk the project folder for a given pattern. """
+        matches = {}
         for p in self.walk(filter_func=lambda p: p.is_file()):
             current_cls, line_number = None, None
             with p.open() as f:
@@ -398,13 +398,27 @@ class ProjectPath(Path):
                         current_cls = l.split("class ")[1].split("(")[0].strip()
                     if "def " in l:
                         line_number = str(i + 1)
-                    if MARKER in l:
+                    match = re.search(pattern, l)
+                    if match:
                         m = str(Path(p))
                         if current_cls is not None:
                             m += ":" + current_cls
                         m += ":" + (line_number or str(i + 1))
-                        todo[m] = l.split(MARKER, 1)[1].strip()
-        return todo
+                        try:
+                            matches[m] = match.group(1)
+                        except IndexError:
+                            matches[m] = l
+        return matches
+    
+    @property
+    def fixme(self):
+        """ Walk the folder for FIXME statements. """
+        return self.search(r"#\s?FIXME:\s+(.*)$")
+    
+    @property
+    def todo(self):
+        """ Walk the folder for TODO statements. """
+        return self.search(r"#\s?TODO:\s+(.*)$")
 
 
 class PythonPath(Path):
