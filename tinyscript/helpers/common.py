@@ -9,7 +9,20 @@ from .compat import b
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["strings", "strings_from_file", "xor", "xor_file"]
+__all__ = __features__ = ["human_readable_size", "strings", "strings_from_file", "xor", "xor_file"]
+
+
+def human_readable_size(size, precision=0):
+    """ Convert size in bytes to a more readable form. """
+    if not isinstance(size, (int, float)):
+        raise ValueError("Bad size")
+    if size < 0:
+        raise ValueError("Size cannot be negative")
+    i, units = 0, ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    while size > 1024 and i < len(units):
+        i += 1
+        size /= 1024.0
+    return "%.*f%s" % (precision, size, units[i])
 
 
 def strings(data, minlen=4, alphabet=printable):
