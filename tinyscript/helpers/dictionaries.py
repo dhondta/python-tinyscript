@@ -1,16 +1,32 @@
 # -*- coding: UTF-8 -*-
+"""Extra dictionary-based data structures.
+
+"""
 import re
-from collections import OrderedDict
+from collections import MutableMapping, OrderedDict
 from time import time
 
 from .data.types import is_class, is_list, is_str
 from .path import Path
 
 
-__all__ = __features__ = ["merge_dictionaries", "ClassRegistry", "ExpiringDict", "PathBasedDict"]
+__all__ = __features__ = ["flatten_dict", "merge_dict", "ClassRegistry", "ExpiringDict", "PathBasedDict"]
 
 
-def merge_dictionaries(*dictionaries, **kwargs):
+def flatten_dict(d, parent_key="", sep="/"):
+    """ Flatten a dictionary of dictionaries.
+    See: https://stackoverflow.com/questions/6027558/flatten-nested-python-dictionaries-compressing-keys """
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, MutableMapping):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+
+def merge_dict(*dictionaries, **kwargs):
     """ Merge dictionaries into the first given one, that is, merging child dictionaries and lists.
     
     :param new:        create a new dictionary object or use first input's reference as the return value
@@ -28,7 +44,7 @@ def merge_dictionaries(*dictionaries, **kwargs):
             elif not update:
                 continue
             elif isinstance(v, dict):
-                d[k] = merge_dictionaries(d[k], v, **kwargs)
+                d[k] = merge_dict(d[k], v, **kwargs)
             elif isinstance(v, (tuple, list)):
                 l = list(d[k])
                 for x in v:

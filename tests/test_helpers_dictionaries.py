@@ -9,23 +9,27 @@ from utils import *
 
 
 class TestHelpersDictionaries(TestCase):
+    def test_flatten_dictionary(self):
+        d = {'k': "test", 'k2': {'sk': "test2"}}
+        self.assertEqual(flatten_dict(d), {'k': "test", 'k2/sk': "test2"})
+    
     def test_merge_dictionaries(self):
         d1, d2 = {'k': "test1"}, {'k': "test2"}
-        self.assertEqual(merge_dictionaries(d1, d2), d2)
-        self.assertEqual(merge_dictionaries(d1, d2, update=False), d1)
+        self.assertEqual(merge_dict(d1, d2), d2)
+        self.assertEqual(merge_dict(d1, d2, update=False), d1)
         d2['k2'] = "test3"
-        self.assertEqual(merge_dictionaries(d1, d2), d2)
-        self.assertEqual(merge_dictionaries(d1, d2, update=False), d1)
+        self.assertEqual(merge_dict(d1, d2), d2)
+        self.assertEqual(merge_dict(d1, d2, update=False), d1)
         del d1['k2'], d2['k2']
         d1['k'], d2['k'] = {'d': "test1"}, {'d': "test2"}
-        self.assertEqual(merge_dictionaries(d1, d2), d2)
+        self.assertEqual(merge_dict(d1, d2), d2)
         d1['k'], d2['k'] = ("test1",), ("test2",)
-        self.assertEqual(merge_dictionaries(d1, d2)['k'], ("test1", "test2"))
+        self.assertEqual(merge_dict(d1, d2)['k'], ("test1", "test2"))
         d1['k'], d2['k'] = {"test1"}, {"test2"}
-        self.assertEqual(merge_dictionaries(d1, d2)['k'], {"test1", "test2"})
-        d3 = merge_dictionaries(d1, d2)
+        self.assertEqual(merge_dict(d1, d2)['k'], {"test1", "test2"})
+        d3 = merge_dict(d1, d2)
         self.assertEqual(id(d1), id(d3))
-        d3 = merge_dictionaries(d1, d2, new=True)
+        d3 = merge_dict(d1, d2, new=True)
         self.assertNotEqual(id(d1), id(d3))
     
     def test_class_registry(self):
