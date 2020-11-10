@@ -39,9 +39,7 @@ pause = lambda *a, **kw: std_input("Press Enter to continue", *a, **kw) or None
 
 
 def capture(f):
-    """
-    Decorator for capturing stdout and stderr.
-    """
+    """ Decorator for capturing stdout and stderr. """
     def _wrapper(*a, **kw):
         with Capture() as (out, err):
             r = f(*a, **kw)
@@ -50,19 +48,12 @@ def capture(f):
 
 
 def clear():
-    """
-    Dummy multi-platform screen clear function.
-    """
-    from os import system
-    if DARWIN or LINUX:
-        system("clear")
-    elif WINDOWS:
-        system("cls")
+    """ Dummy multi-platform screen clear function. """
+    os.system("cls" if WINDOWS else "clear")
 
 
 def colored(text, color=None, on_color=None, attrs=None, style=None, palette=None):
-    """
-    Colorize text.
+    """ Colorize text.
     
     :param text:     text to be colorized
     :param color:    text color
@@ -109,15 +100,12 @@ def colored(text, color=None, on_color=None, attrs=None, style=None, palette=Non
 
 
 def confirm(prompt="Are you sure ?", style="bold"):
-    """
-    Ask for confirmation.
-    """
+    """ Ask for confirmation. """
     return user_input("\r" + prompt, ["(Y)es", "(N)o"], "n", style=style) == "yes"
 
 
 def hotkeys(hotkeys, silent=True):
-    """
-    Hotkeys declaration function relying on pynput.
+    """ Hotkeys declaration function relying on pynput.
     
     :param hotkeys: dictionary of hotkeys and related actions
     :param silent:  do not show errors (of keys not handled)
@@ -189,9 +177,7 @@ def hotkeys(hotkeys, silent=True):
 
 
 def silent(f):
-    """
-    Decorator for silencing stdout and stderr.
-    """
+    """ Decorator for silencing stdout and stderr. """
     def _wrapper(*a, **kw):
         with Capture():
             r = f(*a, **kw)
@@ -200,8 +186,7 @@ def silent(f):
 
 
 def std_input(prompt="", style=None, palette=None):
-    """
-    Very simple Python2/3-compatible input function handling prompt styling.
+    """ Very simple Python2/3-compatible input function handling prompt styling.
     
     :param prompt:  prompt message
     :param style:   colorful styling function, e.g. red_on_green (for green foreground and red background colors)
@@ -216,8 +201,7 @@ def std_input(prompt="", style=None, palette=None):
 
 
 def stdin_flush():
-    """
-    Multi-platform stdin flush function.
+    """ Multi-platform stdin flush function.
     
     Source: https://rosettacode.org/wiki/Keyboard_input/Flush_the_keyboard_buffer#Python
     """
@@ -233,9 +217,7 @@ def stdin_flush():
 
 
 def stdin_pipe():
-    """
-    Python2/3-compatible stdin pipe read function.
-    """
+    """ Python2/3-compatible stdin pipe read function. """
     if PYTHON3:
         with open(0, 'rb') as f:
             for l in f:
@@ -245,23 +227,25 @@ def stdin_pipe():
             yield l
 
 
-def user_input(prompt="", choices=None, default=None, choices_str="", required=False, newline=False, **kwargs):
-    """
-    Python2/3-compatible input function handling choices and default value.
+def user_input(prompt="", choices=None, default=None, choices_str=None, default_str=None, required=False, newline=False,
+               **kwargs):
+    """ Python2/3-compatible input function handling choices and default value.
     
     :param prompt:      prompt message
     :param choices:     list of possible choices or lambda function
-    :param default:     default value
     :param choices_str: list of possible choices as a string (overrides the default composition from the choices list)
+    :param default:     default value
+    :param default_str: string showing the default value (overrides the standard layout)
     :param required:    make non-null user input mandatory
     :param newline:     insert a newline and '>>' after the prompt
     :param kwargs:      keyword-arguments to be passed to std_input for styling
     :return:            handled user input
     """
     shortcuts = {}
+    default_str = kwargs.pop('default_str', ["[{}]".format(default), ""][default is None and required])
     if type(choices) in [list, tuple, set]:
         choices = list(map(lambda x: str(x).lower(), choices))
-        choices_str = " {%s}" % (choices_str or '|'.join(list(map(str, choices))))
+        choices_str = choices_str or "{%s}" % '|'.join(list(map(str, choices)))
         # consider choices of the form ["(Y)es", "(N)o"] ; in this case, we want the choices to be
         #  ['yes', 'no', 'y', 'n'] for the sake of simplicity for the user
         m = list(map(lambda x: re.match(r'\(([a-zA-Z0-9])\)', x), choices))
@@ -274,29 +258,28 @@ def user_input(prompt="", choices=None, default=None, choices_str="", required=F
         _check = choices
     else:
         _check = lambda v: True
-    prompt += "{}{} ".format(choices_str, [" [{}]".format(default), ""][default is None and required])
-    user_input, first = None, True
-    while not user_input:
+    prompt += " " + "{} {} ".format(choices_str or "",
+                                    default_str or ["[{}]".format(default), ""][default is None and required]).strip()
+    ui, first = None, True
+    while not ui:
         stdin_flush()
-        user_input = std_input(["", prompt][first] + ["", "\n >> "][newline], **kwargs)
+        ui = std_input(["", prompt][first] + ["", "\n >> "][newline], **kwargs)
         first = False
         if type(choices) in [list, tuple, set]:
             choices = list(map(lambda x: x.lower(), choices))
-            user_input = user_input.lower()
-        if user_input == "" and default is not None and _check(default):
-            _ = str(default)
-            return shortcuts.get(_) or _
-        if user_input != "" and _check(user_input):
-            _ = user_input
-            return shortcuts.get(_) or _
+            ui = ui.lower()
+        if ui == "" and default is not None and _check(default):
+            s = str(default)
+            return shortcuts.get(s, s)
+        if ui != "" and _check(ui):
+            return shortcuts.get(ui, ui)
         if not required:
             return
+        ui = None
 
 
 class _Text(object):
-    """
-    Dummy Text class for storing StringIO's content before closing it.
-    """
+    """ Dummy Text class for storing StringIO's content before closing it. """
     def __repr__(self):
         return str(self)
 
@@ -305,9 +288,7 @@ class _Text(object):
 
 
 class Capture(object):
-    """
-    Context manager for capturing stdout and stderr.
-    """
+    """ Context manager for capturing stdout and stderr. """
     def __init__(self, out=sys.stdout, err=sys.stderr):
         # backup original output file handles
         self._stdout = sys.stdout

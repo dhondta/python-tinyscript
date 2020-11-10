@@ -44,6 +44,8 @@ class TestHelpersInputs(TestCase):
         self.assertEqual(user_input(choices=lambda v: v in ["test"]), "test")
         temp_stdin(self, "bad\n")
         self.assertIs(user_input(choices=["1", "2"]), None)
+        temp_stdin(self, "bad\n1\n")
+        self.assertIsNotNone(user_input(choices=["1", "2"], required=True))
     
     def test_capture_functions(self):
         with Capture() as (out, err):
