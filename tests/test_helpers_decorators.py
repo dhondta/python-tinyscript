@@ -4,7 +4,6 @@
 
 """
 from tinyscript.helpers.decorators import *
-from tinyscript.helpers.decorators import IncompatibleClassError
 
 from utils import *
 
@@ -44,6 +43,11 @@ class UselessClass(GoodClass, EmptyMixin):
         raise Exception("something wrong happened")
 
 
+@failsafe
+def func():
+    raise Exception("something wrong happened")
+
+
 @try_or_die("TRY_OR_DIE message", extra_info="test")
 def func1():
     raise Exception("something wrong happened")
@@ -64,7 +68,7 @@ class UselessClass2(BadClass, EmptyMixin):
 class TestHelpersDecorators(TestCase):
     def test_applicable_to(self):
         self.assertIsNotNone(UselessClass())
-        self.assertRaises(IncompatibleClassError, UselessClass2)
+        self.assertRaises(Exception, UselessClass2)
     
     def test_try_decorators(self):
         temp_stdout(self)
@@ -72,6 +76,7 @@ class TestHelpersDecorators(TestCase):
         self.assertRaises(Exception, t.func1)
         self.assertIsNone(t.func2())
         self.assertIsNone(t.func3())
+        self.assertIsNone(func())
         #self.assertRaises(Exception, func1)
         self.assertIsNone(func2())
         self.assertIsNone(func3())
