@@ -9,17 +9,27 @@
 
 # TinyScript
 
-This library is aimed to provide useful features and to shorten required lines of code for writing nice-looking scripts or tools.
+This library is aimed to provide useful features and to shorten required lines of code for writing nice-looking command-line interface tools.
 
-<p align="center">
-    <img src="https://dhondta.github.io/python-tinyscript/docs/demos/simple-script.svg">
-</p>
+## Quick Start
 
-## Setup
+### Setup
 
 ```sh
-pip install tinyscript
+pip install --user tinyscript
 ```
+
+### Create from template
+
+<p align="center"><img src="https://dhondta.github.io/python-tinyscript/docs/demos/create.svg"></p>
+
+### Edit source
+
+<p align="center"><img src="https://dhondta.github.io/python-tinyscript/docs/demos/edit.svg"></p>
+
+### Run your tool
+
+<p align="center"><img src="https://dhondta.github.io/python-tinyscript/docs/demos/run.svg"></p>
 
 ## Example tools
 
@@ -48,3 +58,4 @@ pip install tinyscript
 - [PDF Preview Generator](https://gist.github.com/dhondta/f57dfde304905644ca5c43e48c249125)
 - [Recursive Compression](https://github.com/dhondta/recursive-compression)
 - [WebGrep](https://github.com/dhondta/webgrep) (Web text search)
+
