@@ -437,12 +437,7 @@ class PythonPath(Path):
                     self.modules.append(p.module)
         else:
             if self.is_pymodule:
-                if PYTHON3:
-                    spec = importlib.util.spec_from_file_location(self.stem, str(self))
-                    self.module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(self.module)
-                else:
-                    self.module = imp.load_source(self.stem, str(self))
+                self.module = imp.load_source(self.stem, str(self))
     
     @property
     def classes(self):
