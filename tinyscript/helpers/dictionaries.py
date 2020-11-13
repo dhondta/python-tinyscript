@@ -102,12 +102,15 @@ class ClassRegistry(dict):
             self[cls, subcls]
             if cls and not is_class(cls):
                 cls = self[cls]
+            found = False
             for k in (self.keys() if cls is None else [cls]):
                 l = self[k]
                 for v in l:
                     if is_class(v) and v.__name__.lower() == subcls.lower():
                         l.remove(v)
-                        return
+                        found = True
+            if found:
+                return
         super(ClassRegistry, self).__delitem__(key)
     
     def __getitem__(self, key):
@@ -124,18 +127,24 @@ class ClassRegistry(dict):
             for k, v in self.items():
                 if key is k:
                     return v
-        # get a subclass from its parent class definition and its name
+        # get subclass(es) from its parent class definition and its name
         elif is_list(key) and len(key) == 2:
             cls, subcls = key
             if is_class(subcls):
                 return subcls
             if cls and not is_class(cls):
                 cls = self[cls]
+            l = []
             for k in (self.keys() if cls is None else [cls]):
                 for v in self[k]:
                     if is_class(v) and v.__name__.lower() == subcls.lower():
-                        return v
-            raise ValueError(subcls)
+                        l.append(v)
+            if len(l) == 1:
+                return l[0]
+            elif len(l) > 1:
+                return l
+            else:
+                raise ValueError(subcls)
         return super(ClassRegistry, self).__getitem__(key)
     
     def __setitem__(self, cls, subcls):

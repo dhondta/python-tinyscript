@@ -37,6 +37,8 @@ class TestHelpersDictionaries(TestCase):
         class Base: pass
         class Sub1: pass
         class Sub2: pass
+        class Sub3: pass
+        Sub3.__name__ = "Sub2"
         self.assertIsNone(d[None])
         self.assertRaises(KeyError, d.__getitem__, "base")
         d[Base] = Sub1
@@ -44,7 +46,8 @@ class TestHelpersDictionaries(TestCase):
         self.assertEqual(Sub1, d[Base, Sub1])
         self.assertEqual([Sub1], list(d))
         d[Base] = Sub2
-        self.assertEqual(Sub2, d['base', 'sub2'])
+        d[Base] = Sub3
+        self.assertEqual([Sub2, Sub3], d['base', 'sub2'])
         self.assertIsNone(d.__delitem__(("base", "sub1")))
         self.assertRaises(ValueError, d.__delitem__, ("base", "sub1"))
         self.assertIsNone(d.__delitem__("base"))
