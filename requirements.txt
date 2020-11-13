@@ -12,7 +12,7 @@ netifaces
 patchy
 pathlib
 pip>=19.2
-plyer<2.0.0; python_version=='2.7' # rq.filter: ==2.0.0
+plyer<2.0.0; python_version=='2.7' # rq.filter: >=2.0.0
 plyer>=2.0.0; python_version>='3.5'
 pygments
 pyminizip
