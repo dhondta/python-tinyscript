@@ -264,7 +264,7 @@ class ExpiringDict(dict):
 
 
 class PathBasedDict(dict):
-    """ Enhanced dictionary class. """
+    """ Enhanced dictionary class handling keys as paths. """
     def __convert_path(self, path):
         """ Handle multiple path formats, e.g.:
             - "a/b/c/d"     (string)
@@ -277,6 +277,7 @@ class PathBasedDict(dict):
     
     def __delitem__(self, path):
         """ Remove the item at the given path of subdictionaries. """
+        self[path]
         d, parts = self, self.__convert_path(path)
         if len(parts[:-1]) > 0:
             del self[parts[:-1]][parts[-1]]
@@ -290,9 +291,14 @@ class PathBasedDict(dict):
     def __getitem__(self, path):
         """ Get the item from the given path of subdictionaries. """
         d, parts = self, self.__convert_path(path)
-        for p in parts:
-            d = d.get(p)
-        return d
+        try:
+            for p in parts:
+                d = d.get(p)
+            if d is None:
+                raise AttributeError
+            return d
+        except AttributeError:
+            raise KeyError(path)
     
     def __setitem__(self, path, value):
         """ Set the value to the given path of subdictionaries. """

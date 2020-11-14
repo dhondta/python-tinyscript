@@ -99,7 +99,9 @@ class TestHelpersDictionaries(TestCase):
         d['path/to/test'] = "test"
         self.assertEqual(d, {'path': {'to': {'test': 'test'}}})
         self.assertRaises(ValueError, d.__setitem__, 'path/to/test/2', "test2")
+        self.assertRaises(KeyError, d.__delitem__, 'path/to/bad')
         del d['path/to/test']
+        self.assertRaises(KeyError, d.__delitem__, 'does/not/exist')
         self.assertEqual(d, {})
         d['path', 'to', 'test'] = "test"
         self.assertEqual(d, {'path': {'to': {'test': 'test'}}})
