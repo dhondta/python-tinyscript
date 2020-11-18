@@ -18,6 +18,7 @@ pygments
 pyminizip
 pynput
 pypandoc
+pypiwin32; sys_platform=='windows'
 python-slugify
 pyyaml>=5.3.1
 six

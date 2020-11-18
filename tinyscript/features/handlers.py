@@ -94,11 +94,11 @@ def __interrupt_handler(*args):
 signal(SIGINT, __interrupt_handler)
 
 
+def __pause_handler(*args):
+    """ Execution pause handler. """
+    _hooks.pause()
 if not WINDOWS:
     from signal import siginterrupt, SIGUSR1
-    def __pause_handler(*args):
-        """ Execution pause handler. """
-        _hooks.pause()
     # bind to user-defined signal
     signal(SIGUSR1, __pause_handler)
     siginterrupt(SIGUSR1, False)
