@@ -3,11 +3,12 @@
 
 """
 from os import getpid, kill
-from signal import SIGINT, SIGTERM, SIGUSR1
+from signal import SIGINT, SIGTERM
 
 from .handlers import _hooks
-from .helpers.inputs import confirm, hotkeys, hotkeys_enabled
-from .preimports import logging
+from ..helpers.constants import WINDOWS
+from ..helpers.inputs import confirm, hotkeys, hotkeys_enabled
+from ..preimports import logging
 
 
 __all__ = ["set_hotkeys"]
@@ -18,10 +19,16 @@ HOTKEYS = None
 
 def __confirm_sig(prompt, sig):
     def _wrapper():
-        kill(getpid(), SIGUSR1)
-        if confirm(prompt):
-            kill(getpid(), sig)
-        _hooks.state = "RUNNING"
+        if not WINDOWS:
+            from signal import SIGUSR1
+            kill(getpid(), SIGUSR1)
+            if confirm(prompt):
+                kill(getpid(), sig)
+        else:
+            #FIXME: SIGUSR1 does not exist in Windows ; find a way to pause execution while prompting
+            while not confirm(prompt):
+                continue
+        _hooks.resume()
     return _wrapper
 
 

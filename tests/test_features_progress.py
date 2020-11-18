@@ -3,7 +3,7 @@
 """Progress management module assets' tests.
 
 """
-from tinyscript.progress import set_progress_items
+from tinyscript.features.progress import set_progress_items
 
 from utils import *
 

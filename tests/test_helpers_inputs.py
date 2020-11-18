@@ -3,11 +3,11 @@
 """Input functions' tests.
 
 """
+from tinyscript.features.loglib import logger as ts_logger
 from tinyscript.helpers.compat import b
 from tinyscript.helpers.constants import TTY
 from tinyscript.helpers.inputs import *
 from tinyscript.helpers.inputs import _keyboard, hotkeys_enabled
-from tinyscript.loglib import logger as ts_logger
 
 from utils import *
 

@@ -13,18 +13,12 @@ from inspect import currentframe, getmembers, isfunction, ismethod
 from os.path import basename, splitext
 from six import string_types
 
+from .features.handlers import _hooks
 from .argreparse import *
-from .timing import set_time_items
-from .handlers import *
+from .features import *
 from .helpers.constants import LINUX, PYTHON3
 from .helpers.data.types import ip_address, port_number
 from .helpers.text import configure_docformat, gt
-from .interact import set_interact_items
-from .hotkeys import set_hotkeys
-from .notify import set_notify_items
-from .progress import set_progress_items
-from .loglib import *
-from .step import set_step_items
 
 
 __all__ = __features__ = ["parser", "initialize", "validate"]

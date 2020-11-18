@@ -7,7 +7,7 @@ import coloredlogs
 from datetime import timedelta
 from time import gmtime
 
-from .preimports import logging
+from ..preimports import logging
 
 
 __features__ = ["LOG_FORMAT", "DATE_FORMAT", "TIME_MILLISECONDS", "logger"]

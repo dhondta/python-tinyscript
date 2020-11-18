@@ -4,7 +4,7 @@
 
 """
 from tinyscript import *
-from tinyscript.notify import set_notify_items
+from tinyscript.features.notify import set_notify_items
 
 from utils import *
 

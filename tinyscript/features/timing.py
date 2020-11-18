@@ -8,7 +8,7 @@ import time
 from errno import ETIME
 from os import strerror
 
-from .helpers.timeout import TimeoutError
+from ..helpers.timeout import TimeoutError
 
 
 __all__ = ["set_time_items"]

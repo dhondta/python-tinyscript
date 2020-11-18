@@ -5,8 +5,8 @@
 """
 import time
 
+from tinyscript.features.timing import set_time_items
 from tinyscript.helpers.timeout import TimeoutError
-from tinyscript.timing import set_time_items
 
 from utils import *
 

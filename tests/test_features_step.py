@@ -3,7 +3,7 @@
 """Stepping module assets' tests.
 
 """
-from tinyscript.step import set_step_items
+from tinyscript.features.step import set_step_items
 
 from utils import *
 

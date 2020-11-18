@@ -50,6 +50,7 @@ def __activate(venv_dir):
     sys.path = [i for i in new if i not in old] + [i for i in new if i in old]
     sys.real_prefix = __ORIGINAL_SYSRPREFIX or __ORIGINAL_SYSPREFIX
     sys.prefix = venv_dir
+virtualenv.activate = __activate
 
 
 def __check_pip_req_tracker():
@@ -82,6 +83,7 @@ def __deactivate():
     except:
         pass
     __check_pip_req_tracker()
+virtualenv.deactivate = __deactivate
 
 
 def __get_virtualenv(error=True):
@@ -123,6 +125,7 @@ def __install(package, *args, **kwargs):
             if len(m) == 0:
                 raise PipError("Installation of {} failed".format(package))
     return PipPackage(package, error)
+virtualenv.install = __install
 
 
 def __is_installed(package, *args, **kwargs):
@@ -140,6 +143,7 @@ def __is_installed(package, *args, **kwargs):
             found = True
             break
     return found
+virtualenv.is_installed = __is_installed
 
 
 def __list_packages(*args, **kwargs):
@@ -154,6 +158,7 @@ def __list_packages(*args, **kwargs):
     for line in __pip_run(cmd, False):
         if not ("Package" in line and "Version" in line or "-------" in line or line.strip() == ""):
             yield tuple(_.strip() for _ in line.split(" ", 1))
+virtualenv.list_packages = __list_packages
 
 
 def __parse_args(*args, **kwargs):
@@ -230,6 +235,7 @@ def __setup(venv_dir, requirements=None, force_reinstall=False, no_cache=True, v
                     raise TopLevelAlreadyExists("{} ({})".format(tl, pkg.name))
                 m = import_module(tl)
                 setattr(virtualenv, tl, m)
+virtualenv.setup = __setup
 
 
 def __teardown(venv_dir=None):
@@ -242,6 +248,7 @@ def __teardown(venv_dir=None):
     if venv != "":
         __deactivate()
         rmtree(venv, True)
+virtualenv.teardown = __teardown
 
 
 class PipPackage(object):
@@ -281,6 +288,7 @@ class PipPackage(object):
                 self.top_level = tl.read_lines()
             except IndexError:
                 pass
+virtualenv.PipPackage = PipPackage
 
 
 class VirtualEnv(object):
@@ -314,6 +322,7 @@ class VirtualEnv(object):
             return getattr(virtualenv, name)
         except AttributeError:
             raise AttributeError("object 'VirtualEnv' has no attribute '{}'".format(name))
+virtualenv.VirtualEnv = VirtualEnv
 
 
 class NotAVirtualEnv(Exception):
@@ -322,15 +331,4 @@ class NotAVirtualEnv(Exception):
 
 class TopLevelAlreadyExists(Exception):
     pass
-
-
-virtualenv.activate      = __activate
-virtualenv.deactivate    = __deactivate
-virtualenv.install       = __install
-virtualenv.is_installed  = __is_installed
-virtualenv.list_packages = __list_packages
-virtualenv.setup         = __setup
-virtualenv.teardown      = __teardown
-virtualenv.PipPackage    = PipPackage
-virtualenv.VirtualEnv    = VirtualEnv
 

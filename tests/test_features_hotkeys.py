@@ -3,8 +3,8 @@
 """Keystrokes module assets' tests.
 
 """
+from tinyscript.features.hotkeys import set_hotkeys
 from tinyscript.helpers.inputs import _keyboard, hotkeys_enabled
-from tinyscript.hotkeys import set_hotkeys
 
 from utils import *
 

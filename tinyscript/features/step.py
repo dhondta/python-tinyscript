@@ -3,8 +3,8 @@
 """Module for defining stepping mode logic.
 
 """
-import logging
-from .helpers.inputs import std_input
+from ..helpers.inputs import std_input
+from ..preimports import logging
 
 
 __all__ = ["set_step_items"]

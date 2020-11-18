@@ -3,8 +3,8 @@
 """Logging module assets' tests.
 
 """
-from tinyscript.loglib import *
-from tinyscript.loglib import RelativeTimeColoredFormatter
+from tinyscript.features.loglib import *
+from tinyscript.features.loglib import RelativeTimeColoredFormatter
 
 from utils import *
 

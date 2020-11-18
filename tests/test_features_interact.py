@@ -3,7 +3,7 @@
 """Interaction module assets' tests.
 
 """
-from tinyscript.interact import set_interact_items
+from tinyscript.features.interact import set_interact_items
 
 from utils import *
 

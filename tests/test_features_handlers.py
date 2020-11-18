@@ -6,9 +6,9 @@
 import threading
 
 from tinyscript import *
-from tinyscript.handlers import *
-from tinyscript.handlers import signal, SIGINT, SIGUSR1, SIGTERM, _hooks, __interrupt_handler as ih, \
-                                __pause_handler as ph, __terminate_handler as th
+from tinyscript.features.handlers import *
+from tinyscript.features.handlers import signal, SIGINT, SIGUSR1, SIGTERM, _hooks, __interrupt_handler as ih, \
+                                         __pause_handler as ph, __terminate_handler as th
 
 from utils import *
 

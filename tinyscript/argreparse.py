@@ -18,13 +18,13 @@ try:
 except ImportError:
     from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
+from .features.loglib import logger
 from .helpers.constants import PYTHON3
 from .helpers.inputs import user_input
 from .helpers.licenses import *
 from .helpers.data.types import is_executable, is_long_opt, is_pos_int, is_short_opt
 from .helpers.text import *
 from .helpers.text import configure_docformat, txt_terminal_render
-from .loglib import logger
 
 
 __all__ = ["ArgumentParser", "DUNDERS", "SCRIPTNAME_FORMAT", "SUPPRESS"]

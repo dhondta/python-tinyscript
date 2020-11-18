@@ -6,7 +6,8 @@
 import sys
 from signal import getsignal, signal, SIG_IGN, SIGINT, SIGTERM
 
-from .helpers.inputs import user_input
+from ..helpers.constants import WINDOWS
+from ..helpers.inputs import user_input
 
 
 __features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate", "DisableSignals"]
@@ -14,8 +15,7 @@ __all__ = ["_hooks"] + __features__
 
 
 class DisableSignals(object):
-    """
-    Context manager that disable signal handlers.
+    """ Context manager that disable signal handlers.
 
     :param signals: list of signal identifiers
     :param fail:    whether execution should fail or not when a bad signal ID is encountered
@@ -82,8 +82,7 @@ _hooks = ExitHooks()
 
 
 def __interrupt_handler(*args):
-    """
-    Interruption handler.
+    """ Interruption handler.
 
     :param signal: signal number
     :param stack: stack frame
@@ -95,12 +94,10 @@ def __interrupt_handler(*args):
 signal(SIGINT, __interrupt_handler)
 
 
-if "win" not in sys.platform:
+if not WINDOWS:
     from signal import siginterrupt, SIGUSR1
     def __pause_handler(*args):
-        """
-        Execution pause handler.
-        """
+        """ Execution pause handler. """
         _hooks.pause()
     # bind to user-defined signal
     signal(SIGUSR1, __pause_handler)
@@ -108,8 +105,7 @@ if "win" not in sys.platform:
 
 
 def __terminate_handler(*args):
-    """
-    Termination handler.
+    """ Termination handler.
 
     :param signal: signal number
     :param stack: stack frame
