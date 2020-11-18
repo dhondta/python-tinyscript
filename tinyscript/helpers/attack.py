@@ -44,8 +44,7 @@ RULES = {
 
 
 def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1, repeat=True):
-    """
-    Generator for bruteforcing according to minimum and maximum lengths and an alphabet.
+    """ Generator for bruteforcing according to minimum and maximum lengths and an alphabet.
     
     :param maxlen:   maximum bruteforce entry length
     :param alphabet: bruteforce alphabet to be used
@@ -67,8 +66,7 @@ def bruteforce(maxlen, alphabet=tuple(map(chr, range(256))), minlen=1, repeat=Tr
 
 
 def bruteforce_mask(mask, charsets=None):
-    """
-    Generator for bruteforcing according to a given mask (mostly similar to this used in hashcat).
+    """ Generator for bruteforcing according to a given mask (mostly similar to this used in hashcat).
     
     :param mask:     bruteforce mask
     :param charsets: custom alphabets for use with the mask
@@ -82,9 +80,8 @@ def bruteforce_mask(mask, charsets=None):
 
 
 def bruteforce_pin(length=4):
-    """
-    Generator for bruteforcing a PIN code according to the blog article titled "PIN analysis", available at:
-     https://datagenetics.com/blog/september32012/
+    """ Generator for bruteforcing a PIN code according to the blog article titled "PIN analysis", available at:
+         https://datagenetics.com/blog/september32012/
     Note: This generator generalizes to any length of PIN code.
     
     :param length: PIN code length
@@ -136,8 +133,7 @@ def bruteforce_pin(length=4):
 
 
 def bruteforce_re(regex):
-    """
-    Generator for bruteforcing according to a given regular expression.
+    """ Generator for bruteforcing according to a given regular expression.
     
     Important note: due to the way the regex is handled, memory consumption can be really cumbersome with this function,
                      e.g. consider regex r"[a-c]{1,3}" ; in order to generate from 1 to 3 chars, it is necessary to
@@ -156,8 +152,7 @@ def bruteforce_re(regex):
 
 
 def dictionary(path, filter=None, rules=""):
-    """
-    Generator for advanced dictionary attack handling a filter function and a set of rules.
+    """ Generator for advanced dictionary attack handling a filter function and a set of rules.
     
     :param path:   path to the dictionary file
     :param filter: filter function
@@ -180,10 +175,9 @@ def dictionary(path, filter=None, rules=""):
 
 
 def expand_mask(mask, charsets=None):
-    """
-    Function for applying string expansion based on the following formats:       ?.              ?(...)
-                                                                                  ^                 ^
-                                                                            single group     multiple groups
+    """ Function for applying string expansion based on the following formats:       ?.              ?(...)
+                                                                                      ^                 ^
+                                                                                single group     multiple groups
     :param mask:     bruteforce mask
     :param charsets: custom alphabets for use with the mask
     """
@@ -230,9 +224,7 @@ def expand_mask(mask, charsets=None):
 
 
 def parse_rule(rule):
-    """
-    Dictionary attack rule parsing function.
-    """
+    """ Dictionary attack rule parsing function. """
     i = 0
     while i < len(rule):
         if i < len(rule) - 3 and rule[i+1] == "[":

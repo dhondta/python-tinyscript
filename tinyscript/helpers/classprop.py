@@ -11,12 +11,9 @@ def classproperty(f):
     return ClassProperty(f)
 
 
+# inspired from: https://stackoverflow.com/questions/5189699/how-to-make-a-class-property
 class ClassProperty(object):
-    """
-    ClassProperty class for implementing @classproperty.
-    
-    Inspired from: https://stackoverflow.com/questions/5189699/how-to-make-a-class-property
-    """
+    """ ClassProperty class for implementing @classproperty. """
     def __init__(self, fget=None, fset=None, doc=None):
         self.fget = fget
         self.fset = fset

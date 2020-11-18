@@ -37,8 +37,7 @@ SERVERS = {
 
 
 def notify(title="", message="", app="", icon="", timeout=5, ticker=""):
-    """
-    Shortcut to plyer.notification.notify, not considering the 'toast' option, and fail-safe.
+    """ Shortcut to plyer.notification.notify, not considering the 'toast' option, and fail-safe.
     
     :param title:   title of the notification
     :param message: message of the notification
@@ -54,8 +53,7 @@ def notify(title="", message="", app="", icon="", timeout=5, ticker=""):
 
 
 def send_mail(from_mail, to_mail, subject, body, *attachments, **kwargs):
-    """
-    Send an email to a single receiver.
+    """ Send an email to a single receiver.
     
     :param from_mail:   sender's email address
     :param to_mail:     recipient's email address

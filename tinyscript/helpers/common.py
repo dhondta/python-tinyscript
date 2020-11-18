@@ -26,8 +26,7 @@ def human_readable_size(size, precision=0):
 
 
 def strings(data, minlen=4, alphabet=printable):
-    """
-    Generator yielding strings according to a charset and a minimal length from a given string buffer.
+    """ Generator yielding strings according to a charset and a minimal length from a given string buffer.
 
     :param data:     input data
     :param minlen:   minimal length of strings to be considered
@@ -46,8 +45,7 @@ def strings(data, minlen=4, alphabet=printable):
 
 
 def strings_from_file(filename, minlen=4, alphabet=printable, offset=0):
-    """
-    Generator yielding strings according to a charset and a minimal length from a given file.
+    """ Generator yielding strings according to a charset and a minimal length from a given file.
     
     :param filename: input file
     :param minlen:   minimal length of strings to be considered
@@ -73,8 +71,7 @@ def strings_from_file(filename, minlen=4, alphabet=printable, offset=0):
 
 
 def xor(str1, str2, offset=0):
-    """
-    Function for XORing two strings of different length. Either the first or the second string can be longer.
+    """ Function for XORing two strings of different length. Either the first or the second string can be longer.
 
     :param str1:   first string, with length L1
     :param str2:   second string, with length L2
@@ -91,8 +88,7 @@ def xor(str1, str2, offset=0):
 
 
 def xor_file(filename, key, offset=0):
-    """
-    Function for XORing a file with a given key.
+    """ Function for XORing a file with a given key.
 
     :param filename: input file
     :param key:      XOR key

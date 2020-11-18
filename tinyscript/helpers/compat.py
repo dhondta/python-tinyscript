@@ -17,10 +17,8 @@ ensure_unicode = text_type
 
 
 def b(s):
-    """
-    Similar to six.b function, because the behavior of 'b' in Python2/3 is not exactly the same. This makes 'b' behave
-     in Python 3 like in Python 2.
-    """
+    """ Similar to six.b function, because the behavior of 'b' in Python2/3 is not exactly the same. This makes 'b'
+         behave in Python 3 like in Python 2. """
     if PYTHON3:
         try:
             return s.encode("latin-1")
@@ -34,9 +32,7 @@ def b(s):
 
 
 def ensure_binary(s, encoding='utf-8', errors='strict'):
-    """
-    Identical to six.ensure_binary. Copied here to avoid messing up with six version errors.
-    """
+    """ Identical to six.ensure_binary. Copied here to avoid messing up with six version errors. """
     if isinstance(s, text_type):
         return s.encode(encoding, errors)
     elif isinstance(s, binary_type):
@@ -46,9 +42,7 @@ def ensure_binary(s, encoding='utf-8', errors='strict'):
 
 
 def ensure_str(s, encoding='utf-8', errors='strict'):
-    """
-    Similar to six.ensure_str. Adapted here to avoid messing up with six version errors.
-    """
+    """ Similar to six.ensure_str. Adapted here to avoid messing up with six version errors. """
     if not PYTHON3 and isinstance(s, text_type):
         return s.encode(encoding, errors)
     elif PYTHON3 and isinstance(s, binary_type):
@@ -70,9 +64,7 @@ if PYTHON3:
 
 
 def iterbytes(text):
-    """
-    Bytes iterator. If a string is provided, it will automatically be converted to bytes.
-    """
+    """ Bytes iterator. If a string is provided, it will automatically be converted to bytes. """
     if isinstance(text, string_types):
         text = b(text)
     for c in text:

@@ -87,7 +87,7 @@ def __validate(policy):
         raise ValueError("Bad maximum length ; should be greater than 0")
     if maxl < minl:
         raise ValueError("Bad maximum length ; should be greater than the minimum length")
-    if isinstance(policy['wordlists'], list):
+    if isinstance(policy['wordlists'], (list, tuple)):
         # filter out non-existing wordlists
         for p in policy['wordlists']:
             if not os.path.isfile(os.path.expanduser(p)):

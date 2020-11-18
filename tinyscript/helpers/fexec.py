@@ -17,15 +17,12 @@ THREADS   = []
 
 
 def apply(functions, args=(), kwargs={}):
-    """
-    Shortcut to apply a list of functions to the given arguments and keyword-arguments.
-    """
+    """ Shortcut to apply a list of functions to the given arguments and keyword-arguments. """
     return [f(*args, **kwargs) for f in functions]
 
 
 def execute(cmd, **kwargs):
-    """
-    Dummy wrapper for subprocess.Popen.
+    """ Dummy wrapper for subprocess.Popen.
 
     :param cmd: command string
     """
@@ -35,8 +32,7 @@ def execute(cmd, **kwargs):
 
 
 def process(f):
-    """
-    Decorator function for simply running the given function as a separate process.
+    """ Decorator function for simply running the given function as a separate process.
 
     :param f: function to be run as a separate process
     """
@@ -50,11 +46,7 @@ def process(f):
 
 
 def processes_clean(terminate=False, timeout=None):
-    """
-    Utility function to clean up the list of processes.
-
-    :return:
-    """
+    """ Utility function to clean up the list of processes. """
     global PROCESSES
     for p in PROCESSES:
         p.terminate() if terminate else p.join(timeout)
@@ -62,8 +54,7 @@ def processes_clean(terminate=False, timeout=None):
 
 
 def thread(f):
-    """
-    Decorator function for simply running the given function as a separate thread.
+    """ Decorator function for simply running the given function as a separate thread.
 
     :param f: function to be run as a separate thread
     """
@@ -77,11 +68,7 @@ def thread(f):
 
 
 def threads_clean(timeout=None):
-    """
-    Utility function to clean up the list of threads.
-
-    :return:
-    """
+    """ Utility function to clean up the list of threads. """
     global THREADS
     for t in THREADS:
         t.join(timeout)
