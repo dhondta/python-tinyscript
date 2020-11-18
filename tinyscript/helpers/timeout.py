@@ -5,6 +5,8 @@
 import signal
 from contextlib import contextmanager
 
+from .constants import WINDOWS
+
 
 __all__ = __features__ = ["timeout", "Timeout", "TimeoutError"]
 
@@ -26,12 +28,18 @@ class Timeout(object):
         self.stop = stop
 
     def __enter__(self):
-        signal.signal(signal.SIGALRM, self._handler)
-        signal.alarm(self.seconds)
+        if WINDOWS:
+            raise NotImplementedError("signal.SIGALRM does not exist in Windows")
+        else:
+            signal.signal(signal.SIGALRM, self._handler)
+            signal.alarm(self.seconds)
         return self
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        signal.signal(signal.SIGALRM, signal.SIG_IGN)
+        if WINDOWS:
+            raise NotImplementedError("signal.SIGALRM does not exist in Windows")
+        else:
+            signal.signal(signal.SIGALRM, signal.SIG_IGN)
         return not self.stop
     
     def _handler(self, signum, frame):

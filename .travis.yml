@@ -49,6 +49,7 @@ jobs:
         - choco install vcpython27
         - choco install pandoc
         - choco install microsoft-visual-cpp-build-tools
+        - choco install gtk-runtime
       env:
        - PATH=/c/Python27:/c/Python27/Scripts:$PATH
         - VS90COMNTOOLS=%VS140COMNTOOLS%
@@ -58,6 +59,7 @@ jobs:
         - choco install python --version 3.5.4
         - choco install pandoc
         - choco install microsoft-visual-cpp-build-tools
+        - choco install gtk-runtime
       env:
         - PATH=/c/Python35:/c/Python35/Scripts:$PATH
         - VS90COMNTOOLS=%VS140COMNTOOLS%
@@ -67,6 +69,7 @@ jobs:
         - choco install python --version 3.6.8
         - choco install pandoc
         - choco install microsoft-visual-cpp-build-tools
+        - choco install gtk-runtime
       env:
         - PATH=/c/Python36:/c/Python36/Scripts:$PATH
         - VS90COMNTOOLS=%VS140COMNTOOLS%
@@ -76,6 +79,7 @@ jobs:
         - choco install python --version 3.7.6
         - choco install pandoc
         - choco install microsoft-visual-cpp-build-tools
+        - choco install gtk-runtime
       env:
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
         - VS90COMNTOOLS=%VS140COMNTOOLS%
@@ -85,6 +89,7 @@ jobs:
         - choco install python --version 3.8.1
         - choco install pandoc
         - choco install microsoft-visual-cpp-build-tools
+        - choco install gtk-runtime
       env:
         - PATH=/c/Python38:/c/Python38/Scripts:$PATH
         - VS90COMNTOOLS=%VS140COMNTOOLS%

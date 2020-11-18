@@ -8,6 +8,8 @@ import time
 from errno import ETIME
 from os import strerror
 
+from .loglib import logger
+from ..helpers.constants import WINDOWS
 from ..helpers.timeout import TimeoutError
 
 
@@ -60,8 +62,11 @@ def set_time_items(glob):
         def __enter__(self):
             if manager.enabled:
                 if self.timeout is not None:
-                    signal.signal(signal.SIGALRM, self._handler)
-                    signal.alarm(self.timeout)
+                    if WINDOWS:
+                        logger.warning("signal.SIGALRM does not exist in Windows ; timeout parameter won't work.")
+                    else:
+                        signal.signal(signal.SIGALRM, self._handler)
+                        signal.alarm(self.timeout)
                 if manager._timings and self.descr:
                     l.time(self.descr)
                 return self

@@ -72,8 +72,9 @@ class TestHelpersInputs(TestCase):
             hotkeys({'t': ("TEST", ts_logger.info)})
             _keyboard.type("t")
             hotkeys({'t': ("TEST", "BAD_OUTPUT_HANDLER")}, False)
-            with self.assertRaises(ValueError):
-                _keyboard.press("a")
+            if not WINDOWS:
+                with self.assertRaises(ValueError):
+                    _keyboard.press("a")
             with self.assertRaises(TypeError):
                 _keyboard.press("t")
             hotkeys({'ctrl': ("CTRL", ts_logger.info)})

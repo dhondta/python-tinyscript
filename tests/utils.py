@@ -11,7 +11,7 @@ from os.path import dirname, exists, join
 from shutil import rmtree
 from six import StringIO
 from time import sleep
-from tinyscript.helpers.constants import PYTHON3
+from tinyscript.helpers.constants import PYTHON3, WINDOWS
 from unittest import TestCase
 try:
     from unittest.mock import patch as mock_patch
@@ -21,7 +21,7 @@ except ImportError:
 
 __all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep", "exists", "join", "logger", "logging",
            "makedirs", "mock_patch", "remove", "rmdir", "rmtree", "sleep", "sys", "temp_stdin", "touch", "temp_stdout",
-           "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase", "PYTHON3", "_FakeParserAction", "FIXTURES"]
+           "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase", "_FakeParserAction", "FIXTURES", "PYTHON3", "WINDOWS"]
 
 
 FIXTURES = {

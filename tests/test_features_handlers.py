@@ -7,7 +7,7 @@ import threading
 
 from tinyscript import *
 from tinyscript.features.handlers import *
-from tinyscript.features.handlers import signal, SIGINT, SIGUSR1, SIGTERM, _hooks, __interrupt_handler as ih, \
+from tinyscript.features.handlers import signal, SIGINT, SIGTERM, _hooks, __interrupt_handler as ih, \
                                          __pause_handler as ph, __terminate_handler as th
 
 from utils import *
@@ -96,13 +96,18 @@ class TestHandlers(TestCase):
         _hooks.sigint_action = "exit"
     
     def test_pause_handler(self):
-        self.assertIsNot(signal(SIGUSR1, ph), None)
-        self.assertEqual(_hooks.state, "RUNNING")
-        t = threading.Thread(target=exec_pause, args=(self, ))
-        t.start()
-        ph()
-        t.join()
-        self.assertEqual(_hooks.state, "RUNNING")
+        #FIXME: test once the feature for pausing execution is developed
+        if WINDOWS:
+            logger.warning("Pause-related features are not implemented for Windows")
+        else:
+            from tinyscript.features.handlers import SIGUSR1
+            self.assertIsNot(signal(SIGUSR1, ph), None)
+            self.assertEqual(_hooks.state, "RUNNING")
+            t = threading.Thread(target=exec_pause, args=(self, ))
+            t.start()
+            ph()
+            t.join()
+            self.assertEqual(_hooks.state, "RUNNING")
     
     def test_terminate_handler(self):
         self.assertIs(at_terminate(), None)

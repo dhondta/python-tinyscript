@@ -11,7 +11,7 @@ from utils import *
 class TestPreimportsString(TestCase):
     def test_extra_string_functions(self):
         STR = "this is a test"
-        self.assertEqual(string.shorten(STR), STR)
+        self.assertEqual(string.shorten("test"), "test")
         self.assertTrue(len(string.shorten(100 * STR)) < len(100 * STR))
         self.assertTrue(string.shorten(100 * STR).endswith("..."))
         self.assertTrue(string.shorten(100 * STR, end="|||").endswith("|||"))

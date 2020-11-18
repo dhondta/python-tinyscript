@@ -42,7 +42,7 @@ class TestHelpersPath(TestCase):
         self.assertIsInstance(FILE.bytes, bytes)
         self.assertEqual(FILE.size, 4)
         self.assertIsNone(FILE.append_lines("this is", "a test"))
-        self.assertEqual(FILE.size, 19)
+        self.assertEqual(FILE.size, [19, 21][WINDOWS])  # take \r\n into account
         self.assertEqual(FILE.text, "1234\nthis is\na test")
         self.assertEqual(FILE.bytes, b"1234\nthis is\na test")
         self.assertIsNone(FILE.reset())
@@ -61,7 +61,7 @@ class TestHelpersPath(TestCase):
         self.assertEqual(str(PATH), str(Path(TEST).absolute()))
         self.assertEqual(Path(TEST).child, Path("."))
         self.assertEqual(SPATH.size, 4096)
-        self.assertEqual(PATH.size, 4096 + 4096 + 14)  # PATH + SPATH + FILE
+        self.assertEqual(PATH.size, [4096 + 4096 + 14, 8213][WINDOWS])  # PATH + SPATH + FILE
         self.assertTrue(PATH.choice(".txt", ".py", ".other").is_samepath(FILE))
         self.assertIsInstance(PATH.generate(), Path)
         self.assertEqual(list(PATH.iterfiles()), [FILE.absolute()])
