@@ -26,13 +26,14 @@ TEMPLATE = """#!/usr/bin/env python
 # TODO: fill in imports
 
 
-__author__ = "Your name"
-__email__ = "your.name@example.com"
-__version__ = "1.0"
-__copyright__ = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
+__author__     = "John Doe"
+__email__      = "john.doe@example.com"
+__version__    = "1.0"
+__copyright__  = "J. Doe"
+__license__    = "AGPLv3 (http://www.gnu.org/licenses/agpl.html)"
 #__reference__ = ""
-#__source__ = ""
-#__training__ = ""
+#__source__    = ""
+#__training__  = ""
 # TODO: fill in the docstring
 __doc__ = \"\"\"
 This tool ...

@@ -6,10 +6,7 @@ from tinyscript.__info__ import __author__, __copyright__
 
 
 __version__ = "2.0"
-__examples__ = [
-    "test",
-    "my-script -t pybots.HTTPBot",
-]
+__examples__ = ["test", "my-script -t pybots.HTTPBot"]
 __doc__ = """
 This tool allows to quickly create a new Tinyscript script/tool from a template.
 """
