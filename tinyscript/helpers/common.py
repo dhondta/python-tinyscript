@@ -2,6 +2,8 @@
 """Common utility functions.
 
 """
+import ctypes
+import os
 from itertools import cycle
 from string import printable
 
