@@ -24,7 +24,7 @@ exclude_lines =
     except ImportError:
     except NameError:
     # sudo when using 'initialize'
-    os\.geteuid\(\) \!\= 0
+    if sudo and not is_admin():
     # 'interact' module - remote interaction
     class ConsoleSocket
     class RemoteInteractiveConsole

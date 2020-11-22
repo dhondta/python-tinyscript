@@ -16,7 +16,8 @@ from six import string_types
 from .features.handlers import _hooks
 from .argreparse import *
 from .features import *
-from .helpers.constants import LINUX, PYTHON3
+from .helpers.common import is_admin
+from .helpers.constants import LINUX, PYTHON3, WINDOWS
 from .helpers.data.types import ip_address, port_number
 from .helpers.text import configure_docformat, gt
 
@@ -90,8 +91,7 @@ def initialize(add_banner=False,
     # handle backward-compatibility arguments
     exit_at_interrupt = kwargs.pop('exit_at_interrupt', None)
     if len(kwargs) > 0:
-        raise TypeError("Unexpected keyword-argument{} ({})"
-                        .format(["", "s"][len(kwargs) > 1], ", ".join(kwargs.keys())))
+        raise TypeError("Unexpected keyword-arguments (%s)" % ", ".join(kwargs.keys()))
     # get caller's frame
     frame = currentframe().f_back
     # walk the stack until a frame containing a known object is found
@@ -280,10 +280,9 @@ def initialize(add_banner=False,
     # now parse inputs
     glob['args'], glob['parser'] = p.parse_args(), p
     # 3) if sudo required, restart the script
-    if sudo:
-        # if not root, restart the script in another process and jump to this
-        if os.geteuid() != 0:
-            os.execvp("sudo", ["sudo", sys.executable] + sys.argv)
+    if sudo and not is_admin():
+        exe = ["runas", "/env", "/user:Administrator"] if WINDOWS else ["sudo", "-E"]
+        os.execvp(["sudo", "runas"][WINDOWS], exe + [sys.executable] + sys.argv)
     # 4) configure logging and get the main logger
     configure_logger(glob, multi_level_debug, glob['args']._collisions.get("relative"),
                      glob['args']._collisions.get("logfile"), glob['args']._collisions.get("syslog"))
