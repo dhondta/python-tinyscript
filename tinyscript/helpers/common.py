@@ -6,7 +6,7 @@ from itertools import cycle
 from string import printable
 
 from .compat import b
-from .constants import PYTHON3
+from .constants import PYTHON3, WINDOWS
 
 
 __all__ = __features__ = ["human_readable_size", "is_admin", "strings", "strings_from_file", "xor", "xor_file"]
