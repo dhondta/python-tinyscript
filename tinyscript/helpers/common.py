@@ -2,14 +2,24 @@
 """Common utility functions.
 
 """
+import ctypes
+import os
 from itertools import cycle
 from string import printable
 
 from .compat import b
-from .constants import PYTHON3
+from .constants import PYTHON3, WINDOWS
 
 
-__all__ = __features__ = ["human_readable_size", "strings", "strings_from_file", "xor", "xor_file"]
+__all__ = __features__ = ["human_readable_size", "is_admin", "strings", "strings_from_file", "xor", "xor_file"]
+
+
+def is_admin():
+    """ Check if the user running the script is admin. """
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0 if WINDOWS else os.geteuid() == 0
+    except AttributeError:
+        raise NotImplementedError("Admin check is not implemented for this operating system.")
 
 
 def human_readable_size(size, precision=0):
