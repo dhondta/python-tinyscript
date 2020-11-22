@@ -298,7 +298,7 @@ class PathBasedDict(dict):
                 raise AttributeError
             return d
         except AttributeError:
-            raise KeyError(path)
+            raise KeyError(parts)
     
     def __setitem__(self, path, value):
         """ Set the value to the given path of subdictionaries. """
