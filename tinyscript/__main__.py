@@ -1,18 +1,22 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from tinyscript import *
 from tinyscript.template import new as new_script, TARGETS
 
 from tinyscript.__info__ import __author__, __copyright__
 
 
-__version__ = "2.0"
-__examples__ = ["test", "my-script -t pybots.HTTPBot"]
-__doc__ = """
+__script__    = "tinyscript"
+__copyright__ = "A. D'Hondt"
+__license__   = "agpl-3.0"
+__version__   = "2.0"
+__examples__  = ["test", "my-script -t pybots.HTTPBot"]
+__doc__       = """
 This tool allows to quickly create a new Tinyscript script/tool from a template.
 """
 
 
-if __name__ == '__main__':
+def main():
     commands = parser.add_subparsers(dest="command", help="command to be executed")
     new = commands.add_parser("new", help="make a new script")
     new.add_argument("name", type=ts.str_matches(r"^([0-9a-z]+[-_]+)?[0-9a-z]+$", re.I), help="script name")
