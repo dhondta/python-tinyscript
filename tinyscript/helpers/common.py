@@ -9,7 +9,7 @@ from .compat import b
 from .constants import PYTHON3
 
 
-__all__ = __features__ = ["human_readable_size", "strings", "strings_from_file", "xor", "xor_file"]
+__all__ = __features__ = ["human_readable_size", "is_admin", "strings", "strings_from_file", "xor", "xor_file"]
 
 
 def human_readable_size(size, precision=0):
@@ -23,6 +23,14 @@ def human_readable_size(size, precision=0):
         i += 1
         size /= 1024.0
     return "%.*f%s" % (precision, size, units[i])
+
+
+def is_admin():
+    """ Check if the user running the script is admin. """
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0 if WINDOWS else os.geteuid() == 0
+    except AttributeError:
+        raise NotImplementedError("Admin check is not implemented for this operating system.")
 
 
 def strings(data, minlen=4, alphabet=printable):

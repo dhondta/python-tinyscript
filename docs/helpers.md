@@ -83,6 +83,7 @@ It also provides some other utility functions:
 `ts.entropy_bits` | computation function for the number of bits of entropy (i.e. for a password)
 `ts.get_terminal_size` | cross-platform terminal size function
 `ts.human_readable_size` | simple function to convert a size in bytes to a relevant shorter size in kilobytes, megabytes, ...
+`ts.is_admin` | cross-platform function to check if the use executing the script is administrator
 `ts.pad` | String padding function, supporting `ansic9.23`, `incremental`, `iso7816-4`, `pkcs5`, `pkcs7` and `w3c` algorithms
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
 `ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
