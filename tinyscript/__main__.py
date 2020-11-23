@@ -3,15 +3,12 @@
 from tinyscript import *
 from tinyscript.template import new as new_script, TARGETS
 
-from tinyscript.__info__ import __author__, __copyright__
+from tinyscript.__info__ import __author__, __copyright__, __email__, __license__, __version__
 
 
-__script__    = "tinyscript"
-__copyright__ = "A. D'Hondt"
-__license__   = "agpl-3.0"
-__version__   = "2.0"
-__examples__  = ["test", "my-script -t pybots.HTTPBot"]
-__doc__       = """
+__script__   = "tinyscript"
+__examples__ = ["test", "my-script -t pybots.HTTPBot"]
+__doc__      = """
 This tool allows to quickly create a new Tinyscript script/tool from a template.
 """
 
