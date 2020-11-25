@@ -194,11 +194,11 @@ class Path(BasePath):
             p = Path(p.dirname)
         return p in self.parents
     
-    def iterfiles(self, filetype=None, filename_only=False):
+    def iterfiles(self, filetype=None, filename_only=False, relative=False):
         """ List all files from the current directory. """
         for i in self.iterdir():
             if i.is_file() and (filetype is None or i.suffix == filetype):
-                yield i.filename if filename_only else i
+                yield i.filename if filename_only else i.relative_to(self) if relative else i
     
     def iterpubdir(self):
         """ List all visible subdirectories from the current directory. """
@@ -243,24 +243,26 @@ class Path(BasePath):
         else:
             os.remove(str(self))
     
-    def walk(self, breadthfirst=True, filter_func=lambda p: True, sort=True, base_cls=True):
+    def walk(self, breadthfirst=True, filter_func=lambda p: True, sort=True, base_cls=True, relative=False):
         """ Walk the current path for directories and files using os.listdir(), breadth-first or depth-first, sorted or
              not, based on a filter function. """
+        rel = lambda i: i.relative_to(self) if relative else i
+        out = lambda i: Path(str(i)) if base_cls else i
         if breadthfirst:
             for item in self.listdir(lambda p: not p.is_dir(), sort):
                 if filter_func(item):
-                    yield Path(str(item)) if base_cls else item
+                    yield out(rel(item))
         for item in self.listdir(lambda p: p.is_dir(), sort):
             if breadthfirst and filter_func(item):
-                yield Path(str(item)) if base_cls else item
+                yield out(rel(item))
             for subitem in item.walk(breadthfirst, filter_func):
-                yield Path(str(subitem)) if base_cls else subitem
+                yield out(rel(subitem))
             if not breadthfirst and filter_func(item):
-                yield Path(str(item)) if base_cls else item
+                yield out(rel(item))
         if not breadthfirst:
             for item in self.listdir(lambda p: not p.is_dir(), sort):
                 if filter_func(item):
-                    yield Path(str(item)) if base_cls else item
+                    yield out(rel(item))
     
     def write_text(self, data, encoding=None, errors=None):
         """ Fix to non-existing method in Python 2. """

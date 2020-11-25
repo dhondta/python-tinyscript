@@ -61,12 +61,13 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 `ts.std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
 `ts.user_input` | Python2/3-compatible enhanced input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful), choices, default value and 'required' option)
 
-It also provides some simple execution functions:
+It also provides some simple execution-related functions:
 
 **Name** | **Description**
 --- | ---
 `ts.apply` | convenience function for applying a list of functions to the given arguments and keyword-arguments
 `ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
+`ts.filter_bin` | filtering function for getting a list of existing binaries (e.g. `filter_bin("ls", "dir")`)
 `ts.process` | decorator for turning a function into a process
 `ts.processes_clean` | cleanup function for joining processes opened with `ts.process`
 `ts.thread` | decorator for turning a function into a thread
@@ -564,6 +565,31 @@ The currently supported functions are:
         [1, 2, 3]
 
 - Others: `ts.json2html` (relying on [`json2html`](https://pypi.org/project/json2html/)) / `ts.json2xml` (relying on [`dicttoxml`](https://pypi.org/project/dicttoxml/)) / `ts.xml2json`  (relying on [`xmltodict`](https://pypi.org/project/xmltodict/)) / `ts.report2objects` (transforms a WPScan-like report to a Tinyscript [`Report`](reporting.html#report))
+
+-----
+
+## Text formatting functions
+
+Some text-related functions are provided:
+
+**Function** | **Description**
+--- | ---
+`ts.gt` | alias to `gettext.gettext`
+`ts.txt2blockquote` | format the given text into a blockquote object
+`ts.txt2bold` | format the given text as bold
+`ts.txt2email` | format the given text as an email address (link with `mailto:`)
+`ts.txt2italic` | format the given text as italic
+`ts.txt2olist` | format the given arguments as an ordered list
+`ts.txt2paragraph` | format the given text into a paragraph object
+`ts.txt2title` | format the given text into a title object
+`ts.txt2ulist` | format the given arguments as an unordered list
+`ts.txt2underline` | format the given text as underlined
+`ts.txt2url` | format the given text as a URL (hyperlink)
+`ts.txt_terminal_render` | render the given Markdown text in the terminal and relies on [`mdv`](https://github.com/axiros/terminal_markdown_viewer)
+
+!!! note "Supported formats"
+    
+    All these functions (except `ts.gt`) have a `format` argument (default: `None`) that supports, if relevant, the following values: `html`, `md`, `rst`, `textile`.
 
 -----
 

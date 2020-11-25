@@ -282,7 +282,7 @@ class _Text(object):
     """ Dummy Text class for storing StringIO's content before closing it. """
     def __repr__(self):
         return str(self)
-
+    
     def __str__(self):
         return self.text
 
@@ -291,23 +291,31 @@ class Capture(object):
     """ Context manager for capturing stdout and stderr. """
     def __init__(self, out=sys.stdout, err=sys.stderr):
         # backup original output file handles
-        self._stdout = sys.stdout
-        self._stderr = sys.stderr
-        
+        self._stdout, self._stderr = out, err
+    
     def __enter__(self):
+        r = []
         # create new file handles
-        sys.stdout, sys.stderr = StringIO(), StringIO()
-        self.stdout, self.stderr = _Text(), _Text()
+        if self._stdout is not None:
+            sys.stdout = StringIO()
+            self.stdout = _Text()
+            r.append(self.stdout)
+        if self._stderr is not None:
+            sys.stderr = StringIO()
+            self.stderr = _Text()
+            r.append(self.stderr)
         # return references of the dummy objects
-        return self.stdout, self.stderr
+        return tuple(r)
     
     def __exit__(self, *args):
         # freeze stdout and stderr contents before closing the file handles, using the references set in __enter__
-        self.stdout.text = sys.stdout.getvalue().strip() 
-        self.stderr.text = sys.stderr.getvalue().strip()
-        # close current file handles
-        sys.stdout.close()
-        sys.stderr.close()
-        # restore original output file handles
-        sys.stdout, sys.stderr = self._stdout, self._stderr
+        #  then restore the original output file handles
+        if self._stdout is not None:
+            self.stdout.text = sys.stdout.getvalue().strip()
+            sys.stdout.close()
+            sys.stdout = self._stdout
+        if self._stderr is not None:
+            self.stderr.text = sys.stderr.getvalue().strip()
+            sys.stderr.close()
+            sys.stderr = self._stderr
 

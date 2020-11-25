@@ -4,12 +4,13 @@
 """
 from functools import wraps
 from multiprocessing import Process
+from shutil import which
 from six import string_types
 from subprocess import Popen, PIPE
 from threading import Thread
 
 
-__all__ = __features__ = ["apply", "execute", "process", "processes_clean", "thread", "threads_clean"]
+__all__ = __features__ = ["apply", "execute", "filter_bin", "process", "processes_clean", "thread", "threads_clean"]
 
 
 PROCESSES = []
@@ -29,6 +30,11 @@ def execute(cmd, **kwargs):
     if isinstance(cmd, string_types):
         cmd = cmd.split()
     return Popen(cmd, stdout=PIPE, stderr=PIPE, **kwargs).communicate()
+
+
+def filter_bin(*binaries):
+    """ """
+    return [b for b in binaries if which(b) is not None]
 
 
 def process(f):

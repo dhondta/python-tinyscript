@@ -11,7 +11,7 @@ from .data.types.network import is_email, is_url
 
 
 __features__ = ["gt", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist", "txt2paragraph",
-                "txt2title", "txt2ulist", "txt2underline", "txt2url"]
+                "txt2title", "txt2ulist", "txt2underline", "txt2url", "txt_terminal_render"]
 __all__ = __features__ + ["DOCFORMAT_THEME"]
 
 DOCFORMAT = None

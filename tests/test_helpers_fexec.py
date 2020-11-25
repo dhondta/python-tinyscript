@@ -21,6 +21,7 @@ def test2():
 class TestHelpersFexec(TestCase):
     def test_execution_functions(self):
         self.assertIsNotNone(execute("id"))
+        self.assertIsNotNone(filter_bin("cat", "id", "netstat", "whoami"))
         self.assertIsNotNone(test1())
         self.assertIsNotNone(test2())
         self.assertIsNone(processes_clean())
