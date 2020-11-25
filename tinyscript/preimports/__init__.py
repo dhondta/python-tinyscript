@@ -20,6 +20,7 @@ from .log import logging
 from .pswd import getpass
 from .rand import random
 from .regex import re
+from .shutilp import shutil
 from .stringp import string
 from .venv import virtualenv, PipPackage, VirtualEnv
 
@@ -39,6 +40,7 @@ __imports__ = {
         "logging",
         "random",
         "re",
+        "shutil",
         "string",
         "virtualenv",
     ],
@@ -55,7 +57,6 @@ __imports__ = {
         "fileinput",
         "os",
         "platform",
-        "shutil",
         "signal",
         "string",
         "struct",

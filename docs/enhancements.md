@@ -117,6 +117,14 @@ A context manager is also available:
 
 -----
 
+## `shutil`
+
+`shutil` is slightly enhanced with a new function for Python 2:
+
+- `which`: compatibility function (already exists in Python 3) that determines the path to a program.
+
+-----
+
 ## `string`
 
 `string` is slightly enhanced with a few new functions:
