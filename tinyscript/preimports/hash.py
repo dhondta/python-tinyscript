@@ -8,8 +8,7 @@ from six import b
 
 
 def hash_file(filename, algo="sha256"):
-    """
-    This extends hashlib's hashing function to hash a file per block.
+    """ This extends hashlib's hashing function to hash a file per block.
 
     :param filename: name of the file to be hashed
     :return:         ALGO(file)
@@ -40,8 +39,7 @@ for algo in [x for x in hashlib.__dict__.keys()]:
 
 
 class LookupTable(dict):
-    """
-    Lookup table class for password cracking.
+    """ Lookup table class for password cracking.
 
     :param dict_path:   path of the dictionary file to be loaded
     :param algorithm:   the hash algorithm to be used
@@ -70,7 +68,5 @@ class LookupTable(dict):
                         self[h(l)] = l
                     else:
                         self.filtered += 1
-
-
 hashlib.LookupTable = LookupTable
 

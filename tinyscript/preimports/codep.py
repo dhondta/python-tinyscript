@@ -125,10 +125,10 @@ def _cache(f):
 
 
 def code_add_block(func, index, block, after=False):
-    """
-    Additional modification function to allow adding a block of code at a specific place in the code of a function. The
-     input block is automatically reindented relatively to its insertion position. Therefore, successive distinct blocks
-     of code with dedented levels SHALL NOT be added in the same block value through this function but well separately.
+    """ Additional modification function to allow adding a block of code at a specific place in the code of a function.
+         The input block is automatically reindented relatively to its insertion position. Therefore, successive
+         distinct blocks of code with dedented levels SHALL NOT be added in the same block value through this function
+         but well separately.
     
     :param func:  function object to be modified
     :param index: position where the block of code is to be added
@@ -150,9 +150,7 @@ code.add_block = code.insert_block = code_add_block
 
 
 def code_add_line(func, index, addition, **kwargs):
-    """
-    Alias for applying a single-line addition.
-    """
+    """ Alias for applying a single-line addition. """
     __validate(func)
     return code_add_lines(func, index, addition, **kwargs)
 code.add_line = code.insert_line = code_add_line
@@ -160,8 +158,7 @@ code.add_line = code.insert_line = code_add_line
 
 @_cache
 def code_add_lines(func, *additions, **kwargs):
-    """
-    Additional modification function to allow adding lines at specific places in the code of a function.
+    """ Additional modification function to allow adding lines at specific places in the code of a function.
     
     :param func:      function object to be modified
     :param additions: list of additions - pairs (line_index, new_line)
@@ -187,17 +184,14 @@ code.add_lines = code.insert_lines = code_add_lines
 
 
 def code_delete_line(func, index):
-    """
-    Alias for applying a single-line removal.
-    """
+    """ Alias for applying a single-line removal. """
     __validate(func)
     return code_delete_lines(func, index)
 code.delete_line = code.remove_line = code_delete_line
 
 
 def code_delete_lines(func, *indices):
-    """
-    Additional function to allow deleting only specific lines in the code of a function.
+    """ Additional function to allow deleting only specific lines in the code of a function.
     
     :param func:    function object to be modified
     :param indices: list of line indices for removal
@@ -213,9 +207,8 @@ code.delete_lines = code.remove_lines = code_delete_lines
 
 @_cache
 def code_replace(func, *replacements):
-    """
-    Slight modification to original replace function to allow replacing only part(s) of code and not necessarily using
-     whole function's code.
+    """ Slight modification to original replace function to allow replacing only part(s) of code and not necessarily
+         using whole function's code.
     
     :param func:         function object to be modified
     :param replacements: list of replacements - pairs (str_to_repl, replac)
@@ -240,9 +233,7 @@ code.replace = code_replace
 
 
 def code_replace_line(func, index, replacement):
-    """
-    Alias for applying a single-line replacement.
-    """
+    """ Alias for applying a single-line replacement. """
     __validate(func)
     return code_replace_lines(func, index, replacement)
 code.replace_line = code_replace_line
@@ -250,8 +241,7 @@ code.replace_line = code_replace_line
 
 @_cache
 def code_replace_lines(func, *replacements):
-    """
-    Additional replace function to allow replacing only specific lines in the code of a function.
+    """ Additional replace function to allow replacing only specific lines in the code of a function.
     
     :param func:         function object to be modified
     :param replacements: list of replacements - pairs (line_index, replac)
@@ -273,8 +263,7 @@ code.replace_lines = code_replace_lines
 
 
 def code_restore(func):
-    """
-    Additional function to restore mofidied code.
+    """ Additional function to restore mofidied code.
     
     :param func: function object to be restored
     :return:     True if function's code was restored
@@ -290,8 +279,7 @@ code.restore = code_restore
 
 
 def code_revert(func):
-    """ 
-    Additional function to revert mofidied code to last modification.
+    """ Additional function to revert mofidied code to last modification.
     
     :param func: function object to be reverted to last version
     :return:     True if function's code was reverted to last version
@@ -308,8 +296,7 @@ code.revert = code_revert
 
 
 def code_source(func):
-    """ 
-    Alias function to get function's code.
+    """ Alias function to get function's code.
     
     :param func: function object
     :return:     function's source code
