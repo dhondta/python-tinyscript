@@ -2,9 +2,9 @@
 """Common execution functions and decorators.
 
 """
+import os
 from functools import wraps
 from multiprocessing import Process
-from shutil import which
 from six import string_types
 from subprocess import Popen, PIPE
 from threading import Thread
@@ -33,8 +33,18 @@ def execute(cmd, **kwargs):
 
 
 def filter_bin(*binaries):
-    """ """
-    return [b for b in binaries if which(b) is not None]
+    """ Filter the input list of binaries' names.
+
+    :param binaries: binary names
+    :return:         filtered list of existing binaries
+    """
+    l = []
+    for b in binaries:
+        for p in os.environ['PATH'].split(os.path.pathsep):
+            p = os.path.join(p, b)
+            if os.path.exists(p) and os.access(p, os.X_OK):
+                l.append(b)
+    return l
 
 
 def process(f):

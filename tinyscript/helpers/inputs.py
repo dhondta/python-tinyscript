@@ -289,32 +289,32 @@ class _Text(object):
 
 class Capture(object):
     """ Context manager for capturing stdout and stderr. """
-    def __init__(self, out=sys.stdout, err=sys.stderr):
+    def __init__(self, out=None, err=None):
         # backup original output file handles
-        self._stdout, self._stderr = out, err
+        self._stdout, self._stderr = sys.stdout if out is None else out, sys.stderr if err is None else err
     
     def __enter__(self):
         r = []
         # create new file handles
-        if self._stdout is not None:
+        if self._stdout:
             sys.stdout = StringIO()
             self.stdout = _Text()
             r.append(self.stdout)
-        if self._stderr is not None:
+        if self._stderr:
             sys.stderr = StringIO()
             self.stderr = _Text()
             r.append(self.stderr)
         # return references of the dummy objects
-        return tuple(r)
+        return None if len(r) == 0 else r[0] if len(r) == 1 else tuple(r)
     
     def __exit__(self, *args):
         # freeze stdout and stderr contents before closing the file handles, using the references set in __enter__
         #  then restore the original output file handles
-        if self._stdout is not None:
+        if self._stdout:
             self.stdout.text = sys.stdout.getvalue().strip()
             sys.stdout.close()
             sys.stdout = self._stdout
-        if self._stderr is not None:
+        if self._stderr:
             self.stderr.text = sys.stderr.getvalue().strip()
             sys.stderr.close()
             sys.stderr = self._stderr

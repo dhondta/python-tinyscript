@@ -55,7 +55,7 @@ class TestHelpersInputs(TestCase):
         self.assertIn("123456789", err.text)
         def dummy(): print("TEST")
         silent_dummy = silent(dummy)
-        with Capture() as (out, err):
+        with Capture(err=False) as out:
             silent_dummy()
         self.assertEqual(str(repr(out)), "")
         captured_dummy = capture(dummy)
