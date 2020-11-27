@@ -9,7 +9,6 @@ import os
 import re
 from mimetypes import guess_type
 from pathlib import Path as BasePath
-from pygments.lexers import Python2Lexer
 from pyminizip import compress_multiple, uncompress
 from random import choice
 from re import search
@@ -21,6 +20,11 @@ from .constants import *
 from .compat import u
 from .password import getpass
 
+if PYTHON2:
+    from pygments.lexers import Python2Lexer as PythonLexer
+else:
+    from pygments.lexers import PythonLexer
+
 
 __all__ = __features__ = ["Path", "ConfigPath", "MirrorPath", "ProjectPath", "PythonPath", "TempPath"]
 
@@ -28,7 +32,7 @@ __all__ = __features__ = ["Path", "ConfigPath", "MirrorPath", "ProjectPath", "Py
 MARKER = "#TODO:"
 
 # NB: PythonLexer.analyse_text only relies on shebang !
-_lexer = Python2Lexer()
+_lexer = PythonLexer()
 
 
 class Path(BasePath):
