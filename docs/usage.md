@@ -7,47 +7,53 @@ Some example script/tools are available on the [GitHub repo](https://github.com/
 
 A tiny tool is provided with the package to create a template instantly.
 
-- **Create a script**
+- **Create a tool**
 
 ```sh
-$ tinyscript-new script
+$ tinyscript new test
 ```
 
-This creates a script named `script.py` with minimal code.
+This creates a script named `test.py` with minimal code.
 
-??? example "`script.py`"
+??? example "`test.py`"
 
         :::python
         #!/usr/bin/env python
         # -*- coding: UTF-8 -*-
         from tinyscript import *
+        # TODO: fill in imports
+
+
+        __author__     = "John Doe"
+        __email__      = "john.doe@example.com"
+        __version__    = "1.0"
+        __copyright__  = "J. Doe"
+        __license__    = "agpl-3.0"
+        #__reference__ = ""
+        #__source__    = ""
+        #__training__  = ""
+        # TODO: fill in the docstring
+        __doc__ = """
+        This tool ...
+        """
+        # TODO: fill in examples
+        __examples__ = [""]
 
 
         if __name__ == '__main__':
-            parser.add_argument("", help="")
-            # TODO: write new arguments
+            # TODO: add arguments
             initialize()
-            # TODO: use validate(...) if necessary
             # TODO: write logic here
 
 <br>
 
-- **Create a tool**
+- **Create a PyBot tool**
 
 ```sh
-$ tinyscript-new tool
+$ tinyscript new test --target pybots.JSONBot
 ```
 
-This creates a script named `tool.py` with a bit more code, comments and placeholders.
-
-- **Create a PyBot script/tool**
-
-```sh
-$ tinyscript-new script pybots.HTTPBot --name my-http-bot
-$ tinyscript-new tool pybots.JSONBot --name my-json-bot
-```
-
-This creates a script/tool with a specific name and an import of particular class from the [PyBots library](https://github.com/dhondta/pybots).
+This creates a tool with a specific name and an import of particular class from the [PyBots library](https://github.com/dhondta/python-pybots).
 
 
 ## Customization
