@@ -77,3 +77,4 @@ def folder_exists_or_create(f):
     if not isdir(f):
         raise ValueError("Target exists and is not a folder")
     return f
+

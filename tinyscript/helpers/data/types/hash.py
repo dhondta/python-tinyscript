@@ -47,3 +47,4 @@ def any_hash(h):
     if not any(__check_hash(h, a, False) is not None for a in HASH_LEN.keys()):
         raise ValueError("Bad hash")
     return h
+

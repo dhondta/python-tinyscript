@@ -82,6 +82,10 @@ class TestHelpersDataTypes(TestCase):
         self.assertRaises(ValueError, str_contains, "ABCD", 1.1)
         self.assertEqual(regular_expression(r"^[abc]$"), r"^[abc]$")
         self.assertRaises(ValueError, regular_expression, r"^[abc")
+        for i in ["a", 2.2, 10, 145, 1537]:
+            self.assertRaises(ValueError, prime_number, i)
+        for i in [2.0, 3, 5, 7, 11.0, 113]:
+            self.assertEqual(prime_number(i), i)
     
     def test_config_related_types(self):
         self.assertRaises(ValueError, ini_config, "does_not_exist")
@@ -199,6 +203,10 @@ class TestHelpersDataTypes(TestCase):
         self.assertFalse(is_pos_int(-10))
         self.assertTrue(is_neg_int(-10))
         self.assertFalse(is_neg_int(10))
+        for i in ["a", 2.2, 10, 145, 1537]:
+            self.assertFalse(is_prime(i))
+        for i in [2.0, 3, 5, 7, 11.0, 113]:
+            self.assertTrue(is_prime(i))
         self.assertTrue(is_dict({"key": "value"}))
         self.assertFalse(is_dict("not_a_dict"))
         self.assertFalse(is_dict(["not_a_dict"]))

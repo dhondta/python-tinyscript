@@ -301,7 +301,7 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_executable` | whether the given path has the execution flag
 `ts.is_file` | dummy shortcut to `os.path.isfile`
 `ts.is_hex` | hexadecimal string (case insensitive)
-`ts.is_int` / `ts.is_pos_int` / `ts.is_neg_int` | integer (positive / negative)
+`ts.is_int` / `ts.is_pos_int` / `ts.is_neg_int` / `ts.is_prime` | integer (positive / negative / prime)
 `ts.is_list` | list, tuple, set
 `ts.is_long_opt` | for an argument with the "`--option`" format
 `ts.is_str` | str, bytes, unicode
