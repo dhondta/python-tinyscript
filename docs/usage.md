@@ -80,23 +80,21 @@ From there, the first thing to do can be to customize script/tool's metadata. Fo
     
     Copyright is handled the following way: either a copyright text is specified or a 2-tuple with the copyright text and the starting year.
     
-    ```python
-    >>> from tinyscript import *
-    >>> ts.copyright("test")
-    '© 2020 test'
-    >>> ts.copyright("test", 2019)
-    '© 2019-2020 test'
-    ```
+        :::python
+        >>> from tinyscript import *
+        >>> ts.copyright("test")
+        '© 2020 test'
+        >>> ts.copyright("test", 2019)
+        '© 2019-2020 test'
     
     In a script, it is thus defined as a metadata field: `__copyright__ = "test", 2019`
     
     License is handled by a function that gets the full license name from its short name. For a list of short names, use:
     
-    ```python
-    >>> from tinyscript import *
-    >>> ts.list_licenses()
-    ['afl-3.0', 'agpl-3.0', ..., 'zlib']
-    ```
+        :::python
+        >>> from tinyscript import *
+        >>> ts.list_licenses()
+        ['afl-3.0', 'agpl-3.0', ..., 'zlib']
     
 
 !!! note "Comments & Sections"
