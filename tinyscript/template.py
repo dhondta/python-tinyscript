@@ -8,15 +8,15 @@ __all__ = ["new"]
 
 TARGETS = {
     'pybots.HTTPBot': """
-    with HTTPBot("...", verbose=True) as bot:
+    with HTTPBot("...", verbose=args.verbose) as bot:
         bot.get()
 """,
     'pybots.JSONBot': """
-    with JSONBot("...", verbose=True) as bot:
+    with JSONBot("...", verbose=args.verbose) as bot:
         bot.get()
 """,
     'pybots.TCPBot': """
-    with TCPBot("...", 1234, verbose=True) as bot:
+    with TCPBot("...", 1234, verbose=args.verbose) as bot:
         bot.send_receive("...")
 """
 }
