@@ -18,7 +18,9 @@ from tempfile import gettempdir, NamedTemporaryFile as TempFile
 
 from .constants import *
 from .compat import u
-from .password import getpass
+from .data.types import is_dict, is_list, is_str
+from .inputs import user_input
+from .password import getpass, getrepass
 
 if PYTHON2:
     from pygments.lexers import Python2Lexer as PythonLexer
@@ -26,7 +28,8 @@ else:
     from pygments.lexers import PythonLexer
 
 
-__all__ = __features__ = ["Path", "ConfigPath", "MirrorPath", "ProjectPath", "PythonPath", "TempPath"]
+__all__ = __features__ = ["Path", "ConfigPath", "CredentialsPath", "MirrorPath", "ProjectPath", "PythonPath",
+                          "TempPath"]
 
 
 MARKER = "#TODO:"
@@ -48,7 +51,7 @@ class Path(BasePath):
         create = kwargs.pop("create", False)
         p = super(Path, cls).__new__(cls, *parts, **kwargs)
         if expand:
-            p = p.expanduser().absolute()
+            p = super(Path, cls).__new__(cls, str(p.expanduser().absolute()), **kwargs)
         if create and not p.exists():
             p.mkdir(parents=True)  # exist_ok does not work in Python 2
         return p
@@ -83,6 +86,11 @@ class Path(BasePath):
     def mime_type(self):
         """ Get the MIME type of the current Path object. """
         return guess_type(str(self))[0]
+    
+    @property
+    def permissions(self):
+        """ Get the permissions of the current Path object. """
+        return os.stat(str(self)).st_mode
     
     @property
     def size(self):
@@ -291,6 +299,86 @@ class ConfigPath(Path):
         return self
 
 
+class CredentialsPath(Path):
+    """ Extension of the class Path for handling a path to a file containing credentials.
+    
+    Note: Beware that this does not handle any security (no obfuscation, hashing or encryption) ; so, any secret entered
+           in an instance will remain in memory until this is freed.
+    
+    :param id:     identifier
+    :param secret: secret
+    """
+    def __new__(cls, *parts, **kwargs):
+        p = Path(*parts)
+        path, fn = (str(p), "creds.txt") if p.suffix == "" else (p.dirname, p.filename)
+        kw = {'create': True, 'expand': True}
+        path = Path(*parts, **kw)
+        kwargs['exist_ok'] = True
+        kwargs['create'] = False
+        self = super(CredentialsPath, cls).__new__(cls, str(path), fn, **kwargs)
+        self.id = kwargs.get("id") or ""
+        self.secret = kwargs.get("secret") or ""
+        d = kwargs.get("delimiter") or ":"
+        self.save(d) if self.id != "" and self.secret != "" else self.load(d)
+        return self
+    
+    def ask(self, id="Username:", secret="Password:"):
+        """ This method allows to ask for credentials.
+        
+        :param id:     prompt message or (prompt message, validation pattern)
+        :param secret: prompt message or (prompt message, validation pattern) or (prompt message, policy dictionary)
+        """
+        if is_str(id):
+            id_prompt, id_pattern = id, None
+        elif is_list(id) and len(id) == 2:
+            id_prompt, id_pattern = id
+        else:
+            raise ValueError("Bad identifier ; should be either the prompt message or a 2-tuple with the prompt message"
+                             " and the validation pattern")
+        id_alias = id_prompt.rstrip(": ").lower().replace(" ", "_")
+        if is_str(secret):
+            sec_prompt, sec_pattern = secret, None
+        elif is_list(secret) and len(secret) == 2:
+            sec_prompt, sec_pattern = secret
+        else:
+            raise ValueError("Bad secret ; should be either the prompt message, a 2-tuple with the prompt message"
+                             " and the validation pattern or a 2-tuple with the prompt message and a policy")
+        sec_alias = sec_prompt.rstrip(": ").lower().replace(" ", "_")
+        self.id = ""
+        while self.id == "":
+            self.id = user_input(id_prompt, required=True)
+            if id_pattern and not re.search(id_pattern, self.id):
+                raise ValueError("Bad %s" % id_alias)
+        self.secret = ""
+        try:
+            self.secret = (getpass if is_dict(sec_pattern) else getrepass)(sec_prompt, None, sec_pattern).strip()
+        except ValueError as e:
+            raise e("Non-compliant %s:\n- %s" % (sec_alias, "\n- ".join(e.errors))) if hasattr(e, "errors") else e
+    
+    def load(self, delimiter=":"):
+        """ This loads credentials from the path taking a delimiter (default: ":") into account. """
+        if not self.exists():
+            return
+        c = self.read_text().strip()
+        if c == "":
+            return
+        try:
+            self.id, self.secret = c.split(delimiter)
+        except ValueError:
+            raise ValueError("Bad delimiter '%s' ; it should not be a character present in the identifier or secret" % \
+                             delimiter)
+    
+    def save(self, delimiter=":"):
+        """ This saves the defined credentials to the path taking a delimiter (default: ":") into account. """
+        if self.id == "" and self.secret == "":
+            return
+        self.touch(0o600)
+        if delimiter in self.id or delimiter in self.secret:
+            raise ValueError("Bad delimiter '%s' ; it should not be a character present in the identifier or secret" % \
+                             delimiter)
+        self.write_text("%s%s%s" % (self.id, delimiter, self.secret))
+
+
 class MirrorPath(Path):
     """ Extension of the class Path for handling a folder that can mirror another one using symbolic links.
     
@@ -336,7 +424,7 @@ class ProjectPath(Path):
         return self
     
     def archive(self, path=None, password=None, ask=False, remove=True, **kwargs):
-        """ This function compresses the content of the given source path into the given archive as the destination
+        """ This method compresses the content of the given source path into the given archive as the destination
              path, eventually given a password.
 
         :param path:     path to the project folder to be archived
@@ -373,7 +461,7 @@ class ProjectPath(Path):
                 sp.write_text(str(v))
     
     def load(self, path=None, password=None, ask=False, remove=True, **kwargs):
-        """ This function decompresses the given archive, eventually given a password.
+        """ This method decompresses the given archive, eventually given a password.
 
         :param path:     path to the archive to be extracted
         :param password: password string to be passed

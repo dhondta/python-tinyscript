@@ -13,6 +13,7 @@ Policy:
 """
 import getpass as _getpass
 import os
+import re
 from platform import system
 
 from .attack import expand_mask, parse_rule, MASKS
@@ -20,7 +21,7 @@ from .constants import *
 from .data.utils import entropy_bits
 
 
-__all__ = __features__ = ["getpass"]
+__all__ = __features__ = ["getpass", "getrepass"]
 
 
 BAD_PASSWORDS_LISTS = {
@@ -161,5 +162,21 @@ def getpass(prompt="Password: ", stream=None, policy=None):
         exec("class NonCompliantPasswordError(ValueError):\n    def __init__(self, msg, errors, **kwargs):\n        " \
              "super(NonCompliantPasswordError, self).__init__(msg, **kwargs)\n        self.errors = errors", g)
         raise g['NonCompliantPasswordError'](pwd, errors)
+    return pwd
+
+
+def getrepass(prompt="Password: ", stream=None, pattern=None):
+    """ This function allows to enter a password enforced through pattern matching.
+    
+    :param prompt:  prompt text
+    :param stream:  a writable file object to display the prompt (defaults to the tty or to sys.stderr if not available)
+    :param pattern: pattern to be used
+    :return:        pattern-compliant password
+    """
+    pwd = _getpass.getpass(prompt, stream).strip()
+    if pattern and not re.search(pattern, pwd):
+        g = {'__name__': "__main__"}
+        exec("class NonCompliantPasswordError(ValueError): pass", g)
+        raise g['NonCompliantPasswordError'](pwd)
     return pwd
 

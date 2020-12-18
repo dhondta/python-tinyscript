@@ -3,7 +3,7 @@
 """Password input function tests.
 
 """
-from tinyscript.helpers.password import getpass
+from tinyscript.helpers.password import *
 
 from utils import *
 
@@ -37,4 +37,10 @@ class TestHelpersPassword(TestCase):
             with mock_patch("getpass.getpass", return_value=p):
                 pswd = getpass(**kwargs)
             self.assertEqual(pswd, p)
+    
+    def test_getrepass(self):
+        with mock_patch("getpass.getpass", return_value="test"):
+            self.assertRaises(ValueError, getrepass, pattern=r"[a-z]+\d+")
+        with mock_patch("getpass.getpass", return_value="test1"):
+            self.assertEqual(getrepass(pattern=r"[a-z]+\d+"), "test1")
 

@@ -56,6 +56,7 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 `ts.clear` | multi-platform clear screen function
 `ts.confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
 `ts.getpass` | `getpass.getpass`-based function that allows to enter a policy for making compliant passwords (see [`getpass` enhancement](enhancements.html#getpass) for more details about how a policy can be described)
+`ts.getrepass` | `getpass.getpass`-based function that allows to enter a regular expression for making compliant passwords
 `ts.notify` | shortcut to the `notification.notify` function of [`plyer`](https://github.com/kivy/plyer)
 `ts.pause` | Python2/3-compatible dummy input function, waiting for a key to be pressed (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
 `ts.std_input` | Python2/3-compatible input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful))
@@ -249,7 +250,14 @@ Tinyscript also provides 2 `pathlib`-related functions:
 - `ts.ConfigPath`: additional class for handling configuration files or folders
     
     This subclass of `Path` takes an `application` name and a `file` boolean as arguments and makes configuration items depending on the OS (e.g. on Windows, using `%APPDATA%` or on Linux, user's home folder). If `file` is `True`, then make a config file path, otherwise create a config folder.
+
+- `ts.CredentialsPath`: new class for handling a file with credentials
     
+    This subclass of `Path` handles `id` and `secret` attributes (that can be specified while creating an instance with the same keyword-arguments) with loading from or saving to a file that has the read-write permissions only for the owner. This class adds the following methods:
+    
+    - `load(delimiter)`: loads credentials from the given path (default delimiter: `:`)
+    - `save(delimiter)`: saves credentials to the given path (default delimiter: `:`), creating the file with read-write permissions limited to the owner
+
 - `ts.MirrorPath`: additional class for handling mirrored files and folders
     
     This mirrors an item, that is, if the given source does not exist in the given destination, it creates a symbolic link and recurses if it is a folder.

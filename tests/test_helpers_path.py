@@ -39,6 +39,7 @@ class TestHelpersPath(TestCase):
     def test_file_extensions(self):
         self.assertEqual(FILE.filename, "test.txt")
         FILE.append_bytes(b"1234")
+        self.assertIsNotNone(FILE.permissions)
         self.assertIsInstance(FILE.bytes, bytes)
         self.assertEqual(FILE.size, 4)
         self.assertIsNone(FILE.append_lines("this is", "a test"))
@@ -77,6 +78,55 @@ class TestHelpersPath(TestCase):
     def test_config_path(self):
         PATH = ConfigPath("test-app", file=True)
         self.assertTrue(str(PATH).endswith("test-app.conf"))
+    
+    def test_credentials_path(self):
+        PATH1 = CredentialsPath("test_creds")
+        self.assertEqual(PATH1.id, "")
+        self.assertEqual(PATH1.secret, "")
+        with mock_patch("tinyscript.helpers.inputs.std_input", return_value="test"), \
+             mock_patch("getpass.getpass", return_value=""):
+            PATH1.ask()
+        self.assertEqual(PATH1.id, "test")
+        self.assertEqual(PATH1.secret, "")
+        with mock_patch("tinyscript.helpers.inputs.std_input", return_value="test"), \
+             mock_patch("getpass.getpass", return_value=""):
+            self.assertRaises(ValueError, PATH1.ask, ("Identifier:", r"test\d+"))
+        self.assertEqual(PATH1.id, "test")
+        with mock_patch("tinyscript.helpers.inputs.std_input", return_value="test1"), \
+             mock_patch("getpass.getpass", return_value="test"):
+            self.assertRaises(ValueError, PATH1.ask, ("ID:", r"test\d+"), ("Secret:", r"[a-z]+\d+"))
+        self.assertEqual(PATH1.id, "test1")
+        self.assertEqual(PATH1.secret, "")
+        with mock_patch("tinyscript.helpers.inputs.std_input", return_value="test1"), \
+             mock_patch("getpass.getpass", return_value="test1"):
+            PATH1.ask(("ID:", r"test\d+"), ("Secret:", r"[a-z]+\d+"))
+        self.assertEqual(PATH1.id, "test1")
+        self.assertEqual(PATH1.secret, "test1")
+        self.assertIsNone(PATH1.save())
+        PATH2 = CredentialsPath("test_creds")
+        self.assertEqual(PATH2.id, "test1")
+        self.assertEqual(PATH2.secret, "test1")
+        PATH2.remove()
+        PATH3 = CredentialsPath("test_creds", id="test2", secret="test2")
+        self.assertEqual(PATH3.id, "test2")
+        self.assertEqual(PATH3.secret, "test2")
+        self.assertRaises(ValueError, PATH3.load, "t")  # bad delimiter
+        self.assertRaises(ValueError, PATH3.save, "t")
+        PATH3.remove()
+        PATH4 = CredentialsPath("test_creds")
+        PATH4.save()  # id and secret are "" ; this should thus do nothing
+        self.assertFalse(PATH4.exists())
+        PATH4.write_text("BAD")
+        self.assertRaises(ValueError, PATH4.load)
+        self.assertRaises(ValueError, PATH4.ask, id=("BAD", "identifier", "format"))
+        self.assertRaises(ValueError, PATH4.ask, secret=("BAD", "secret", "format"))
+        PATH4.remove()
+        PATH4.touch()
+        self.assertIsNone(PATH4.load())
+        self.assertEqual(PATH4.id, "")
+        self.assertEqual(PATH4.secret, "")
+        PATH4.remove()
+        Path("test_creds").remove()
     
     def test_mirror_path(self):
         PATH2 = Path(TEST + "2", expand=True, create=True)
