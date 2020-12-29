@@ -6,12 +6,17 @@ import ctypes
 import os
 from itertools import cycle
 from string import printable
+try:                 # Python 2
+    from urlparse import urlparse, parse_qs as urlparse_query
+except ImportError:  # Python 3
+    from urllib.parse import urlparse, parse_qs as urlparse_query
 
 from .compat import b
 from .constants import PYTHON3, WINDOWS
 
 
-__all__ = __features__ = ["human_readable_size", "is_admin", "strings", "strings_from_file", "xor", "xor_file"]
+__all__ = __features__ = ["human_readable_size", "is_admin", "strings", "strings_from_file", "urlparse",
+                          "urlparse_query", "xor", "xor_file"]
 
 
 def human_readable_size(size, precision=0):

@@ -96,6 +96,8 @@ It also provides some other utility functions:
 `ts.Timeout` | context manager for applying a timeout to a code block
 `ts.TimeoutError` | custom exception for handling a timeout (as it is natively available in Python 3 but not in Python 2)
 `ts.unpad` | String unpadding function (complementary of `ts.pad`)
+`ts.urlparse` | Python2/3-compatible shortcut to `urlparse` (from module `urlparse` in Python 2 and `urllib` in Python 3)
+`ts.urlparse_query` | Python2/3-compatible shortcut to `parse_qs` (from module `urlparse` in Python 2 and `urllib` in Python 3)
 `ts.xor` | repeated XOR function, also allowing to apply an ordinal offset on XORed characters
 `ts.xor_file` | XOR a file with a given key
 
