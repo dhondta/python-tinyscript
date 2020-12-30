@@ -311,7 +311,7 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_executable` | whether the given path has the execution flag
 `ts.is_file` | dummy shortcut to `os.path.isfile`
 `ts.is_hex` | hexadecimal string (case insensitive)
-`ts.is_int` / `ts.is_pos_int` / `ts.is_neg_int` / `ts.is_prime` | integer (positive / negative / prime)
+`ts.is_int` / `ts.is_int_range` / `ts.is_pos_int` / `ts.is_neg_int` / `ts.is_prime` | integer (within range / positive / negative / prime)
 `ts.is_list` | list, tuple, set
 `ts.is_long_opt` | for an argument with the "`--option`" format
 `ts.is_str` | str, bytes, unicode
@@ -402,6 +402,8 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `ts.folder_does_not_exist` | `str` | non-existing folder
 `ts.folder_exists` / `ts.folder_exists_or_create` | `str` | existing folder or folder to be created if it does not exist
 `ts.ints` | `list(int)` | list of integers
+`ts.int_range` | single integer within range (second bound included!)
+`ts.ints_range` | list of integers within range (second bound included!)
 `ts.neg_int` / `negative_int` | `int` | single negative integer
 `ts.neg_ints` / `negative_ints` | `list(int)` | list of negative integers
 `ts.pos_int` / `positive_int` | `int` | single positive integer
