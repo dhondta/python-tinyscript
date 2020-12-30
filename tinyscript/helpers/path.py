@@ -599,8 +599,9 @@ class TempPath(Path):
                 return super(TempPath, cls).__new__(cls, tmp, **kwargs)
             return super(TempPath, cls).__new__(cls, p, **kwargs)
         else:
-            sp = Path(*parts)
+            sp = p.joinpath(*parts)
             if sp.is_under(p):
+                Path(sp, create=True)
                 return super(TempPath, cls).__new__(cls, sp if sp.is_dir() else sp.dirname, **kwargs)
             raise ValueError("The given path shall be under '{}'".format(p))
     
