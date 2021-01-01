@@ -67,7 +67,7 @@ It also provides some simple execution-related functions:
 **Name** | **Description**
 --- | ---
 `ts.apply` | convenience function for applying a list of functions to the given arguments and keyword-arguments
-`ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR
+`ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR ; `returncode=True` allows to output its STDOUT, STDERR and return code
 `ts.filter_bin` | filtering function for getting a list of existing binaries (e.g. `filter_bin("ls", "dir")`)
 `ts.process` | decorator for turning a function into a process
 `ts.processes_clean` | cleanup function for joining processes opened with `ts.process`
@@ -237,7 +237,7 @@ Tinyscript also provides 2 `pathlib`-related functions:
     - `iterpubdir()`: iterates over visible directories only
     - `listdir(filter_func:lambda, sort:bool)`: list the current path based on a filter function, sorted or not
     - `reset()`: truncates the file
-    - `remove()`: removes the current file or recursively removes the current folder
+    - `remove(error:bool)`: removes the current file or recursively removes the current folder (can use `error=False` to prevent from raising an exception if the target does not exist)
     - `walk(breadthfirst:bool, filter_func:lambda, sort:bool)`: walk the current path breadth-first or depth-first using a filter function, sorted or not
     
     It also adds some properties:

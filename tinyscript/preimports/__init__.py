@@ -57,6 +57,7 @@ __imports__ = {
         "fileinput",
         "os",
         "platform",
+        "shlex",
         "signal",
         "string",
         "struct",

@@ -164,6 +164,7 @@ $ python
               'os',
               'random',
               're',
+              'shlex',
               'shutil',
               'signal',
               'string',

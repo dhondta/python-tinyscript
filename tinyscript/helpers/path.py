@@ -248,12 +248,13 @@ class Path(BasePath):
         with self.open('w') as f:
             pass
     
-    def remove(self):
+    def remove(self, error=True):
         """ Extension for removing a directory or a file. """
-        if self.is_dir():
-            rmtree(str(self))
-        else:
-            os.remove(str(self))
+        try:
+            rmtree(str(self)) if self.is_dir() else os.remove(str(self))
+        except OSError:
+            if error:
+                raise
     
     def walk(self, breadthfirst=True, filter_func=lambda p: True, sort=True, base_cls=True, relative=False):
         """ Walk the current path for directories and files using os.listdir(), breadth-first or depth-first, sorted or

@@ -27,9 +27,12 @@ def execute(cmd, **kwargs):
 
     :param cmd: command string
     """
+    rc = kwargs.pop("returncode", False)
     if isinstance(cmd, string_types):
         cmd = cmd.split()
-    return Popen(cmd, stdout=PIPE, stderr=PIPE, **kwargs).communicate()
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, **kwargs)
+    out, err = p.communicate()
+    return (out, err, p.returncode) if rc else (out, err)
 
 
 def filter_bin(*binaries):
