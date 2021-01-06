@@ -194,7 +194,6 @@ install:
   - pip install $PIP_ARGS nose
   - pip install $PIP_ARGS coveralls
   - pip install $PIP_ARGS cairocffi>=1.0.0
-  - pip install $PIP_ARGS -r requirements.txt
   - pip install $PIP_ARGS .
 script: nosetests -v --with-coverage --cover-tests --cover-package tinyscript tests
 after_success: coveralls
