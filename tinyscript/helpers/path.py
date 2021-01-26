@@ -22,20 +22,12 @@ from .data.types import is_dict, is_list, is_str
 from .inputs import user_input
 from .password import getpass, getrepass
 
-if PYTHON2:
-    from pygments.lexers import Python2Lexer as PythonLexer
-else:
-    from pygments.lexers import PythonLexer
-
 
 __all__ = __features__ = ["Path", "ConfigPath", "CredentialsPath", "MirrorPath", "ProjectPath", "PythonPath",
                           "TempPath"]
 
 
 MARKER = "#TODO:"
-
-# NB: PythonLexer.analyse_text only relies on shebang !
-_lexer = PythonLexer()
 
 
 class Path(BasePath):
@@ -76,6 +68,11 @@ class Path(BasePath):
     def dirname(self):
         """ Get the directory name. """
         return self if self.is_dir() else self.parent
+    
+    @property
+    def extension(self):
+        """ Alias for suffix. """
+        return self.suffix
     
     @property
     def filename(self):
@@ -268,7 +265,7 @@ class Path(BasePath):
         for item in self.listdir(lambda p: p.is_dir(), sort):
             if breadthfirst and filter_func(item):
                 yield out(rel(item))
-            for subitem in item.walk(breadthfirst, filter_func):
+            for subitem in item.walk(breadthfirst, filter_func, sort, base_cls):
                 yield out(rel(subitem))
             if not breadthfirst and filter_func(item):
                 yield out(rel(item))
@@ -277,10 +274,15 @@ class Path(BasePath):
                 if filter_func(item):
                     yield out(rel(item))
     
+    def write_bytes(self, data):
+        """ Fix to non-existing method in Python 2. """
+        with self.open(mode='wb') as f:
+            return f.write(memoryview(data))
+    
     def write_text(self, data, encoding=None, errors=None):
         """ Fix to non-existing method in Python 2. """
         return self.__add_text(data, 'w', encoding, errors)
-
+    
 
 class ConfigPath(Path):
     """ Extension of the class Path for handling a temporary path.
@@ -487,22 +489,25 @@ class ProjectPath(Path):
         matches = {}
         for p in self.walk(filter_func=lambda p: p.is_file()):
             current_cls, line_number = None, None
-            with p.open() as f:
-                for i, l in enumerate(f):
-                    if "class " in l:
-                        current_cls = l.split("class ")[1].split("(")[0].strip()
-                    if "def " in l:
-                        line_number = str(i + 1)
-                    match = re.search(pattern, l)
-                    if match:
-                        m = str(Path(p))
-                        if current_cls is not None:
-                            m += ":" + current_cls
-                        m += ":" + (line_number or str(i + 1))
-                        try:
-                            matches[m] = match.group(1)
-                        except IndexError:
-                            matches[m] = l
+            try:
+                with p.open() as f:
+                    for i, l in enumerate(f):
+                        if "class " in l:
+                            current_cls = l.split("class ")[1].split("(")[0].strip()
+                        if "def " in l:
+                            line_number = str(i + 1)
+                        match = re.search(pattern, l)
+                        if match:
+                            m = str(Path(p))
+                            if current_cls is not None:
+                                m += ":" + current_cls
+                            m += ":" + (line_number or str(i + 1))
+                            try:
+                                matches[m] = match.group(1)
+                            except IndexError:
+                                matches[m] = l
+            except UnicodeDecodeError:
+                pass
         return matches
     
     @property
@@ -520,19 +525,30 @@ class PythonPath(Path):
     """ Path extension for handling the dynamic import of Python modules. """
     def __init__(self, path):
         super(PythonPath, self).__init__()
-        try:
-            self.is_pymodule = self.is_file() and _lexer.analyse_text(self.open().read()) == 1.0
-        except UnicodeDecodeError:
-            self.is_pymodule = False
         if self.is_dir():
             self.modules = []
-            for p in self.walk(base_cls=False):
-                p = PythonPath(p)
-                if p.is_pymodule:
-                    self.modules.append(p.module)
+            _cached = []
+            for e in [".pyc", ".py"]:
+                for p in self.walk(filter_func=lambda x: x.extension == e, base_cls=False):
+                    if not p.is_file() or str(p.absolute()) in _cached:
+                        continue
+                    if e == ".pyc" and (PYTHON3 and p.absolute().dirname.parts[-1] == "__pycache__" or PYTHON2):
+                        parts = p.filename.split(".")
+                        if PYTHON3 and len(parts) == 3 and re.match(r".?python\-?[23]\d", parts[-2]) or PYTHON2:
+                            d = p.absolute().dirname
+                            d = d if PYTHON2 else d.parent
+                            _cached.append(str(d.joinpath("%s.py" % parts[0])))
+                    p = PythonPath(p)
+                    if p.loaded:
+                        self.modules.append(p.module)
         else:
-            if self.is_pymodule:
-                self.module = imp.load_source(self.stem, str(self))
+            self.loaded = False
+            if self.extension in [".py", ".pyc"]:
+                try:
+                    self.module = [imp.load_compiled, imp.load_source][self.extension == ".py"](self.stem, str(self))
+                    self.loaded = True
+                except (ImportError, NameError, SyntaxError, ValueError):
+                    pass
     
     @property
     def classes(self):

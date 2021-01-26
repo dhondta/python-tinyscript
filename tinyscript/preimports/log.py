@@ -77,8 +77,10 @@ def bindLogger(f):
     """
     @wraps(f)
     def _wrapper(*args, **kwargs):
-        logger = kwargs.pop('logger', None) or globals().get('logger') or inspect.getmainglobals().get('logger') or \
-                 logging.nullLogger
+        logger = kwargs.pop('logger', None) or f.__globals__.get('logger') or inspect.getmainglobals().get('logger') \
+                 or logging.nullLogger
+        if logger.name not in ["main", "null"]:
+            setLogger(logger.name)
         # if f is a method, bind the logger to self
         if inspect.ismethod(f) or f.__code__.co_varnames[0] == "self":
             args[0].logger = logger

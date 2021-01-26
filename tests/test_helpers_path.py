@@ -3,6 +3,7 @@
 """Pathlib extension tests.
 
 """
+import py_compile
 from tempfile import gettempdir
 from unittest import TestCase
 
@@ -14,7 +15,7 @@ from utils import *
 class TestHelpersPath(TestCase):
     @classmethod
     def setUpClass(cls):
-        global FILE, MODULE, PATH, SPATH, TEST, TPATH1, TPATH2
+        global FILE, MODULE, NOTEX, PATH, SPATH, TEST, TPATH1, TPATH2
         TEST = "test_dir"
         PATH = Path(TEST, expand=True, create=True)
         SPATH = PATH.joinpath("test")
@@ -25,18 +26,24 @@ class TestHelpersPath(TestCase):
         m.mkdir()
         f, MODULE = m.joinpath("test1.py"), m.joinpath("test2.py")
         f.write_text("#!/usr/bin/env python\nimport os")
+        f.write_bytes(b"#!/usr/bin/env python\nimport os")
+        py_compile.compile(str(f))
+        (m.joinpath("__pycache__") if PYTHON3 else f.dirname).joinpath("not-cached.pyc").touch()
         MODULE.write_text("#!/usr/bin/env python\nimport os\n\nclass Test(object):\n   pass\n\n"
                           "def test(): pass #TODO: test")
         FILE = PATH.joinpath("test.txt")
         FILE.touch()
         SPATH.joinpath("test.txt").touch()
+        NOTEX = Path("DOES_NOT_EXIST")
     
     @classmethod
     def tearDownClass(cls):
         PATH.remove()
-        #TPATH2.remove()
+        TPATH2.remove()
     
     def test_file_extensions(self):
+        self.assertRaises(OSError, NOTEX.remove)
+        self.assertIsNone(NOTEX.remove(error=False))
         self.assertEqual(FILE.filename, "test.txt")
         FILE.append_bytes(b"1234")
         self.assertIsNotNone(FILE.permissions)
@@ -162,10 +169,10 @@ class TestHelpersPath(TestCase):
         self.assertTrue(any(hasattr(m, "Test") for m in p.modules))
         self.assertEqual(len(list(p.get_classes())), 1)
         p = PythonPath(FILE)
-        self.assertFalse(p.is_pymodule)
+        self.assertFalse(p.loaded)
         self.assertEqual(list(p.get_classes()), [])
         p = PythonPath(MODULE)
-        self.assertTrue(p.is_pymodule)
+        self.assertTrue(p.loaded)
         l = list(p.get_classes())
         self.assertEqual(len(l), 1)
         self.assertEqual(l[0].__name__, "Test")
