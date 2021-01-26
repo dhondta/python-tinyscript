@@ -7,7 +7,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/dhondta/python-tinyscript/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/python-tinyscript?targetFile=requirements.txt)
 [![License](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 
-# TinyScript
+## Introduction
 
 This library is aimed to provide useful features and to shorten required lines of code for writing nice-looking command-line interface tools.
 
@@ -21,15 +21,15 @@ pip install --user tinyscript
 
 ### Create from template
 
-<p align="center"><img src="https://dhondta.github.io/python-tinyscript/docs/demos/create.svg"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/master/docs/demos/create.svg"></p>
 
 ### Edit source
 
-<p align="center"><img src="https://dhondta.github.io/python-tinyscript/docs/demos/edit.svg"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/master/docs/demos/edit.svg"></p>
 
 ### Run your tool
 
-<p align="center"><img src="https://dhondta.github.io/python-tinyscript/docs/demos/run.svg"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/master/docs/demos/run.svg"></p>
 
 ## Example tools
 
