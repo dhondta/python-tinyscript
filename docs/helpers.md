@@ -586,6 +586,7 @@ Some text-related functions are provided:
 
 **Function** | **Description**
 --- | ---
+`ts.ansi_seq_strip` | remove ANSI sequences from the input string
 `ts.gt` | alias to `gettext.gettext`
 `ts.txt2blockquote` | format the given text into a blockquote object
 `ts.txt2bold` | format the given text as bold

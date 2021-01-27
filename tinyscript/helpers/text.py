@@ -11,13 +11,15 @@ from slugify import slugify
 from .data.types.network import is_email, is_url
 
 
-__features__ = ["gt", "slugify", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist", "txt2paragraph",
+__features__ = ["ansi_seq_strip", "gt", "slugify", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist", "txt2paragraph",
                 "txt2title", "txt2ulist", "txt2underline", "txt2url", "txt_terminal_render"]
 __all__ = __features__ + ["DOCFORMAT_THEME"]
 
 DOCFORMAT = None
 DOCFORMAT_THEME = "Makeup"
 FORMATS = [None, "html", "md", "rst", "textile"]
+
+ansi_seq_strip = lambda text: re.sub(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])", "", text)
 
 
 def __check(**kwargs):
