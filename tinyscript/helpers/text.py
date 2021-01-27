@@ -8,18 +8,17 @@ from gettext import gettext as gt
 from pypandoc import convert_text
 from slugify import slugify
 
+from .compat import b
 from .data.types.network import is_email, is_url
 
 
-__features__ = ["ansi_seq_strip", "gt", "slugify", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist", "txt2paragraph",
-                "txt2title", "txt2ulist", "txt2underline", "txt2url", "txt_terminal_render"]
+__features__ = ["ansi_seq_strip", "gt", "slugify", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist",
+                "txt2paragraph", "txt2title", "txt2ulist", "txt2underline", "txt2url", "txt_terminal_render"]
 __all__ = __features__ + ["DOCFORMAT_THEME"]
 
 DOCFORMAT = None
 DOCFORMAT_THEME = "Makeup"
 FORMATS = [None, "html", "md", "rst", "textile"]
-
-ansi_seq_strip = lambda text: re.sub(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])", "", text)
 
 
 def __check(**kwargs):
@@ -34,6 +33,15 @@ def __check(**kwargs):
             raise ValueError("Bad boolean value")
         elif k == 'url' and not is_url(v):
             raise ValueError("Invalid URL")
+
+
+def ansi_seq_strip(text):
+    RE = r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])"
+    try:
+        return re.sub(RE, "", text)
+    except TypeError:
+        return re.sub(b(RE), b"", text)
+    
 
 
 def configure_docformat(glob):

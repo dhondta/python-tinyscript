@@ -170,4 +170,9 @@ class TestHelpersText(TestCase):
         self.assertRaises(ValueError, txt2url, TXT)
         for help, fmt in zip([HTML, MD, RST, TEXTILE], ["html", "md", "rst", "textile"]):
             self.assertIsNotNone(txt_terminal_render(help, fmt))
+    
+    def test_text_utils(self):
+        self.assertEqual(slugify("This is a test"), "this-is-a-test")
+        self.assertEqual(ansi_seq_strip("\x1b[93;41mtest\x1b[0m"), "test")
+        self.assertEqual(ansi_seq_strip(b"\x1b[93;41mtest\x1b[0m"), b"test")
 
