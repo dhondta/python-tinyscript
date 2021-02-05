@@ -1,17 +1,17 @@
-asciistuff>=1.0.12
+asciistuff>=1.1.1
 bitstring
-codext
+codext>=1.8.0
 coloredlogs
 colorful
 dicttoxml
-ipaddress
+ipaddress>=1.0.23
 json2html
-mdv
+mdv3
 netaddr
 netifaces
 patchy
 pathlib
-pip>=19.2
+pip>=20.0
 plyer>=2.0.0; python_version>='3.5'
 pygments
 pyminizip
