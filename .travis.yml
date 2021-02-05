@@ -14,11 +14,6 @@ jobs:
         apt:
           packages:
             - pandoc
-    - python: 3.5
-      addons:
-        apt:
-          packages:
-            - pandoc
     - python: 3.6
       dist: bionic
       addons:
@@ -33,6 +28,11 @@ jobs:
             - pandoc
     - python: 3.8
       dist: focal
+      addons:
+        apt:
+          packages:
+            - pandoc
+    - python: 3.9
       addons:
         apt:
           packages:
@@ -52,16 +52,6 @@ jobs:
         - choco install gtk-runtime
       env:
        - PATH=/c/Python27:/c/Python27/Scripts:$PATH
-        - VS90COMNTOOLS=%VS140COMNTOOLS%
-    - os: windows
-      language: shell
-      before_install:
-        - choco install python --version 3.5.4
-        - choco install pandoc
-        - choco install microsoft-visual-cpp-build-tools
-        - choco install gtk-runtime
-      env:
-        - PATH=/c/Python35:/c/Python35/Scripts:$PATH
         - VS90COMNTOOLS=%VS140COMNTOOLS%
     - os: windows
       language: shell
@@ -93,13 +83,17 @@ jobs:
       env:
         - PATH=/c/Python38:/c/Python38/Scripts:$PATH
         - VS90COMNTOOLS=%VS140COMNTOOLS%
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.9.0
+        - choco install pandoc
+        - choco install microsoft-visual-cpp-build-tools
+        - choco install gtk-runtime
+      env:
+        - PATH=/c/Python35:/c/Python35/Scripts:$PATH
+        - VS90COMNTOOLS=%VS140COMNTOOLS%
     - python: 2.7
-      arch: arm64
-      addons:
-        apt:
-          packages:
-            - pandoc
-    - python: 3.5
       arch: arm64
       addons:
         apt:
@@ -126,6 +120,12 @@ jobs:
         apt:
           packages:
             - pandoc
+    - python: 3.9
+      arch: arm64
+      addons:
+        apt:
+          packages:
+            - pandoc
     - python: nightly
       arch: arm64
       addons:
@@ -133,7 +133,6 @@ jobs:
           packages:
             - pandoc
     - os: osx
-      osx_image: xcode9.2
       language: shell
       env:
         - PATH=/Users/travis/.pyenv/shims:$PATH
@@ -144,18 +143,6 @@ jobs:
           packages:
             - pandoc
     - os: osx
-      osx_image: xcode9.2
-      language: shell
-      env:
-        - PATH=/Users/travis/.pyenv/shims:$PATH
-        - PYENV_VERSION=3.5.2
-      before_install: travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
-      addons:
-        homebrew:
-          packages:
-            - pandoc
-    - os: osx
-      osx_image: xcode9.2
       language: shell
       env:
         - PATH=/Users/travis/.pyenv/shims:$PATH
@@ -166,7 +153,7 @@ jobs:
           packages:
             - pandoc
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.3
       language: shell
       env:
         - PATH=/Users/travis/.pyenv/shims:$PATH
@@ -177,11 +164,22 @@ jobs:
           packages:
             - pandoc
     - os: osx
-      osx_image: xcode10.2
+      osx_image: xcode11.3
       language: shell
       env:
         - PATH=/Users/travis/.pyenv/shims:$PATH
         - PYENV_VERSION=3.8.1
+      before_install: travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
+      addons:
+        homebrew:
+          packages:
+            - pandoc
+    - os: osx
+      osx_image: xcode11.3
+      language: shell
+      env:
+        - PATH=/Users/travis/.pyenv/shims:$PATH
+        - PYENV_VERSION=3.9.0
       before_install: travis_wait brew upgrade pyenv && pyenv install $PYENV_VERSION
       addons:
         homebrew:
