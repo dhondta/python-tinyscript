@@ -9,6 +9,7 @@ from datetime import datetime
 __all__ = __features__ = ["copyright", "license", "list_licenses"]
 
 
+# source: https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/licensing-a-repository
 LICENSES = {
     'afl-3.0': "Academic Free License v3.0",
     'agpl-3.0': "GNU Affero General Public License v3.0",
