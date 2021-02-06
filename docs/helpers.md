@@ -411,6 +411,7 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `ts.regular_expression` | `str` | string that can be parsed as a regular expression
 `ts.str_contains(alphabet, threshold)` | `str` | string that contains characters with a percentage of at least `threshold`
 `ts.str_matches(pattern, flags)` | `str` | string that matches the given pattern with the given flags
+`ts.values_list` | `list(literals)` | list of literal values (comma-separated, not or "`()`"- or "`[]`"-enclosed)
 
 For config-related types:
 

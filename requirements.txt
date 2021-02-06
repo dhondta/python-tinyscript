@@ -6,7 +6,7 @@ colorful
 dicttoxml
 ipaddress>=1.0.23
 json2html
-mdv3
+mdv
 netaddr
 netifaces
 patchy

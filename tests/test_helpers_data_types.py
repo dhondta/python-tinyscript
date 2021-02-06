@@ -97,6 +97,11 @@ class TestHelpersDataTypes(TestCase):
             self.assertRaises(ValueError, prime_number, i)
         for i in [2.0, 3, 5, 7, 11.0, 113]:
             self.assertEqual(prime_number(i), i)
+        for il, ol in [("a,b,c", ["a","b","c"]), ("[1,2,3]", [1,2,3]), ("(a,b)", ["a","b"]), ("(a,", ["(a",""]),
+                       ("1,2]", [1,"2]"]), (1, [1])]:
+            self.assertEqual(values_list(il), ol)
+            # note: ({"a"}, [{"a"}]) will fail in Python2 as ast.literal_eval will not be able to parse "set(['a'])",
+            #        the representation of {"a"} (while in Python3, it succeeds)
     
     def test_config_related_types(self):
         self.assertRaises(ValueError, ini_config, "does_not_exist")
