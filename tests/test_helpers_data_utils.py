@@ -40,4 +40,5 @@ class TestHelpersDataUtils(TestCase):
         self.assertEqual(entropy_bits(STR), 19)
         self.assertRaises(TypeError, entropy_bits, 1)
         self.assertRaises(TypeError, entropy_bits, pad)
+        self.assertEqual(entropy_bits("This is a test !"), 103)
 

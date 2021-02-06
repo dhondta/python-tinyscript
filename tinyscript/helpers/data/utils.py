@@ -46,8 +46,7 @@ patchy.replace(bitstring.Bits._getbin, """
 
 
 class BitArray(bitstring.BitArray):
-    __doc__ = """
-    Small improvement to the original bitstring.BitArray class.
+    __doc__ = """ Small improvement to the original bitstring.BitArray class.
     
     It allows to set the number of bits per group (by default, 8, for considering bytes).
     
@@ -83,17 +82,13 @@ class BitArray(bitstring.BitArray):
 
 
 def entropy(string):
-    """
-    Shannon entropy computation function.
-    """
+    """ Shannon entropy computation function. """
     s = string
     return - sum([p * log(p, 2) for p in [float(s.count(c)) / len(s) for c in set(s)]])
 
 
 def entropy_bits(string):
-    """
-    Number of bits of entropy.
-    """
+    """ Number of bits of entropy. """
     string = ensure_str(string)
     pool_len = 0
     for r, n in zip([r"[a-z]", r"[A-Z]", r"\d"], [26, 26, 10]):
@@ -107,9 +102,8 @@ def entropy_bits(string):
 
 
 def pad(string, padding=None, blocksize=8, raw=False):
-    """
-    Custom string padding function relying on Tinyscript's data type check functions and a few implemented padding
-     algorithms.
+    """ Custom string padding function relying on Tinyscript's data type check functions and a few implemented padding
+         algorithms.
     
     NB: Default algorithm is the zero padding.
     
@@ -159,9 +153,8 @@ def pad(string, padding=None, blocksize=8, raw=False):
 
 
 def unpad(string, padding=None, blocksize=8, raw=False):
-    """
-    Custom string unpadding function relying on Tinyscript's data type check functions and a few implemented padding
-     algorithms.
+    """ Custom string unpadding function relying on Tinyscript's data type check functions and a few implemented padding
+         algorithms.
     
     NB: Default algorithm is the zero padding.
     

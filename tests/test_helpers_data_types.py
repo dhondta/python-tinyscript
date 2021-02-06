@@ -10,42 +10,54 @@ from tinyscript.helpers.data.types import *
 from utils import *
 
 
-CFNAME = ".test-data-types-config."
-INI    = '[section1]\ntest = "data"\nbool = true\n\n[section2]\ntest = "data"'
-JSON   = '{"test":"data"}'
-TOML   = 'title="test"\n\n[section1]\nfield = "data"\nbool = true\n\n[section2]\ntest = "data"'
-YAML   = "test:\n  - data: test\ntest2:\n  data: test"
-
-
 class TestHelpersDataTypes(TestCase):
+    def setUp(self):
+        global CFNAME, TF, TFNE
+        CFNAME = ".test-data-types-config."
+        TF   = "test_folder"
+        TFNE = "test_folder_not_existing"
+    
+    @classmethod
+    def tearDownClass(cls):
+        for f in [TF, TFNE]:
+            rmtree(f)
+        for f in ["test1.txt", "test2.txt"]:
+            remove(f)
+        for ext in ["ini", "json", "toml", "yaml"]:
+            remove(CFNAME + ext)
+    
     def test_file_related_types(self):
-        tf = "test_folder"
-        tfne = "test_folder_not_existing"
         l1 = ["test1.txt", "test2.txt"]
         l2 = ["test1.txt", "test3.txt"]
         l3 = ["test3.txt", "test4.txt"]
-        touch("test1.txt", "test2.txt")
-        self.assertEqual(folder_does_not_exist(tf), tf)
-        self.assertEqual(folder_exists_or_create(tf), tf)
+        touch("test1.txt")
+        with open("test2.txt", 'wt') as f:
+            f.write("test")
+        self.assertEqual(folder_does_not_exist(TF), TF)
+        self.assertEqual(folder_exists_or_create(TF), TF)
         self.assertEqual(file_exists(l1[0]), l1[0])
         self.assertRaises(ValueError, file_does_not_exist, l1[0])
         self.assertRaises(ValueError, file_exists, l3[0])
-        self.assertRaises(ValueError, file_exists, tf)
+        self.assertRaises(ValueError, file_exists, TF)
+        self.assertEqual(file_mimetype("empty")(l1[0]), l1[0])
+        self.assertRaises(ValueError, file_mimetype("text/plain"), l1[0])
+        self.assertEqual(file_type("empty")(l1[0]), l1[0])
+        self.assertRaises(ValueError, file_type("ASCII text"), l1[0])
+        self.assertEqual(file_mimetype("text/plain")(l1[1]), l1[1])
+        self.assertEqual(file_type("ASCII text")(l1[1]), l1[1])
         self.assertEqual(files_list(l1), l1)
         self.assertRaises(ValueError, files_list, l2)
         self.assertEqual(files_filtered_list(l2), [l2[0]])
         self.assertRaises(ValueError, files_filtered_list, l3)
-        self.assertEqual(folder_exists(tf), tf)
-        self.assertRaises(ValueError, folder_does_not_exist, tf)
-        self.assertRaises(ValueError, folder_exists, tfne)
+        self.assertEqual(files_type("empty")([l1[0]]), [l1[0]])
+        self.assertRaises(ValueError, files_type("empty"), l1)
+        self.assertEqual(folder_exists(TF), TF)
+        self.assertRaises(ValueError, folder_does_not_exist, TF)
+        self.assertRaises(ValueError, folder_exists, TFNE)
         self.assertRaises(ValueError, folder_exists, l1[0])
-        rmdir(tf)
-        self.assertEqual(folder_exists_or_create(tfne), tfne)
+        self.assertEqual(folder_exists_or_create(TFNE), TFNE)
         self.assertRaises(ValueError, folder_exists_or_create, l1[0])
-        self.assertEqual(folder_exists(tfne), tfne)
-        rmdir(tfne)
-        remove("test1.txt")
-        remove("test2.txt")
+        self.assertEqual(folder_exists(TFNE), TFNE)
 
     def test_general_purpose_types(self):
         self.assertEqual(int_range(1, 2), 1)
@@ -104,6 +116,10 @@ class TestHelpersDataTypes(TestCase):
             #        the representation of {"a"} (while in Python3, it succeeds)
     
     def test_config_related_types(self):
+        INI    = '[section1]\ntest = "data"\nbool = true\n\n[section2]\ntest = "data"'
+        JSON   = '{"test":"data"}'
+        TOML   = 'title="test"\n\n[section1]\nfield = "data"\nbool = true\n\n[section2]\ntest = "data"'
+        YAML   = "test:\n  - data: test\ntest2:\n  data: test"
         self.assertRaises(ValueError, ini_config, "does_not_exist")
         #self.assertTrue(is_ini(INI))  # FIXME: this test fails on Travis CI
         self.assertFalse(is_ini_file("does_not_exist"))
@@ -111,7 +127,6 @@ class TestHelpersDataTypes(TestCase):
         with open(cfg, 'wt') as f:
             f.write(INI)
         self.assertIsNotNone(ini_config(cfg))
-        remove(cfg)
         self.assertRaises(ValueError, json_config, "does_not_exist")
         self.assertTrue(is_json(JSON))
         self.assertFalse(is_json_file("does_not_exist"))
@@ -119,7 +134,6 @@ class TestHelpersDataTypes(TestCase):
         with open(cfg, 'wt') as f:
             f.write(JSON)
         self.assertIsNotNone(json_config(cfg))
-        remove(cfg)
         self.assertRaises(ValueError, toml_config, "does_not_exist")
         self.assertTrue(is_toml(TOML))
         self.assertFalse(is_toml_file("does_not_exist"))
@@ -127,7 +141,6 @@ class TestHelpersDataTypes(TestCase):
         with open(cfg, 'wt') as f:
             f.write(TOML)
         self.assertIsNotNone(toml_config(cfg))
-        remove(cfg)
         self.assertRaises(ValueError, yaml_config, "does_not_exist")
         self.assertTrue(is_yaml(YAML))
         self.assertFalse(is_yaml_file("does_not_exist"))
@@ -135,7 +148,6 @@ class TestHelpersDataTypes(TestCase):
         with open(cfg, 'wt') as f:
             f.write(YAML)
         self.assertIsNotNone(yaml_config(cfg))
-        remove(cfg)
     
     def test_hash_related_types(self):
         self.assertIsNotNone(any_hash("0" * 32))
@@ -272,6 +284,7 @@ class TestHelpersDataTypes(TestCase):
         self.assertTrue(is_hostname("www.example.com"))
         self.assertTrue(is_url("http://www.example.com"))
         self.assertTrue(is_url("http://john:doe@www.example.com/path?p=true"))
+        self.assertFalse(is_url("http:/example.com"))
         self.assertFalse(is_url("http://www.example-.com/"))
         self.assertFalse(is_url("A" * 40 + "://example.com"))
         self.assertFalse(is_url("http://:@www.example.com/"))

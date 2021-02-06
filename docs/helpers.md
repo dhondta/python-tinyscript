@@ -310,10 +310,12 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_dir` / `ts.is_folder` | dummy shortcuts to `os.path.isdir`
 `ts.is_executable` | whether the given path has the execution flag
 `ts.is_file` | dummy shortcut to `os.path.isfile`
+`ts.is_filetype` | regex-based check for file's type (relying on [`python-magic`](https://pypi.org/project/python-magic/))
 `ts.is_hex` | hexadecimal string (case insensitive)
 `ts.is_int` / `ts.is_int_range` / `ts.is_pos_int` / `ts.is_neg_int` / `ts.is_prime` | integer (within range / positive / negative / prime)
 `ts.is_list` | list, tuple, set
 `ts.is_long_opt` | for an argument with the "`--option`" format
+`ts.is_mimetype` | regex-based check for file's MIME type (relying on [`python-magic`](https://pypi.org/project/python-magic/))
 `ts.is_str` | str, bytes, unicode
 `ts.is_short_opt` | for an argument with the "`-o`" format
 
@@ -397,8 +399,12 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 --- | --- | ---
 `ts.file_does_not_exist` | `str` | non-existing file path
 `ts.file_exists` | `str` | existing file path
+`ts.file_mimetype(mimetype)` | `str` | file path exists and has a MIME type matching the given one
+`ts.file_type(type)` | `str` | file path exists and has a file type matching the given one
 `ts.files_list` | `list(str)` | list of only existing file paths
 `ts.files_filtered_list` | `list(str)` | list of at least one existing file path (bad paths are filtered)
+`ts.files_mimetype(mimetype)` | `list(str)` | same as for `ts.files_mimetype(mimetype)` but for a list
+`ts.files_type(type)` | `list(str)` | same as for `ts.file_type(type)` but for a list
 `ts.folder_does_not_exist` | `str` | non-existing folder
 `ts.folder_exists` / `ts.folder_exists_or_create` | `str` | existing folder or folder to be created if it does not exist
 `ts.ints` | `list(int)` | list of integers

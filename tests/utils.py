@@ -6,12 +6,13 @@
 import logging
 import sys
 from argparse import Action
-from os import makedirs, remove, rmdir
+from os import makedirs, remove as os_remove, rmdir as os_rmdir
 from os.path import dirname, exists, join
-from shutil import rmtree
+from shutil import rmtree as shutil_rmtree
 from six import StringIO
 from time import sleep
 from tinyscript.helpers.constants import PYTHON3, WINDOWS
+from tinyscript.helpers.decorators import failsafe
 from unittest import TestCase
 try:
     from unittest.mock import patch as mock_patch
@@ -37,6 +38,9 @@ FIXTURES = {
 
 
 dummy_lambda = lambda *a, **k: None
+remove = failsafe(os_remove)
+rmdir = failsafe(os_rmdir)
+rmtree = failsafe(shutil_rmtree)
 tmpf = lambda name="test", ext="py": ".tinyscript-{}.{}".format(name, ext)
 
 
