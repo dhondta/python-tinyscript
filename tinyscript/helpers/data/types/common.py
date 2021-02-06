@@ -44,7 +44,7 @@ is_type          = lambda t: isinstance(t, type)
 
 # -------------------- DATA FORMAT ARGUMENT TYPES --------------------
 __all__ += ["int_range", "neg_int", "negative_int", "pos_int", "positive_int", "ints", "ints_range", "neg_ints",
-            "negative_ints", "pos_ints", "positive_ints", "prime_number"]
+            "negative_ints", "pos_ints", "positive_ints", "prime_number", "values_list"]
 
 
 def __ints(l, check_func=lambda x: False, idescr=None, shouldbe=None, **kwargs):
@@ -95,4 +95,11 @@ def __prime_number(n, fail=False):
         f += 6
     return i if fail else True
 prime_number = lambda n: __prime_number(n, True)
+
+
+def values_list(var):
+    """ Alias to _str2list for use in types of argparse argument.
+    
+    NB: It converts anything to a list, that is, it nevers fails. """
+    return _str2list(var)
 
