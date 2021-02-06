@@ -6,7 +6,6 @@ jobs:
     - arch: arm64
     - os: osx
     - os: windows
-    - python: 3.9
     - python: nightly
   fast_finish: true
   include:
