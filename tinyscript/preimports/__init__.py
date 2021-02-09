@@ -37,6 +37,7 @@ __imports__ = {
         "hashlib",
         "inspect",
         "itertools",
+        "json",
         "logging",
         "random",
         "re",

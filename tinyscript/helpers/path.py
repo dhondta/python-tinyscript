@@ -35,17 +35,25 @@ class Path(BasePath):
     
     :param expand: expand user's path
     :param create: create the directory if it doesn't exist
+    :param touch:  create the file if it doesn't exist (mutually exclusive with 'create')
     """
+
     _flavour = BasePath()._flavour  # fix to AttributeError
     
     def __new__(cls, *parts, **kwargs):
         expand = kwargs.pop("expand", False)
         create = kwargs.pop("create", False)
+        touch  = kwargs.pop("touch", False)
         p = super(Path, cls).__new__(cls, *parts, **kwargs)
         if expand:
             p = super(Path, cls).__new__(cls, str(p.expanduser().absolute()), **kwargs)
-        if create and not p.exists():
-            p.mkdir(parents=True)  # exist_ok does not work in Python 2
+        if create and touch:
+            raise ValueError("Conflicting options ; 'create' creates a folder hwile 'touch' creates a file")
+        elif (create or touch) and not p.exists():
+            if create:
+                p.mkdir(parents=True)  # exist_ok does not work in Python 2
+            elif touch:
+                p.touch()
         return p
     
     @property

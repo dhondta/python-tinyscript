@@ -42,8 +42,8 @@ DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
 SCRIPTNAME_FORMAT   = "slugified"
 SCRIPTNAME_FORMATS  = {
-    'acronym':   lambda s: "".join(x.strip()[0].upper() for x in re.split(r"[ -_]", s)) \
-                           if len(re.split(r"[ -_]", s)) > 1 else s.upper(),
+    'acronym':   lambda s: "".join(x.strip()[0].upper() for x in re.split(r"[ -_]", s.lower())) \
+                           if len(re.split(r"[ -_]", s.lower())) > 1 else s.upper(),
     'as_is':     lambda s: s,
     'none':      lambda s: s,
     'slugified': lambda s: "".join(x.strip().capitalize() for x in re.split(r"[ -_]", s)),

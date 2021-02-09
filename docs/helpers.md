@@ -215,11 +215,16 @@ This package also provides some CLI layout objects:
 
 ## Extended `pathlib`-like classes
 
-Tinyscript also provides 2 `pathlib`-related functions:
+Tinyscript also provides modified/additional `pathlib`-related classes:
 
 - `ts.Path`: extended Python2/3-compatible path class
 
     It fixes multiple compatibility issues between Python 2 and 3, namely `mkdir`'s `exist_ok` argument or methods `expanduser`, `read_text` and `write_text`.
+    
+    `Path`'s initialization accepts some new arguments:
+    
+    - `expand`: for immediately expanding the path (e.g. when using a path like "`~/...`")
+    - `create` or `touch`: respectively creates a folder or file ; these arguments are mutually exclusive
     
     It also extends the class with multiple new useful methods like:
     

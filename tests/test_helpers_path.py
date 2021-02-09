@@ -24,7 +24,8 @@ class TestHelpersPath(TestCase):
         TPATH2 = TempPath(prefix="tinyscript-test_", length=8)
         m = TPATH2.joinpath("modules")
         m.mkdir()
-        f, MODULE = m.joinpath("test1.py"), m.joinpath("test2.py")
+        f = Path(str(m.joinpath("test1.py")), touch=True)
+        MODULE = m.joinpath("test2.py")
         f.write_text("#!/usr/bin/env python\nimport os")
         f.write_bytes(b"#!/usr/bin/env python\nimport os")
         py_compile.compile(str(f))
@@ -42,6 +43,7 @@ class TestHelpersPath(TestCase):
         TPATH2.remove()
     
     def test_file_extensions(self):
+        self.assertRaises(ValueError, Path, PATH.joinpath("test1.py"), create=True, touch=True)
         self.assertRaises(OSError, NOTEX.remove)
         self.assertIsNone(NOTEX.remove(error=False))
         self.assertEqual(FILE.filename, "test.txt")
