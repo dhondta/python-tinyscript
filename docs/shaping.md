@@ -45,12 +45,13 @@ Usage examples:
   python tool.py ...
 ```
 
-If not using `__script__`, the name of the script will be used taking a format into account. This format is defined by the `SCRIPTNAME_FORMAT` constant and defaults to "`slugified`". The possible values are:
+If not using `__script__`, the name of the script will be used taking a format into account. This format is defined by the `SCRIPTNAME_FORMAT` constant and defaults to "`camelcase`". The possible values are:
 
 - `acronym`: split the name on whitespaces, hyphens and underscores then make an acronym from the collected tokens (e.g. "`my-super-script`" becomes "`MSS`")
 - `as_is`: do not modify the name
+- `camelcase`: split the name on whitespaces, hyphens and underscores then capitalize and gather the collected tokens (e.g. "`my-script`" becomes "`MyScript`")
 - `none`: equivalent to "`as_is`"
-- `slugified`: split the name on whitespaces, hyphens and underscores then capitalize and gather the collected tokens (e.g. "`my-script`" becomes "`MyScript`")
+- `slugified`: split the name on whitespaces, hyphens and underscores then lowercase the tokens and join them with hyphens (e.g. "`my_script`" becomes "`my-script`")
 
 [See example here](examples/metadata.md)
 

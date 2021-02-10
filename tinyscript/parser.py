@@ -297,9 +297,7 @@ def initialize(add_banner=False,
     bf = glob.get('BANNER_FONT', BANNER_FONT)
     if add_banner or isinstance(bf, string_types):
         f = AsciiFile()
-        bs = BANNER_STYLE
-        bs = bs if isinstance(bs, dict) else {}
-        f['title', bs] = Banner(p.scriptname, font=bf)
+        f['title', glob.get('BANNER_STYLE', BANNER_STYLE)] = Banner(p.scriptname, font=bf)
         print(f)
     # 7) finally, bind the global exit handler
     _hooks.sigint_action = action_at_interrupt if exit_at_interrupt is None else ["continue", "exit"][exit_at_interrupt]

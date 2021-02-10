@@ -4,13 +4,18 @@
 """
 import os
 from functools import wraps
+from inspect import currentframe
 from multiprocessing import Process
+from shlex import split
 from six import string_types
 from subprocess import Popen, PIPE
 from threading import Thread
 
+from .compat import ensure_str
 
-__all__ = __features__ = ["apply", "execute", "filter_bin", "process", "processes_clean", "thread", "threads_clean"]
+
+__all__ = __features__ = ["apply", "execute", "execute_and_log", "filter_bin", "process", "processes_clean", "thread",
+                          "threads_clean"]
 
 
 PROCESSES = []
@@ -29,10 +34,30 @@ def execute(cmd, **kwargs):
     """
     rc = kwargs.pop("returncode", False)
     if isinstance(cmd, string_types):
-        cmd = cmd.split()
+        cmd = split(cmd)
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, **kwargs)
     out, err = p.communicate()
     return (out, err, p.returncode) if rc else (out, err)
+
+
+def execute_and_log(cmd, out_maxlen=256, **kwargs):
+    """ Wrapper for subprocess.Popen, logging execution using the logger from kwargs or globals.
+
+    :param cmd:        command string
+    :param out_maxlen: convenience length limit for displaying the output of a command with logger.debug
+    """
+    logger, frame = kwargs.pop('logger', None), currentframe()
+    while logger is None and frame is not None:
+        logger = frame.f_globals.get('logger')
+        frame = frame.f_back
+    logger.debug(cmd)
+    out, err, retc = execute(cmd, returncode=True, **kwargs)
+    if out and len(out) < out_maxlen:
+        logger.debug(ensure_str(out).strip())
+    if err:
+        err = ensure_str(err).strip()
+        (logger.warning if err.startswith("WARNING") else logger.error)(err)
+    return out, err, retc
 
 
 def filter_bin(*binaries):

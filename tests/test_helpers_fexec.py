@@ -3,9 +3,13 @@
 """Compatibility functions' tests.
 
 """
+import logging
 from tinyscript.helpers.fexec import *
 
 from utils import remove, TestCase
+
+
+logger = logging.getLogger("test-exec-log")
 
 
 @process
@@ -21,6 +25,8 @@ def test2():
 class TestHelpersFexec(TestCase):
     def test_execution_functions(self):
         self.assertIsNotNone(execute("id"))
+        self.assertIsNotNone(execute_and_log("id"))
+        self.assertIsNotNone(execute_and_log("id 123456789", logger=logging.getLogger("test-exec-log-2")))
         self.assertIsNotNone(filter_bin("cat", "id", "netstat", "whoami"))
         self.assertIsNotNone(test1())
         self.assertIsNotNone(test2())

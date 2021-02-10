@@ -212,7 +212,9 @@ class TestArgreparse(TestCase):
                 ("test.py", "acronym", "TEST"),
                 ("this-is_a_test.py", "acronym", "TIAT"),
                 ("this_is-a_test.py", "as_is", "this_is-a_test"),
-                ("this-is-a-test.py", "slugified", "ThisIsATest"),
+                ("this_is-a_test.py", "none", "this_is-a_test"),
+                ("this-is-a-test.py", "camelcase", "ThisIsATest"),
+                ("this_is_a-test.py", "slugified", "this-is-a-test"),
             ]:
             f['__file__'] = fn
             f['SCRIPTNAME_FORMAT'] = fmt

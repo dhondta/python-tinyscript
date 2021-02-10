@@ -68,6 +68,7 @@ It also provides some simple execution-related functions:
 --- | ---
 `ts.apply` | convenience function for applying a list of functions to the given arguments and keyword-arguments
 `ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR ; `returncode=True` allows to output its STDOUT, STDERR and return code
+`ts.executeand_log` | alias for calling a subprocess and returning its STDOUT, STDERR and the return code, also logging information using a logger obtained from a keyword-argument or from globals
 `ts.filter_bin` | filtering function for getting a list of existing binaries (e.g. `filter_bin("ls", "dir")`)
 `ts.process` | decorator for turning a function into a process
 `ts.processes_clean` | cleanup function for joining processes opened with `ts.process`
