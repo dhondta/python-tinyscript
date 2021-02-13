@@ -27,7 +27,8 @@ __all__ = __features__ = ["Path", "ConfigPath", "CredentialsPath", "MirrorPath",
                           "TempPath"]
 
 
-MARKER = "#TODO:"
+DOUBLE_EXT = re.compile(r"^(.*?)(\.tar\.(?:br|bz2?|gz|lpaq|lzo?|xz|zst|Z))$")
+MARKER     = "#TODO:"
 
 
 class Path(BasePath):
@@ -79,13 +80,13 @@ class Path(BasePath):
     
     @property
     def extension(self):
-        """ Alias for suffix. """
+        """ Get the extension based on the stem and suffix. """
         return self.suffix
     
     @property
     def filename(self):
         """ Get the file name, without the complete path. """
-        return self.stem + self.suffix
+        return self.basename
     
     @property
     def mime_type(self):
@@ -109,6 +110,22 @@ class Path(BasePath):
                 for f in files:
                     s += os.stat(str(Path(root).joinpath(f))).st_size
             return s
+    
+    @property
+    def stem(self):
+        """ Stem also handling some common double extensions. """
+        try:
+            return DOUBLE_EXT.search(self.basename).group(1)
+        except AttributeError:
+            return super(Path, self).stem
+    
+    @property
+    def suffix(self):
+        """ Suffix also handling some common double extensions. """
+        try:
+            return DOUBLE_EXT.search(self.basename).group(2)
+        except AttributeError:
+            return super(Path, self).suffix
     
     @property
     def text(self):

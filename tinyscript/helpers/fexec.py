@@ -40,11 +40,12 @@ def execute(cmd, **kwargs):
     return (out, err, p.returncode) if rc else (out, err)
 
 
-def execute_and_log(cmd, out_maxlen=256, **kwargs):
+def execute_and_log(cmd, out_maxlen=256, silent=None, **kwargs):
     """ Wrapper for subprocess.Popen, logging execution using the logger from kwargs or globals.
 
     :param cmd:        command string
     :param out_maxlen: convenience length limit for displaying the output of a command with logger.debug
+    :param silent:     list of patterns for stderr lines to be silenced
     """
     logger, frame = kwargs.pop('logger', None), currentframe()
     while logger is None and frame is not None:
@@ -56,7 +57,8 @@ def execute_and_log(cmd, out_maxlen=256, **kwargs):
         logger.debug(ensure_str(out).strip())
     if err:
         err = ensure_str(err).strip()
-        (logger.warning if err.startswith("WARNING") else logger.error)(err)
+        if all(pattern not in err for pattern in (silent or [])):
+            (logger.warning if err.startswith("WARNING") else logger.error)(err)
     return out, err, retc
 
 
