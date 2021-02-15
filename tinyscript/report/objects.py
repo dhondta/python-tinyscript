@@ -133,6 +133,8 @@ class List(Element):
     """
     def __init__(self, *items, **kwargs):
         super(List, self).__init__(**kwargs)
+        if len(items) == 1 and isinstance(items[0], list):
+            items = items[0]
         self._data = items
         self.ordered = kwargs.get('ordered', False)
         self.tag = ["ul", "ol"][self.ordered]
@@ -272,7 +274,7 @@ class Table(Element):
         for row in self._format(self.data):
             r.append(" | ".join(row))
         if self.column_footers is not None:
-            r.append(" | ".join(map(lambda x: "**%s**" % x, self.column_footers)))
+            r.append(" | ".join(map(lambda x: "**%s**" % x if len(x) > 0 else "", self.column_footers)))
         return "\n".join(r)
     
     @output

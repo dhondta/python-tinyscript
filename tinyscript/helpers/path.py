@@ -195,11 +195,12 @@ class Path(BasePath):
     
     def generate(self, prefix="", suffix="", length=8, alphabet="0123456789abcdef"):
         """ Generate a random folder name. """
-        if not self.is_dir():
+        # simply return self if it exists and it is not a directory
+        if self.exists() and not self.is_dir():
             return self
+        # ensure this is a newly generated path
         while True:
-            _ = "".join(choice(alphabet) for i in range(length))
-            new = self.joinpath(str(prefix) + _ + str(suffix))
+            new = self.joinpath(str(prefix) + "".join(choice(alphabet) for i in range(length)) + str(suffix))
             if not new.exists():
                 return new
     rand_folder_name = generate
@@ -633,21 +634,19 @@ class TempPath(Path):
             kw["length"]   = kwargs.pop("length", 0)
             kw["alphabet"] = kwargs.pop("alphabet", "0123456789abcdef")
             if kw["length"] > 0:
-                while True:
-                    # ensure this is a newly generated path
-                    tmp = p.generate(**kw)
-                    if not tmp.exists():
-                        break
-                return super(TempPath, cls).__new__(cls, tmp, **kwargs)
+                return super(TempPath, cls).__new__(cls, p.generate(**kw), **kwargs)
             return super(TempPath, cls).__new__(cls, p, **kwargs)
         else:
             sp = p.joinpath(*parts)
             if sp.is_under(p):
-                Path(sp, create=True)
-                return super(TempPath, cls).__new__(cls, sp if sp.is_dir() else sp.dirname, **kwargs)
+                return super(TempPath, cls).__new__(cls, sp, **kwargs)
             raise ValueError("The given path shall be under '{}'".format(p))
+    
+    def tempdir(self, dirname=None, **kwargs):
+        """ Create and return a TempPath subdirectory instance. """
+        return TempPath(self.generate(**kwargs) if dirname is None else self.joinpath(dirname))
     
     def tempfile(self, filename=None, **kwargs):
         """ Instantiate a NamedTemporaryFile or use an existing file in the TempPath and return it as a Path object. """
-        return Path(TempFile(dir=str(self), **kwargs).name) if filename is None else self.joinpath(filename)
+        return Path(TempFile(dir=str(self), **kwargs).name if filename is None else self.joinpath(filename))
 

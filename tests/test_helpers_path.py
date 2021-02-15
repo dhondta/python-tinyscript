@@ -188,5 +188,6 @@ class TestHelpersPath(TestCase):
         self.assertNotEqual(str(TPATH2), gettempdir())
         self.assertEqual(str(TempPath(str(TPATH2))), str(TPATH2))
         self.assertRaises(ValueError, TempPath, Path(".").absolute().root)
+        self.assertTrue(TPATH2.tempdir("test").exists())
         self.assertIsNotNone(TPATH2.tempfile())
 
