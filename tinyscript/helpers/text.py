@@ -12,13 +12,18 @@ from .compat import b
 from .data.types.network import is_email, is_url
 
 
-__features__ = ["ansi_seq_strip", "gt", "slugify", "txt2blockquote", "txt2bold", "txt2email", "txt2italic", "txt2olist",
-                "txt2paragraph", "txt2title", "txt2ulist", "txt2underline", "txt2url", "txt_terminal_render"]
+__features__ = ["ansi_seq_strip", "gt", "slugify", "txt2blockquote", "txt2bold", "txt2code", "txt2comment", "txt2email",
+                "txt2italic", "txt2olist", "txt2paragraph", "txt2preformatted", "txt2title", "txt2ulist",
+                "txt2underline", "txt2url", "txt_terminal_render"]
 __all__ = __features__ + ["DOCFORMAT_THEME"]
 
 DOCFORMAT = None
 DOCFORMAT_THEME = "Makeup"
 FORMATS = [None, "html", "md", "rst", "textile"]
+
+_indent = lambda t, n: _pline(t, " " * n)
+_pline  = lambda t, p, i=False: "\n".join("" if i and l.strip() == "" else p + l for l in t.split("\n"))
+_sline  = lambda t: re.sub(r"[\s\n]+", " ", t)
 
 
 def __check(**kwargs):
@@ -33,6 +38,10 @@ def __check(**kwargs):
             raise ValueError("Bad boolean value")
         elif k == 'url' and not is_url(v):
             raise ValueError("Invalid URL")
+
+
+#def __replace_hspaces(line, token="&nbsp;"):
+#    return re.sub(r"^\s+", lambda m: token * len(m.group()), line)
 
 
 def ansi_seq_strip(text):
@@ -56,7 +65,7 @@ def configure_docformat(glob):
     DOCFORMAT_THEME = glob.get('DOCFORMAT_THEME', DOCFORMAT_THEME)
 
 
-def txt_terminal_render(text, format=None):
+def txt_terminal_render(text, format=None, debug=True):
     """ This renders input text based on the selected format.
     
     :param format: selected format (one of FORMATS)
@@ -79,7 +88,12 @@ def txt_terminal_render(text, format=None):
             indent = len(line) - len(tmp)
             if indent > 0:
                 spaces[tmp.strip()] = indent
-    # convert here   
+    # convert here
+    if debug:
+        lines = text.split("\n")
+        n = len(str(len(lines))) + 2
+        for i, l in enumerate(lines):
+            print(("{: <%d}{}" % n).format(i, l))
     md = text if format == "md" else convert_text(text, "md", format=format).replace("\\", "")
     if format != "md":
         # bug corrections
@@ -204,72 +218,102 @@ def txt2blockquote(text, format=None):
     if format == "html":
         text = "<blockquote>{}</blockquote>".format(text.strip("\n"))
     elif format == "md":
-        text = "\n".join("> {}".format(line) for line in text.splitlines())
+        text = _pline(text, "> ")
     elif format == "rst":
-        text = "\n".join("\t{}".format(line) for line in text.splitlines())
+        text = _pline(text, "\t")
     elif format == "textile":
-        text = "\n".join("" if line.strip() == "" else "bq. " + line for line in text.splitlines())
+        text = "bq.. {}".format(text)
     return text
 
 
-def txt2email(text, format=None):
-    """ This reformats an email to a hyperlink based on the selected format.
-    
-    :param format: selected format (one of FORMATS)
-    :param text:   email address
-    """
-    format = format or DOCFORMAT
-    __check(format=format, email=text)
-    if format == "html":
-        text = "<a href=\"mailto:{0}\">{0}</a>".format(text)
-    elif format == "md":
-        text = "[{0}](mailto:{0})".format(text)
-    elif format == "textile":
-        text = "\"{0}\":mailto:{0}".format(text)
-    return text
-
-
-def txt2paragraph(text, format=None):
-    """ This reformats a text to a paragraph based on the selected format.
-    
-    :param format: selected format (one of FORMATS)
-    """
+def txt2code(code, format=None, language=None):
+    """ This reformats a raw text to a block of code based on the selected format. """
     format = format or DOCFORMAT
     __check(format=format)
     if format == "html":
-        text = "<p>{}</p>".format(text)
-    elif format in ["rst", "textile"]:
-        text = "\n" + text
+        code = "<pre><code{}>{}</code></pre>".format([" class=\"language-%s\"" % language, ""][language is None], code)
+    elif format == "md":
+        code = "```{}\n{}\n```".format(language or "", code)
+    elif format == "rst":
+        code = ".. code-block:: {}\n   \n{}".format(language or "raw", _indent(code, 3)) 
+    elif format == "textile":
+        code = "bc.. {}".format(code)
+    return code
+
+
+def txt2comment(text, format=None, language=None):
+    """ This reformats a raw text as a comment based on the selected format. """
+    format = format or DOCFORMAT
+    __check(format=format)
+    if format == "html":
+        text = "<!-- {} -->".format(text)
+    elif format == "md":
+        text = "[//]: # ({})".format(_sline(text))
+    elif format == "rst":
+        text = ""
+    elif format == "textile":
+        text = "###. {}".format(_sline(text))
     return text
 
 
-def txt2title(text, format=None, level=2):
-    """ This reformats a text to a title based on the selected format.
-    
-    :param format: selected format (one of FORMATS)
-    :param level:  title level
-    """
+def txt2email(email, format=None):
+    """ This reformats an email to a hyperlink based on the selected format. """
+    format = format or DOCFORMAT
+    __check(format=format, email=email)
+    if format == "html":
+        email = "<a href=\"mailto:{0}\">{0}</a>".format(email)
+    elif format == "md":
+        email = "[{0}](mailto:{0})".format(email)
+    elif format == "textile":
+        email = "\"{0}\":mailto:{0}".format(email)
+    return email
+
+
+def txt2paragraph(para, format=None):
+    """ This reformats a text to a paragraph based on the selected format. """
+    format = format or DOCFORMAT
+    __check(format=format)
+    if format == "html":
+        para = "<p>{}</p>".format(para)
+    else:
+        para = _sline(para)
+    return para
+
+
+def txt2preformatted(text, format=None):
+    """ This reformats a raw text as a preformatted text based on the selected format. """
+    format = format or DOCFORMAT
+    __check(format=format)
+    if format == "html":
+        text = "<pre>{}</pre>".format(text)
+    elif format == "md":
+        text = "```\n{}\n```".format(text)
+    elif format == "rst":
+        text = "::\n   \n{}".format(_indent(text, 3)) 
+    elif format == "textile":
+        text = "pre.. {}".format(text)
+    return text
+
+
+def txt2title(title, format=None, level=2):
+    """ This reformats a text to a title based on the selected format. """
     format = format or DOCFORMAT
     __check(format=format, level=level)
     if format is not None:
-        text = text.title()
+        title = title.title()
     if format == "html":
-        text = "<h{0}>{1}</h{0}>".format(level, text)
+        title = "<h{0}>{1}</h{0}>".format(level, title)
     elif format == "md":
-        text = "{} ".format(level * "#") + text
+        title = "{} ".format(level * "#") + title
     elif format == "rst":
-        text = "{}\n{}".format(text, len(text) * "=-`'~*"[level - 1])
+        title = "{}\n{}".format(title, len(title) * "=-`'~*"[level - 1])
     elif format == "textile":
-        text = "h{}. {}".format(level, text)
-    return text
+        title = "h{}. {}".format(level, title)
+    return title
 
 
 def txt2url(text, format=None, url=None):
-    """ This reformats a text to a hyperlink based on the selected format.
-    
-    :param format: selected format (one of FORMATS)
-    :param url:    URL
-    """
+    """ This reformats a text to a hyperlink based on the selected format. """
     format = format or DOCFORMAT
     if url is None:
         __check(format=format, url=text)

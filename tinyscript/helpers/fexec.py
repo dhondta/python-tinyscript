@@ -3,6 +3,7 @@
 
 """
 import os
+import re
 from functools import wraps
 from inspect import currentframe
 from multiprocessing import Process
@@ -33,8 +34,11 @@ def execute(cmd, **kwargs):
     :param cmd: command string
     """
     rc = kwargs.pop("returncode", False)
-    if isinstance(cmd, string_types):
+    sh = kwargs.get('shell', False)
+    if isinstance(cmd, string_types) and not sh:
         cmd = split(cmd)
+    elif not isinstance(cmd, string_types) and sh:
+        cmd = " ".join(cmd)
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, **kwargs)
     out, err = p.communicate()
     return (out, err, p.returncode) if rc else (out, err)
@@ -57,7 +61,7 @@ def execute_and_log(cmd, out_maxlen=256, silent=None, **kwargs):
         logger.debug(ensure_str(out).strip())
     if err:
         err = ensure_str(err).strip()
-        if all(pattern not in err for pattern in (silent or [])):
+        if all(re.search(pattern, err) is None for pattern in (silent or [])):
             (logger.warning if err.startswith("WARNING") else logger.error)(err)
     return out, err, retc
 

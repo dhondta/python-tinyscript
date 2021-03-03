@@ -26,6 +26,7 @@ class TestHelpersFexec(TestCase):
     def test_execution_functions(self):
         self.assertIsNotNone(execute("id"))
         self.assertIsNotNone(execute_and_log("id"))
+        self.assertIsNotNone(execute_and_log(["id"], shell=True))
         self.assertIsNotNone(execute_and_log("id 123456789", logger=logging.getLogger("test-exec-log-2")))
         self.assertIsNotNone(filter_bin("cat", "id", "netstat", "whoami"))
         self.assertIsNotNone(test1())

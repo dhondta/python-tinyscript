@@ -29,7 +29,7 @@ BAD_PASSWORDS_LISTS = {
         'password.lst': ["./", "~/"],
         'rockyou.txt':  ["./", "~/"],
     },
-    'Linux': {
+    'linux': {
         'password.lst': ["./", "~/", "/opt/john/run", "/usr/local/share/john", "/usr/share/john", "/var/lib/john"],
         'rockyou.txt':  ["./", "~/"],
     },
@@ -39,7 +39,7 @@ DEFAULT_POLICY = {
     'length':    (8, 40),
     'rules':     "lut",  # .lower(), .upper(), .title()
     'entropy':   32,
-    'wordlists': BAD_PASSWORDS_LISTS.get(system(), "default"),
+    'wordlists': BAD_PASSWORDS_LISTS.get(system().lower(), "default"),
 }
 MASK_DESCRIPTIONS = {
     'd': "digits",
