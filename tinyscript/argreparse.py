@@ -23,6 +23,7 @@ from .helpers.constants import PYTHON3
 from .helpers.inputs import user_input
 from .helpers.licenses import *
 from .helpers.data.types import is_executable, is_long_opt, is_pos_int, is_short_opt
+from .helpers.termsize import get_terminal_size
 from .helpers.text import *
 from .helpers.text import configure_docformat, txt_terminal_render
 
@@ -57,7 +58,7 @@ class _ConfigAction(Action):
     def __init__(self, option_strings, dest=None, default=None, help=None):
         super(_ConfigAction, self).__init__(option_strings=option_strings, dest=SUPPRESS, default=default, nargs=1,
                                             help=gt(help), metavar="INI")
-
+    
     def __call__(self, parser, namespace, values, option_string=None):
         conf = values[0]
         setattr(namespace, "read_config", conf)
@@ -72,7 +73,7 @@ class _DemoAction(Action):
     def __init__(self, option_strings, dest=SUPPRESS, help=None):
         super(_DemoAction, self).__init__(option_strings=option_strings, dest=SUPPRESS, default=SUPPRESS, nargs=0,
                                           help=gt(help))
-
+    
     def __call__(self, parser, namespace, values, option_string=None):
         parser.demo_args()
 
@@ -111,7 +112,7 @@ class _NewSubParsersAction(_SubParsersAction):
         # create the parser, but with another formatter and separating the help into an argument group
         parser = self._parser_class(ArgumentParser.globals_dict, add_help=False, **kwargs)
         parser.name = name
-        i = parser.add_argument_group(txt2title(gt("extra arguments")))
+        i = parser.add_argument_group(gt("extra arguments"))
         i.add_argument("-h", action="usage", prefix="show", help=gt("show usage message and exit"))
         i.add_argument("--help", action="help", prefix="show", help=gt("show this help message and exit"))
         # add it to the map
@@ -127,7 +128,7 @@ class _UsageAction(Action):
     def __init__(self, option_strings, dest=SUPPRESS, help=None):
         super(_UsageAction, self).__init__(option_strings=option_strings, dest=SUPPRESS, default=SUPPRESS, nargs=0,
                                            help=gt(help))
-
+    
     def __call__(self, parser, namespace, values, option_string=None):
         parser.print_usage()
         parser.exit()
@@ -204,12 +205,12 @@ class _NewActionsContainer(_ActionsContainer):
                     long_opt = "{}-{}".format(long_opt, suffix)
                     args.append(long_opt)
                     return self.add_argument(*args, **kwargs)
-
+    
     def add_argument_group(self, *args, **kwargs):
         group = _NewArgumentGroup(self, *args, **kwargs)
         self._action_groups.append(group)
         return group
-
+    
     def add_mutually_exclusive_group(self, **kwargs):
         group = _NewMutuallyExclusiveGroup(self, **kwargs)
         self._mutually_exclusive_groups.append(group)
@@ -264,7 +265,10 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             script, _ = splitext(script)
         kwargs['add_help'] = False
         kwargs['conflict_handler'] = "error"
-        kwargs['formatter_class'] = HelpFormatter
+        # when __docformat__ is set, fixing max_help_position to terminal's width forces argparse to format arguments
+        #  with their help on the same line ; in other words, formatting is left to the renderer
+        kwargs['formatter_class'] = HelpFormatter if self._docfmt is None else \
+                                    lambda prog: HelpFormatter(prog, max_help_position=get_terminal_size()[0])
         # format the epilog message
         if self.examples and script:
             _ = ["{} {}".format(ArgumentParser.prog, e) for e in self.examples]
@@ -485,6 +489,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             formatter.add_arguments(action_group._group_actions)
             formatter.end_section()
             actions = formatter.format_help()
+            if actions == "":
+                continue
             a = ""
             for i, line in enumerate(actions.splitlines()):
                 s, dedent = line.lstrip(), 0
@@ -504,8 +510,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                     continue
                 if self._docfmt and s[0] in "-*":
                     dedent = len(line) - len(s)
-                a += (line + "\n\n") if line.rstrip()[-1] == ":" else (txt2paragraph(line[dedent:]) + \
-                                                                       ["\n\n", "\n"][self._docfmt is None])
+                _nl = ["\n", ""][self._docfmt is None]
+                a += (line + "\n\n") if line.rstrip()[-1] == ":" else (_nl + txt2paragraph(line[dedent:]) + _nl)
             text += a + "\n"
         # epilog
         formatter = self._get_formatter()
@@ -519,8 +525,9 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         formatter.add_usage(self.usage, self._actions, self._mutually_exclusive_groups)
         text = formatter.format_help()
         if self._docfmt:
-            title, usage = text.split(": ", 1)
-            text = txt2title(title + ":") + "\n\n" + txt2paragraph(usage.rstrip("\n")) + "\n"
+            title, usage = text.rstrip("\n").split(": ", 1)
+            usage = "\n".join(l[2:] if i > 0 else l for i, l in enumerate(usage.split("\n")))
+            text = txt2title(title + ":") + "\n\n" + txt2preformatted(usage) + "\n"
         return text
     
     def input_args(self):
@@ -601,7 +608,7 @@ class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
                     s = ','.join(p[:2] + ["..."] + p[-2:])
             params['default'] = s
         return self._get_help_string(action) % params
-
+    
     def _get_help_string(self, action):
         help = super(HelpFormatter, self)._get_help_string(action)
         if '%(note)' not in help and hasattr(action, "note") and action.note is not None:
