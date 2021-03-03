@@ -9,7 +9,7 @@ from errno import ETIME
 from os import strerror
 
 from .loglib import logger
-from ..helpers.constants import WINDOWS
+from ..helpers.constants import PYTHON3, WINDOWS
 from ..helpers.timeout import TimeoutError
 
 
@@ -51,14 +51,14 @@ def set_time_items(glob):
         return t - (start or 0)
     # Time context manager, for easilly benchmarking a block of code
     class Timer(object):
-        def __init__(self, description=None, message=TO_MSG, timeout=None, fail_on_timeout=False):
+        def __init__(self, description=None, message=TO_MSG, timeout=None, fail_on_timeout=False, precision=True):
             self.fail = fail_on_timeout
             self.id = len(manager.times)
             self.descr = "#" + str(self.id) + (": " + (description or "")).rstrip(": ")
             self.message = message
-            self.start = _take_time()
+            self.precision = precision
             self.timeout = timeout
-
+        
         def __enter__(self):
             if manager.enabled:
                 if self.timeout is not None:
@@ -69,13 +69,26 @@ def set_time_items(glob):
                         signal.alarm(self.timeout)
                 if manager._timings and self.descr:
                     l.time(self.descr)
+                self.start = _take_time()
+                if self.precision:
+                    if PYTHON3:
+                        self.startp = time.perf_counter()
+                    else:
+                        l.warning("Precision timer is not available with Python 2")
                 return self
         
         def __exit__(self, exc_type, exc_value, exc_traceback):
             if manager.enabled:
+                if self.precision:
+                    if PYTHON3:
+                        dt = time.perf_counter() - self.startp
+                        l.time("> Precise time elapsed: %.6f seconds"% dt)
+                        manager.times.append(("", 0, dt))
+                    else:
+                        l.warning("Precision timer is not available with Python 2")
                 d = _take_time(self.start, self.descr)
                 if manager._timings:
-                    l.time("> Time elapsed: {} seconds".format(d))
+                    l.time("> Time elapsed: %.2f seconds"% d)
                 if self.timeout is not None:
                     if not self.fail and exc_type is TimeoutError:
                         return True  # this allows to let the execution continue
