@@ -370,16 +370,21 @@ class Code(Text):
     """
     _style = {'size': 10, 'style': "normal", 'color': "grey"}
     
-    def __init__(self, code, language=None, hl_lines=None, **kwargs):
+    def __init__(self, code, language=None, hl_lines=None, line_numbers=False, **kwargs):
         super(Code, self).__init__(code, "pre", **kwargs)
         self.language = language
         self.hl_lines = hl_lines
+        self.line_numbers = line_numbers
     
     @output
     def html(self, indent=4, text=TEXT):
-        s = "<pre"
+        s, cls = "<pre", "hljs"
         if self.language:
-            s += " class='%s hljs'" % self.language
+            cls += " " + self.language
+        if self.line_numbers:
+            cls += " hljs-line-numbers"  # NB: requires highlight-line-numbers.js
+        if cls != "hljs":
+            s += " class='%s'" % (cls)
         if self.style:
             s += " style='%s'>" % self.style
         return s + str(self.data).replace("\n", "<br>") + "</pre>"
@@ -389,8 +394,10 @@ class Code(Text):
         s = "```"
         if self.language:
             s += self.language
+        if self.line_numbers:
+            s += " linenums=\"1\""
         if self.hl_lines:
-            s += " hl_lines=\"%s\"" % self.hl_lines
+            s += " hl_lines=\"%s\"" % " ".join(self.hl_lines)
         return s + "\n%s\n```" % self.data
     
     @output
@@ -398,6 +405,10 @@ class Code(Text):
         s = ".. code-block:"
         if self.language:
             s += " %s" + self.language
+        if self.line_numbers:
+            s += "    :linenos:"
+        if self.hl_lines:
+            s += "    :emphasize-lines: %s" % ",".join(self.hl_lines)
         s += "\n    "
         for l in self.data.split("\n"):
             s += "\n    " + l

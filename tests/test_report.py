@@ -14,10 +14,12 @@ class TestReport(TestCase):
             self.assertIsNotNone(getattr(element, fmt)())
     
     def test_report_text_elements(self):
-        for e in [Text, Title, Section]:
+        for e in [Blockquote, Code, Text, Title, Section, Subsection]:
             o = e("test")
             self.__try_formats(o)
         self.assertRaises(ValueError, Section, "bad section", tag="a")
+        self.assertIsNotNone(List("a", "b"))
+        self.assertIsNotNone(List(["a", "b"]))
     
     def test_report_methods(self):
         r = Report(title="Test")
@@ -40,7 +42,7 @@ class TestReport(TestCase):
                   Image("test_image.png", width="50%"),
                   Blockquote("test blockquote", size=11),
                   Rule(),
-                  Code("#test\nprint('hello')", language="python", hl_lines="1")]:
+                  Code("#test\nprint('hello')", language="python", hl_lines="1", line_numbers=True)]:
             self.__try_formats(e)
             l.append(e)
         r.extend(l)

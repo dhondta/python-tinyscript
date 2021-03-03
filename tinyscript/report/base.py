@@ -14,8 +14,7 @@ TEXT = True
 
 
 def output(f):
-    """ This decorator allows to choose to return an output as text or to save
-         it to a file. """
+    """ This decorator allows to choose to return an output as text or to save it to a file. """
     f._output = True
     @wraps(f)
     def _wrapper(self, *args, **kwargs):
