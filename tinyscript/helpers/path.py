@@ -3,6 +3,7 @@
 
 """
 import ctypes
+import errno
 import imp
 import importlib
 import os
@@ -12,7 +13,7 @@ from pathlib import Path as BasePath
 from pyminizip import compress_multiple, uncompress
 from random import choice
 from re import search
-from shutil import rmtree
+from shutil import copy, copytree, rmtree
 from six import string_types
 from tempfile import gettempdir, NamedTemporaryFile as TempFile
 
@@ -171,6 +172,17 @@ class Path(BasePath):
             l = list(self.iterfiles(filetype, filename_only=True))
             if len(l) > 0:
                 return self.joinpath(choice(l))
+    
+    def copy(self, new_path):
+        """ Copy this folder or file to the given destination. """
+        try:
+            copytree(str(self), str(new_path))
+        except OSError as e:
+            if e.errno == errno.ENOTDIR:
+                copy(str(self), str(new_path))
+            else:
+                return self
+        return self.__class__(new_path)
     
     def expanduser(self):
         """ Fixed expanduser() method, working for both Python 2 and 3. """

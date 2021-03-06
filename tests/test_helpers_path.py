@@ -15,7 +15,7 @@ from utils import *
 class TestHelpersPath(TestCase):
     @classmethod
     def setUpClass(cls):
-        global FILE, MODULE, NOTEX, PATH, SPATH, TEST, TPATH1, TPATH2
+        global FILE, FILE2, MODULE, NOTEX, PATH, SPATH, TEST, TPATH1, TPATH2
         TEST = "test_dir"
         PATH = Path(TEST, expand=True, create=True)
         SPATH = PATH.joinpath("test")
@@ -34,6 +34,7 @@ class TestHelpersPath(TestCase):
                           "def test(): pass #TODO: test")
         FILE = PATH.joinpath("test.txt")
         FILE.touch()
+        FILE2 = PATH.joinpath("test2.txt")
         SPATH.joinpath("test.txt").touch()
         NOTEX = Path("DOES_NOT_EXIST")
     
@@ -66,6 +67,9 @@ class TestHelpersPath(TestCase):
         self.assertEqual(FILE.generate(), FILE)
         self.assertRaises(TypeError, FILE.append_text, 0)
         self.assertTrue(FILE.is_under(FILE))
+        self.assertTrue(FILE.copy(FILE2).is_file())
+        FILE2.remove()
+        self.assertFalse(FILE2.copy(FILE).is_file())
     
     def test_folder_extensions(self):
         self.assertEqual(str(PATH), str(Path(TEST).absolute()))
