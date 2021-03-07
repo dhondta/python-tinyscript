@@ -23,7 +23,7 @@ FORMATS = [None, "html", "md", "rst", "textile"]
 
 _indent = lambda t, n: _pline(t, " " * n)
 _pline  = lambda t, p, i=False: "\n".join("" if i and l.strip() == "" else p + l for l in t.split("\n"))
-_sline  = lambda t: re.sub(r"[\s\n]+", " ", t)
+_sline  = lambda t: re.sub(r"\n+", " ", t)
 
 
 def __check(**kwargs):
@@ -65,7 +65,7 @@ def configure_docformat(glob):
     DOCFORMAT_THEME = glob.get('DOCFORMAT_THEME', DOCFORMAT_THEME)
 
 
-def txt_terminal_render(text, format=None, debug=True):
+def txt_terminal_render(text, format=None, debug=False):
     """ This renders input text based on the selected format.
     
     :param format: selected format (one of FORMATS)

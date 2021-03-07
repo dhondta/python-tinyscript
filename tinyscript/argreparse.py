@@ -498,21 +498,21 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                     # action_group.title has ":" added after txt2title(...) causing an extra ":" to be appended
                     if self._docfmt == "html":
                         # for markup languages with tags, ":" appears behind the title tag
-                        a += line.rstrip(":") + "\n"
+                        title = line.rstrip(":") + "\n"
                     else:
                         # for other markup languages without tags, ":" appears at the end in duplicate
-                        a += line.rstrip(":") + ":\n"
+                        title = line.rstrip(":") + ":\n"
                     continue
                 if i == 1 and self._docfmt == "rst":
                     # action_group.title has ":" added after txt2title(...) causing an extra ":" to be appended behind
                     #  the underline, making rendering fail
-                    a = a.rstrip("\n") + "\n" + line.rstrip(":") + "\n"
+                    title = title.rstrip("\n") + "\n" + line.rstrip(":") + "\n"
                     continue
                 if self._docfmt and s[0] in "-*":
                     dedent = len(line) - len(s)
                 _nl = ["\n", ""][self._docfmt is None]
-                a += (line + "\n\n") if line.rstrip()[-1] == ":" else (_nl + txt2paragraph(line[dedent:]) + _nl)
-            text += a + "\n"
+                a += _nl + txt2paragraph(line.lstrip() if self._docfmt else line) + "\n"
+            text += title + a + "\n"
         # epilog
         formatter = self._get_formatter()
         formatter.add_text(self.epilog)
@@ -527,7 +527,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         if self._docfmt:
             title, usage = text.rstrip("\n").split(": ", 1)
             usage = "\n".join(l[2:] if i > 0 else l for i, l in enumerate(usage.split("\n")))
-            text = txt2title(title + ":") + "\n\n" + txt2preformatted(usage) + "\n"
+            text = txt2title(title + ":") + "\n\n" + txt2paragraph(usage) + "\n"
         return text
     
     def input_args(self):
