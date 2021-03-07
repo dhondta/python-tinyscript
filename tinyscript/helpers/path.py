@@ -177,7 +177,7 @@ class Path(BasePath):
         """ Copy this folder or file to the given destination. """
         try:
             copytree(str(self), str(new_path))
-        except OSError as e:
+        except OSError as e:  # does not use NotADirectoryError as it is only available from Python3
             if e.errno == errno.ENOTDIR:
                 copy(str(self), str(new_path))
             else:
@@ -301,6 +301,8 @@ class Path(BasePath):
                 if filter_func(item):
                     yield out(rel(item))
         for item in self.listdir(lambda p: p.is_dir(), sort):
+            if self.is_symlink() and self.resolve() == self.parent:
+                continue  # e.g.: /usr/bin/X11 -> /usr/bin
             if breadthfirst and filter_func(item):
                 yield out(rel(item))
             for subitem in item.walk(breadthfirst, filter_func, sort, base_cls):
