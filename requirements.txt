@@ -1,4 +1,4 @@
-asciistuff>=1.2.1
+asciistuff>=1.2.2
 bitstring
 codext>=1.8.0
 coloredlogs
@@ -7,15 +7,16 @@ dicttoxml
 ipaddress>=1.0.23
 json2html
 markdown2>=2.4.0
-mdv
+mdv; python_version<'3.9'
+mdv3; python_version>='3.9'
 netaddr
 netifaces
 patchy
 pathlib
-pillow>=8.1.0
+pillow>=8.2.0
 pip>=20.0
 plyer>=2.0.0; python_version>='3.5'
-pygments
+pygments>=2.8.1
 pyminizip
 pynput
 pypandoc

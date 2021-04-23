@@ -13,7 +13,7 @@ from pathlib import Path as BasePath
 from pyminizip import compress_multiple, uncompress
 from random import choice
 from re import search
-from shutil import copy, copytree, rmtree
+from shutil import copy, copy2, copytree, rmtree
 from six import string_types
 from tempfile import gettempdir, NamedTemporaryFile as TempFile
 
@@ -173,13 +173,13 @@ class Path(BasePath):
             if len(l) > 0:
                 return self.joinpath(choice(l))
     
-    def copy(self, new_path):
+    def copy(self, new_path, **kwargs):
         """ Copy this folder or file to the given destination. """
         try:
-            copytree(str(self), str(new_path))
+            copytree(str(self), str(new_path), **kwargs)
         except OSError as e:  # does not use NotADirectoryError as it is only available from Python3
             if e.errno == errno.ENOTDIR:
-                copy(str(self), str(new_path))
+                (copy2 if kwargs.pop('metadata', True) else copy)(str(self), str(new_path), **kwargs)
             else:
                 return self
         return self.__class__(new_path)

@@ -2,13 +2,14 @@
 """Common Python2/3 compatibility functions.
 
 """
+from functools import reduce
 from six import binary_type, string_types, text_type, u
 
 from .constants import PYTHON3
 
 
 __all__ = __features__ = ["b", "binary_type", "byteindex", "execfile", "ensure_binary", "ensure_str", "ensure_unicode",
-                          "iterbytes", "string_types", "text_type", "u"]
+                          "iterbytes", "reduce", "string_types", "text_type", "u"]
 
 
 # see: http://python3porting.com/problems.html
