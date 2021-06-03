@@ -41,6 +41,8 @@ class TestPreimportsLogging(TestCase):
         self.assertIsNone(logging.delLevelName(100))
         self.assertIsNone(logging.addLevelName(100, levelname))
         self.assertIsNone(logging.delLevelName(levelname))
+        self.assertIsNone(logging.setLoggingLevel("WARNING", r"test_"))
+        self.assertEqual(l.level, logging.WARNING)
     
     def test_manipulate_loggers(self):
         l = logging.getLogger("test")

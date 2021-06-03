@@ -4,7 +4,6 @@
 
 """
 from tinyscript.features.loglib import *
-from tinyscript.features.loglib import RelativeTimeColoredFormatter
 
 from utils import *
 
@@ -35,7 +34,7 @@ class TestLogging(TestCase):
         self.assertIs(logger.time("test"), None)
         self.assertIs(logger.step("test"), None)
         self.assertIs(logger.interact("test"), None)
-        self.assertIsNot(RelativeTimeColoredFormatter().format(FakeLogRecord()), None)
+        self.assertIsNot(logging.RelativeTimeColoredFormatter().format(FakeLogRecord()), None)
     
     def test_multi_level_debug(self):
         temp_stdout(self)

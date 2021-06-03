@@ -4,8 +4,6 @@
 
 """
 import coloredlogs
-from datetime import timedelta
-from time import gmtime
 
 from ..preimports import logging
 
@@ -19,6 +17,8 @@ LOG_FORMAT        = '%(asctime)s [%(levelname)s] %(message)s'
 TIME_MILLISECONDS = False
 
 
+# add a custom level beneath DEBUG
+logging.addLogLevel("detail", "green", 5, False)
 # add a custom log level for interactive mode
 logging.addLogLevel("interact", "cyan", 100)
 # add a custom log level for stepping
@@ -40,24 +40,8 @@ coloredlogs.DEFAULT_DATE_FORMAT = DATE_FORMAT
 coloredlogs.install(logger=logger)
 
 
-class RelativeTimeColoredFormatter(coloredlogs.ColoredFormatter):
-    """
-    Custom formatter for computing relative times.
-    """
-    converter = gmtime
-    
-    def __init__(self, *args, **kwargs):
-        super(RelativeTimeColoredFormatter, self).__init__(*args, **kwargs)
-        self.datefmt = '%H:%M:%S.%f'
-    
-    def format(self, record):
-        record.created = timedelta(microseconds=record.relativeCreated).total_seconds()
-        return super(RelativeTimeColoredFormatter, self).format(record)
-
-
 def configure_logger(glob, multi_level, relative=False, logfile=None, syslog=False):
-    """
-    Logger configuration function for setting either a simple debug mode or a multi-level one.
+    """ Logger configuration function for setting either a simple debug mode or a multi-level one.
     
     :param glob:        globals dictionary
     :param multi_level: boolean telling if multi-level debug is to be considered
@@ -75,25 +59,19 @@ def configure_logger(glob, multi_level, relative=False, logfile=None, syslog=Fal
     glob['args']._debug_syslog = syslog
     glob['args']._debug_logfile = logfile
     glob['logger'] = logger
-    logger.handlers = []
-    logger.setLevel(1)
-    logger.addHandler(_l.InterceptionHandler())
-    handler = _l.StreamHandler()
-    lfmt = "\r" + glob.get('LOG_FORMAT', LOG_FORMAT)
-    dfmt = glob.get('DATE_FORMAT', DATE_FORMAT)
-    formatter = _l.Formatter(lfmt, dfmt)
-    handler.setFormatter(formatter)
-    handler.setLevel(dl)
-    logger.addHandler(handler)
-    if relative:
-        coloredlogs.ColoredFormatter = RelativeTimeColoredFormatter
-    gtms = glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS)
-    coloredlogs.install(dl, logger=logger, fmt=lfmt, datefmt=dfmt, syslog=syslog, stream=logfile, milliseconds=gtms)
-    lastrec = _l.getLogger("__last_record__")
-    lastrec.handlers = []
-    handler = _l.StreamHandler()
-    handler.setFormatter(_l.Formatter("\r" + lfmt, dfmt))
-    lastrec.addHandler(handler)
+    # create the "last record" logger, used for reminding the last log record, i.e. with a shortcut key
+    lastrec = logging.getLogger("__last_record__")
+    kw = {'fmt': "\r" + glob.pop('LOG_FORMAT', LOG_FORMAT), 'datefmt': glob.pop('DATE_FORMAT', DATE_FORMAT)}
+    if len(lastrec.handlers) != 1:
+        for h in lastrec.handlers:
+            lastrec.removeHandler(h)
+        h = logging.StreamHandler()
+        lastrec.addHandler(h)
+    else:
+        h = lastrec.handlers[0]
+    h.setFormatter(logging.Formatter(*kw.values()))
     lastrec.setLevel(1)
-    coloredlogs.install(1, logger=lastrec, fmt="\r" + lfmt, datefmt=dfmt, milliseconds=gtms)
+    coloredlogs.install(1, logger=lastrec, **kw)
+    logging.configLogger(logger, dl, syslog=syslog, stream=logfile, relative=relative,
+                         milliseconds=glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS), **kw)
 

@@ -4,13 +4,17 @@
 """
 import coloredlogs
 import logging
+import re
 import sys
+import types
 from functools import wraps
+from time import gmtime
 
 from .inspectp import inspect
 
 
 PY3 = sys.version[0] == "3"
+logging.START_TIME = None
 
 
 # setup a null logger
@@ -100,6 +104,35 @@ def bindLogger(f):
                     glob['logger'] = old
     return _wrapper
 logging.bindLogger = bindLogger
+
+
+def configLogger(logger, level="INFO", **kwargs):
+    """ Configure colored logging for the given logger. """
+    kwargs['fmt'] = kwargs.get('fmt', coloredlogs.DEFAULT_LOG_FORMAT)
+    kwargs['datefmt'] = kwargs.get('datefmt', coloredlogs.DEFAULT_DATE_FORMAT)
+    f = logging.Formatter(kwargs['fmt'], kwargs['datefmt'])
+    level = level if isinstance(level, int) else getattr(logging, level)
+    # ensure the InterceptionHandler is present
+    if not any(isinstance(h, logging.InterceptionHandler) for h in logger.handlers):
+        h = logging.InterceptionHandler()
+        h.setLevel(1)
+        logger.addHandler(h)
+    # ensure there is at least one StreamHandler
+    if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+        h = logging.StreamHandler()
+        h.setFormatter(f)
+        h.setLevel(level)
+        logger.addHandler(h)
+        if kwargs.pop('relative', False):
+            coloredlogs.ColoredFormatter = RelativeTimeColoredFormatter
+        coloredlogs.install(level, logger=logger, **kwargs)
+    # now, update logger's relevant handlers with the new level
+    for h in logger.handlers:
+        if not isinstance(h, logging.InterceptionHandler):
+            h.setFormatter(f)
+            h.setLevel(level)
+            coloredlogs.install(level, logger=logger, **kwargs)
+logging.configLogger = configLogger
 
 
 def delLevelName(level):
@@ -195,6 +228,17 @@ def setLoggers(*names):
 logging.setLoggers = setLoggers
 
 
+def setLoggingLevel(level="INFO", *patterns, **kwargs):
+    """ Set logging level for loggers whose names match the list of patterns. """
+    level = getattr(logging, level) if not isinstance(level, int) else level
+    for l in list(logging.root.manager.loggerDict.keys()):
+        if any(re.match(p, l) for p in patterns):
+            l = logging.getLogger(l)
+            l.setLevel(level)
+            kwargs.get('config_func', logging.configLogger)(l, level)
+logging.setLoggingLevel = setLoggingLevel
+
+
 def unsetLogger(name, force=False):
     """ Remove a logger. If the name does not exist in the dictionary of loggers, it raises an exception.
     
@@ -236,11 +280,27 @@ class InterceptionHandler(logging.Handler):
 logging.InterceptionHandler = InterceptionHandler
 
 
+class RelativeTimeColoredFormatter(coloredlogs.ColoredFormatter):
+    """ Custom formatter for computing relative times. """
+    converter = gmtime
+    
+    def __init__(self, *args, **kwargs):
+        super(RelativeTimeColoredFormatter, self).__init__(*args, **kwargs)
+        self.datefmt = '%H:%M:%S.%f'
+    
+    def format(self, record):
+        record.created = record.relativeCreated / 1000
+        return super(RelativeTimeColoredFormatter, self).format(record)
+logging.RelativeTimeColoredFormatter = RelativeTimeColoredFormatter
+
 # setup the private logger for displaying the last intercepted log record
-__logger = logging.getLogger("__last_record__")
-__logger.setLevel(1)
-__handler = logging.StreamHandler()
-__formatter = logging.Formatter('\r%(asctime)s [%(levelname)s] %(message)s')
-__handler.setFormatter(__formatter)
-__logger.addHandler(__handler)
+def __setup_lr_logger():
+    l = logging.getLogger("__last_record__")
+    l.setLevel(1)
+    h = logging.StreamHandler()
+    f = logging.Formatter("\r%(asctime)s [%(levelname)s] %(message)s")
+    h.setFormatter(f)
+    l.addHandler(h)
+    coloredlogs.install(1, logger=l)
+__setup_lr_logger()
 
