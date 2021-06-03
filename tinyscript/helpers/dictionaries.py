@@ -3,8 +3,12 @@
 
 """
 import re
-from collections import MutableMapping, OrderedDict
+from collections import OrderedDict
 from time import time
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 from .data.types import is_class, is_list, is_str
 from .path import Path

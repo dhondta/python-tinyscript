@@ -4,8 +4,11 @@
 """
 import inspect
 import types
-from collections import Iterable
 from six import integer_types
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 from .strings import _str2list
 
