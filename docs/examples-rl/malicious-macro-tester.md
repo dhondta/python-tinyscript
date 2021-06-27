@@ -1,12 +1,14 @@
-### Description
+# Malicious Macro Tester
+
+## Description
 
 This CLI tool automates the classification of Office documents with macros using MaliciousMacroBot. It allows to analyze a folder of sample files and to generate a report in multiple output formats.
 
-### Code
+## Code
 
 See [this GitHub repository](https://github.com/dhondta/malicious-macro-tester).
 
-### Help
+## Help
 
 ```sh
 $ malicious-macro-tester -h
@@ -62,7 +64,7 @@ Usage examples:
 
 ```
 
-### Execution
+## Execution
 
 ```session
 $ python malicious-macro-tester.py samples -vfqs --output xml

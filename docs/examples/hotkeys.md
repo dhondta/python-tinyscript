@@ -1,8 +1,10 @@
-### Description
+# Hotkeys
+
+## Description
 
 Very basic script demonstrating the hotkeys feature.
 
-### Code
+## Code
 
 ```python hl_lines="3 4 5 6 7 9 10"
 from tinyscript import *
@@ -22,7 +24,7 @@ if __name__ == '__main__':
         pass
 ```
 
-### Help
+## Help
 
 ```sh
 $ python hotkeys.py -h
@@ -30,7 +32,7 @@ usage: python hotkeys.py [-h] [--help] [-v]
 
 ```
 
-### Execution
+## Execution
 
 During this execution, the following keys are pressed: `p`, `q`, `l`, `i`, `Enter`, `i`, `y`, `Enter`.
 

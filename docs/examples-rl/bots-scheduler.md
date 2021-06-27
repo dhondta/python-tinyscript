@@ -1,12 +1,14 @@
-### Description
+# Bots Scheduler
+
+## Description
 
 This tool is a launcher for the [Nextdoor Scheduler](https://github.com/Nextdoor/ndscheduler) with a set of jobs based on robots made with [PyBots](https://github.com/dhondta/pybots).
 
-### Code
+## Code
 
 See [this GitHub repository](https://github.com/dhondta/bots-scheduler).
 
-### Help
+## Help
 
 ```sh
 $ ./bots-scheduler --help
@@ -90,7 +92,7 @@ Tornado options:
 
 ```
 
-### Execution
+## Execution
 
 ```sh
 $ ./bots-scheduler run -d

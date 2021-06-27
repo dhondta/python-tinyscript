@@ -31,13 +31,11 @@ pages:
 extra:
   mailto: alexandre.dhondt@gmail.com
 theme: readthedocs
-extra_javascript:
-  - js/collapsible-navbar.js
 use_directory_urls: false
 markdown_extensions:
-  - toc:
-      permalink: true
   - admonition
   - codehilite:
       linenums: true
   - pymdownx.details
+  - toc:
+      permalink: true

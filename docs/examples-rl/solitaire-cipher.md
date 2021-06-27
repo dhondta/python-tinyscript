@@ -1,12 +1,14 @@
-### Description
+# Solitaire Cipher
+
+## Description
 
 This tool implements Bruce Schneier's [Solitaire Cipher](https://www.schneier.com/academic/solitaire/).
 
-### Code
+## Code
 
 See [this GitHub repository](https://github.com/dhondta/solitaire-cipher).
 
-### Help
+## Help
 
 ```sh
 $ solitaire-cipher --help
@@ -83,7 +85,7 @@ extra arguments:
 
 ```
 
-### Execution
+## Execution
 
 ```sh
 $ solitaire-cipher encrypt "TEST" -s -p my_super_secret

@@ -1,8 +1,10 @@
-### Description
+# Multi-Level Help
+
+## Description
 
 Very basic script demonstrating the multi-level help messages.
 
-### Code
+## Code
 
 ```python hl_lines="7 8 9 10"
 from tinyscript import *
@@ -17,7 +19,7 @@ if __name__ == '__main__':
     initialize()
 ```
 
-### Help
+## Help
 
 ```sh hl_lines="1 4"
 $ python multi-level-help.py -h

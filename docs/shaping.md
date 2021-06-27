@@ -1,3 +1,5 @@
+# Tool Shaping
+
 ## Metadata
 
 Metadata can be defined using *dunders* (double underscore variables) at the very beginning of the script/tool and is used by Tinyscript to format the help message.

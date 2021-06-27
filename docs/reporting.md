@@ -1,4 +1,6 @@
-## Report
+# Report Generation
+
+## `Report` Class
 
 The `Report` class is aimed to model a report document in an object-oriented fashion. It is a subclass of `list`, hence exposing the same methods. It also manages report elements' names for distinguishing elements in some particular output formats.
 
@@ -28,7 +30,7 @@ And just like with the `list`, we can also `copy()` or `clear()` a `Report` inst
 
 -----
 
-## Objects
+## Report Objects
 
 Multiple report elements can be defined:
 

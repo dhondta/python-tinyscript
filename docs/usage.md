@@ -1,3 +1,5 @@
+# Usage
+
 This section proposes a method for building a script/tool with Tinyscript.
 
 Some example script/tools are available on the [GitHub repo](https://github.com/dhondta/tinyscript/tree/master/examples).

@@ -1,8 +1,10 @@
-### Description
+# Simple Script
+
+## Description
 
 Very basic script, with no particular feature used.
 
-### Code
+## Code
 
 ```python
 #!/usr/bin/env python
@@ -16,7 +18,7 @@ if __name__ == '__main__':
     logger.info(args.string)
 ```
 
-### Help
+## Help
 
 ```sh
 $ python simple-script.py -h
@@ -34,7 +36,7 @@ extra arguments:
 
 ```
 
-### Execution
+## Execution
 
 ```sh
 $ python simple-script.py "Hello World!"

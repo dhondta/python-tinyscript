@@ -1,8 +1,10 @@
-### Description
+# Timing Feature
+
+## Description
 
 Very basic script demonstrating the execution timing feature.
 
-### Code
+## Code
 
 ```python hl_lines="7"
 from tinyscript import *
@@ -17,7 +19,7 @@ if __name__ == '__main__':
             pass
 ```
 
-### Help
+## Help
 
 ```sh
 $ python step.py -h
@@ -36,7 +38,7 @@ timing arguments:
 
 ```
 
-### Execution
+## Execution
 
 ```sh hl_lines="1"
 $ python tool.py --timings

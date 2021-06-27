@@ -1,3 +1,5 @@
+# Enhanced Modules
+
 ## `code`
     
 Formerly a set of [helper functions](helpers.md), the followings have been attached to the `code` module, which is now preimported.
@@ -85,12 +87,14 @@ A context manager is also available:
 
 - `addLogLevel`: adds a custom log level (with a color).
 - `bindLogger`: decorates a function or method to provide a logger (`self.logger` for a method, global `logger` for a function).
+- `configLogger`: configures the given logger with an `InterceptionHandler` (for catching and re-displaying the last log record) and a `StreamHandler`, also installing it in `coloredlogs`.
 - `delLevelName`: deletes a level from the registry by its name or integer.
 - `delLogLevel`: deletes a log level, that is, its complete definition.
 - `lastLogRecord`: displays the last log record.
 - `nullLogger`: a ready-to-use null logger.
 - `renameLogger`: renames a logger from an old to a new name.
 - `setLogger` / `setLoggers`: sets respectively one or multiple loggers using Tinyscript's logger configuration.
+- `setLoggingLevel`: sets a logging level to every logger matching the given patterns.
 - `unsetLogger` / `unsetLoggers`: unsets respectively one or multiple loggers (removing them from the root `logging` dictionary).
 - `InterceptionHandler`: handler that intercepts the last log record.
 

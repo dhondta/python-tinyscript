@@ -1,3 +1,5 @@
+# Helper Functions & Classes
+
 ## Useful constants and compatibility functions
 
 Tinyscript provides some predefined boolean constants, handy in some use cases:

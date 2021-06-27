@@ -1,12 +1,14 @@
-### Description
+# Recursive Compression
+
+## Description
 
 This tool allows to recursively (de)compress nested archives according to various decompression algorithms, relying on the [`patool`](https://github.com/wummel/patool) module.
 
-### Code
+## Code
 
 See [this GitHub repository](https://github.com/dhondta/recursive-compression).
 
-### Help
+## Help
 
 ```session
 $ rec-comp -h
@@ -88,7 +90,7 @@ Usage examples:
 
 ```
 
-### Execution
+## Execution
 
 ```session
 $ rec-comp file1 file2 file3 -r 10 -p

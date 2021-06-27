@@ -1,3 +1,5 @@
+# Utility Features
+
 ## Privilege elevation
 
 This is achieved by passing a keyword argument `sudo=[boolean]` to `initialize(...)`.

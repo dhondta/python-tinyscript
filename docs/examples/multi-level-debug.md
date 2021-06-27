@@ -1,8 +1,10 @@
-### Description
+# Multi-Level Debugging
+
+## Description
 
 Very basic script demonstrating the multi-level debug mode.
 
-### Code
+## Code
 
 ```python hl_lines="4"
 from tinyscript import *
@@ -16,7 +18,7 @@ if __name__ == '__main__':
     logger.debug("This is displayed with -vvv")
 ```
 
-### Help
+## Help
 
 ```sh hl_lines="8 9"
 $ python multi-level-debug.py --help
@@ -32,7 +34,7 @@ extra arguments:
 
 ```
 
-### Execution
+## Execution
 
 ```sh hl_lines="1"
 $ python multi-level-debug.py

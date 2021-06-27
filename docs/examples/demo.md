@@ -1,4 +1,6 @@
-### Description
+# Demo Feature
+
+## Description
 
 Very basic script demonstrating the demonstration feature, adding an option to start a demo using one of the available examples defined in `__examples__`.
 
@@ -6,7 +8,7 @@ Very basic script demonstrating the demonstration feature, adding an option to s
 
     If `__examples__` is not defined or is en empty list, the `--demo` will simply not be available, even if `add_demo` is `True` in the `initialize` function.
 
-### Code
+## Code
 
 ```python hl_lines="3 7"
 from tinyscript import *
@@ -19,7 +21,7 @@ if __name__ == '__main__':
     logger.success("First example" if not args.test else "Second example")
 ```
 
-### Help
+## Help
 
 ```sh
 $ python demo.py -h
@@ -27,7 +29,7 @@ usage: python demo.py [--test] [--demo] [-h] [--help] [-v]
 
 ```
 
-### Execution
+## Execution
 
 ```sh hl_lines="1"
 $ python demo.py --demo

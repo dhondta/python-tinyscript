@@ -1,4 +1,4 @@
-## Introduction
+# Introduction
 
 Tinyscript aims to quickly prototype tools by sparing as much lines of code as possible and providing base features (especially useful for debugging or understanding the execution flow) like configured logging, preimports, stepping, timing and so forth.
 

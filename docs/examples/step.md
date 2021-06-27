@@ -1,8 +1,10 @@
-### Description
+# Step Feature
+
+## Description
 
 Very basic script demonstrating the execution stepping feature.
 
-### Code
+## Code
 
 ```python hl_lines="7"
 from tinyscript import *
@@ -15,7 +17,7 @@ if __name__ == '__main__':
         print("Second computation")
 ```
 
-### Help
+## Help
 
 ```sh
 $ python step.py -h
@@ -23,7 +25,7 @@ usage: python step.py [-h] [--help] [--step] [-v]
 
 ```
 
-### Execution
+## Execution
 
 ```sh hl_lines="1"
 $ python step.py

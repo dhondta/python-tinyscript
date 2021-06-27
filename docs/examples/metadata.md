@@ -1,8 +1,10 @@
-### Description
+# Metadata
+
+## Description
 
 Very basic script demonstrating how to include metadata and how it is rendered in the help message.
 
-### Code
+## Code
 
 ```python hl_lines="3 4 5 6 7"
 from tinyscript import *
@@ -18,7 +20,7 @@ if __name__ == '__main__':
     logger.success("Hello world !")
 ```
 
-### Help
+## Help
 
 ```sh hl_lines="5 7"
 $ python metadata.py -h
@@ -39,7 +41,7 @@ Usage example:
 
 ```
 
-### Execution
+## Execution
 
 ```sh
 $ python metadata.py

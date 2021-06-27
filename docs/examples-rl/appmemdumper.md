@@ -1,14 +1,16 @@
-### Description
+# AppMemDumper
+
+## Description
 
 This tool automates the research of some artifacts for forensics purpose in memory dumps based upon Volatility for a series of common Windows applications.
 
 It can also open multiple archive formats. In case of an archive, the tool will extract all its files to a temporary directory and then try to open each file as a memory dump (except files named README or README.md).
 
-### Code
+## Code
 
 See [this GitHub repository](https://github.com/dhondta/AppmemDumper).
 
-### Help
+## Help
 
 ```sh
 $ app-mem-dumper -h
@@ -72,7 +74,7 @@ Usage examples:
 
 ```
 
-### Execution
+## Execution
 
 ```sh
 $ app-mem-dumper memory.dump -v -p plugins

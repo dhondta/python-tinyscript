@@ -1,8 +1,10 @@
-### Description
+# Simple Tool
+
+## Description
 
 Very basic tool, using the demonstration feature when no argument is given. It also redefines a constant for tuning the logging.
 
-### Code
+## Code
 
 ```python
 #!/usr/bin/env python
@@ -34,7 +36,7 @@ if __name__ == '__main__':
     hello(args.message, args.critical)
 ```
 
-### Help
+## Help
 
 ```sh
 $ python simple-tool.py -h
@@ -62,7 +64,7 @@ Usage examples:
 
 ```
 
-### Execution
+## Execution
 
 ```sh
 $ python simple-tool.py 
