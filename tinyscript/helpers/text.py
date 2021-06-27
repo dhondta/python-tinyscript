@@ -2,6 +2,7 @@
 """Module for text-related utility functions.
 
 """
+import colorful
 import mdv
 import re
 from gettext import gettext as gt
@@ -19,7 +20,7 @@ __all__ = __features__ + ["DOCFORMAT_THEME"]
 
 DOCFORMAT = None
 DOCFORMAT_THEME = "Makeup"
-FORMATS = [None, "html", "md", "rst", "textile"]
+FORMATS = [None, "console", "html", "md", "rst", "textile"]
 
 _indent = lambda t, n: _pline(t, " " * n)
 _pline  = lambda t, p, i=False: "\n".join("" if i and l.strip() == "" else p + l for l in t.split("\n"))
@@ -170,7 +171,7 @@ txt2olist = lambda text, format=None: _txt_list(text, format, True)
 txt2ulist = lambda text, format=None: _txt_list(text, format)
 
 
-def _txt_style(text, format=None, bold=False, italic=False, underline=False):
+def _txt_style(text, format="console", bold=False, italic=False, underline=False):
     """ This restyles an input raw text based on the selected format.
     
     :param format:    selected format (one of FORMATS)
@@ -180,7 +181,14 @@ def _txt_style(text, format=None, bold=False, italic=False, underline=False):
     """
     format = format or DOCFORMAT
     __check(format=format, bold=bold, italic=italic, underline=underline)
-    if format == "html":
+    if format == "console":
+        if bold:
+            text = colorful.bold(text)
+        if italic:
+            text = colorful.italic(text)
+        if underline:
+            text = colorful.underlined(text)
+    elif format == "html":
         if bold:
             text = "<b>{}</b>".format(text)
         if italic:
@@ -202,9 +210,9 @@ def _txt_style(text, format=None, bold=False, italic=False, underline=False):
         if underline:
             text = "_{}_".format(text)
     return text
-txt2bold = lambda text, format=None: _txt_style(text, format, bold=True)
-txt2italic = lambda text, format=None: _txt_style(text, format, italic=True)
-txt2underline = lambda text, format=None: _txt_style(text, format, underline=True)
+txt2bold = lambda text, format="console": _txt_style(text, format, bold=True)
+txt2italic = lambda text, format="console": _txt_style(text, format, italic=True)
+txt2underline = lambda text, format="console": _txt_style(text, format, underline=True)
 
 
 def txt2blockquote(text, format=None):
