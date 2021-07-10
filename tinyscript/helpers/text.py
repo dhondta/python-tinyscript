@@ -182,12 +182,15 @@ def _txt_style(text, format="console", bold=False, italic=False, underline=False
     format = format or DOCFORMAT
     __check(format=format, bold=bold, italic=italic, underline=underline)
     if format == "console":
+        attrs = []
         if bold:
-            text = colorful.bold(text)
+            attrs.append("bold")
         if italic:
-            text = colorful.italic(text)
+            attrs.append("italic")
         if underline:
-            text = colorful.underlined(text)
+            attrs.append("underlined")
+        if len(attrs) > 0:
+            text = str(getattr(colorful, "_".join(attrs))(text))
     elif format == "html":
         if bold:
             text = "<b>{}</b>".format(text)

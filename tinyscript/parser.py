@@ -280,8 +280,11 @@ def initialize(add_banner=False,
         exe = ["runas", "/env", "/user:Administrator"] if WINDOWS else ["sudo", "-E"]
         os.execvp(["sudo", "runas"][WINDOWS], exe + [sys.executable] + sys.argv)
     # 4) configure logging and get the main logger
-    configure_logger(glob, multi_level_debug, glob['args']._collisions.get("relative"),
-                     glob['args']._collisions.get("logfile"), glob['args']._collisions.get("syslog"))
+    a = glob['args']
+    configure_logger(glob, multi_level_debug,
+                     getattr(a, a._collisions.get("relative", "relative"), False),
+                     getattr(a, a._collisions.get("logfile", "logfile"), None),
+                     getattr(a, a._collisions.get("syslog", "syslog"), None))
     # 5) append modes items
     set_interact_items(glob)
     set_hotkeys(glob)

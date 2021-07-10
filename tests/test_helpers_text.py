@@ -103,7 +103,7 @@ class TestHelpersText(TestCase):
         self.assertEqual(TXT, txt2bold(TXT))
         for fmt in FORMATS[1:]:
             configure_docformat({'__docformat__': fmt})
-            self.assertNotEqual(TXT, txt2bold(TXT))
+            [self.assertNotEqual, self.assertEqual][fmt == "console"](TXT, txt2bold(TXT, fmt))
 
     def test_text_conversions(self):
         # input validation

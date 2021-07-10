@@ -108,6 +108,8 @@ logging.bindLogger = bindLogger
 
 def configLogger(logger, level="INFO", **kwargs):
     """ Configure colored logging for the given logger. """
+    if kwargs.pop('relative', False):
+        coloredlogs.ColoredFormatter = RelativeTimeColoredFormatter
     kwargs['fmt'] = kwargs.get('fmt', coloredlogs.DEFAULT_LOG_FORMAT)
     kwargs['datefmt'] = kwargs.get('datefmt', coloredlogs.DEFAULT_DATE_FORMAT)
     f = logging.Formatter(kwargs['fmt'], kwargs['datefmt'])
@@ -123,8 +125,6 @@ def configLogger(logger, level="INFO", **kwargs):
         h.setFormatter(f)
         h.setLevel(level)
         logger.addHandler(h)
-        if kwargs.pop('relative', False):
-            coloredlogs.ColoredFormatter = RelativeTimeColoredFormatter
         coloredlogs.install(level, logger=logger, **kwargs)
     # now, update logger's relevant handlers with the new level
     for h in logger.handlers:

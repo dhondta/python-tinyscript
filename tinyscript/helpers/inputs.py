@@ -295,15 +295,18 @@ class Capture(object):
     
     def __enter__(self):
         r = []
+        self.__devnull = os.open(os.devnull, os.O_RDWR)
         # create new file handles
         if self._stdout:
-            sys.stdout = StringIO()
-            self.stdout = _Text()
+            sys.stdout, self.stdout = StringIO(), _Text()
             r.append(self.stdout)
+            self.__tmp_fd1 = os.dup(1)
+            os.dup2(self.__devnull, 1)
         if self._stderr:
-            sys.stderr = StringIO()
-            self.stderr = _Text()
+            sys.stderr, self.stderr = StringIO(), _Text()
             r.append(self.stderr)
+            self.__tmp_fd2 = os.dup(2)
+            os.dup2(self.__devnull, 2)
         # return references of the dummy objects
         return None if len(r) == 0 else r[0] if len(r) == 1 else tuple(r)
     
@@ -314,8 +317,11 @@ class Capture(object):
             self.stdout.text = sys.stdout.getvalue().strip()
             sys.stdout.close()
             sys.stdout = self._stdout
+            os.dup2(self.__tmp_fd1, 1)
         if self._stderr:
             self.stderr.text = sys.stderr.getvalue().strip()
             sys.stderr.close()
             sys.stderr = self._stderr
+            os.dup2(self.__tmp_fd2, 2)
+        os.close(self.__devnull)
 

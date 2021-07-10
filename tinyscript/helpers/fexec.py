@@ -55,14 +55,16 @@ def execute_and_log(cmd, out_maxlen=256, silent=None, **kwargs):
     while logger is None and frame is not None:
         logger = frame.f_globals.get('logger')
         frame = frame.f_back
-    logger.debug(cmd)
+    if logger is not None:
+        logger.debug(cmd)
     out, err, retc = execute(cmd, returncode=True, **kwargs)
-    if out and len(out) < out_maxlen:
-        logger.debug(ensure_str(out).strip())
-    if err:
-        err = ensure_str(err).strip()
-        if all(re.search(pattern, err) is None for pattern in (silent or [])):
-            (logger.warning if err.startswith("WARNING") else logger.error)(err)
+    if logger is not None:
+        if out and len(out) < out_maxlen:
+            logger.debug(ensure_str(out).strip())
+        if err:
+            err = ensure_str(err).strip()
+            if all(re.search(pattern, err) is None for pattern in (silent or [])):
+                (logger.warning if err.startswith("WARNING") else logger.error)(err)
     return out, err, retc
 
 
