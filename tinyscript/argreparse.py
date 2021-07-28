@@ -253,7 +253,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self._docfmt = gd.get('__docformat__')
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         self.examples = gd.get('__examples__', [])
-        script = gd.get('__script__', gd.get('__file__', sys.argv[0]))
+        script = basename(gd.get('__script__', gd.get('__file__', sys.argv[0])))
         if script and kwargs.get('prog') is None:
             path = abspath(script)
             root = dirname(path)
