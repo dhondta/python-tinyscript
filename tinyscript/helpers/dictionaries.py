@@ -283,13 +283,13 @@ class PathBasedDict(dict):
         """ Remove the item at the given path of subdictionaries. """
         self[path]
         d, parts = self, self.__convert_path(path)
-        if len(parts[:-1]) > 0:
+        if len(parts) > 1:
             del self[parts[:-1]][parts[-1]]
-        parts = parts[:-1]
+            parts = parts[:-1]
         while len(parts) > 1 and len(d[parts]) == 0:
             del self[parts[:-1]][parts[-1]]
             parts = parts[:-1]
-        if len(parts) == 1 and len(d[parts]) == 0:
+        if len(parts) == 1 and (not isinstance(d[parts], dict) or len(d[parts]) == 0):
             super(PathBasedDict, self).__delitem__(parts[0])
     
     def __getitem__(self, path):
