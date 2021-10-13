@@ -28,6 +28,6 @@ six
 terminaltables
 toml
 tqdm
-virtualenv
+virtualenv>=20.8.1; python_version>='3.5'
 weasyprint; python_version>='3.5'
 xmltodict
