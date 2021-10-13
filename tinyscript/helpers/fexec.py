@@ -4,23 +4,41 @@
 """
 import os
 import re
+import sys
 from functools import wraps
 from inspect import currentframe
 from multiprocessing import Process
+from select import poll, POLLIN
 from shlex import split
 from six import string_types
 from subprocess import Popen, PIPE
 from threading import Thread
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 
-from .compat import ensure_str
+from .compat import b, ensure_str
 
 
-__all__ = __features__ = ["apply", "execute", "execute_and_log", "filter_bin", "process", "processes_clean", "thread",
-                          "threads_clean"]
+__all__ = __features__ = ["apply", "execute", "execute_and_log", "execute_and_kill", "filter_bin", "process",
+                          "processes_clean", "thread", "threads_clean"]
 
 
 PROCESSES = []
 THREADS   = []
+
+
+def __set_cmd(cmd, **kwargs):
+    sh = kwargs.get('shell', False)
+    if isinstance(cmd, string_types):
+        if not sh:
+            cmd = split(cmd)
+    elif isinstance(cmd, (list, tuple)):
+        cmd = " ".join(cmd) if sh else [str(x) for x in cmd]
+    else:
+        cmd = str(cmd)
+    return cmd
 
 
 def apply(functions, args=(), kwargs={}):
@@ -34,12 +52,7 @@ def execute(cmd, **kwargs):
     :param cmd: command string
     """
     rc = kwargs.pop("returncode", False)
-    sh = kwargs.get('shell', False)
-    if isinstance(cmd, string_types) and not sh:
-        cmd = split(cmd)
-    elif not isinstance(cmd, string_types) and sh:
-        cmd = " ".join(cmd)
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE, **kwargs)
+    p = Popen(__set_cmd(cmd, **kwargs), stdout=PIPE, stderr=PIPE, **kwargs)
     out, err = p.communicate()
     return (out, err, p.returncode) if rc else (out, err)
 
@@ -66,6 +79,41 @@ def execute_and_log(cmd, out_maxlen=256, silent=None, **kwargs):
             if all(re.search(pattern, err) is None for pattern in (silent or [])):
                 (logger.warning if err.startswith("WARNING") else logger.error)(err)
     return out, err, retc
+
+
+def execute_and_kill(cmd, patterns=None, **kwargs):
+    """ Wrapper for subprocess.Popen, watching stderr for the given pattern for killing the process.
+
+    :param cmd:      command string
+    :param patterns: list of patterns for stderr lines to be watched for
+    """
+    def _read(pipe, queue):
+        try:
+            with pipe:
+                for line in iter(pipe.readline, b""):
+                    queue.put((pipe, line))
+        finally:
+            queue.put(None)
+    
+    bs, out, err = kwargs.pop('bufsize', 1), b"", b""
+    patterns = [b(x) for x in (patterns or [])]
+    p, q = Popen(__set_cmd(cmd, **kwargs), stdout=PIPE, stderr=PIPE, bufsize=bs, **kwargs), Queue()
+    Thread(target=_read, args=(p.stdout, q)).start()
+    Thread(target=_read, args=(p.stderr, q)).start()
+    br = False
+    for _ in range(2):
+        for src, l in iter(q.get, None):
+            if src is p.stdout:
+                out += l
+            else:
+                err += l
+                if any(pat in l for pat in patterns):
+                    p.kill()
+                    br = True
+                    break
+        if br:
+            break
+    return out, err, p.poll()
 
 
 def filter_bin(*binaries):
