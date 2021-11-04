@@ -1,3 +1,6 @@
+<h1 align="center">TinyScript <a href="https://twitter.com/intent/tweet?text=TinyScript%20-%20Devkit%20for%20quickly%20building%20CLI%20tools%20with%20Python.%0D%0APython%20library%20with%20many%20features%20for%20writing%20short,%20simple%20and%20nice-looking%20CLI%20tools.%0D%0Ahttps%3a%2f%2fgithub%2ecom%2fdhondta%2fpython-tinyscript%0D%0A&hashtags=python,programming,devkit,console,cli,tools,ctftools"><img src="https://img.shields.io/badge/Tweet--lightgrey?logo=twitter&style=social" alt="Tweet" height="20"/></a></h1>
+<h3 align="center">Make a CLI tool with very few lines of code.</h3>
+
 [![PyPi](https://img.shields.io/pypi/v/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 [![Read The Docs](https://readthedocs.org/projects/python-tinyscript/badge/?version=latest)](https://python-tinyscript.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.com/dhondta/python-tinyscript.svg?branch=master)](https://travis-ci.com/dhondta/python-tinyscript)
@@ -7,11 +10,13 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/dhondta/python-tinyscript/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/python-tinyscript?targetFile=requirements.txt)
 [![License](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 
-## Introduction
-
 This library is aimed to provide useful features and helpers in order to shorten the number of required lines of code for writing simple and nice-looking command-line interface tools. It is based on `argparse` and is considered a **development kit**, on the contrary of popular **frameworks** like [`cement`](https://builtoncement.com/), [`click`](https://click.palletsprojects.com) or [`docopt`](http://docopt.org), as it is not aimed to reinvent the wheel in yet another paradigm.
 
-## Philosophy
+```sh
+pip install tinyscript
+```
+
+## :bulb: Philosophy
 
 This library is built with the DRY (*Don't Repeat Yourself*) and KISS (*Keep It Stupid Simple*) philosophies in mind ; the whole machinery of Tinyscript holds in its **star import** (`from tinyscript import *`) and its **initialization** (with the `initialize` function).
 
@@ -25,7 +30,7 @@ Leveraging this allows to create very short scripts with **only the real code th
 
 Note that, while star imports should be avoided according to Python's style guide (see [PEP8](https://pep8.org/#imports)), it is deliberately extensively used and covering a huge scope in order to shorten code length. This "anti-pattern" pays off after creating a few tools, when we can realize it shortens parts of the code that are often repeated from a tool to another (e.g. for shaping tool's help message).
 
-## Usage
+## :sunglasses: Usage
 
 It is designed to be as simple and straightforward to use as possible. In order to learn and use it, you only need your browser (for consulting the documentation), a text editor and a good Python Interpreter (e.g. [IDLE](https://docs.python.org/3/library/idle.html)) for using auto-completion or an IDE like [PyCharm](https://www.jetbrains.com/pycharm/) to get helpers suggested.
 
@@ -36,13 +41,7 @@ The point is that you will use:
 
 Please see the [example tools](#example-tools) herebelow for examples of usage of features, helpers and reporting.
 
-## Quick Start
-
-### Setup
-
-```sh
-pip install --user tinyscript
-```
+## :fast_forward: Quick Start
 
 ### Create from template
 
@@ -56,7 +55,7 @@ pip install --user tinyscript
 
 <p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/master/docs/demos/run.svg"></p>
 
-## Example tools
+## :mag: Example tools
 
 ### Security
 
@@ -85,3 +84,11 @@ pip install --user tinyscript
 - [WebGrep](https://github.com/dhondta/webgrep) (Web text search)
 - [Zotero CLI](https://github.com/dhondta/zotero-cli)
 
+
+## :clap:  Supporters
+
+[![Stargazers repo roster for @dhondta/python-tinyscript](https://reporoster.com/stars/dark/dhondta/python-tinyscript)](https://github.com/dhondta/python-tinyscript/stargazers)
+
+[![Forkers repo roster for @dhondta/python-tinyscript](https://reporoster.com/forks/dark/dhondta/python-tinyscript)](https://github.com/dhondta/python-tinyscript/network/members)
+
+<p align="center"><a href="#"><img src="https://img.shields.io/badge/Back%20to%20top--lightgrey?style=social" alt="Back to top" height="20"/></a></p>
