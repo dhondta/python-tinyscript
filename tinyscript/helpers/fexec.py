@@ -8,7 +8,6 @@ import sys
 from functools import wraps
 from inspect import currentframe
 from multiprocessing import Process
-from select import poll, POLLIN
 from shlex import split
 from six import string_types
 from subprocess import Popen, PIPE
