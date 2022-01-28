@@ -5,6 +5,8 @@
 from terminaltables import AsciiTable
 from textwrap import wrap
 
+from .termsize import get_terminal_size
+
 
 __all__ = __features__ = ["BorderlessTable", "NameDescription"]
 
@@ -24,23 +26,39 @@ class _NoBorder(AsciiTable):
 
 class BorderlessTable(_NoBorder):
     """ Custom table with no border. """
-    def __init__(self, data, title=None, title_ul_char="=", header_ul_char="-", header=True):
+    def __init__(self, data, title=None, title_ul_char="=", header_ul_char="-", header=True, indent=3):
+        if len(data) == 0:
+            raise ValueError("Invalid data ; should be a non-empty")
         self.data = data
         if data is None or not isinstance(data, list) or not all(isinstance(r, list) for r in data):
-            raise ValueError("Invalid data ; should be a list of lists")
+            raise ValueError("Invalid data ; should be a non-empty list of lists")
         if header:
             # add a row with underlining for the header row
-            underlines = [len(_) * header_ul_char for _ in data[0]]
-            data.insert(1, underlines)
+            data.insert(1, [len(_) * header_ul_char for _ in data[0]])
+        if len(data) < 2:
+            raise ValueError("Invalid data ; should be a non-empty")
         # now insert an indentation column
-        for row in data:
-            row.insert(0, " ")
+        if (indent or 0) > 0:
+            for row in data:
+                row.insert(0, max(0, indent - 3) * " ")
         # then initialize the AsciiTable
         super(BorderlessTable, self).__init__(data)
-        # wrap the text of the last column
-        max_w = self.column_max_width(-1)
+        # wrap the text for every column that has a width above the average
+        n_cols, sum_w, c_widths = len(self.column_widths), sum(self.column_widths), []
+        try:
+            width, _ = get_terminal_size()
+        except TypeError:
+            width = 80
+        width -= n_cols * 2  # take cell padding into account
+        max_w = round(float(width) / n_cols)
+        rem = width - sum(w for w in self.column_widths if w <= max_w)
+        c_widths = [w if w <= max_w else max(round(float(w) * width / sum_w), max_w) for w in self.column_widths]
+        if sum(c_widths) >= width:
+            c_widths[c_widths.index(max(c_widths))] -= sum(c_widths) - width
         for row in self.table_data:
-            row[-1] = "\n".join(wrap(row[-1], max_w))
+            for i, v in enumerate(row):
+                if len(v) > 0:
+                    row[i] = "\n".join(wrap(v, c_widths[i]))
         # configure the title
         self.title_ = title  # define another title to format it differently
         self.title_ul_char = title_ul_char

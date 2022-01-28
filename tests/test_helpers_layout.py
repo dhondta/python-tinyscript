@@ -22,4 +22,5 @@ class TestHelpersLayoutObjects(TestCase):
         self.assertIsNotNone(str(bt2))
         self.assertIn("-", str(bt2))
         self.assertRaises(ValueError, BorderlessTable, "BAD_DATA")
+        self.assertRaises(ValueError, BorderlessTable, [])
 
