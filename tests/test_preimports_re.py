@@ -33,7 +33,9 @@ class TestPreimportsRe(TestCase):
         self.assertEqual(re.size(r"[a-z]*", "inf"), float("inf"))
         for regex in [r"[ab]{1,3}.", r"(?<=ab)cd", r"(?<=-)\w+", r"([^\s])\1", r"[^\\]", r"(|[0-5])?", r"^\S{10,20}"]:
             g = re.strings(regex)
-            for i in range(min(100, re.size(regex))):
+            for i in range(min(50, re.size(regex))):
                 self.assertIsNotNone(next(g))
                 self.assertEqual(len(list(re.strings(regex, 1))), re.size(regex, 1))
+        for regex in [r"abc(1|2|3){1,3}", r"[ab]{1,2}c[d-eD0-3]"]:
+            self.assertEqual(len(list(re.strings(regex))), re.size(regex))
 
