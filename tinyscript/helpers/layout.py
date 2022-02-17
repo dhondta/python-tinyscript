@@ -57,8 +57,8 @@ class BorderlessTable(_NoBorder):
             c_widths[c_widths.index(max(c_widths))] -= sum(c_widths) - width
         for row in self.table_data:
             for i, v in enumerate(row):
-                if len(v) > 0:
-                    row[i] = "\n".join(wrap(v, c_widths[i]))
+                if len(str(v)) > 0:
+                    row[i] = "\n".join(wrap(str(v), c_widths[i]))
         # configure the title
         self.title_ = title  # define another title to format it differently
         self.title_ul_char = title_ul_char
