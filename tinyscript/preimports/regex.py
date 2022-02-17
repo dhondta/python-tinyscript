@@ -11,7 +11,6 @@ from .itools import itertools
 from ..helpers.attack import MASKS
 from ..helpers.compat import b
 from ..helpers.constants import PYTHON2
-from ..helpers import is_generator
 
 
 CATEGORIES = {
