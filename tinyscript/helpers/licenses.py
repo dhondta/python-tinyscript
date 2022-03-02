@@ -47,11 +47,13 @@ LICENSES = {
 }
 
 
-def copyright(text, start=None):
+def copyright(text, start=None, end=None):
     """ Make the copyright field value from the given text. """
     year = datetime.now().year
-    if isinstance(start, int) and start < year:
-        year = "{}-{}".format(start, year)
+    if end is None:
+        end = year
+    if isinstance(start, int) and isinstance(end, int) and start < end:
+        year = "{}-{}".format(start, end)
     return "© {} {}".format(year, text) if not text.startswith("©") else text
 
 
