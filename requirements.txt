@@ -1,4 +1,4 @@
-asciistuff>=1.2.2
+asciistuff>=1.2.3
 bitstring
 codext>=1.8.2
 coloredlogs
