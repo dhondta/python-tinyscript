@@ -80,7 +80,7 @@ ts = ModuleType("ts", """
       
     - Path-related helpers
       
-      Some useful path functions, enhanced from pathlib.Path's one. It adds
+      Some useful path functions, enhanced from pathlib2.Path's one. It adds
       various methods to Path and provides helpers for mirroring a path or
       creating a temporary one.
       

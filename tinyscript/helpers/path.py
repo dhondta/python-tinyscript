@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-"""Path-oriented structures derived from pathlib.Path.
+"""Path-oriented structures derived from pathlib2.Path.
 
 """
 import ctypes
@@ -9,7 +9,7 @@ import importlib
 import os
 import re
 from mimetypes import guess_type
-from pathlib import Path as BasePath
+from pathlib2 import Path as BasePath
 from pyminizip import compress_multiple, uncompress
 from random import choice
 from re import search
@@ -33,7 +33,7 @@ MARKER     = "#TODO:"
 
 
 class Path(BasePath):
-    """ Extension of the base class Path from pathlib.
+    """ Extension of the base class Path from pathlib2.
     
     :param expand: expand user's path
     :param create: create the directory if it doesn't exist
@@ -142,7 +142,7 @@ class Path(BasePath):
             return f.write(u(data))
     
     def append_bytes(self, data):
-        """ Allows to append bytes to the file, as only write_bytes is available in pathlib, overwritting the former
+        """ Allows to append bytes to the file, as only write_bytes is available in pathlib2, overwritting the former
              bytes at each write. """
         with self.open(mode='ab') as f:
             return f.write(memoryview(data))
@@ -157,7 +157,7 @@ class Path(BasePath):
             self.append_line(line)
     
     def append_text(self, text, encoding=None, errors=None):
-        """ Allows to append text to the file, as only write_text is available in pathlib, overwritting the former text
+        """ Allows to append text to the file, as only write_text is available in pathlib2, overwritting the former text
              at each write. """
         return self.__add_text(text, 'a', encoding, errors)
     

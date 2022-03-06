@@ -12,7 +12,7 @@ mdv3; python_version>='3.9'
 netaddr
 netifaces
 patchy
-pathlib
+pathlib2
 pillow>=8.2.0
 pip>=20.0
 plyer>=2.0.0; python_version>='3.5'
