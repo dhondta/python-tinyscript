@@ -73,7 +73,7 @@ class TestHelpersDecorators(TestCase):
     def test_try_decorators(self):
         temp_stdout(self)
         t = UselessClass()
-        self.assertRaises(Exception, t.func1)
+        self.assertRaises(SystemExit, t.func1)
         self.assertIsNone(t.func2())
         self.assertIsNone(t.func3())
         self.assertIsNone(func())

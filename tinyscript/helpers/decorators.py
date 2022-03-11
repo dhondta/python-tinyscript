@@ -4,7 +4,7 @@
 """
 import logging
 from functools import wraps
-from sys import exc_info
+from sys import exc_info, exit
 try:  # PYTHON3
     from inspect import getfullargspec
 except ImportError:
@@ -68,7 +68,7 @@ def try_and_pass(exc=Exception):
     return _try_and_pass
 
 
-def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
+def try_and_warn(message=None, exc=Exception, trace=False, extra_info=""):
     """ Decorator handling a try-except block to log a warning and continue the execution.
 
     :param message:    message to be displayed when crashing
@@ -84,8 +84,8 @@ def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
             try:
                 return f(*args, **kwargs)
             except exc as e:
-                l = logger if self is None else self.logger
-                l.warning(message)
+                l = getattr(self, "logger", None) or logger
+                l.warning(str(e) if message is None else message)
                 if trace:
                     l.exception(e)
                 if extra_info != "" and hasattr(self, extra_info):
@@ -94,7 +94,7 @@ def try_and_warn(message, exc=Exception, trace=False, extra_info=""):
     return _try_and_warn
 
 
-def try_or_die(message, exc=Exception, trace=True, extra_info=""):
+def try_or_die(message=None, exc=Exception, trace=True, extra_info=""):
     """ Decorator handling a try-except block to log an error.
 
     :param message:    message to be displayed when crashing
@@ -111,8 +111,8 @@ def try_or_die(message, exc=Exception, trace=True, extra_info=""):
             try:
                 return f(*args, **kwargs)
             except exc as e:
-                l = logger if self is None else self.logger
-                l.critical(message)
+                l = getattr(self, "logger", None) or logger
+                l.critical(str(e) if message is None else message)
                 if trace:
                     l.exception(e)
                 if extra_info != "" and hasattr(self, extra_info):
@@ -120,8 +120,8 @@ def try_or_die(message, exc=Exception, trace=True, extra_info=""):
                 # if the decorated method is part of a context manager, close it with its __exit__ method and continue
                 if hasattr(self, "__exit__"):
                     self.__exit__(*exc_info())
-                # re-raise the exception
-                raise e
+                # stop execution
+                exit(1)
         return wrapper
     return _try_or_die
 
