@@ -11,7 +11,7 @@ from argparse import _ActionsContainer, _ArgumentGroup, _MutuallyExclusiveGroup,
                      ArgumentDefaultsHelpFormatter, Action, ArgumentError, RawTextHelpFormatter, SUPPRESS, \
                      _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, ArgumentParser as BaseArgumentParser
 from os import environ
-from os.path import abspath, basename, dirname, splitext
+from os.path import abspath, basename, dirname, sep, splitext
 from stat import S_IXUSR
 try:
     from configparser import ConfigParser, NoOptionError, NoSectionError
@@ -26,6 +26,7 @@ from .helpers.data.types import is_executable, is_long_opt, is_pos_int, is_short
 from .helpers.termsize import get_terminal_size
 from .helpers.text import *
 from .helpers.text import configure_docformat, txt_terminal_render
+from .preimports.shutilp import which
 
 
 __all__ = ["ArgumentParser", "DUNDERS", "SCRIPTNAME_FORMAT", "SUPPRESS"]
@@ -255,14 +256,18 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self.examples = gd.get('__examples__', [])
         script = basename(gd.get('__script__', gd.get('__file__', sys.argv[0])))
         if script and kwargs.get('prog') is None:
-            path = abspath(script)
+            path = abspath(which(script) or script)
             root = dirname(path)
             script = basename(script)
-            kwargs['prog'] = script if gd.get('__script__') else \
-                             "python{} ".format(["", "3"][PYTHON3]) + script if not is_executable(path) else \
-                             "./" + script if root not in environ['PATH'].split(":") else script
+            if gd.get('__script__'):
+                kwargs['prog'] = gd['__script__']
+            elif not is_executable(path):
+                kwargs['prog'] = "python{} ".format(["", "3"][PYTHON3]) + script
+            elif root not in [x.rstrip(sep) for x in environ['PATH'].split(":")]:
+                kwargs['prog'] = "./" + script
+            else:
+                kwargs['prog'] = splitext(script)[0]
             ArgumentParser.prog = kwargs['prog']
-            script, _ = splitext(script)
         kwargs['add_help'] = False
         kwargs['conflict_handler'] = "error"
         # when __docformat__ is set, fixing max_help_position to terminal's width forces argparse to format arguments
@@ -282,7 +287,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         sname = script
         sname_func = SCRIPTNAME_FORMATS.get(gd.get('SCRIPTNAME_FORMAT', SCRIPTNAME_FORMAT))
         if sname_func:
-            sname = sname_func(script)
+            sname = sname_func(splitext(script)[0])
         else:
             l = "\n- ".join(sorted(SCRIPTNAME_FORMATS.keys()))
             raise ValueError("Bad script name format ; please use one of the followings:\n{}".format(l))
