@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Common custom type validations' tests.
+"""Deprecation warning functions' tests.
 
 """
 from unittest import main, TestCase
 
-from tinyscript.warnings import *
-from tinyscript.warnings import __features__
+from tinyscript.deprecation import *
+from tinyscript.deprecation import __features__
 
 
-class TestWarnings(TestCase):
+class TestDeprecation(TestCase):
     def test_deprecation_warnings(self):
         for f in __features__:
             self.assertRaises(DeprecationWarning, eval(f))
