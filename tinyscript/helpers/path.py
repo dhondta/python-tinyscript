@@ -255,7 +255,10 @@ class Path(BasePath):
     
     def listdir(self, filter_func=lambda p: True, sort=True):
         """ List the current path using the given filter. """
-        l = os.listdir(str(self))
+        try:
+            l = os.listdir(str(self))
+        except OSError:
+            return
         if sort:
             l = sorted(l)
         for item in l:
@@ -563,8 +566,13 @@ class ProjectPath(Path):
 
 class PythonPath(Path):
     """ Path extension for handling the dynamic import of Python modules. """
-    def __init__(self, path):
+    def __init__(self, path, remove_cache=False):
         super(PythonPath, self).__init__()
+        if remove_cache:
+            f = (lambda x: x.is_file() and x.extension == ".pyc") if PYTHON2 else \
+                (lambda x: x.is_dir() and x.basename == "__pycache__")
+            for p in self.walk(filter_func=f):
+                p.remove(False)
         if self.is_dir():
             self.modules = []
             _cached = []
