@@ -82,11 +82,15 @@ class _DemoAction(Action):
 class _ExtendAction(Action):
     """ Custom action for extending a list of values. """
     def __call__(self, parser, namespace, values, option_string=None):
-        _ = getattr(namespace, self.dest) or []
+        l = getattr(namespace, self.dest) or []
+        if not isinstance(l, list):
+            if not getattr(namespace, "default_silent", False):
+                logger.warning(gt("extend is used with %s while its value is not a list").format(self.dest))
+            l = []
         if not isinstance(values, list):
             values = [values]
-        _.extend(values)
-        setattr(namespace, self.dest, _)
+        l.extend(values)
+        setattr(namespace, self.dest, l)
 
 
 class _NewSubParsersAction(_SubParsersAction):
