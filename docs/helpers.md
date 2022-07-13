@@ -55,8 +55,10 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 
 **Name** | **Description**
 --- | ---
+`eval2` | alternative to `eval` that uses a blacklist for scope's names and a whitelist for AST nodes while parsing the input expression
 `ts.clear` | multi-platform clear screen function
 `ts.confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
+`ts.eval_ast_nodes` | useful to determine the necessary AST nodes for a limited set of expressions ; this gives a list that can be used as a whitelist for `eval2`
 `ts.getpass` | `getpass.getpass`-based function that allows to enter a policy for making compliant passwords (see [`getpass` enhancement](enhancements.html#getpass) for more details about how a policy can be described)
 `ts.getrepass` | `getpass.getpass`-based function that allows to enter a regular expression for making compliant passwords
 `ts.notify` | shortcut to the `notification.notify` function of [`plyer`](https://github.com/kivy/plyer)
@@ -89,7 +91,7 @@ It also provides some other utility functions:
 `ts.entropy_bits` | computation function for the number of bits of entropy (i.e. for a password)
 `ts.get_terminal_size` | cross-platform terminal size function
 `ts.human_readable_size` | simple function to convert a size in bytes to a relevant shorter size in kilobytes, megabytes, ...
-`ts.is_admin` | cross-platform function to check if the use executing the script is administrator
+`ts.is_admin` | cross-platform function to check if the user executing the script is administrator
 `ts.pad` | String padding function, supporting `ansic9.23`, `incremental`, `iso7816-4`, `pkcs5`, `pkcs7` and `w3c` algorithms
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
 `ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
