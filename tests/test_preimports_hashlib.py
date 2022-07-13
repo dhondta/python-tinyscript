@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Preimports hashlib assets' tests.
+"""Preimports hashing assets' tests.
 
 """
 from tinyscript.preimports import hashlib

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Compatibility functions' tests.
+"""Data utility functions' tests.
 
 """
 from tinyscript.helpers.data.utils import *

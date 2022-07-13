@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Pathlib extension tests.
+"""Pathlib2 extension tests.
 
 """
 import py_compile

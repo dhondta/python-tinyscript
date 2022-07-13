@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Preimports getpass assets' tests.
+"""Preimports password input assets' tests.
 
 """
 from tinyscript.preimports import getpass

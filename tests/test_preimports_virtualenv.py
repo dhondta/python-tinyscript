@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Preimports virtualenv assets' tests.
+"""Virtual environment assets' tests.
 
 """
 from tinyscript.preimports import os, virtualenv

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Preimports code assets' tests.
+"""Preimports code inspection assets' tests.
 
 """
 from tinyscript.helpers.data.types import is_module

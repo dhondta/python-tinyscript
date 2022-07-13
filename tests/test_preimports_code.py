@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Preimports code assets' tests.
+"""Preimports code manipulation assets' tests.
 
 """
 from tinyscript.preimports import code

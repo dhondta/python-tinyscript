@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Compatibility functions' tests.
+"""Execution functions' tests.
 
 """
 from tinyscript import logging, shutil

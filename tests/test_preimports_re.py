@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""Preimports re assets' tests.
+"""Preimports regular expression assets' tests.
 
 """
 from tinyscript.preimports import re
