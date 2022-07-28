@@ -8,19 +8,22 @@ import re
 from gettext import gettext as gt
 from pypandoc import convert_text
 from slugify import slugify
+from string import printable
 
 from .compat import b
+from .data.transform.common import str2hex
 from .data.types.network import is_email, is_url
 
 
-__features__ = ["ansi_seq_strip", "gt", "slugify", "txt2blockquote", "txt2bold", "txt2code", "txt2comment", "txt2email",
-                "txt2italic", "txt2olist", "txt2paragraph", "txt2preformatted", "txt2title", "txt2ulist",
+__features__ = ["ansi_seq_strip", "gt", "hexdump", "slugify", "txt2blockquote", "txt2bold", "txt2code", "txt2comment",
+                "txt2email", "txt2italic", "txt2olist", "txt2paragraph", "txt2preformatted", "txt2title", "txt2ulist",
                 "txt2underline", "txt2url", "txt_terminal_render"]
 __all__ = __features__ + ["DOCFORMAT_THEME"]
 
 DOCFORMAT = None
 DOCFORMAT_THEME = "Makeup"
 FORMATS = [None, "console", "html", "md", "rst", "textile"]
+PRINTABLES = re.sub(r"\s", "", printable)
 
 _indent = lambda t, n: _pline(t, " " * n)
 _pline  = lambda t, p, i=False: "\n".join("" if i and l.strip() == "" else p + l for l in t.split("\n"))
@@ -39,10 +42,6 @@ def __check(**kwargs):
             raise ValueError("Bad boolean value")
         elif k == 'url' and not is_url(v):
             raise ValueError("Invalid URL")
-
-
-#def __replace_hspaces(line, token="&nbsp;"):
-#    return re.sub(r"^\s+", lambda m: token * len(m.group()), line)
 
 
 def ansi_seq_strip(text):
@@ -64,6 +63,26 @@ def configure_docformat(glob):
     global DOCFORMAT, DOCFORMAT_THEME
     DOCFORMAT = format
     DOCFORMAT_THEME = glob.get('DOCFORMAT_THEME', DOCFORMAT_THEME)
+
+
+def hexdump(data, width=16, first=0, last=0):
+    """ This generator converts input data into an hexadecimal dump.
+    
+    :param data:  data to be dumped
+    :param width: width to be displayed in bytes (e.g. 16 will display 8 groups of 2 bytes with the 16 bytes of data)
+    :param first: output only the N heading lines of dump
+    :param last:  output only the N trailing lines of dump
+    """
+    n, is_mult = len(data) // width, len(data) % width == 0
+    for i in range(0, len(data), width):
+        if first > 0 and i // width >= first:
+            break
+        elif last > 0 and i // width <= n - last - [0, 1][is_mult]:
+            continue
+        h = str2hex(data[i:i+width])
+        h = " ".join(h[j:j+4] for j in range(0, len(h), 4))
+        b = "".join(c if c in PRINTABLES else "." for c in data[i:i+width])
+        yield "%0.8x:  %s  %s" % (i, h.ljust(width*2+(width//2-1)), b)
 
 
 def txt_terminal_render(text, format=None, debug=False):

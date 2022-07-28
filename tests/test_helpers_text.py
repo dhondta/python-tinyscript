@@ -103,7 +103,8 @@ class TestHelpersText(TestCase):
         self.assertEqual(TXT, txt2bold(TXT))
         for fmt in FORMATS[1:]:
             configure_docformat({'__docformat__': fmt})
-            [self.assertNotEqual, self.assertEqual][fmt == "console"](TXT, txt2bold(TXT, fmt))
+            for f in [txt2bold, txt2italic, txt2underline]:
+                [self.assertNotEqual, self.assertEqual][fmt == "console"](TXT, f(TXT, fmt))
 
     def test_text_conversions(self):
         # input validation
@@ -134,6 +135,11 @@ class TestHelpersText(TestCase):
             self.assertIsNotNone(txt_terminal_render(help, fmt))
     
     def test_text_utils(self):
+        self.assertEqual(list(hexdump(URL)), ["00000000:  6874 7470 733a 2f2f 6a6f 686e 3a64 6f65  https://john:doe",
+                                              "00000010:  4077 7777 2e65 7861 6d70 6c65 2e63 6f6d  @www.example.com",
+                                              "00000020:  2f70 6174 683f 703d 7472 7565            /path?p=true"])
+        self.assertEqual(list(hexdump(URL, width=4, first=1)), ["00000000:  6874 7470  http"])
+        self.assertEqual(list(hexdump(URL, width=4, last=1)), ["00000028:  7472 7565  true"])
         self.assertEqual(slugify("This is a test"), "this-is-a-test")
         self.assertEqual(ansi_seq_strip("\x1b[93;41mtest\x1b[0m"), "test")
         self.assertEqual(ansi_seq_strip(b"\x1b[93;41mtest\x1b[0m"), b"test")
