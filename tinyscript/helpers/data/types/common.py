@@ -69,6 +69,13 @@ ints_range = lambda l, i1, i2=None: __ints(l, is_int_range, "valid", "in range [
                                            (0 if i2 is None else i1, i1 if i2 is None else i2), i1=i1, i2=i2)
 negative_ints = neg_ints = lambda l, zero=False: __ints(l, is_neg_int, "negative", zero=zero)
 positive_ints = pos_ints = lambda l, zero=True: __ints(l, is_pos_int, "positive", zero=zero)
+ints.__name__       = "integers"
+int_range.__name__  = "integer (from range)"
+ints_range.__name__ = "integers list (from range)"
+negative_int.__name__  = neg_int.__name__  = "negative integer"
+negative_ints.__name__ = neg_ints.__name__ = "negative integers list"
+positive_int.__name__  = pos_int.__name__  = "positive integer"
+positive_ints.__name__ = pos_ints.__name__ = "positive integers list"
 
 
 # see: https://stackoverflow.com/questions/15285534/isprime-function-for-python-language
@@ -98,11 +105,12 @@ def __prime_number(n, fail=False):
         f += 6
     return i if fail else True
 prime_number = lambda n: __prime_number(n, True)
+prime_number.__name__ = "prime number"
 
 
 def values_list(var):
     """ Alias to _str2list for use in types of argparse argument.
     
-    NB: It converts anything to a list, that is, it nevers fails. """
+    NB: It converts anything to a list, that is, it never fails. """
     return _str2list(var)
 

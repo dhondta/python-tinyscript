@@ -120,34 +120,34 @@ class TestHelpersDataTypes(TestCase):
         JSON   = '{"test":"data"}'
         TOML   = 'title="test"\n\n[section1]\nfield = "data"\nbool = true\n\n[section2]\ntest = "data"'
         YAML   = "test:\n  - data: test\ntest2:\n  data: test"
-        self.assertRaises(ValueError, ini_config, "does_not_exist")
+        self.assertRaises(ValueError, ini_file, "does_not_exist")
         #self.assertTrue(is_ini(INI))  # FIXME: this test fails on Travis CI
         self.assertFalse(is_ini_file("does_not_exist"))
         cfg = CFNAME + "ini"
         with open(cfg, 'wt') as f:
             f.write(INI)
-        self.assertIsNotNone(ini_config(cfg))
-        self.assertRaises(ValueError, json_config, "does_not_exist")
+        self.assertIsNotNone(ini_file(cfg))
+        self.assertRaises(ValueError, json_file, "does_not_exist")
         self.assertTrue(is_json(JSON))
         self.assertFalse(is_json_file("does_not_exist"))
         cfg = CFNAME + "json"
         with open(cfg, 'wt') as f:
             f.write(JSON)
-        self.assertIsNotNone(json_config(cfg))
-        self.assertRaises(ValueError, toml_config, "does_not_exist")
+        self.assertIsNotNone(json_file(cfg))
+        self.assertRaises(ValueError, toml_file, "does_not_exist")
         self.assertTrue(is_toml(TOML))
         self.assertFalse(is_toml_file("does_not_exist"))
         cfg = CFNAME + "toml"
         with open(cfg, 'wt') as f:
             f.write(TOML)
-        self.assertIsNotNone(toml_config(cfg))
-        self.assertRaises(ValueError, yaml_config, "does_not_exist")
+        self.assertIsNotNone(toml_file(cfg))
+        self.assertRaises(ValueError, yaml_file, "does_not_exist")
         self.assertTrue(is_yaml(YAML))
         self.assertFalse(is_yaml_file("does_not_exist"))
         cfg = CFNAME + "yaml"
         with open(cfg, 'wt') as f:
             f.write(YAML)
-        self.assertIsNotNone(yaml_config(cfg))
+        self.assertIsNotNone(yaml_file(cfg))
     
     def test_hash_related_types(self):
         self.assertIsNotNone(any_hash("0" * 32))

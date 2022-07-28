@@ -52,6 +52,7 @@ def __as_number(asn, fail=True):
     if fail:
         raise ValueError("Bad AS number")
 as_number = lambda a: __as_number(a)
+as_number.__name__ = "AS number"
 
 
 def __domain_name(name, dotted=False, fail=True):
@@ -65,6 +66,7 @@ def __domain_name(name, dotted=False, fail=True):
     if fail:
         raise ValueError("Bad domain name")
 domain_name = lambda n: __domain_name(n)
+domain_name.__name__ = "domain name"
 
 
 def __email_address(email, fail=True):
@@ -76,6 +78,7 @@ def __email_address(email, fail=True):
     if fail:
         raise ValueError("Bad email address")
 email_address = lambda e: __email_address(e)
+email_address.__name__ = "email address"
 
 
 def __gateway_address(gw, default=False, fail=True):
@@ -93,6 +96,8 @@ def __gateway_address(gw, default=False, fail=True):
         raise ValueError("Bad {}gateway".format(["", "default "][default]))
 default_gateway_address = lambda gw: __gateway_address(gw, True)
 gateway_address         = lambda gw: __gateway_address(gw)
+default_gateway_address.__name__ = "default gateway address"
+gateway_address.__name__         = "gateway address"
 
 
 HN = re.compile(r"(?!-)[A-Z\d-]{1,63}(?<!-)$", re.I)
@@ -104,6 +109,7 @@ def __hostname(hostname, fail=True):
     if fail:
         raise ValueError("Bad hostname")
 hostname = lambda h: __hostname(h)
+hostname.__name__ = "hostname"
 
 
 def __interface_address(addr, fail=True):
@@ -116,6 +122,7 @@ def __interface_address(addr, fail=True):
     if fail:
         raise ValueError("Bad interface address")
 interface_address = lambda a: __interface_address(a)
+interface_address.__name__ = "interface address"
 
 
 def __interface_address_list(addrs, filter_bad=False):
@@ -131,6 +138,8 @@ def __interface_address_list(addrs, filter_bad=False):
     return l
 interface_address_list          = lambda a: __interface_address_list(a)
 interface_address_filtered_list = lambda a: __interface_address_list(a, True)
+interface_address_list.__name__          = "interface addresses list"
+interface_address_filtered_list.__name__ = "interface addresses filtered list"
 
 
 def __ip_address(ip, version=None, fail=True):
@@ -147,6 +156,9 @@ def __ip_address(ip, version=None, fail=True):
 ip_address   = lambda ip: __ip_address(ip)
 ipv4_address = lambda ip: __ip_address(ip, 4)
 ipv6_address = lambda ip: __ip_address(ip, 6)
+ip_address.__name__   = "IP address"
+ipv4_address.__name__ = "IPv4 address"
+ipv6_address.__name__ = "IPv6 address"
 
 
 def __ip_address_list(ips, version=None, filter_bad=False, fail=True):
@@ -184,6 +196,15 @@ ipv6_address_filtered_list = lambda ips: __ip_address_list(ips, 6, True)
 ip_address_network         = lambda net: __ip_address_list([net], None)
 ipv4_address_network       = lambda net: __ip_address_list([net], 4)
 ipv6_address_network       = lambda net: __ip_address_list([net], 6)
+ip_address_list.__name__              = "IP addresses list"
+ip_address_filtered_list.__name__     = "IP addresses filtered list"
+ip_address_network.__name__           = "IP address network"
+ipv4_address.__name__                 = "IPv4 addresses list"
+ipv4_address_filtered_list.__name__   = "IPv4 addresses filtered list"
+ipv4_address_network.__name__         = "IPv4 address network"
+ipv6_address.__name__                 = "IPv6 addresses list"
+ipv6_address_filtered_list.__name__   = "IPv6 addresses filtered list"
+ipv6_address_network.__name__         = "IPv6 address network"
 
 
 def __mac_address(mac, fail=True):
@@ -200,6 +221,7 @@ def __mac_address(mac, fail=True):
         else:
             return
 mac_address = lambda mac: __mac_address(mac)
+mac_address.__name__ = "MAC address"
 
 
 def __network_interface(netif, fail=True):
@@ -209,6 +231,7 @@ def __network_interface(netif, fail=True):
     if fail:
         raise ValueError("Not an existing interface")
 network_interface = lambda nif: __network_interface(nif)
+network_interface.__name__ = "network interface"
 
 
 def __url(url, fail=True):
@@ -246,6 +269,7 @@ def __url(url, fail=True):
             return
     return url
 url = lambda url: __url(url)
+url.__name__ = "URL"
 
 
 def port_number(port):
@@ -257,6 +281,7 @@ def port_number(port):
     if not 0 <= port < 2 ** 16:
         raise ValueError("Bad port number")
     return port
+port_number.__name__ = "port number"
 
 
 def port_number_range(prange):
@@ -274,4 +299,5 @@ def port_number_range(prange):
     except (AttributeError, TypeError):
         raise ValueError("Bad port number range")
     return list(range(bounds[0], bounds[1] + 1))
+port_number_range.__name__ = "port numbers range"
 

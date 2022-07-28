@@ -17,21 +17,22 @@ __all__ = __features__ = []
 
 # config check functions
 __all__ += ["is_ini", "is_ini_file", "is_json", "is_json_file", "is_toml", "is_toml_file", "is_yaml", "is_yaml_file"]
-is_ini       = lambda c: __check_config(c, "ini", False, False) is not None
-is_ini_file  = lambda c: __check_config(c, "ini", False) is not None
-is_json      = lambda c: __check_config(c, "json", False, False) is not None
-is_json_file = lambda c: __check_config(c, "json", False) is not None
-is_toml      = lambda c: __check_config(c, "toml", False, False) is not None
-is_toml_file = lambda c: __check_config(c, "toml", False) is not None
-is_yaml      = lambda c: __check_config(c, "yaml", False, False) is not None
-is_yaml_file = lambda c: __check_config(c, "yaml", False) is not None
+is_ini       = lambda c: __check_file(c, "ini", False, False) is not None
+is_ini_file  = lambda c: __check_file(c, "ini", False) is not None
+is_json      = lambda c: __check_file(c, "json", False, False) is not None
+is_json_file = lambda c: __check_file(c, "json", False) is not None
+is_toml      = lambda c: __check_file(c, "toml", False, False) is not None
+is_toml_file = lambda c: __check_file(c, "toml", False) is not None
+is_yaml      = lambda c: __check_file(c, "yaml", False, False) is not None
+is_yaml_file = lambda c: __check_file(c, "yaml", False) is not None
 
 
 # config argument types
-__all__ += ["ini_config", "json_config", "toml_config", "yaml_config"]
+__all__ += ["ini_config", "ini_file", "json_config", "json_file", "toml_config", "toml_file", "yaml_config",
+            "yaml_file"]
 
 
-def __check_config(c, ctype, fail=True, is_file=True):
+def __check_file(c, ctype, fail=True, is_file=True):
     try:
         if ctype == "ini":
             cfg = ini.ConfigParser()
@@ -56,8 +57,12 @@ def __check_config(c, ctype, fail=True, is_file=True):
     except Exception as e:
         if fail:
             raise ValueError("Bad {} input config ({})".format(ctype, e))
-ini_config  = lambda c: __check_config(c, "ini")
-json_config = lambda c: __check_config(c, "json")
-toml_config = lambda c: __check_config(c, "toml")
-yaml_config = lambda c: __check_config(c, "yaml")
+ini_config  = ini_file  = lambda c: __check_file(c, "ini")
+json_config = json_file = lambda c: __check_file(c, "json")
+toml_config = toml_file = lambda c: __check_file(c, "toml")
+yaml_config = yaml_file = lambda c: __check_file(c, "yaml")
+ini_config.__name__  = ini_file.__name__  = "INI file"
+json_config.__name__ = json_file.__name__ = "JSON file"
+toml_config.__name__ = toml_file.__name__ = "TOML file"
+yaml_config.__name__ = yaml_file.__name__ = "YAML file"
 

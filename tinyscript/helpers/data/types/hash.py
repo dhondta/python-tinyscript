@@ -41,10 +41,17 @@ sha224_hash = lambda h: __check_hash(h, "sha224")
 sha256_hash = lambda h: __check_hash(h, "sha256")
 sha384_hash = lambda h: __check_hash(h, "sha384")
 sha512_hash = lambda h: __check_hash(h, "sha512")
+md5_hash.__name__    = "MD5 hash"
+sha1_hash.__name__   = "SHA1 hash"
+sha224_hash.__name__ = "SHA224 hash"
+sha256_hash.__name__ = "SHA256 hash"
+sha384_hash.__name__ = "SHA384 hash"
+sha512_hash.__name__ = "SHA512 hash"
 
 
 def any_hash(h):
     if not any(__check_hash(h, a, False) is not None for a in HASH_LEN.keys()):
         raise ValueError("Bad hash")
     return h
+any_hash.__name__ = "arbitrary hash"
 

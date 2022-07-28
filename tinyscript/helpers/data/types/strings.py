@@ -54,12 +54,22 @@ is_lowercase   = lambda s, t=1.0: _is_from_alph(s, LC, t)
 is_printable   = lambda s, t=1.0: _is_from_alph(s, printable, t)
 is_punctuation = lambda s, t=1.0: _is_from_alph(s, punctuation, t)
 is_uppercase   = lambda s, t=1.0: _is_from_alph(s, UC, t)
+is_str.__name__         = "string"
+is_bytes.__name__       = "bytes"
+is_digits.__name__      = "digits"
+is_letters.__name__     = "letters"
+is_lowercase.__name__   = "lowercase string"
+is_printable.__name__   = "printable string"
+is_punctuation.__name__ = "punctuation"
+is_uppercase.__name__   = "uppercase string"
 
 # various data format check functions
 __all__ += ["is_bin", "is_hex"]
 is_bin = lambda b: is_str(b) and all(set(_).difference(set("01")) == set() for _ in re.split(r"\W+", b)) or \
                    isinstance(b, (list, set, tuple)) and all(str(x) in "01" for x in b)
 is_hex = lambda h: is_str(h) and len(h) % 2 == 0 and set(h.lower()).difference(set("0123456789abcdef")) == set()
+is_bin.__name__ = "binary string"
+is_hex.__name__ = "hexadecimal string"
 
 # some other common check functions
 __all__ += ["is_long_opt", "is_short_opt"]
@@ -80,6 +90,7 @@ def __regex(regex, fail=True):
         if fail:
             raise ValueError("Bad regular expression")
 regular_expression = lambda s: __regex(s)
+regular_expression.__name__ = "regular expression"
 
 
 # -------------------- STRING FORMAT ARGUMENT TYPES --------------------
@@ -97,6 +108,7 @@ def str_contains(alphabet, threshold=1.0):
             raise ValueError("Input string does not contain enough items from the given alphabet ({:.2f}%)"
                              .format(p * 100))
         return s
+    _validation.__name__ = "string contained"
     return _validation
 
 
@@ -106,5 +118,6 @@ def str_matches(pattern, flags=0):
         if re.match(pattern, s, flags) is None:
             raise ValueError("Input string does not match the given regex")
         return s
+    _validation.__name__ = "string match"
     return _validation
 

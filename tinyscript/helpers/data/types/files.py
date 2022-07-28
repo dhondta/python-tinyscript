@@ -34,6 +34,8 @@ def file_does_not_exist(f):
         raise ValueError("'{}' already exists".format(f))
     return f
 folder_does_not_exist = file_does_not_exist
+folder_does_not_exist.__name__ = "non-existing folder"
+file_does_not_exist.__name__ = "non-existing file"
 
 
 def file_exists(f):
@@ -43,6 +45,7 @@ def file_exists(f):
     if not isfile(f):
         raise ValueError("Target exists and is not a file")
     return f
+file_exists.__name__ = "existing file"
 
 
 def __file_type(mime=False):
@@ -53,6 +56,7 @@ def __file_type(mime=False):
                 raise ValueError("Target's type is not {}".format(ftype))
             return f
         return _subwrapper
+    _wrapper.__name__ = "MIME type"
     return _wrapper
 file_mimetype, file_type = __file_type(True), __file_type()
 file_mimetype.__doc__ = __file_type.__doc__.format("MIME")
@@ -72,6 +76,7 @@ def files_list(l, filter_bad=False):
     if filter_bad and len(nl) == 0:
         raise ValueError("No valid file in the given list")
     return nl
+files_list.__name__ = "valid files list"
 
 
 def __files_type(mime=False):
@@ -82,6 +87,7 @@ def __files_type(mime=False):
                 __file_type(mime)(ftype)(f)
             return l
         return _subwrapper
+    _wrapper.__name__ = "MIME types"
     return _wrapper
 files_mimetype, files_type = __files_type(True), __files_type()
 files_mimetype.__doc__ = files_type.__doc__ = __files_type.__doc__
@@ -90,6 +96,7 @@ files_mimetype.__doc__ = files_type.__doc__ = __files_type.__doc__
 def files_filtered_list(l):
     """ Check if the list contains valid files and discard invalid ones. """
     return files_list(l, True)
+files_filtered_list.__name__ = "filtered files list"
 
 
 def folder_exists(f):
@@ -99,6 +106,7 @@ def folder_exists(f):
     if not isdir(f):
         raise ValueError("Target exists and is not a folder")
     return f
+folder_exists.__name__ = "existing folder"
 
 
 def folder_exists_or_create(f):
@@ -108,4 +116,5 @@ def folder_exists_or_create(f):
     if not isdir(f):
         raise ValueError("Target exists and is not a folder")
     return f
+folder_exists_or_create.__name__ = "folder (exists and is not a folder)"
 
