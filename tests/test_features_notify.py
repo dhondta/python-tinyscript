@@ -25,12 +25,15 @@ class TestNotify(TestCase):
     @classmethod
     def tearDownClass(cls):
         sys.argv[1:] = cls.argv  # restore input arguments
-
+        for h in logger.handlers[:]:
+            if h.__class__.__name__ == "NotificationHandler":
+                logger.handlers.remove(h)
+    
     def test_notify_setup(self):
         g = globals().keys()
         self.assertTrue(args.notify)
         self.assertIn("notify", g)
-
+    
     def test_notifications(self):
         logger.info("test message")
         logger.warning("test message")

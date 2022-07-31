@@ -37,7 +37,7 @@ class TestParser(TestCase):
         if '__docformat__' in globals():
             del globals()['__docformat__']
         parser = proxy_parser  # reuse the original proxy parser reference
-
+    
     def test_input_arguments(self):
         sys.argv[1:] = ["--arg1", "test", "-b"]
         parser.add_argument("-a", "--arg1")

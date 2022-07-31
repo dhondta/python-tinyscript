@@ -27,7 +27,7 @@ def set_notify_items(glob):
     icon_path = folder_exists(glob.get('NOTIFICATION_ICONS_PATH', dirname(__file__)))
     level = positive_int(glob.get('NOTIFICATION_LEVEL', logging.SUCCESS))
     
-    class __NotificationHandler(logging.Handler):
+    class NotificationHandler(logging.Handler):
         def emit(self, record):
             title = "{}[{}]:".format(appname, record.name) if record.name != "main" else appname
             icon = record.levelname.lower()
@@ -36,8 +36,8 @@ def set_notify_items(glob):
                 icon = ipath
             notify(title, record.msg, appname, icon, timeout, title + " " + record.levelname)
     
-    if enabled and not any(type(h) is __NotificationHandler for h in glob['logger'].handlers):
-        nh = __NotificationHandler()
+    if enabled and not any(type(h) is NotificationHandler for h in glob['logger'].handlers):
+        nh = NotificationHandler()
         nh.setLevel(level)
         glob['logger'].addHandler(nh)
     glob['notify'] = notify
