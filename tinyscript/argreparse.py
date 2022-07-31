@@ -3,6 +3,7 @@
 """Module for extending argparse features, for simplifying parser.py.
 
 """
+import operator as op
 import random
 import re
 import shlex
@@ -39,6 +40,8 @@ DUNDERS = BASE_DUNDERS + [
     '__functions__', '__maximum_python_version__', '__minimum_python_version__', '__priority__', '__product__',
     '__script__', '__status__', '__version__',
 ]
+if sys.version_info >= (3, 8):
+    DUNDERS.append('__requires__')
 
 DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
@@ -231,7 +234,7 @@ class _NewMutuallyExclusiveGroup(_MutuallyExclusiveGroup, _NewArgumentGroup):
     """ Alternative argparse._MutuallyExclusiveGroup for modifying arguments mutually exclusive groups handling in the
          modified ActionsContainer. """
     pass
-        
+
 
 class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     """ Modified version of argparse.ArgumentParser, based on the modified ActionsContainer.
@@ -253,6 +256,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     
     def __init__(self, globals_dict=None, *args, **kwargs):
         ArgumentParser.globals_dict = gd = globals_dict or {}
+        if sys.version_info >= (3, 8):
+            self._check_requirements(gd.get('__requires__'))
         configure_docformat(gd)
         self._config_parsed = False
         self._docfmt = gd.get('__docformat__')
@@ -326,6 +331,30 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self.details = gd.get('__details__', [])
         # now initialize argparse's ArgumentParser with the new arguments
         super(ArgumentParser, self).__init__(*args, **kwargs)
+    
+    def _check_requirements(self, requires):
+        """ Check for package requirements before continuing.
+        
+        :param requires: dictionary of requirements
+        """
+        # importlib.metadata is available only from Python 3.8
+        from importlib.metadata import version as get_version
+        from setuptools.extern.packaging.version import Version
+        errors = []
+        for m, v in (requires or {}).items():
+            o, v = re.match(r"^([<>]|[<>=!]=|)(.*)$", v).groups()
+            operator = {'': op.ge, '<': op.lt, '>': op.gt, '<=': op.le, '>=': op.ge, '==': op.eq, '!=': op.ne}[o]
+            desired, actual = Version(v), Version(get_version(m))
+            if not operator(actual, desired):
+                errors.append((m, o or ">=", str(desired), str(actual)))
+        if len(errors) > 0:
+            if len(errors) == 1:
+                msg = "Bad version for module '%s' ; should be %s%s while actual version is %s" % errors[0]
+            else:
+                msg = ""
+                for error in errors:
+                    msg += "\n- Bad version for module '%s' ; should be %s%s while actual version is %s" % error
+            raise RequirementError(msg)
     
     def _filtered_actions(self, *a_types):
         """ Get actions filtered on a list of action types.

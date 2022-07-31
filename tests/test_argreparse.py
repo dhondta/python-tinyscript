@@ -3,6 +3,7 @@
 """Argreparse module assets' tests.
 
 """
+from sys import version_info
 from tinyscript.argreparse import ArgumentParser, HelpFormatter, Namespace, SUPPRESS as SUP, _NewSubParsersAction
 
 from utils import *
@@ -166,6 +167,8 @@ class TestArgreparse(TestCase):
     def test_parser_error(self):
         self.p.add_argument("test")
         self.assertRaises(SystemExit, self.p.parse_args)
+        if version_info >= (3, 8):
+            self.assertRaises(RequirementError, self.p._check_requirements, {'tinyscript': "==0"})
     
     def test_parser_subparsers(self):
         subparsers = self.p.add_subparsers(dest="command")

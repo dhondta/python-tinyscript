@@ -61,6 +61,22 @@ For more detailed information about metadata fields, see [this section](usage.ht
 
 -----
 
+## Package requirements checking
+
+(only for Python3.8+)
+
+Required module can be added via the `__requires__` dunder in order to check for requirements before the tool starts.
+
+```python hl_lines="2 4"
+...
+__requires__  = {'tinyscript': "1.23"}
+...
+    initialize(...)
+...
+```
+
+-----
+
 ## Help message styling
 
 Help can be formatted using multiple markup languages for making the help text more user-friendly with colors and styling. This is configured by using the `__docformat__` dunder (which can also be `None`, meaning no formatting). This feature is supported by [`mdv`](https://github.com/axiros/terminal_markdown_viewer) and the theme can be tuned by using the constant `DOCFORMAT_THEME`.
@@ -122,7 +138,7 @@ This is achieved by passing a keyword argument `multi_level_debug=[boolean]` to 
 
 ```python hl_lines="3"
     ...
-    initalize(...
+    initialize(...
               multi_level_debug=True,
               ...)
     ...
@@ -147,7 +163,7 @@ This is achieved by passing a keyword argument `ext_logging=[boolean]` to `initi
 
 ```python hl_lines="3"
     ...
-    initalize(...
+    initialize(...
               ext_logging=True,
               ...)
     ...
@@ -172,7 +188,7 @@ This is achieved by setting the `__details__` metadata at the beginning of the s
     """Other extra documentation, displayed when using -hhh. """
     ]
     ...
-    initalize(...)
+    initialize(...)
     ...
 ```
 
@@ -196,7 +212,7 @@ This is enabled by the `short_long_help` parameter of `initialize(...)` and is s
 
 ```python hl_lines="3"
 ...
-initalize(...
+initialize(...
           short_long_help=False,
           ...)
 ...
