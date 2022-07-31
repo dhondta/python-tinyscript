@@ -2,6 +2,10 @@
 """Common utility functions.
 
 """
+try:  # Python2
+    import __builtin__ as builtins
+except ImportError:
+    import builtins
 import ctypes
 import os
 from itertools import cycle
@@ -15,8 +19,8 @@ from .compat import b
 from .constants import PYTHON3, WINDOWS
 
 
-__all__ = __features__ = ["human_readable_size", "is_admin", "strings", "strings_from_file", "urlparse",
-                          "urlparse_query", "xor", "xor_file"]
+__all__ = __features__ = ["human_readable_size", "is_admin", "set_exception", "strings", "strings_from_file",
+                          "urlparse", "urlparse_query", "xor", "xor_file"]
 
 
 def human_readable_size(size, precision=0):
@@ -38,6 +42,14 @@ def is_admin():
         return ctypes.windll.shell32.IsUserAnAdmin() != 0 if WINDOWS else os.geteuid() == 0
     except AttributeError:
         raise NotImplementedError("Admin check is not implemented for this operating system.")
+
+
+def set_exception(name, etype="ValueError"):
+    """ Set a custom exception in the builtins. """
+    if not hasattr(builtins, name):
+        exec("class %s(%s): __module__ = 'builtins'" % (name, etype))
+        setattr(builtins, name, locals()[name])
+set_exception("RequirementError", "ImportError")
 
 
 def strings(data, minlen=4, alphabet=printable):

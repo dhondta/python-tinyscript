@@ -93,6 +93,7 @@ It also provides some other utility functions:
 `ts.human_readable_size` | simple function to convert a size in bytes to a relevant shorter size in kilobytes, megabytes, ...
 `ts.is_admin` | cross-platform function to check if the user executing the script is administrator
 `ts.pad` | String padding function, supporting `ansic9.23`, `incremental`, `iso7816-4`, `pkcs5`, `pkcs7` and `w3c` algorithms
+`ts.set_exception` | Set a custom exception given its name and parent (defaults to `ValueError`) into the builtins
 `ts.silent` | decorator for silencing `stdout` and `stderr` of a function
 `ts.slugify` | slugify a string (handles unicode ; relying on [`slugify`](https://github.com/un33k/python-slugify))
 `ts.stdin_pipe` | Python2/3-compatible iterator of STDIN lines
