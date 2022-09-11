@@ -16,4 +16,5 @@ class TestHelpersLicenses(TestCase):
         self.assertIsNotNone(list_licenses())
         self.assertIn("test", copyright("test"))
         self.assertIn("2000", copyright("test", 2000))
+        self.assertIn("2010", copyright("test", 2000, 2010))
 

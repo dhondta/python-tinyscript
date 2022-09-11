@@ -633,6 +633,8 @@ A few functions are available to handle copyright and licenses:
 >>> from tinyscript.helpers.licenses import *
 >>> copyright("John Doe")
 '© 2019 John Doe'
+>>> copyright("John Doe", 2015, 2018)
+'© 2015-2018 John Doe'
 >>> license("test")
 'Invalid license'
 >>> license("agpl-3.0")
