@@ -121,6 +121,7 @@ def initialize(add_banner=False,
         add[noargs_action] = True  # ensure this action is enabled, even if it is not given the passed arguments
     # 2) populate the real parser and add information arguments
     __parsers = {parser: p}
+    i = p.add_argument_group("extra arguments")
     #  proxy parser to real parser recursive conversion function
     def __proxy_to_real_parser(value):
         """
@@ -163,7 +164,6 @@ def initialize(add_banner=False,
         c.add_argument("-w", "--write-config", metavar="INI", help=gt("write args to a config file"))
         if noarg and noargs_action == "config":
             sys.argv[1:] = [opt, "config.ini"]
-    i = p.add_argument_group("extra arguments")
     # demonstration feature, for executing an example amongst these defined in __examples__, useful for observing what
     #  the tool does
     if add['demo']:

@@ -120,7 +120,7 @@ class _NewSubParsersAction(_SubParsersAction):
         # create the parser, but with another formatter and separating the help into an argument group
         parser = self._parser_class(ArgumentParser.globals_dict, add_help=False, **kwargs)
         parser.name = name
-        i = parser.add_argument_group(gt("extra arguments"))
+        i = parser.get_argument_group(gt("extra arguments"))
         i.add_argument("-h", action="usage", prefix="show", help=gt("show usage message and exit"))
         i.add_argument("--help", action="help", prefix="show", help=gt("show this help message and exit"))
         # add it to the map
@@ -223,6 +223,11 @@ class _NewActionsContainer(_ActionsContainer):
         group = _NewMutuallyExclusiveGroup(self, **kwargs)
         self._mutually_exclusive_groups.append(group)
         return group
+    
+    def get_argument_group(self, title):
+        for group in self._action_groups:
+            if group.title == title:
+                return group
 
 
 class _NewArgumentGroup(_ArgumentGroup, _NewActionsContainer):
