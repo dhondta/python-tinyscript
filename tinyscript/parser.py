@@ -121,7 +121,6 @@ def initialize(add_banner=False,
         add[noargs_action] = True  # ensure this action is enabled, even if it is not given the passed arguments
     # 2) populate the real parser and add information arguments
     __parsers = {parser: p}
-    i = p.add_argument_group("extra arguments")
     #  proxy parser to real parser recursive conversion function
     def __proxy_to_real_parser(value):
         """
@@ -154,6 +153,7 @@ def initialize(add_banner=False,
     #  attribute
     parser_calls = []
     ArgumentParser.reset()
+    i = p.add_argument_group("extra arguments")
     # configure documentation formatting
     configure_docformat(glob)
     # config handling feature, for reading/writing an INI config file with the input arguments, e.g. for future reuse
