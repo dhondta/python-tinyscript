@@ -21,28 +21,37 @@ __all__ = __features__ = ["BitArray", "entropy", "entropy_bits", "pad", "unpad"]
 PAD = ["ansic9.23", "incremental", "iso7816-4", "pkcs5", "pkcs7", "w3c"]
 
 
-patchy.replace(bitstring.Bits._getlength, """
-    def _getlength(self):
+OLD_CODE, NEW_CODE = """
+    def _getlength(self)%s:
         \"\"\"Return the length of the bitstring in bits.\"\"\"
         return self._datastore.bitlength
 """, """
-    def _getlength(self):
+    def _getlength(self)%s:
         \"\"\"Return the length of the bitstring in bits.\"\"\"
         l = self._datastore.bitlength
-        return l + (8 - l % 8) % 8 if getattr(Bits, "_padding", True) else l
-""")
-patchy.replace(bitstring.Bits._getbin, """
-    def _getbin(self):
+        return l + (8 - l %% 8) %% 8 if getattr(Bits, "_padding", True) else l
+"""
+try:
+    patchy.replace(bitstring.Bits._getlength, OLD_CODE % " -> int", NEW_CODE % " -> int")
+except ValueError:
+    patchy.replace(bitstring.Bits._getlength, OLD_CODE % "", NEW_CODE % "")
+
+OLD_CODE, NEW_CODE = """
+    def _getbin(self)%s:
         \"\"\"Return interpretation as a binary string.\"\"\"
         return self._readbin(self.len, 0)
 """, """
-    def _getbin(self):
+    def _getbin(self)%s:
         \"\"\"Return interpretation as a binary string.\"\"\"
         Bits._padding = False
         r = self._readbin(self.len, 0)
         Bits._padding = True
         return r
-""")
+"""
+try:
+    patchy.replace(bitstring.Bits._getbin, OLD_CODE % " -> str", NEW_CODE % " -> str")
+except ValueError:
+    patchy.replace(bitstring.Bits._getbin, OLD_CODE % "", NEW_CODE % "")
 
 
 class BitArray(bitstring.BitArray):
