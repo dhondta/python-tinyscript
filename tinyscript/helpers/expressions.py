@@ -47,16 +47,16 @@ def __eval(expr, globals=None, locals=None, bl_builtins=BL_BUILTINS, wl_nodes=WL
         if isinstance(globals.get(name, locals.get(name)), code_obj):
             raise TypeError("code objects are forbidden")
     # walk the AST and only allow the whitelisted nodes
-    listcomp = []
+    extra_names = []
     for node in _walk(ast.parse(expr, mode="eval")):
-        if any(n in list(map(lambda x: x.name, node.parents)) for n in ["ListComp", "GeneratorExp"]) and \
-           hasattr(node, "id") and node.id not in listcomp:
-            listcomp.append(node.id)
+        if any(n in list(map(lambda x: x.name, node.parents)) for n in ("Lambda", "ListComp", "GeneratorExp")) and \
+           hasattr(node, "id") and node.id not in extra_names:
+            extra_names.append(node.id)
         # blacklist dunders and input list
         if isinstance(node, ast.Name) and (node.id.startswith("__") or node.id in bl_builtins):
             raise NameError("name '%s' is not allowed" % node.id)
         # check if the node's identifier exists in the known names
-        if isinstance(node, ast.Name) and node.id not in (names + listcomp):
+        if isinstance(node, ast.Name) and node.id not in (names + extra_names):
             raise NameError("name '%s' is not defined" % node.id)
         # whitelist AST nodes based on the input list
         if node.name.lower() not in wl_nodes:
