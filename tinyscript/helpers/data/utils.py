@@ -39,19 +39,19 @@ except ValueError:
 OLD_CODE, NEW_CODE = """
     def _getbin(self)%s:
         \"\"\"Return interpretation as a binary string.\"\"\"
-        return self._readbin(self.len, 0)
+        return self._readbin(%s)
 """, """
     def _getbin(self)%s:
         \"\"\"Return interpretation as a binary string.\"\"\"
         Bits._padding = False
-        r = self._readbin(self.len, 0)
+        r = self._readbin(%s)
         Bits._padding = True
         return r
 """
 try:
-    patchy.replace(bitstring.Bits._getbin, OLD_CODE % " -> str", NEW_CODE % " -> str")
+    patchy.replace(bitstring.Bits._getbin, OLD_CODE % (" -> str", "0, self.len"), NEW_CODE % (" -> str", "0, self.len"))
 except ValueError:
-    patchy.replace(bitstring.Bits._getbin, OLD_CODE % "", NEW_CODE % "")
+    patchy.replace(bitstring.Bits._getbin, OLD_CODE % ("", "self.len, 0"), NEW_CODE % ("", "self.len, 0"))
 
 
 class BitArray(bitstring.BitArray):
