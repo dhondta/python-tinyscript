@@ -66,6 +66,11 @@ class range2object:
             yield round(cursor, n_rnd)
             cursor += self.step
     
+    def __len__(self):
+        for i, _ in enumerate(self):
+            pass
+        return i + 1
+    
     def __repr__(self):
         v = [[self.start, self.stop], [self.start, self.stop, self.step]][self.step != 1.]
         return "range(%s)" % ", ".join(map(str, v))

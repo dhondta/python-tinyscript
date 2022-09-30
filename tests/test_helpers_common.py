@@ -14,6 +14,7 @@ class TestHelpersCommon(TestCase):
         self.assertRaises(TypeError, range2, 1, 2, 3, 4)
         self.assertEqual(list(range2(2)), [0.0, 1.0])
         self.assertEqual(list(range2(0, .5)), [0.0])
+        self.assertEqual(len(range2(0, .5)), 1)
         r = range2(0, .5, .1)
         self.assertEqual(list(r), [0.0, 0.1, 0.2, 0.3, 0.4])
         self.assertEqual(r.count(.5), 0)
