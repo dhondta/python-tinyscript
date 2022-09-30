@@ -10,6 +10,14 @@ from utils import remove, TestCase
 
 class TestHelpersCommon(TestCase):
     def test_common_utility_functions(self):
+        self.assertRaises(TypeError, range2)
+        self.assertRaises(TypeError, range2, 1, 2, 3, 4)
+        self.assertEqual(list(range2(2)), [0.0, 1.0])
+        self.assertEqual(list(range2(0, .5)), [0.0])
+        r = range2(0, .5, .1)
+        self.assertEqual(list(r), [0.0, 0.1, 0.2, 0.3, 0.4])
+        self.assertEqual(r.count(.5), 0)
+        self.assertEqual(r.index(.2), 2)
         self.assertEqual(human_readable_size(123456), "121KB")
         self.assertRaises(ValueError, human_readable_size, "BAD")
         self.assertRaises(ValueError, human_readable_size, -1)

@@ -59,6 +59,7 @@ According to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) ph
 `ts.clear` | multi-platform clear screen function
 `ts.confirm` | Python2/3-compatible Yes/No input function (supporting style and palette, relying on [`colorful`](https://github.com/timofurrer/colorful)
 `ts.eval_ast_nodes` | useful to determine the necessary AST nodes for a limited set of expressions ; this gives a list that can be used as a whitelist for `eval2`
+`ts.eval_free_variables` | useful to determine the free variables from an expression
 `ts.getpass` | `getpass.getpass`-based function that allows to enter a policy for making compliant passwords (see [`getpass` enhancement](enhancements.html#getpass) for more details about how a policy can be described)
 `ts.getrepass` | `getpass.getpass`-based function that allows to enter a regular expression for making compliant passwords
 `ts.notify` | shortcut to the `notification.notify` function of [`plyer`](https://github.com/kivy/plyer)
@@ -80,10 +81,11 @@ It also provides some simple execution-related functions:
 `ts.thread` | decorator for turning a function into a thread
 `ts.threads_clean` | cleanup function for joining threads opened with `ts.thread`
  
-It also provides some other utility functions:
+It also provides some other utility functions, decorators, context managers and classes:
  
 **Name** | **Description**
 --- | ---
+`range2` | alternative to `range` that supports floats
 `ts.BitArray` | slightly extended `BitArray` class from [`bitstring`](https://github.com/scott-griffiths/bitstring)
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
@@ -107,6 +109,7 @@ It also provides some other utility functions:
 `ts.urlparse_query` | Python2/3-compatible shortcut to `parse_qs` (from module `urlparse` in Python 2 and `urllib` in Python 3)
 `ts.xor` | repeated XOR function, also allowing to apply an ordinal offset on XORed characters
 `ts.xor_file` | XOR a file with a given key
+`ts.withrepr` | decorator for modifying the representation of a function
 
 -----
 
