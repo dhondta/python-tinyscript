@@ -65,10 +65,11 @@ class range2object:
     def __iter__(self):
         n_rnd, cursor = max(len(str(f).split(".")[1]) for f in [self.start, self.stop, self.step]), self.start
         while cursor < [1, -1][self.step < 0] * self.stop:
-            yield round(cursor, n_rnd)
-            cursor += self.step
+            yield cursor
+            cursor = round(cursor + self.step, n_rnd)
     
     def __len__(self):
+        i = -1  # need to be initialized for the case when e.g. step is negative while start-stop grows positive
         for i, _ in enumerate(self):
             pass
         return i + 1
