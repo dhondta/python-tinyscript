@@ -33,7 +33,7 @@ OLD_CODE, NEW_CODE = """
 """
 try:
     patchy.replace(bitstring.Bits._getlength, OLD_CODE % " -> int", NEW_CODE % " -> int")
-except ValueError:
+except (SyntaxError, ValueError):
     patchy.replace(bitstring.Bits._getlength, OLD_CODE % "", NEW_CODE % "")
 
 OLD_CODE, NEW_CODE = """
@@ -50,7 +50,7 @@ OLD_CODE, NEW_CODE = """
 """
 try:
     patchy.replace(bitstring.Bits._getbin, OLD_CODE % (" -> str", "0, self.len"), NEW_CODE % (" -> str", "0, self.len"))
-except ValueError:
+except (SyntaxError, ValueError):
     patchy.replace(bitstring.Bits._getbin, OLD_CODE % ("", "self.len, 0"), NEW_CODE % ("", "self.len, 0"))
 
 
