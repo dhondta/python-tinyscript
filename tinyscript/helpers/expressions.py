@@ -9,8 +9,10 @@ except ImportError:
     import builtins
 from collections import deque
 
+from .common import set_exception
 
-__all__ = __features__ = ["eval_ast_nodes"]
+
+__all__ = __features__ = ["eval_ast_nodes", "eval_free_variables"]  # eval2 is bound to the builtins, hence not included
 
 
 BL_BUILTINS = ("breakpoint", "classmethod", "compile", "eval", "exec", "exit", "globals", "help", "input", "locals",
@@ -22,20 +24,11 @@ WL_NODES = ("add", "and", "binop", "bitand", "bitor", "bitxor", "boolop", "call"
             "slice", "store", "str", "sub", "subscript", "tuple", "uadd", "unaryop", "usub")
 
 
+set_exception("ForbiddenNameError", "NameError")
+set_exception("UnknownNameError", "NameError")
+
+
 def __eval(expr, globals=None, locals=None, bl_builtins=BL_BUILTINS, wl_nodes=WL_NODES, eval_=True):
-    def _walk(node):
-        node.depth = 0
-        node.parents = []
-        todo = deque([node])
-        while todo:
-            node = todo.popleft()
-            node.name = node.__class__.__name__
-            children = list(ast.iter_child_nodes(node))
-            for child in children:
-                child.depth = node.depth + 1
-                child.parents = node.parents + [node]
-            todo.extend(children)
-            yield node
     if globals is None:
         globals = {n: getattr(builtins, n) for n in dir(builtins)}
     if locals is None:
@@ -48,16 +41,16 @@ def __eval(expr, globals=None, locals=None, bl_builtins=BL_BUILTINS, wl_nodes=WL
             raise TypeError("code objects are forbidden")
     # walk the AST and only allow the whitelisted nodes
     extra_names = []
-    for node in _walk(ast.parse(expr, mode="eval")):
+    for node in __walk(ast.parse(expr, mode="eval")):
         if any(n in list(map(lambda x: x.name, node.parents)) for n in ("Lambda", "ListComp", "GeneratorExp")) and \
            hasattr(node, "id") and node.id not in extra_names:
             extra_names.append(node.id)
         # blacklist dunders and input list
         if isinstance(node, ast.Name) and (node.id.startswith("__") or node.id in bl_builtins):
-            raise NameError("name '%s' is not allowed" % node.id)
+            raise ForbiddenNameError("name '%s' is not allowed" % node.id)
         # check if the node's identifier exists in the known names
         if isinstance(node, ast.Name) and node.id not in (names + extra_names):
-            raise NameError("name '%s' is not defined" % node.id)
+            raise UnknownNameError("name '%s' is not defined" % node.id)
         # whitelist AST nodes based on the input list
         if node.name.lower() not in wl_nodes:
             e = ValueError("node '%s' is not allowed" % node.name)
@@ -65,6 +58,21 @@ def __eval(expr, globals=None, locals=None, bl_builtins=BL_BUILTINS, wl_nodes=WL
             raise e
     if eval_:
         return eval(expr, globals, locals)
+
+
+def __walk(node):
+    node.depth = 0
+    node.parents = []
+    todo = deque([node])
+    while todo:
+        node = todo.popleft()
+        node.name = node.__class__.__name__
+        children = list(ast.iter_child_nodes(node))
+        for child in children:
+            child.depth = node.depth + 1
+            child.parents = node.parents + [node]
+        todo.extend(children)
+        yield node
 
 
 def eval_ast_nodes(*expressions, **variables):
@@ -83,6 +91,21 @@ def eval_ast_nodes(*expressions, **variables):
             except ValueError as e:
                 nodes.append(e.node.lower())
     return nodes
+
+
+def eval_free_variables(expression, **variables):
+    """
+    This allows to identify the free variables from a given expression.
+    
+    :param expression: expression to be evaluated
+    :param variables:  dictionary of variables for use with the expression
+    """
+    free_vars = []
+    for node in __walk(ast.parse(expression, mode="eval")):
+        if any(n in list(map(lambda x: x.name, node.parents)) for n in ("Lambda", "ListComp", "GeneratorExp")) and \
+           hasattr(node, "id") and node.id not in variables and node.id not in free_vars:
+            free_vars.append(node.id)
+    return free_vars
 
 
 def eval2(expression, globals=None, locals=None, blacklist_builtins=BL_BUILTINS, whitelist_nodes=WL_NODES):

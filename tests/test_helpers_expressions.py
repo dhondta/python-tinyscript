@@ -39,3 +39,7 @@ class TestHelpersExpressions(TestCase):
         self.assertRaises(ValueError, eval2, "__import__('subprocess').getoutput('id')")
         self.assertRaises(ValueError, eval2, "().__class__.__base__.__subclasses__()")
 
+    def test_free_variables_evaluation(self):
+        self.assertEqual(eval_free_variables("test + 1", **{'test': 1}), [])
+        self.assertEqual(eval_free_variables(EXPRESSIONS[1]), ["x"])
+
