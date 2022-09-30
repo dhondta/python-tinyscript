@@ -47,7 +47,7 @@ def is_admin():
 
 class range2object:
     """ Class for making a range of floats (alternative to the native range() function). """
-    def __new__(self, *args):
+    def __new__(cls, *args):
         self = super(range2object, cls).__new__(cls)
         l = len(args)
         if l == 0:
