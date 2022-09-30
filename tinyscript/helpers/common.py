@@ -47,7 +47,8 @@ def is_admin():
 
 class range2object:
     """ Class for making a range of floats (alternative to the native range() function). """
-    def __init__(self, *args):
+    def __new__(self, *args):
+        self = super(range2object, cls).__new__(cls)
         l = len(args)
         if l == 0:
             raise TypeError("range2 expected 1 argument, got 0")
@@ -59,6 +60,7 @@ class range2object:
             self.start, self.stop, self.step = list(map(float, args))
         else:
             raise TypeError("range2 expected at most 3 arguments, got %s" % l)
+        return self
     
     def __iter__(self):
         n_rnd, cursor = max(len(str(f).split(".")[1]) for f in [self.start, self.stop, self.step]), self.start
