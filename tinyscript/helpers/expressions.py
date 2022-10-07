@@ -25,6 +25,7 @@ WL_NODES = ("add", "and", "binop", "bitand", "bitor", "bitxor", "boolop", "call"
 
 
 set_exception("ForbiddenNameError", "NameError")
+set_exception("ForbiddenNodeError", "ValueError")
 set_exception("UnknownNameError", "NameError")
 
 
@@ -53,7 +54,7 @@ def __eval(expr, globals=None, locals=None, bl_builtins=BL_BUILTINS, wl_nodes=WL
             raise UnknownNameError("name '%s' is not defined" % node.id)
         # whitelist AST nodes based on the input list
         if node.name.lower() not in wl_nodes:
-            e = ValueError("node '%s' is not allowed" % node.name)
+            e = ForbiddenNodeError("node '%s' is not allowed" % node.name)
             e.node = node.name
             raise e
     if eval_:

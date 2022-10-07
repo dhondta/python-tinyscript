@@ -88,7 +88,7 @@ class _ExtendAction(Action):
         l = getattr(namespace, self.dest) or []
         if not isinstance(l, list):
             if not getattr(namespace, "default_silent", False):
-                logger.warning(gt("extend is used with %s while its value is not a list").format(self.dest))
+                logger.warning(gt("extend is used with {} while its value is not a list").format(self.dest))
             l = []
         if not isinstance(values, list):
             values = [values]
@@ -271,14 +271,10 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             path = abspath(which(script) or script)
             root = dirname(path)
             script = basename(script)
-            if gd.get('__script__'):
-                kwargs['prog'] = gd['__script__']
-            elif not is_executable(path):
-                kwargs['prog'] = "python{} ".format(["", "3"][PYTHON3]) + script
-            elif root not in [x.rstrip(sep) for x in environ['PATH'].split(":")]:
-                kwargs['prog'] = "./" + script
-            else:
-                kwargs['prog'] = splitext(script)[0]
+            kwargs['prog'] = gd['__script__'] if gd.get('__script__') else \
+                             "python{} ".format(["", "3"][PYTHON3]) + script if not is_executable(path) else \
+                             "./" + script if root not in [x.rstrip(sep) for x in environ['PATH'].split(":")] else \
+                             splitext(script)[0]
             ArgumentParser.prog = kwargs['prog']
         kwargs['add_help'] = False
         kwargs['conflict_handler'] = "error"
