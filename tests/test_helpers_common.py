@@ -10,7 +10,7 @@ from utils import remove, TestCase
 
 class TestHelpersCommon(TestCase):
     def test_common_utility_functions(self):
-        self.assertRaises(TypeError, range2)
+        self.assertRaises(TypeError, range2, ())
         self.assertRaises(TypeError, range2, 1, 2, 3, 4)
         self.assertEqual(list(range2(2)), [0.0, 1.0])
         self.assertEqual(list(range2(0, .5)), [0.0])

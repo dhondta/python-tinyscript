@@ -3,10 +3,19 @@
 """Keystrokes module assets' tests.
 
 """
+from time import sleep
 from tinyscript.features.hotkeys import set_hotkeys
 from tinyscript.helpers.inputs import _keyboard, hotkeys_enabled
 
 from utils import *
+
+
+def _press(*keys):
+    for i in range([5, 1][PYTHON3]):
+        for key in keys:
+            _keyboard.press(key)
+            if not PYTHON3:
+                sleep(.1)
 
 
 class TestHotkeys(TestCase):
@@ -15,11 +24,10 @@ class TestHotkeys(TestCase):
             temp_stdout(self)
             set_hotkeys({})
             set_hotkeys({'HOTKEYS': "default"})
-            _keyboard.press("a")
-            _keyboard.press("l")
+            _press("a", "l")
             set_hotkeys({'HOTKEYS': {'l': "TEST"}})
-            _keyboard.press("l")
+            _press("l")
             set_hotkeys({'HOTKEYS': ("default", {'l': "TEST"})})
-            _keyboard.press("l")
+            _press("l")
             self.assertRaises(ValueError, set_hotkeys, {'HOTKEYS': "BAD"})
 

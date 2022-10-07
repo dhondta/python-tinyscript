@@ -170,7 +170,7 @@ class TestHelpersPath(TestCase):
         self.assertTrue(p.exists())
     
     def test_python_path(self):
-        p = PythonPath(TPATH2)
+        p = PythonPath(TPATH2, remove_cache=True)
         self.assertEqual(len(p.modules), 2)
         self.assertTrue(any(hasattr(m, "Test") for m in p.modules))
         self.assertEqual(len(list(p.get_classes())), 1)

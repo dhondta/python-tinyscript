@@ -38,6 +38,9 @@ class TestArgreparse(TestCase):
             self.p._set_arg(_)
         args = self.p.parse_args()
         self.assertEqual(args.test, "input_test")
+        g1 = self.p.add_argument_group("extra arguments")
+        g2 = self.p.add_argument_group("extra arguments")
+        self.assertEqual(g1, g2)
 
     def test_optional_arguments(self):
         self.p.add_argument("--opt1")
@@ -46,10 +49,13 @@ class TestArgreparse(TestCase):
         sys.argv += ["--opt2"]
         self.p.add_argument("-e", dest="ext", action="extend")
         sys.argv += ["-e", "1", "-e", "2", "-e", "3"]
+        self.p.add_argument("-e2", dest="ext2", action="extend", default="BAD")
+        sys.argv += ["-e2", "test"]
         args = self.p.parse_args()
         self.assertEqual(args.opt1, "test")
         self.assertEqual(args.opt2, True)
         self.assertEqual(args.ext, ["1", "2", "3"])
+        self.assertEqual(args.ext2, ["test"])
 
     def test_fixed_arguments(self):
         p = ArgumentParser({'__examples__': []})
