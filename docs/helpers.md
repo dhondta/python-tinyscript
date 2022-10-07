@@ -331,6 +331,7 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_list` | list, tuple, set
 `ts.is_long_opt` | for an argument with the "`--option`" format
 `ts.is_mimetype` | regex-based check for file's MIME type (relying on [`python-magic`](https://pypi.org/project/python-magic/))
+`ts.is_percentage` | number between 0. and 1.
 `ts.is_str` | str, bytes, unicode
 `ts.is_short_opt` | for an argument with the "`-o`" format
 

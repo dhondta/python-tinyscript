@@ -17,16 +17,18 @@ __all__ = __features__ = []
 
 
 # various object type check functions
-__all__ += ["is_bool", "is_dict", "is_int", "is_int_range", "is_list", "is_neg_int", "is_pos_int", "is_prime"]
-is_bool      = lambda b: isinstance(b, bool)
-is_dict      = lambda d: isinstance(d, dict)
-is_int       = lambda i: isinstance(i, integer_types)
-is_int_range = lambda i, i1, i2=None: all(is_int(x) for x in [i, i1, i2 or 0]) and i in (range(i1+1) if i2 is None \
-                                                                                         else range(i1, i2+1))
-is_list      = lambda l: isinstance(l, (list, set, tuple))
-is_neg_int   = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
-is_pos_int   = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
-is_prime     = lambda i: __prime_number(i)
+__all__ += ["is_bool", "is_dict", "is_int", "is_int_range", "is_list", "is_neg_int", "is_percentage", "is_pos_int",
+            "is_prime"]
+is_bool       = lambda b: isinstance(b, bool)
+is_dict       = lambda d: isinstance(d, dict)
+is_int        = lambda i: isinstance(i, integer_types)
+is_int_range  = lambda i, i1, i2=None: all(is_int(x) for x in [i, i1, i2 or 0]) and i in (range(i1+1) if i2 is None \
+                                                                                          else range(i1, i2+1))
+is_list       = lambda l: isinstance(l, (list, set, tuple))
+is_neg_int    = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
+is_percentage = lambda f: isinstance(f, (int, float)) and 0. <= float(f) <= 1.
+is_pos_int    = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
+is_prime      = lambda i: __prime_number(i)
 
 __all__ += ["is_class", "is_coroutine", "is_coroutinefunc", "is_frame", "is_function", "is_generator",
             "is_generatorfunc", "is_instance", "is_iterable", "is_lambda", "is_method", "is_module", "is_type"]
