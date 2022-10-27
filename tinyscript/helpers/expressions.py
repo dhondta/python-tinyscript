@@ -15,8 +15,8 @@ from .common import set_exception
 __all__ = __features__ = ["eval_ast_nodes", "eval_free_variables"]  # eval2 is bound to the builtins, hence not included
 
 
-BL_BUILTINS = ("breakpoint", "classmethod", "compile", "eval", "exec", "exit", "globals", "help", "input", "locals",
-               "memoryview", "open", "print", "property", "quit", "staticmethod", "super")
+BL_BUILTINS = ("breakpoint", "classmethod", "compile", "delattr", "eval", "exec", "exit", "getattr", "globals", "help",
+               "hasattr", "input", "locals", "memoryview", "open", "print", "property", "quit", "staticmethod", "super")
 WL_NODES = ("add", "and", "binop", "bitand", "bitor", "bitxor", "boolop", "call", "cmpop", "compare", "comprehension",
             "constant", "dict", "div", "eq", "expr", "expr_context", "expression", "floordiv", "for", "generatorexp",
             "gt", "gte", "in", "index", "invert", "is", "isnot", "list", "listcomp", "load", "lshift", "lt", "lte",
