@@ -340,7 +340,12 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         from importlib.metadata import version as get_version
         from setuptools.extern.packaging.version import Version
         errors = []
-        for m, v in (requires or {}).items():
+        requires = requires or {}
+        if not isinstance(requires, dict):
+            logger.warning(gt("'__requires__' does not contain a dictionary ({}) ; could not check requirements")
+                              .format(str(requires)))
+            requires = {}
+        for m, v in requires.items():
             o, v = re.match(r"^([<>]|[<>=!]=|)(.*)$", v).groups()
             operator = {'': op.ge, '<': op.lt, '>': op.gt, '<=': op.le, '>=': op.ge, '==': op.eq, '!=': op.ne}[o]
             desired, actual = Version(v), Version(get_version(m))
