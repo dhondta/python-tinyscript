@@ -215,11 +215,21 @@ class _NewActionsContainer(_ActionsContainer):
                     return self.add_argument(*args, **kwargs)
     
     def add_argument_group(self, title, *args, **kwargs):
+        # return the group if it already exists
         for group in self._action_groups:
             if group.title == title:
                 return group
+        # add the new group, after or before the specified one if relevant
+        added, after, before = False, kwargs.pop('after', None), kwargs.pop('before', None)
         group = _NewArgumentGroup(self, title, *args, **kwargs)
-        self._action_groups.append(group)
+        if after or before:
+            for i, g in enumerate(self._action_groups):
+                if g.title == after or g.title == before:
+                    self._action_groups.insert(i + [0, 1][g.title == after], group)
+                    added = True
+                    break
+        if not added:
+            self._action_groups.append(group)
         return group
     
     def add_mutually_exclusive_group(self, **kwargs):

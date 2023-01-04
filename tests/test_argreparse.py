@@ -41,6 +41,10 @@ class TestArgreparse(TestCase):
         g1 = self.p.add_argument_group("extra arguments")
         g2 = self.p.add_argument_group("extra arguments")
         self.assertEqual(g1, g2)
+        for t, p in zip(["some other extra arguments", "some additional extra arguments", "some more extra arguments"],
+                        [{'after': "extra arguments"}, {'before': "extra arguments"}, {'before': "DOES NOT EXIST"}]):
+            self.p.add_argument_group(t, **p)
+            self.assertIn(t, [g.title for g in self.p._action_groups])
 
     def test_optional_arguments(self):
         self.p.add_argument("--opt1")

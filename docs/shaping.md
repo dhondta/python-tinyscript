@@ -219,3 +219,16 @@ initialize(...
 ```
 
 When set to `True`, `-h` only displays usage information and `--help` shows the full help message. If `False`, `-h` and `--help` both displays the full help message.
+
+-----
+
+## Argument groups ordering
+
+Groups can be ordered by using the `after` and `before` keyword-arguments in `add_argument_group`.
+
+```python hl_lines="2"
+...
+parser.add_argument_group("custom arguments", before="extra arguments")
+...
+```
+
