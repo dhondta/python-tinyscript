@@ -18,6 +18,7 @@ except ImportError:
     from queue import Queue
 
 from .compat import b, ensure_str
+from .constants import PYTHON3
 
 
 __all__ = __features__ = ["apply", "execute", "execute_and_log", "execute_and_kill", "filter_bin", "process",
@@ -50,9 +51,9 @@ def execute(cmd, **kwargs):
 
     :param cmd: command string
     """
-    rc = kwargs.pop("returncode", False)
+    rc, to = kwargs.pop('returncode', False), kwargs.pop('timeout', None)
     p = Popen(__set_cmd(cmd, **kwargs), stdout=PIPE, stderr=PIPE, **kwargs)
-    out, err = p.communicate()
+    out, err = p.communicate(**({'timeout': to} if PYTHON3 else {}))
     return (out, err, p.returncode) if rc else (out, err)
 
 

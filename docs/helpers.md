@@ -72,7 +72,7 @@ It also provides some simple execution-related functions:
 **Name** | **Description**
 --- | ---
 `ts.apply` | convenience function for applying a list of functions to the given arguments and keyword-arguments
-`ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR ; `returncode=True` allows to output its STDOUT, STDERR and return code
+`ts.execute` | dummy alias for calling a subprocess and returning its STDOUT and STDERR ; `returncode=True` allows to output its STDOUT, STDERR and return code (`timeout=...` can also be used)
 `ts.execute_and_log` | alias for calling a subprocess and returning its STDOUT, STDERR and the return code, also logging information using a logger obtained from a keyword-argument or from globals
 `ts.execute_and_kill` | alias for calling a subprocess and returning its STDOUT, STDERR and the return code, watching for input patterns and killing the process when one of them is encountered
 `ts.filter_bin` | filtering function for getting a list of existing binaries (e.g. `filter_bin("ls", "dir")`)
