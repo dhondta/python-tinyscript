@@ -4,6 +4,7 @@
 """
 import os
 import re
+import signal
 import sys
 from functools import wraps
 from inspect import currentframe
@@ -55,14 +56,21 @@ def execute(cmd, **kwargs):
 
     :param cmd: command string
     """
-    rc, to = kwargs.pop('returncode', False), kwargs.pop('timeout', None)
+    rc, to, rr = kwargs.pop('returncode', False), kwargs.pop('timeout', None), kwargs.pop('reraise', False)
+    sh = kwargs.get('shell', False)
+    if PYTHON3 and sh:
+        kwargs['preexec_fn'] = os.setsid
     p = Popen(__set_cmd(cmd, **kwargs), stdout=PIPE, stderr=PIPE, **kwargs)
     if PYTHON3:
         try:
             out, err = p.communicate(timeout=to)
         except TimeoutExpired:
-            p.kill()
+            p.terminate()
+            if sh:
+                os.killpg(os.getpgid(p.pid), signal.SIGTERM)
             out, err = p.communicate()
+            if rr:
+                raise
     else:
         out, err = p.communicate()
     return (out, err, p.returncode) if rc else (out, err)
