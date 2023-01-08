@@ -16,6 +16,10 @@ try:
     from Queue import Queue
 except ImportError:
     from queue import Queue
+try:  # only used in Python3
+    from subprocess import TimeoutExpired
+except ImportError:
+    pass
 
 from .compat import b, ensure_str
 from .constants import PYTHON3
@@ -53,7 +57,14 @@ def execute(cmd, **kwargs):
     """
     rc, to = kwargs.pop('returncode', False), kwargs.pop('timeout', None)
     p = Popen(__set_cmd(cmd, **kwargs), stdout=PIPE, stderr=PIPE, **kwargs)
-    out, err = p.communicate(**({'timeout': to} if PYTHON3 else {}))
+    if PYTHON3:
+        try:
+            out, err = p.communicate(timeout=to)
+        except TimeoutExpired:
+            p.kill()
+            out, err = p.communicate()
+    else:
+        out, err = p.communicate()
     return (out, err, p.returncode) if rc else (out, err)
 
 
