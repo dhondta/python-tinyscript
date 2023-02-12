@@ -70,7 +70,7 @@ class TestReport(TestCase):
     def test_report_assets(self):
         self.assertRaises(ValueError, Report, css="does_not_exist")
         self.assertRaises(ValueError, Report, theme="does_not_exist")
-        self.assertTrue(Report(css="tinyscript/report/default.css").css)
+        self.assertTrue(Report(css="src/tinyscript/report/default.css").css)
         self.assertTrue(Report(theme="default").css)
         self.assertRaises(ValueError, Data, "BAD DATA ; SHOULD BE DICT")
         self.assertRaises(ValueError, Table, [["a"]], column_headers=["1", "2"])

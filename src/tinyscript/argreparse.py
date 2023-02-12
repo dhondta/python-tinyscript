@@ -290,8 +290,12 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         kwargs['conflict_handler'] = "error"
         # when __docformat__ is set, fixing max_help_position to terminal's width forces argparse to format arguments
         #  with their help on the same line ; in other words, formatting is left to the renderer
+        try:
+            mhp = get_terminal_size()[0]
+        except TypeError:
+            mhp = 80
         kwargs['formatter_class'] = HelpFormatter if self._docfmt is None else \
-                                    lambda prog: HelpFormatter(prog, max_help_position=get_terminal_size()[0])
+                                    lambda prog: HelpFormatter(prog, max_help_position=mhp)
         # format the epilog message
         if self.examples and script:
             _ = ["{} {}".format(ArgumentParser.prog, e) for e in self.examples]
