@@ -1,13 +1,12 @@
-<p align="center"><img src="https://github.com/dhondta/python-tinyscript/raw/master/docs/logo.png"></p>
+<p align="center"><img src="https://github.com/dhondta/python-tinyscript/raw/main/docs/pages/img/logo.png"></p>
 <h1 align="center">TinyScript <a href="https://twitter.com/intent/tweet?text=TinyScript%20-%20Devkit%20for%20quickly%20building%20CLI%20tools%20with%20Python.%0D%0APython%20library%20with%20many%20features%20for%20writing%20short,%20simple%20and%20nice-looking%20CLI%20tools.%0D%0Ahttps%3a%2f%2fgithub%2ecom%2fdhondta%2fpython-tinyscript%0D%0A&hashtags=python,programming,devkit,console,cli,tools,ctftools"><img src="https://img.shields.io/badge/Tweet--lightgrey?logo=twitter&style=social" alt="Tweet" height="20"/></a></h1>
 <h3 align="center">Make a CLI tool with very few lines of code.</h3>
 
 [![PyPi](https://img.shields.io/pypi/v/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 [![Read The Docs](https://readthedocs.org/projects/python-tinyscript/badge/?version=latest)](https://python-tinyscript.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.com/dhondta/python-tinyscript.svg?branch=master)](https://travis-ci.com/dhondta/python-tinyscript)
-[![Coverage Status](https://coveralls.io/repos/github/dhondta/python-tinyscript/badge.svg?branch=master)](https://coveralls.io/github/dhondta/python-tinyscript?branch=master)
+[![Build Status](https://github.com/dhondta/python-tinyscript/actions/workflows/python-package.yml/badge.svg)](https://github.com/dhondta/python-tinyscript/actions/workflows/python-package.yml)
+[![Coverage Status](https://raw.githubusercontent.com/dhondta/python-tinyscript/main/docs/coverage.svg)](#)
 [![Python Versions](https://img.shields.io/pypi/pyversions/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
-[![Requirements Status](https://requires.io/github/dhondta/python-tinyscript/requirements.svg?branch=master)](https://requires.io/github/dhondta/python-tinyscript/requirements/?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/dhondta/python-tinyscript/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/python-tinyscript?targetFile=requirements.txt)
 [![License](https://img.shields.io/pypi/l/tinyscript.svg)](https://pypi.python.org/pypi/tinyscript/)
 
@@ -46,15 +45,15 @@ Please see the [example tools](#example-tools) herebelow for examples of usage o
 
 ### Create from template
 
-<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/master/docs/demos/create.svg"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/main/docs/pages/demos/create.svg"></p>
 
 ### Edit source
 
-<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/master/docs/demos/edit.svg"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/main/docs/pages/demos/edit.svg"></p>
 
 ### Run your tool
 
-<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/master/docs/demos/run.svg"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/dhondta/python-tinyscript/main/docs/pages/demos/run.svg"></p>
 
 ## :mag: Example tools
 

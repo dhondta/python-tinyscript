@@ -1,8 +1,9 @@
+site_author: dhondta
 site_name: "Tinyscript - Devkit for quickly building CLI tools with Python"
 repo_url: https://github.com/dhondta/python-tinyscript
-site_author: dhondta
-docs_dir: docs
-pages:
+copyright: Copyright &copy; 2017-2023 Alexandre D'Hondt
+docs_dir: pages
+nav:
   - Introduction: index.md
   - Internals: internals.md
   - 'Enhanced modules': enhancements.md
@@ -29,13 +30,35 @@ pages:
     - 'Recursive Compression': examples-rl/recursive-compression.md
     - 'Solitaire Cipher': examples-rl/solitaire-cipher.md
 extra:
-  mailto: alexandre.dhondt@gmail.com
-theme: readthedocs
+  generator: false
+  social:
+    - icon: fontawesome/solid/paper-plane
+      link: mailto:alexandre.dhondt@gmail.com
+      name: Contact Alex
+    - icon: fontawesome/brands/github
+      link: https://github.com/dhondta
+      name: Alex on GitHub
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/alexandre-d-2ab2aa14/
+      name: Alex on LinkedIn
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/alex_dhondt
+      name: Alex on Twitter
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  logo: img/logo.png
+  favicon: img/icon.png
 use_directory_urls: false
 markdown_extensions:
-  - admonition
-  - codehilite:
-      linenums: true
-  - pymdownx.details
   - toc:
       permalink: true
+  - admonition
