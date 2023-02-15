@@ -20,8 +20,8 @@ BL_BUILTINS = ("breakpoint", "classmethod", "compile", "delattr", "eval", "exec"
 WL_NODES = ("add", "and", "binop", "bitand", "bitor", "bitxor", "boolop", "call", "cmpop", "compare", "comprehension",
             "constant", "dict", "div", "eq", "expr", "expr_context", "expression", "floordiv", "for", "generatorexp",
             "gt", "gte", "in", "index", "invert", "is", "isnot", "list", "listcomp", "load", "lshift", "lt", "lte",
-            "matmult", "mod", "mult", "name", "not", "noteq", "notin", "num", "operator", "or", "pow", "rshift", "set",
-            "slice", "store", "str", "sub", "subscript", "tuple", "uadd", "unaryop", "usub")
+            "matmult", "mod", "mult", "name", "nameconstant", "not", "noteq", "notin", "num", "operator", "or", "pow",
+            "rshift", "set", "slice", "store", "str", "sub", "subscript", "tuple", "uadd", "unaryop", "usub")
 
 
 set_exception("ForbiddenNameError", "NameError")
