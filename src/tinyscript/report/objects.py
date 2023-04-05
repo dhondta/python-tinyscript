@@ -9,7 +9,7 @@ from ..helpers.data.transform import json2html, json2xml
 
 
 __all__ = __features__ = ["Blockquote", "Code", "Data", "Footer", "Header", "Image", "List", "Rule", "Section",
-                          "Subsection", "Table", "Text", "Title"]
+                          "Subsection", "Subsubsection", "Subsubsubsection", "Table", "Text", "Title"]
 
 HEAD_CSS = "@%(pos)s-left{%(left)s};@%(pos)s-center{%(center)s};@%(pos)s-right{%(right)s};"
 
@@ -459,4 +459,24 @@ class Subsection(Title):
     """
     def __init__(self, title, tag="h3", **kwargs):
         super(Subsection, self).__init__(title, tag, **kwargs)
+
+
+class Subsubsection(Title):
+    """ Subsubsection report element.
+    
+    :param title: title content
+    :param tag:   HTML tag to be used
+    """
+    def __init__(self, title, tag="h4", **kwargs):
+        super(Subsubsection, self).__init__(title, tag, **kwargs)
+
+
+class Subsubsubsection(Title):
+    """ Subsubsubsection report element.
+    
+    :param title: title content
+    :param tag:   HTML tag to be used
+    """
+    def __init__(self, title, tag="h5", **kwargs):
+        super(Subsubsubsection, self).__init__(title, tag, **kwargs)
 
