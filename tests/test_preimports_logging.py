@@ -3,7 +3,7 @@
 """Preimports logging assets' tests.
 
 """
-from tinyscript.preimports import logging
+from tinyscript.preimports import logging, os, sys
 
 from utils import *
 
@@ -68,4 +68,13 @@ class TestPreimportsLogging(TestCase):
         self.assertNotIn("test", k)
         self.assertNotIn("test2", k)
         self.assertIn("test3", k)
+    
+    def test_std_to_logger(self):
+        l = logging.getLogger("test")
+        l.setLevel(logging.INFO)
+        stdout = sys.stdout
+        sys.stdout = logging.Std2Logger(l, "DEBUG")
+        print("TEST")
+        sys.stdout.flush()
+        sys.stdout = stdout
 

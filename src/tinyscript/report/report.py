@@ -161,7 +161,7 @@ class Report(list):
             if p.rst().strip() != "":
                 r.append(p.rst())
         return "\n\n".join(r)
-
+    
     @output
     def pdf(self, text=TEXT):
         """ Generate a PDF file from the report data. """

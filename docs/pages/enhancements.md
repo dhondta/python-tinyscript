@@ -97,6 +97,8 @@ A context manager is also available:
 - `setLoggingLevel`: sets a logging level to every logger matching the given patterns.
 - `unsetLogger` / `unsetLoggers`: unsets respectively one or multiple loggers (removing them from the root `logging` dictionary).
 - `InterceptionHandler`: handler that intercepts the last log record.
+- `RelativeTimeColoredFormatter`: custom formatter for handling relative log times.
+- `Std2Logger`: instantiates a file-like object to write to a logger instance.
 
 -----
 

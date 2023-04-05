@@ -8,6 +8,7 @@ import re
 import sys
 import types
 from functools import wraps
+from platform import system
 from time import gmtime
 
 from .inspectp import inspect
@@ -54,14 +55,7 @@ def addLogLevel(levelName, color, level, bold=True):
     setattr(logging.Logger, n, display)
     attrs = {'color': color}
     if bold:
-        # compatibility fix due to a change in coloredlogs from version 14.0
-        # see: https://github.com/xolox/python-coloredlogs/issues/82
-        try:
-            attrs['bold'] = coloredlogs.CAN_USE_BOLD_FONT
-        except AttributeError:
-            # in coloredlogs from v14, CAN_USE_BOLD_FONT is not present anymore and its flag is set to True everywhere
-            #  it appears
-            attrs['bold'] = True
+        attrs['bold'] = system() != "Windows"
     coloredlogs.DEFAULT_LEVEL_STYLES[n] = attrs
     if PY3:
         logging._levelToName[level] = N
@@ -292,6 +286,32 @@ class RelativeTimeColoredFormatter(coloredlogs.ColoredFormatter):
         record.created = record.relativeCreated / 1000
         return super(RelativeTimeColoredFormatter, self).format(record)
 logging.RelativeTimeColoredFormatter = RelativeTimeColoredFormatter
+
+
+class Std2Logger:
+    """ File-like stream object redirecting writes to a logger.
+    
+    Inspired from: https://stackoverflow.com/questions/11124093/redirect-python-print-output-to-logger/36296215
+    """
+    def __init__(self, logger, level="INFO"):
+        level = getattr(logging, level) if not isinstance(level, int) else level
+        self.__logger, self.__level, self.__buffer = logger, level, ""
+    
+    def write(self, data):
+        data = self.__buffer + data
+        self.__buffer = ""
+        for line in data.splitlines(True):
+            if line[-1] == "\n":
+                self.__logger.log(self.__level, line.rstrip())
+            else:
+                self.__buffer += line
+    
+    def flush(self):
+        if self.__buffer:
+            self.__logger.log(self.__level, self.__buffer.rstrip())
+        self.__buffer = ""
+logging.Std2Logger = Std2Logger
+
 
 # setup the private logger for displaying the last intercepted log record
 def __setup_lr_logger():
