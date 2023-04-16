@@ -3,11 +3,13 @@
 
 """
 import re
-from magic import from_file
 from os import access, makedirs, X_OK
 from os.path import exists, isdir, isfile
 
 from .strings import _str2list
+from ...common import lazy_load_module
+
+lazy_load_module("magic")
 
 
 __all__ = __features__ = []
@@ -18,8 +20,8 @@ __all__ += ["is_dir", "is_executable", "is_file", "is_filetype", "is_folder", "i
 is_dir = is_folder = isdir
 is_executable = lambda f: access(f, X_OK)
 is_file = isfile
-is_filetype = lambda f, t: is_file(f) and re.search(t, from_file(f)) is not None
-is_mimetype = lambda f, m: is_file(f) and re.search(m, from_file(f, mime=True)) is not None
+is_filetype = lambda f, t: is_file(f) and re.search(t, magic.from_file(f)) is not None
+is_mimetype = lambda f, m: is_file(f) and re.search(m, magic.from_file(f, mime=True)) is not None
 
 
 # file and folder-related argument types

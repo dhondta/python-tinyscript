@@ -2,9 +2,6 @@
 """Common utility functions for data.
 
 """
-import binascii
-import bitstring
-import patchy
 import re
 from ast import literal_eval as litev
 from math import log
@@ -12,7 +9,11 @@ from random import randint
 from string import punctuation
 
 from .types import *
+from ..common import lazy_load_module, lazy_object
 from ..compat import ensure_str
+
+for _m in ["binascii", "patchy"]:
+    lazy_load_module(_m)
 
 
 __all__ = __features__ = ["BitArray", "entropy", "entropy_bits", "pad", "unpad"]
@@ -21,73 +22,79 @@ __all__ = __features__ = ["BitArray", "entropy", "entropy_bits", "pad", "unpad"]
 PAD = ["ansic9.23", "incremental", "iso7816-4", "pkcs5", "pkcs7", "w3c"]
 
 
-OLD_CODE, NEW_CODE = """
-    def _getlength(self)%s:
-        \"\"\"Return the length of the bitstring in bits.\"\"\"
-        return self._datastore.bitlength
-""", """
-    def _getlength(self)%s:
-        \"\"\"Return the length of the bitstring in bits.\"\"\"
-        l = self._datastore.bitlength
-        return l + (8 - l %% 8) %% 8 if getattr(Bits, "_padding", True) else l
-"""
-try:
-    patchy.replace(bitstring.Bits._getlength, OLD_CODE % " -> int", NEW_CODE % " -> int")
-except (SyntaxError, ValueError):
-    patchy.replace(bitstring.Bits._getlength, OLD_CODE % "", NEW_CODE % "")
+def __init_bitstring(bs):
+    OLD_CODE, NEW_CODE = """
+        def _getlength(self)%s:
+            \"\"\"Return the length of the bitstring in bits.\"\"\"
+            return self._datastore.bitlength
+    """, """
+        def _getlength(self)%s:
+            \"\"\"Return the length of the bitstring in bits.\"\"\"
+            l = self._datastore.bitlength
+            return l + (8 - l %% 8) %% 8 if getattr(Bits, "_padding", True) else l
+    """
+    try:
+        patchy.replace(bs.Bits._getlength, OLD_CODE % " -> int", NEW_CODE % " -> int")
+    except (SyntaxError, ValueError):
+        patchy.replace(bs.Bits._getlength, OLD_CODE % "", NEW_CODE % "")
+    OLD_CODE, NEW_CODE = """
+        def _getbin(self)%s:
+            \"\"\"Return interpretation as a binary string.\"\"\"
+            return self._readbin(%s)
+    """, """
+        def _getbin(self)%s:
+            \"\"\"Return interpretation as a binary string.\"\"\"
+            Bits._padding = False
+            r = self._readbin(%s)
+            Bits._padding = True
+            return r
+    """
+    try:
+        patchy.replace(bs.Bits._getbin, OLD_CODE % (" -> str", "0, self.len"),
+                                               NEW_CODE % (" -> str", "0, self.len"))
+    except (SyntaxError, ValueError):
+        patchy.replace(bs.Bits._getbin, OLD_CODE % ("", "self.len, 0"),
+                                               NEW_CODE % ("", "self.len, 0"))
+lazy_load_module("bitstring", postload=__init_bitstring)
 
-OLD_CODE, NEW_CODE = """
-    def _getbin(self)%s:
-        \"\"\"Return interpretation as a binary string.\"\"\"
-        return self._readbin(%s)
-""", """
-    def _getbin(self)%s:
-        \"\"\"Return interpretation as a binary string.\"\"\"
-        Bits._padding = False
-        r = self._readbin(%s)
-        Bits._padding = True
-        return r
-"""
-try:
-    patchy.replace(bitstring.Bits._getbin, OLD_CODE % (" -> str", "0, self.len"), NEW_CODE % (" -> str", "0, self.len"))
-except (SyntaxError, ValueError):
-    patchy.replace(bitstring.Bits._getbin, OLD_CODE % ("", "self.len, 0"), NEW_CODE % ("", "self.len, 0"))
 
-
-class BitArray(bitstring.BitArray):
-    __doc__ = """ Small improvement to the original bitstring.BitArray class.
-    
-    It allows to set the number of bits per group (by default, 8, for considering bytes).
-    
-    """ + bitstring.BitArray.__doc__
-    
-    def __new__(cls, auto=None, length=None, offset=None, nbits=8, **kwargs):
-        if auto:
-            if not auto.startswith("0b"):
-                auto = "0b" + auto
-        c = super(BitArray, cls).__new__(cls, auto, length, offset, **kwargs)
-        c._nbits = nbits
-        c.original = True
-        return c
-    
-    @property
-    def nbits(self):
-        return self._nbits
-    
-    @nbits.setter
-    def nbits(self, n):
-        ob = self.bin
-        nb = ""
-        for i in range(0, len(ob), self._nbits):
-            group = ob[i:i+self._nbits]
-            if i > 0 and len(group) < self._nbits:
-                break
-            group = pad(group, ">0", n)[-n:]
-            if int(ob[i:i+self._nbits], 2) != int(group, 2):
-                self.original = False
-            nb += group
-        self.bin = nb
-        self._nbits = n
+def __init_bitarray():
+    class BitArray(bitstring.BitArray):
+        __doc__ = """ Small improvement to the original bitstring.BitArray class.
+        
+        It allows to set the number of bits per group (by default, 8, for considering bytes).
+        
+        """ + bitstring.BitArray.__doc__
+        
+        def __new__(cls, auto=None, length=None, offset=None, nbits=8, **kwargs):
+            if auto:
+                if not auto.startswith("0b"):
+                    auto = "0b" + auto
+            c = super(BitArray, cls).__new__(cls, auto, length, offset, **kwargs)
+            c._nbits = nbits
+            c.original = True
+            return c
+        
+        @property
+        def nbits(self):
+            return self._nbits
+        
+        @nbits.setter
+        def nbits(self, n):
+            ob = self.bin
+            nb = ""
+            for i in range(0, len(ob), self._nbits):
+                group = ob[i:i+self._nbits]
+                if i > 0 and len(group) < self._nbits:
+                    break
+                group = pad(group, ">0", n)[-n:]
+                if int(ob[i:i+self._nbits], 2) != int(group, 2):
+                    self.original = False
+                nb += group
+            self.bin = nb
+            self._nbits = n
+    return BitArray
+BitArray = lazy_object(__init_bitarray)
 
 
 def entropy(string):

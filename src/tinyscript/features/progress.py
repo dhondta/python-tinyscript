@@ -3,7 +3,9 @@
 """Module for defining progress mode logic.
 
 """
-from tqdm import tqdm, trange
+from ..helpers.common import lazy_load_module
+
+lazy_load_module("tqdm")
 
 
 __all__ = ["set_progress_items"]
@@ -29,20 +31,20 @@ def set_progress_items(glob):
                     return self.__getattribute__(name)
                 except AttributeError:
                     pass
-                if hasattr(tqdm, name) and self._tqdm is not None:
+                if hasattr(tqdm.tqdm, name) and self._tqdm is not None:
                     return getattr(self._tqdm, name)
                 raise AttributeError("ProgressManager instance has no attribute '{}'".format(name))
         
         def range(self, *args, **kwargs):
             """ Dummy alias to trange. """
             if enabled:
-                self._tqdm = trange(*args, **kwargs)
+                self._tqdm = tqdm.trange(*args, **kwargs)
                 return self._tqdm
         
         def start(self, *args, **kwargs):
             if enabled:
                 self.stop()
-                self._tqdm = tqdm(*args, **kwargs)
+                self._tqdm = tqdm.tqdm(*args, **kwargs)
                 return self._tqdm
         
         def stop(self):

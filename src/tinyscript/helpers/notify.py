@@ -2,18 +2,13 @@
 """Utility function for sending notifications (either local or by email).
 
 """
-import mimetypes
 import os
-import smtplib
-from email import encoders
-from email.mime.audio import MIMEAudio
-from email.mime.base import MIMEBase
-from email.mime.image import MIMEImage
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from plyer import notification
 
+from .common import lazy_load_module
 from .data.types import is_domain, is_email, is_file, is_port
+
+for _m in ["email", "mimetypes", "plyer", "smtplib"]:
+    lazy_load_module(_m)
 
 
 __all__ = __features__ = ["notify", "send_mail"]
@@ -47,7 +42,7 @@ def notify(title="", message="", app="", icon="", timeout=5, ticker=""):
     :param ticker:  text to display on status bar as the notification arrives
     """
     try:
-        notification.notify(title, message, app, icon, timeout, ticker)
+        plyer.notification.notify(title, message, app, icon, timeout, ticker)
     except NotImplementedError:
         pass
 
@@ -62,6 +57,7 @@ def send_mail(from_mail, to_mail, subject, body, *attachments, **kwargs):
     :param attachments: list of paths to files to be attached
     :param kwargs:      other email parameters (i.e. server, security, auth)
     """
+    import email.mime
     ctype = kwargs.get('content_type', "plain")
     srv = kwargs.get('server')
     auth = kwargs.get('auth')
@@ -86,9 +82,9 @@ def send_mail(from_mail, to_mail, subject, body, *attachments, **kwargs):
             raise ValueError("Attachment '%s' does not exist" % path)
     sec = kwargs.get('security', SECURITY.get(port, "unencrypted"))
     # create the email
-    msg = MIMEMultipart()
+    msg = email.mime.multipart.MIMEMultipart()
     msg['From'], msg['To'], msg['Subject'] = from_mail, to_mail, subject
-    msg.attach(MIMEText(body, ctype))
+    msg.attach(email.mime.text.MIMEText(body, ctype))
     for path in attachments:
         ctype, encoding = mimetypes.guess_type(path)
         if ctype is None or encoding is not None:
@@ -99,7 +95,7 @@ def send_mail(from_mail, to_mail, subject, body, *attachments, **kwargs):
             if cls:
                 submsg = cls(f.read(), _subtype=subtype)
             else:
-                submsg = MIMEBase(maintype, subtype)
+                submsg = email.mime.base.MIMEBase(maintype, subtype)
                 submsg.set_payload(f.read())
                 encoders.encode_base64(submsg)
         submsg.add_header('Content-Disposition', 'attachment', filename=os.path.basename(path))

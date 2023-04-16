@@ -2,14 +2,16 @@
 """Config-related checking functions and argument types.
 
 """
-import json
-import toml
-import yaml
 try:
     import ConfigParser as ini
 except ImportError:
     import configparser as ini
 from six import u
+
+from ...common import lazy_load_module
+
+for _m in ["json", "toml", "yaml"]:
+    lazy_load_module(_m)
 
 
 __all__ = __features__ = []

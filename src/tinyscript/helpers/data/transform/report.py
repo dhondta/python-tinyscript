@@ -3,19 +3,22 @@
 
 """
 import re
-import xmltodict
 from collections import OrderedDict
-from dicttoxml import dicttoxml
 from inspect import currentframe
-from json2html import json2html as j2h
+
+from ...common import lazy_load_module, lazy_object
+
+lazy_load_module("dicttoxml")
+lazy_load_module("json2html", alias="j2h")
+lazy_load_module("xmltodict")
 
 
 __all__ = __features__ = ["dict2html", "dict2xml", "json2html", "json2xml", "report2objects", "xml2dict", "xml2json"]
 
 
-json2html = dict2html = j2h.convert
-json2xml = dict2xml = dicttoxml
-xml2json = xml2dict = xmltodict.parse
+json2html = dict2html = lazy_object(lambda: j2h.json2html.convert)
+json2xml = dict2xml = lazy_object(lambda: dicttoxml.dicttoxml)
+xml2json = xml2dict = lazy_object(lambda: xmltodict.parse)
 
 
 def report2objects(text, header_sep=None, footer_sep=None):

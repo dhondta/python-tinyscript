@@ -3,9 +3,11 @@
 """Initialization of Tinyscript package.
 
 """
+# NB: disabled as too expensive to load while almost not used ; if the error mentioned hereafter appears again, this
+#      will be addressed in a different way
 # this avoids an AssertionError due to pip being loaded before setuptools ;
 #  see https://github.com/pypa/setuptools/issues/3044
-import setuptools
+#import setuptools
 
 from warnings import filterwarnings
 filterwarnings("ignore", "Setuptools is replacing distutils.")

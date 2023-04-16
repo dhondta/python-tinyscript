@@ -4,10 +4,10 @@ source = tinyscript
 omit =
     /home/travis/virtualenv/*
     */site-packages/*
-    tinyscript/__main__.py
-    tinyscript/hotkeys.py
-    tinyscript/warnings.py
-    tinyscript/helpers/termsize.py
+    src/tinyscript/__main__.py
+    src/tinyscript/hotkeys.py
+    src/tinyscript/warnings.py
+    src/tinyscript/helpers/termsize.py
     tests/*
 
 [report]

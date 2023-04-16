@@ -8,7 +8,6 @@ import signal
 import sys
 from functools import wraps
 from inspect import currentframe
-from multiprocessing import Process
 from shlex import split
 from six import string_types
 from subprocess import Popen, PIPE
@@ -22,8 +21,11 @@ try:  # only used in Python3
 except ImportError:
     pass
 
+from .common import lazy_load_module
 from .compat import b, ensure_str
 from .constants import PYTHON3
+
+lazy_load_module("multiprocessing")
 
 
 __all__ = __features__ = ["apply", "execute", "execute_and_log", "execute_and_kill", "filter_bin", "process",
@@ -157,7 +159,7 @@ def process(f):
     """
     @wraps(f)
     def _wrapper(*args, **kwargs):
-        p = Process(target=f, args=args, kwargs=kwargs)
+        p = multiprocessing.Process(target=f, args=args, kwargs=kwargs)
         p.start()
         PROCESSES.append(p)
         return p

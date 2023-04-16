@@ -2,60 +2,41 @@
 """Module for defining the list of preimports.
 
 """
-import codext
-from importlib import import_module
-try:  # will work in Python 3
-    from importlib import reload
-    import configparser
-except ImportError:  # will fail in Python 2 ; it will keep the built-in reload
-    reload = reload  # this declaration is required to get "reload" in the global scope for inclusion in __all__
-    import ConfigParser as configparser
-
-from .codep import code
-from .ftools import functools
-from .hash import hashlib
-from .inspectp import inspect
-from .itools import itertools
-from .log import logging
-from .pswd import getpass
-from .rand import random
-from .regex import re
-from .shutilp import shutil
-from .stringp import string
-from .venv import virtualenv, PipPackage, VirtualEnv
+import lazy_object_proxy
+from importlib import import_module, reload
 
 
-__all__ = __features__ = ["PipPackage", "VirtualEnv", "import_module"]
+__all__ = __features__ = ["import_module"]
 __all__ += ["__imports__", "load", "reload"]
 
 __imports__ = {
     'bad': [],
-    'enhanced': [
-        "code",
-        "functools",
-        "getpass",
-        "hashlib",
-        "inspect",
-        "itertools",
-        "json",
-        "logging",
-        "random",
-        "re",
-        "shutil",
-        "string",
-        "virtualenv",
-    ],
+    'enhanced': {
+        'code':       "codep",
+        'functools':  "ftools",
+        'getpass':    "pswd",
+        'hashlib':    "hash",
+        'inspect':    "inspectp",
+        'itertools':  "itools",
+        'logging':    "log",
+        'random':     "rand",
+        're':         "regex",
+        'shutil':     "shutilp",
+        'string':     "stringp",
+        'virtualenv': "venv",
+    },
     'standard': [
         "argparse",
         "ast",
         "base64",
         "binascii",
-        "codecs",
+        "codext",
         "collections",
         "colorful",
         "configparser",
         "ctypes",
         "fileinput",
+        "json",
         "os",
         "platform",
         "shlex",
@@ -77,7 +58,7 @@ __imports__ = {
 }
 
 
-def _load_preimports(*extras):
+def _load_preimports(*extras, lazy=True):
     """
     This loads the list of modules to be preimported in the global scope.
     
@@ -85,36 +66,54 @@ def _load_preimports(*extras):
     :return:      list of successfully imported modules, list of failures
     """
     i = __imports__
-    for module in i['standard'] + i['enhanced'] + list(extras):
-        load(module)
+    for module, enhanced in i['enhanced'].copy().items():
+        # these modules are used somewhere in the imported code anyway, hence laziness makes no sense
+        load(module, enhanced, lazy=module in ["inspect", "logging", "shutil"] or lazy)
+        # handle specific classes to be added to the global namespace
+        if module == "virtualenv":
+            cls = ["PipPackage", "VirtualEnv"]
+            for c in cls:
+                globals()[c] = lazy_object_proxy.Proxy(lambda: getattr(m, c))
+            __features__.extend(cls)
+    for module in i['standard'] + list(extras):
+        load(module, lazy=lazy)
     for module in i['optional']:
-        load(module, True)
+        load(module, optional=True, lazy=lazy)
 
 
-def load(module, optional=False):
+def load(module, tsmodule=None, optional=False, lazy=True):
     """
     This loads a module and, in case of failure, appends it to a list of bad
      imports or not if it is required or optional.
     
     :param module:   module name
+    :param tsmodule: Tinyscript root submodulen (in case of internal import)
     :param optional: whether the module is optional or not
+    :param lazy:     lazily load the module using a Proxy object
     """
     global __features__, __imports__
-    m = globals().get(module)
-    if m is not None:  # already imported (e.g. configparser)
+    m, tsmodule = globals().get(module), (module, ) if tsmodule is None else ("." + tsmodule, "tinyscript.preimports")
+    if m is not None:  # already imported
         __features__.append(module)
         return m
-    try:
-        globals()[module] = m = import_module(module)
-        m.__name__ = module
-        __features__.append(module)
-        return m
-    except ImportError:
-        if not optional and module not in __imports__['bad']:
-            __imports__['bad'].append(module)
-            for k, l in __imports__.items():
-                if k != 'bad' and module in l:
-                    l.remove(module)
+    def _load():
+        try:
+            m = import_module(*tsmodule)
+            if len(tsmodule) == 2:
+                m = getattr(m, module)
+            globals()[module] = m
+            m.__name__ = module
+            return m
+        except ImportError:
+            if module in __features__:
+                __features__.remove(module)
+            if not optional and module not in __imports__['bad']:
+                __imports__['bad'].append(module)
+                for k, x in __imports__.items():
+                    if k != 'bad' and module in x:
+                        x.remove(module) if isinstance(x, list) else x.pop(module)
+    __features__.append(module)
+    globals()[module] = m = lazy_object_proxy.Proxy(_load) if lazy else _load()
 
 
 _load_preimports()

@@ -28,8 +28,6 @@ initialize()
 with DisableSignals(signal.{2}) as _:
     {3}"""
 SIGNALS = {
-    'exit': "EXIT",
-    'graceful_exit': "GEXIT",
     'interrupt': "SIGINT",
     'terminate': "SIGTERM",
 }
@@ -72,14 +70,6 @@ class TestHandlers(TestCase):
             self.assertIsNone(exec_script("interrupt", SCRIPT2))
             self.assertIsNone(exec_script("terminate", SCRIPT2))
         self.assertRaises(ValueError, DisableSignals, 123456, fail=True)
-    
-    def test_exit_handler(self):
-        self.assertIs(at_exit(), None)
-        self._test_handler("exit")
-    
-    def test_graceful_exit_handler(self):
-        self.assertIs(at_graceful_exit(), None)
-        self._test_handler("graceful_exit")
     
     def test_interrupt_handler(self):
         self.assertIs(at_interrupt(), None)

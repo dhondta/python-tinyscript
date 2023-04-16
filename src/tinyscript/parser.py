@@ -8,7 +8,6 @@ import atexit
 import os
 import re
 import sys
-from asciistuff import AsciiFile, Banner
 from inspect import currentframe, getmembers, isfunction, ismethod
 from os.path import basename, splitext
 from six import string_types
@@ -195,21 +194,25 @@ def initialize(add_banner=False,
                            help=gt("remote interacting port"))
         if noarg and noargs_action == "interact":
             sys.argv[1:] = [opt]
+        set_interact_items(glob)
     # notification feature, for displaying notifications during the execution
     if add['notify']:
         opt = i.add_argument("-n", "--notify", action="store_true", suffix="mode", help=gt("notify mode"))
         if noarg and noargs_action == "notify":
             sys.argv[1:] = [opt]
+        set_notify_items(glob)
     # progress mode feature, for displaying a progress bar during the execution
     if add['progress']:
         opt = i.add_argument("-p", "--progress", action="store_true", suffix="mode", help=gt("progress mode"))
         if noarg and noargs_action == "progress":
             sys.argv[1:] = [opt]
+        set_progress_items(glob)
     # stepping mode feature, for stepping within the tool during its execution, especially useful for debugging
     if add['step']:
         opt = i.add_argument("--step", action="store_true", last=True, suffix="mode", help=gt("stepping mode"))
         if noarg and noargs_action == "step":
             sys.argv[1:] = [opt]
+        set_step_items(glob)
     # timing mode feature, for measuring time along the execution of the tool
     if add['time']:
         b = p.add_argument_group("timing arguments")
@@ -285,16 +288,14 @@ def initialize(add_banner=False,
                      getattr(a, a._collisions.get("relative", "relative"), False),
                      getattr(a, a._collisions.get("logfile", "logfile"), None),
                      getattr(a, a._collisions.get("syslog", "syslog"), None))
-    # 5) append modes items
-    set_interact_items(glob)
+    # 5) configure features that need it (even if not enabled)
     set_hotkeys(glob)
-    set_notify_items(glob)
-    set_progress_items(glob)
-    set_step_items(glob)
     set_time_items(glob)
     # 6) display a banner if relevant
     bf = glob.get('BANNER_FONT', BANNER_FONT)
     if add_banner or isinstance(bf, string_types):
+        # expensive to load asciistuff ; import only when a banner is used
+        from asciistuff import AsciiFile, Banner
         f = AsciiFile()
         banner = getattr(glob['args'], glob.get('BANNER_ARG', BANNER_ARG) or "", None) or p.scriptname
         f['title', glob.get('BANNER_STYLE', BANNER_STYLE)] = Banner(banner, font=bf)

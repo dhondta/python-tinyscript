@@ -7,8 +7,11 @@ try:  # Python2
 except ImportError:
     import builtins
 import ctypes
+import lazy_object_proxy
 import os
 from functools import update_wrapper
+from importlib import import_module
+from inspect import currentframe
 from itertools import cycle
 from string import printable
 try:                 # Python 2
@@ -19,9 +22,10 @@ except ImportError:  # Python 3
 from .compat import b
 from .constants import PYTHON3, WINDOWS
 
+__all__ = __features__ = ["human_readable_size", "is_admin", "lazy_load_module", "lazy_object", "set_exception",
+                          "strings", "strings_from_file", "urlparse", "urlparse_query", "xor", "xor_file", "withrepr"]
 
-__all__ = __features__ = ["human_readable_size", "is_admin", "set_exception", "strings", "strings_from_file",
-                          "urlparse", "urlparse_query", "xor", "xor_file", "withrepr"]
+lazy_object = lazy_object_proxy.Proxy
 
 
 def human_readable_size(size, precision=0):
@@ -43,6 +47,18 @@ def is_admin():
         return ctypes.windll.shell32.IsUserAnAdmin() != 0 if WINDOWS else os.geteuid() == 0
     except AttributeError:
         raise NotImplementedError("Admin check is not implemented for this operating system.")
+
+
+def lazy_load_module(module, relative=None, alias=None, postload=None):
+    """ Lazily load a module. """
+    glob = currentframe().f_back.f_globals
+    def _load():
+        glob[alias or module] = m = import_module(*((module, ) if relative is None else ("." + module, relative)))
+        m.__name__ = alias or module
+        if postload is not None:
+            postload(m)
+        return m
+    glob[alias or module] = lazy_object(_load)
 
 
 class range2object:

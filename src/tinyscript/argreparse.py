@@ -350,6 +350,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         
         :param requires: dictionary of requirements
         """
+        environ['SETUPTOOLS_USE_DISTUTILS'] = "stdlib"
         # importlib.metadata is available only from Python 3.8
         from importlib.metadata import version as get_version
         from setuptools.extern.packaging.version import Version

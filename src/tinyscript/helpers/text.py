@@ -3,16 +3,17 @@
 
 """
 import colorful
-import mdv
 import re
 from gettext import gettext as gt
-from pypandoc import convert_text
-from slugify import slugify
 from string import printable
 
+from .common import lazy_load_module, lazy_object
 from .compat import b
 from .data.transform.common import str2hex
 from .data.types.network import is_email, is_url
+
+lazy_load_module("pypandoc")
+lazy_load_module("slugify", alias="_slugify")
 
 
 __features__ = ["ansi_seq_strip", "gt", "hexdump", "slugify", "txt2blockquote", "txt2bold", "txt2code", "txt2comment",
@@ -28,6 +29,8 @@ PRINTABLES = re.sub(r"\s", "", printable)
 _indent = lambda t, n: _pline(t, " " * n)
 _pline  = lambda t, p, i=False: "\n".join("" if i and l.strip() == "" else p + l for l in t.split("\n"))
 _sline  = lambda t: re.sub(r"\n+", " ", t)
+
+slugify = lazy_object(lambda: _slugify.slugify)
 
 
 def __check(**kwargs):
@@ -114,7 +117,7 @@ def txt_terminal_render(text, format=None, debug=False):
         n = len(str(len(lines))) + 2
         for i, l in enumerate(lines):
             print(("{: <%d}{}" % n).format(i, l))
-    md = text if format == "md" else convert_text(text, "md", format=format).replace("\\", "")
+    md = text if format == "md" else pypandoc.convert_text(text, "md", format=format).replace("\\", "")
     if format != "md":
         # bug corrections
         # 1. misaligned metadata fields
@@ -159,7 +162,9 @@ def txt_terminal_render(text, format=None, debug=False):
         # 3. links incorrectly rendered with mdv after using pandoc
         for link in re.findall("(<(.*?)>)", md):
             md = md.replace(link[0], "[{0}]({1}{0})".format(link[1], ["", "mailto:"][is_email(link[1])]))
-    return mdv.main(md, display_links=True, theme=DOCFORMAT_THEME)
+    # too expensive to load mdv ; import only if it is required to render Markdown in the terminal
+    from mdv import main
+    return main(md, display_links=True, theme=DOCFORMAT_THEME)
 
 
 def _txt_list(text, format=None, ordered=False):

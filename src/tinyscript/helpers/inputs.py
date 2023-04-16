@@ -11,6 +11,7 @@ from ast import literal_eval
 from colorful.core import COLOR_PALETTE
 from six import StringIO
 
+from .common import lazy_object
 from .compat import ensure_str
 from .constants import *
 from .data.types import is_function, is_lambda, is_str
@@ -21,21 +22,22 @@ if LINUX:
     os.system("xhost +SI:localuser:{} > /dev/null 2>&1".format(USER))
 os.environ['DISPLAY'] = os.environ.get('DISPLAY') or os.environ.get('REMOTE_DISPLAY', ":0")
 
-try:
-    from pynput.keyboard import Controller, Key, Listener
-    _keyboard = Controller()
-    hotkeys_enabled = True
-except Exception:  # catch ImportError but also Xlib.error.DisplayConnectionError
-    _keyboard = None
-    hotkeys_enabled = False
-
 
 __all__ = ["capture", "clear", "confirm", "hotkeys", "pause", "silent", "std_input", "stdin_flush", "stdin_pipe",
-           "user_input", "Capture"]
+           "user_input", "Capture", "Redirect"]
 __features__ = [x for x in __all__]
 __all__ += ["colored"]
 
 pause = lambda *a, **kw: std_input("Press Enter to continue", *a, **kw) or None
+
+
+def __load_kb():
+    try:
+        from pynput.keyboard import Controller
+        _keyboard = Controller()
+    except Exception:  # catch ImportError but also Xlib.error.DisplayConnectionError
+        _keyboard = None
+_keyboard = lazy_object(__load_kb)
 
 
 def capture(f):
@@ -119,8 +121,11 @@ def hotkeys(hotkeys, silent=True):
     1. (str, output handler)
     2. function returning None|str|(str, output handler)
     """
-    if not hotkeys_enabled:
+    try:  # do not check with 'if _keyboard is None:' ; _keyboard's type will be lazy_proxy_object.Proxy
+        _keyboard.press
+    except AttributeError:  # 'NoneType' object has no attribute 'press'
         return
+    from pynput.keyboard import Key, Listener
     global listener, on_press
     # close the running listener, if hotkeys(...) was already called
     try:
@@ -324,4 +329,29 @@ class Capture(object):
             sys.stderr = self._stderr
             os.dup2(self.__tmp_fd2, 2)
         os.close(self.__devnull)
+
+
+class Redirect(object):
+    """ Context manager for capturing stdout and stderr. """
+    def __init__(self, out=None, err=None):
+        # backup original output file handles
+        self._stdout, self._stderr = out, err
+    
+    def __enter__(self):
+        self.__stdout, self.__stderr, r = sys.stdout, sys.stderr, []
+        if self._stdout:
+            sys.stdout = self._stdout
+            r.append(self._stdout)
+        if self._stderr:
+            sys.stderr = self._stderr
+            r.append(self._stderr)
+        # return references of the dummy objects
+        return None if len(r) == 0 else r[0] if len(r) == 1 else tuple(r)
+    
+    def __exit__(self, *args):
+        if hasattr(sys.stdout, "close"):
+            sys.stdout.close()
+        if hasattr(sys.stderr, "close"):
+            sys.stderr.close()
+        sys.stdout, sys.stderr = self.__stdout, self.__stderr
 

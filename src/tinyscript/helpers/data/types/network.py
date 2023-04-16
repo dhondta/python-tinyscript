@@ -2,16 +2,18 @@
 """Network-related checking functions and argument types.
 
 """
-import netaddr
-import netifaces
 import re
-from email.utils import parseaddr as parse_email
 from itertools import chain
 
 from .strings import _str2list
+from ...common import lazy_load_module
 
 
 __all__ = __features__ = []
+
+lazy_load_module("email", alias="emaillib")
+for _m in ["netaddr", "netifaces"]:
+    lazy_load_module(_m)
 
 
 # network-related check functions
@@ -73,7 +75,7 @@ def __email_address(email, fail=True):
     """ Email address validation. """
     # reference: https://stackoverflow.com/questions/8022530/
     if len(email) <= 320 and re.match(r"^[^@]+@[^@]+$", email) and \
-       is_hostname(email.split("@")[1]) and parse_email(email)[1] != "":
+       is_hostname(email.split("@")[1]) and emaillib.utils.parseaddr(email)[1] != "":
         return email
     if fail:
         raise ValueError("Bad email address")

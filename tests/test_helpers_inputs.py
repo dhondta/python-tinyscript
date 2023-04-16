@@ -7,7 +7,7 @@ from tinyscript.features.loglib import logger as ts_logger
 from tinyscript.helpers.compat import b
 from tinyscript.helpers.constants import TTY
 from tinyscript.helpers.inputs import *
-from tinyscript.helpers.inputs import _keyboard, hotkeys_enabled
+from tinyscript.helpers.inputs import _keyboard
 
 from utils import *
 
@@ -63,23 +63,25 @@ class TestHelpersInputs(TestCase):
         self.assertEqual(out, "TEST")
     
     def test_keystrokes_function(self):
-        if hotkeys_enabled:
-            temp_stdout(self)
-            hotkeys({'t': "TEST"})
-            _keyboard.type("t")
-            hotkeys({'t': ("TEST", sys.stdout)})
-            _keyboard.type("t")
-            hotkeys({'t': ("TEST", ts_logger.info)})
-            _keyboard.type("t")
-            hotkeys({'t': ("TEST", "BAD_OUTPUT_HANDLER")}, False)
-            if not WINDOWS:
-                with self.assertRaises(ValueError):
-                    _keyboard.press("a")
-            with self.assertRaises(TypeError):
-                _keyboard.press("t")
-            hotkeys({'ctrl': ("CTRL", ts_logger.info)})
-            from tinyscript.helpers.inputs import Key
-            _keyboard.press(Key.ctrl)
+        try:  # do not check with 'if _keyboard is None:' ; _keyboard's type will be lazy_proxy_object.Proxy
+            _keyboard.press
+        except AttributeError:  # 'NoneType' object has no attribute 'press'
+            return
+        temp_stdout(self)
+        hotkeys({'t': "TEST"})
+        _keyboard.type("t")
+        hotkeys({'t': ("TEST", sys.stdout)})
+        _keyboard.type("t")
+        hotkeys({'t': ("TEST", ts_logger.info)})
+        _keyboard.type("t")
+        hotkeys({'t': ("TEST", "BAD_OUTPUT_HANDLER")}, False)
+        if not WINDOWS:
+            with self.assertRaises(ValueError):
+                _keyboard.press("a")
+        with self.assertRaises(TypeError):
+            _keyboard.press("t")
+        hotkeys({'ctrl': ("CTRL", ts_logger.info)})
+        _keyboard.press(Key.ctrl)
     
     def test_styling_functions(self):
         STR = "test string"

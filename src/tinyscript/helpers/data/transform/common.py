@@ -2,13 +2,13 @@
 """Common data transformation functions.
 
 """
-import binascii
-from functools import wraps
-from math import ceil
-
 from ..types import is_bin, is_bytes, is_hex, is_int, is_list, is_pos_int, is_str
 from ..utils import BitArray as Bits
+from ...common import lazy_load_module
 from ...compat import b, ensure_str
+
+for _m in ["binascii", "functools"]:
+    lazy_load_module(_m)
 
 
 __all__ = __features__ = [
@@ -18,6 +18,9 @@ __all__ = __features__ = [
     "lst2str",
     "str2bin", "str2int", "str2hex", "str2lst",
 ]
+
+
+ceil = lambda f: int(round(float(f) + .5, 0))
 
 
 def __validation(**kwargs):
@@ -219,7 +222,7 @@ def str2lst(chars_string):
 
 # make conversion functions compatible with input/output strings/bytes
 def __fix_inout_formats(f):
-    @wraps(f)
+    @functools.wraps(f)
     def _wrapper(*args, **kwargs):
         a0 = args[0]
         a0 = ensure_str(a0) if is_str(a0) or is_bytes(a0) else a0
@@ -238,7 +241,7 @@ for f in __features__:
 def __items2something(f):
     """ Decorate infmt2outfmt functions to make intfmtS2outfmt (taking multiple inputs, producing a single output. """
     infmt, outfmt = f.__name__.split("2")
-    @wraps(f)
+    @functools.wraps(f)
     def _wrapper(*args, **kwargs):
         r = [] if outfmt == "int" else ""
         for arg in args:
@@ -256,7 +259,7 @@ def __items2something(f):
 def __something2items(f):
     """ Decorate infmt2outfmt functions to make intfmt2outfmtS (taking a single input, producing multiple outputs. """
     infmt, outfmt = f.__name__.split("2")
-    @wraps(f)
+    @functools.wraps(f)
     def _wrapper(data, **kwargs):
         func = f
         n = kwargs.pop('n_chunks', None)

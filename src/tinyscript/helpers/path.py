@@ -20,7 +20,6 @@ from tempfile import gettempdir, NamedTemporaryFile as TempFile
 from .constants import *
 from .compat import u
 from .data.types import is_dict, is_list, is_str
-from .inputs import user_input
 from .password import getpass, getrepass
 
 
@@ -391,6 +390,8 @@ class CredentialsPath(Path):
                              " and the validation pattern or a 2-tuple with the prompt message and a policy")
         sec_alias = sec_prompt.rstrip(": ").lower().replace(" ", "_")
         self.id = ""
+        # too expensive to load the underlying packages ; import only when .ask(...) is called
+        from .inputs import user_input
         while self.id == "":
             self.id = user_input(id_prompt, required=True)
             if id_pattern and not re.search(id_pattern, self.id):
