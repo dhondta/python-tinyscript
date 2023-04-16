@@ -5,11 +5,6 @@
 import logging
 from os import listdir
 from os.path import abspath, dirname, isfile, join, splitext
-try:
-    from weasyprint import CSS, HTML
-    pdf_generation = True
-except ImportError:
-    pdf_generation = False
 
 from .base import *
 from .objects import *
@@ -165,11 +160,14 @@ class Report(list):
     @output
     def pdf(self, text=TEXT):
         """ Generate a PDF file from the report data. """
-        if pdf_generation:
-            self.logger.debug("Generating the PDF report...")
-            html = HTML(string=self.html())
-            fn = self.filename if self.filename.endswith(".pdf") else "%s.pdf" % self.filename
-            html.write_pdf(fn, stylesheets=[self.css, CSS(string=PAGE_CSS % self.__dict__)])
+        try:
+            from weasyprint import CSS, HTML
+        except ImportError:
+            return
+        self.logger.debug("Generating the PDF report...")
+        html = HTML(string=self.html())
+        fn = self.filename if self.filename.endswith(".pdf") else "%s.pdf" % self.filename
+        html.write_pdf(fn, stylesheets=[self.css, CSS(string=PAGE_CSS % self.__dict__)])
     
     @output
     def xml(self, indent=2, data_only=False, text=TEXT):
