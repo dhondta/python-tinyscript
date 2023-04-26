@@ -2,12 +2,12 @@
 """Common utility functions.
 
 """
-import re
 from itertools import permutations, product
 from string import digits, printable, punctuation
 
 from .compat import b, ensure_str
 from .data import is_file, is_list, is_str
+from ..preimports import re
 
 
 __all__ = __features__ = ["bruteforce", "bruteforce_mask", "bruteforce_pin", "bruteforce_re", "dictionary",

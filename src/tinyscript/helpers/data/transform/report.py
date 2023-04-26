@@ -2,11 +2,8 @@
 """Report data transformation functions.
 
 """
-import re
-from collections import OrderedDict
-from inspect import currentframe
-
 from ...common import lazy_load_module, lazy_object
+from ....preimports import inspect, re
 
 lazy_load_module("dicttoxml")
 lazy_load_module("json2html", alias="j2h")
@@ -23,7 +20,7 @@ xml2json = xml2dict = lazy_object(lambda: xmltodict.parse)
 
 def report2objects(text, header_sep=None, footer_sep=None):
     """ Convert a raw text report (i.e. WPScan-like) to Tinyscript report objects. """
-    glob = currentframe().f_back.f_globals
+    glob = inspect.currentframe().f_back.f_globals
     o = glob.get('Report', list)()
     if header_sep:
         parts = re.split("[" + re.escape(header_sep) + "]{10,}", text)

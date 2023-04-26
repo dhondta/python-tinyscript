@@ -2,15 +2,8 @@
 """Common execution functions and decorators.
 
 """
-import os
-import re
-import signal
-import sys
 from functools import wraps
-from inspect import currentframe
-from shlex import split
 from six import string_types
-from subprocess import Popen, PIPE
 from threading import Thread
 try:
     from Queue import Queue
@@ -24,6 +17,7 @@ except ImportError:
 from .common import lazy_load_module
 from .compat import b, ensure_str
 from .constants import PYTHON3
+from ..preimports import inspect, os, re, shlex, signal, subprocess, sys
 
 lazy_load_module("multiprocessing")
 
@@ -40,7 +34,7 @@ def __set_cmd(cmd, **kwargs):
     sh = kwargs.get('shell', False)
     if isinstance(cmd, string_types):
         if not sh:
-            cmd = split(cmd)
+            cmd = shlex.split(cmd)
     elif isinstance(cmd, (list, tuple)):
         cmd = " ".join(cmd) if sh else [str(x) for x in cmd]
     else:
@@ -62,7 +56,7 @@ def execute(cmd, **kwargs):
     sh = kwargs.get('shell', False)
     if PYTHON3 and sh:
         kwargs['preexec_fn'] = os.setsid
-    p = Popen(__set_cmd(cmd, **kwargs), stdout=PIPE, stderr=PIPE, **kwargs)
+    p = subprocess.Popen(__set_cmd(cmd, **kwargs), stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
     if PYTHON3:
         try:
             out, err = p.communicate(timeout=to)
@@ -85,7 +79,7 @@ def execute_and_log(cmd, out_maxlen=256, silent=None, **kwargs):
     :param out_maxlen: convenience length limit for displaying the output of a command with logger.debug
     :param silent:     list of patterns for stderr lines to be silenced
     """
-    logger, frame = kwargs.pop('logger', None), currentframe()
+    logger, frame = kwargs.pop('logger', None), inspect.currentframe()
     while logger is None and frame is not None:
         logger = frame.f_globals.get('logger')
         frame = frame.f_back
@@ -118,7 +112,8 @@ def execute_and_kill(cmd, patterns=None, **kwargs):
     
     bs, out, err = kwargs.pop('bufsize', 1), b"", b""
     patterns = [b(x) for x in (patterns or [])]
-    p, q = Popen(__set_cmd(cmd, **kwargs), stdout=PIPE, stderr=PIPE, bufsize=bs, **kwargs), Queue()
+    p = subprocess.Popen(__set_cmd(cmd, **kwargs), stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=bs, **kwargs)
+    q = Queue()
     Thread(target=_read, args=(p.stdout, q)).start()
     Thread(target=_read, args=(p.stderr, q)).start()
     br = False

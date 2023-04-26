@@ -2,18 +2,16 @@
 """Common utility functions for data.
 
 """
-import re
-from ast import literal_eval as litev
 from math import log
-from random import randint
-from string import punctuation
 
 from .types import *
 from ..common import lazy_load_module, lazy_object
 from ..compat import ensure_str
+from ...preimports import ast, random, re
 
 for _m in ["binascii", "patchy"]:
     lazy_load_module(_m)
+lazy_load_module("string", alias="strmod")
 
 
 __all__ = __features__ = ["BitArray", "entropy", "entropy_bits", "pad", "unpad"]
@@ -110,8 +108,8 @@ def entropy_bits(string):
     for r, n in zip([r"[a-z]", r"[A-Z]", r"\d"], [26, 26, 10]):
         if re.search(r, string):
             pool_len += n
-    if any(c in punctuation for c in string):
-        pool_len += len(punctuation)
+    if any(c in strmod.punctuation for c in string):
+        pool_len += len(strmod.punctuation)
     if " " in string:
         pool_len += 1
     return int(log(max(pool_len, 1) ** len(string), 2) + .5)
@@ -151,7 +149,7 @@ def pad(string, padding=None, blocksize=8, raw=False):
     elif padding in ["pkcs5", "pkcs7"]:
         return s + p * nc
     elif padding == "w3c":
-        rand = "".join(to_char(randint(0, 255)) for i in range(p - 1))
+        rand = "".join(to_char(random.randint(0, 255)) for i in range(p - 1))
         return s + rand + int(p > 0) * nc
     else:
         padding = padding or ("0" if isb else "00" if ish else "\x00")
@@ -185,7 +183,8 @@ def unpad(string, padding=None, blocksize=8, raw=False):
     if blocksize <= 0:
         raise ValueError("Block size must be a positive integer")
     to_char = lambda x: [chr(x), "{:0>2}".format(hex(x)[2:])][ish]
-    lastb = [litev("0x" + (s[i:i+2 or len(s)] or "0")) for i in range(-bs*2, 0, 2)] if ish else list(map(ord, s[-bs:]))
+    lastb = [ast.literal_eval("0x" + (s[i:i+2 or len(s)] or "0")) for i in range(-bs*2, 0, 2)] if ish else \
+             list(map(ord, s[-bs:]))
     n = lastb[-1]
     lp = [1, 2][ish]
     if padding == "ansic9.23":

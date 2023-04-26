@@ -2,8 +2,6 @@
 """Common checking functions and argument types.
 
 """
-import inspect
-import types
 from six import integer_types
 try:
     from collections.abc import Iterable
@@ -11,6 +9,7 @@ except ImportError:
     from collections import Iterable
 
 from .strings import _str2list
+from ....preimports import inspect, types
 
 
 __all__ = __features__ = []

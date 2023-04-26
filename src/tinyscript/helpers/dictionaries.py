@@ -2,8 +2,6 @@
 """Extra dictionary-based data structures.
 
 """
-import re
-from collections import OrderedDict
 from time import time
 try:
     from collections.abc import MutableMapping
@@ -12,6 +10,7 @@ except ImportError:
 
 from .data.types import is_class, is_list, is_str
 from .path import Path
+from ..preimports import re
 
 
 __all__ = __features__ = ["flatten_dict", "merge_dict", "ClassRegistry", "ExpiringDict", "PathBasedDict"]

@@ -2,11 +2,9 @@
 """Network-related checking functions and argument types.
 
 """
-import re
-from itertools import chain
-
 from .strings import _str2list
-from ...common import lazy_load_module
+from ...common import lazy_load_module, lazy_object
+from ....preimports import itertools, re
 
 
 __all__ = __features__ = []
@@ -102,7 +100,7 @@ default_gateway_address.__name__ = "default gateway address"
 gateway_address.__name__         = "gateway address"
 
 
-HN = re.compile(r"(?!-)[A-Z\d-]{1,63}(?<!-)$", re.I)
+HN = lazy_object(lambda: re.compile(r"(?!-)[A-Z\d-]{1,63}(?<!-)$", re.I))
 def __hostname(hostname, fail=True):
     """ Hostname validation. """
     if len(hostname) <= 255 and all(HN.match(x) for x in \
@@ -183,7 +181,7 @@ def __ip_address_list(ips, version=None, filter_bad=False, fail=True):
     # make a generator with the parsed IP addresses/networks
     def __generator():
         _ = []
-        for ip in chain(*l):
+        for ip in itertools.chain(*l):
             if ip not in _:
                 yield str(ip)
                 _.append(ip)

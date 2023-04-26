@@ -2,15 +2,13 @@
 """Module for text-related utility functions.
 
 """
-import colorful
-import re
 from gettext import gettext as gt
-from string import printable
 
 from .common import lazy_load_module, lazy_object
 from .compat import b
 from .data.transform.common import str2hex
 from .data.types.network import is_email, is_url
+from ..preimports import colorful, re, string
 
 lazy_load_module("pypandoc")
 lazy_load_module("slugify", alias="_slugify")
@@ -24,7 +22,7 @@ __all__ = __features__ + ["DOCFORMAT_THEME"]
 DOCFORMAT = None
 DOCFORMAT_THEME = "Makeup"
 FORMATS = [None, "console", "html", "md", "rst", "textile"]
-PRINTABLES = re.sub(r"\s", "", printable)
+PRINTABLES = lazy_object(lambda: re.sub(r"\s", "", string.printable))
 
 _indent = lambda t, n: _pline(t, " " * n)
 _pline  = lambda t, p, i=False: "\n".join("" if i and l.strip() == "" else p + l for l in t.split("\n"))

@@ -32,7 +32,7 @@
      'something': 'lorem ipsum paragraph',
      'version': '1.0'}
 """
-import re
+from ..preimports import re
 
 
 __all__ = __features__ = ["parse_docstring"]

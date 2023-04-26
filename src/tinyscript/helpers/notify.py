@@ -2,10 +2,9 @@
 """Utility function for sending notifications (either local or by email).
 
 """
-import os
-
 from .common import lazy_load_module
 from .data.types import is_domain, is_email, is_file, is_port
+from ..preimports import os
 
 for _m in ["email", "mimetypes", "plyer", "smtplib"]:
     lazy_load_module(_m)

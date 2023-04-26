@@ -3,10 +3,8 @@
 
 Source: https://gist.githubusercontent.com/jtriley/1108174/raw/6ec4c846427120aa342912956c7f717b586f1ddb/terminalsize.py
 """
-import os
-import struct
-import platform
-import subprocess
+from ..preimports import os, platform, struct, subprocess
+
 
 __author__ = "Justin Riley (https://gist.github.com/jtriley)"
 

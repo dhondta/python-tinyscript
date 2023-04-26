@@ -12,13 +12,11 @@ Policy:
 - Do not use a password known in a dictionary (e.g. this of John the Ripper)
 """
 import getpass as _getpass
-import os
-import re
-from platform import system
 
 from .attack import expand_mask, parse_rule, MASKS
 from .constants import *
 from .data.utils import entropy_bits
+from ..preimports import os, re, platform
 
 
 __all__ = __features__ = ["getpass", "getrepass"]
@@ -39,7 +37,7 @@ DEFAULT_POLICY = {
     'length':    (8, 40),
     'rules':     "lut",  # .lower(), .upper(), .title()
     'entropy':   32,
-    'wordlists': BAD_PASSWORDS_LISTS.get(system().lower(), "default"),
+    'wordlists': BAD_PASSWORDS_LISTS.get(platform.system().lower(), "default"),
 }
 MASK_DESCRIPTIONS = {
     'd': "digits",

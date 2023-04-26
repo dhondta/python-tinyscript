@@ -2,19 +2,13 @@
 """Common utility functions.
 
 """
-import colorful
-import os
-import re
-import signal
-import sys
-from ast import literal_eval
-from colorful.core import COLOR_PALETTE
 from six import StringIO
 
 from .common import lazy_object
 from .compat import ensure_str
 from .constants import *
 from .data.types import is_function, is_lambda, is_str
+from ..preimports import colorful, os, re, signal, sys
 
 # fix to Xlib.error.DisplayConnectionError: Can't connect to display ":0": No protocol specified
 # however, it does not fix the error while testing with Travis CI
@@ -97,6 +91,7 @@ def colored(text, color=None, on_color=None, attrs=None, style=None, palette=Non
     try:
         return c(text).styled_string if s and TTY else text
     finally:
+        from colorful.core import COLOR_PALETTE
         # ensure that the palette is restored
         colorful.use_palette(COLOR_PALETTE)
 

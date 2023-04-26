@@ -2,12 +2,9 @@
 """Files/Folders-related checking functions and argument types.
 
 """
-import re
-from os import access, makedirs, X_OK
-from os.path import exists, isdir, isfile
-
 from .strings import _str2list
 from ...common import lazy_load_module
+from ....preimports import os, re
 
 lazy_load_module("magic")
 
@@ -17,9 +14,9 @@ __all__ = __features__ = []
 
 # dummy shortcuts, compliant with the is_* naming convention
 __all__ += ["is_dir", "is_executable", "is_file", "is_filetype", "is_folder", "is_mimetype"]
-is_dir = is_folder = isdir
-is_executable = lambda f: access(f, X_OK)
-is_file = isfile
+is_dir = is_folder = os.path.isdir
+is_executable = lambda f: os.access(f, os.X_OK)
+is_file = os.path.isfile
 is_filetype = lambda f, t: is_file(f) and re.search(t, magic.from_file(f)) is not None
 is_mimetype = lambda f, m: is_file(f) and re.search(m, magic.from_file(f, mime=True)) is not None
 
@@ -32,7 +29,7 @@ __all__ += ["file_does_not_exist", "file_exists", "file_mimetype", "file_type", 
 
 def file_does_not_exist(f):
     """ Check that the given file does not exist. """
-    if exists(f):
+    if os.path.exists(f):
         raise ValueError("'{}' already exists".format(f))
     return f
 folder_does_not_exist = file_does_not_exist
@@ -42,9 +39,9 @@ file_does_not_exist.__name__ = "non-existing file"
 
 def file_exists(f):
     """ Check that the given file exists. """
-    if not exists(f):
+    if not os.path.exists(f):
         raise ValueError("'{}' does not exist".format(f))
-    if not isfile(f):
+    if not os.path.isfile(f):
         raise ValueError("Target exists and is not a file")
     return f
 file_exists.__name__ = "existing file"
@@ -70,7 +67,7 @@ def files_list(l, filter_bad=False):
     l = _str2list(l)
     nl = []
     for f in l:
-        if not isfile(f):
+        if not os.path.isfile(f):
             if not filter_bad:
                 raise ValueError("A file from the given list does not exist")
         else:
@@ -103,9 +100,9 @@ files_filtered_list.__name__ = "filtered files list"
 
 def folder_exists(f):
     """ Check that the given folder exists. """
-    if not exists(f):
+    if not os.path.exists(f):
         raise ValueError("'{}' does not exist".format(f))
-    if not isdir(f):
+    if not os.path.isdir(f):
         raise ValueError("Target exists and is not a folder")
     return f
 folder_exists.__name__ = "existing folder"
@@ -113,9 +110,9 @@ folder_exists.__name__ = "existing folder"
 
 def folder_exists_or_create(f):
     """ Check that the given folder exists and create it if not existing. """
-    if not exists(f):
-        makedirs(f)
-    if not isdir(f):
+    if not os.path.exists(f):
+        os.makedirs(f)
+    if not os.path.isdir(f):
         raise ValueError("Target exists and is not a folder")
     return f
 folder_exists_or_create.__name__ = "folder (exists and is not a folder)"

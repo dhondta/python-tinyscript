@@ -2,17 +2,12 @@
 """Path-oriented structures derived from pathlib2.Path.
 
 """
-import ctypes
 import errno
 import imp
 import importlib
-import os
-import re
 from mimetypes import guess_type
 from pathlib2 import Path as BasePath
 from pyminizip import compress_multiple, uncompress
-from random import choice
-from re import search
 from shutil import copy, copy2, copytree, rmtree
 from six import string_types
 from tempfile import gettempdir, NamedTemporaryFile as TempFile
@@ -21,6 +16,7 @@ from .constants import *
 from .compat import u
 from .data.types import is_dict, is_list, is_str
 from .password import getpass, getrepass
+from ..preimports import ctypes, os, random, re
 
 
 __all__ = __features__ = ["Path", "ConfigPath", "CredentialsPath", "MirrorPath", "ProjectPath", "PythonPath",
@@ -166,11 +162,11 @@ class Path(BasePath):
             return self
         filetypes = list(filetypes)
         while len(filetypes) > 0:
-            filetype = choice(filetypes)
+            filetype = random.choice(filetypes)
             filetypes.remove(filetype)
             l = list(self.iterfiles(filetype, filename_only=True))
             if len(l) > 0:
-                return self.joinpath(choice(l))
+                return self.joinpath(random.choice(l))
     
     def copy(self, new_path, **kwargs):
         """ Copy this folder or file to the given destination. """
@@ -198,9 +194,9 @@ class Path(BasePath):
                 r = "^{}$".format(name.replace(".", "\\.").replace("?", "\\?").replace("-", "\\-").replace("+", "\\+")
                                       .replace("[", "\\[").replace("]", "\\]").replace("(", "\\(").replace(")", "\\)")
                                       .replace("{", "\\{").replace("}", "\\}").replace("*", ".*"))
-                f = lambda p: search(r, p.basename) is not None
+                f = lambda p: re.search(r, p.basename) is not None
         else:
-            f = lambda p: search(name, p.basename) is not None
+            f = lambda p: re.search(name, p.basename) is not None
         for item in self.walk(filter_func=f):
             yield item
     
@@ -211,7 +207,7 @@ class Path(BasePath):
             return self
         # ensure this is a newly generated path
         while True:
-            new = self.joinpath(str(prefix) + "".join(choice(alphabet) for i in range(length)) + str(suffix))
+            new = self.joinpath(str(prefix) + "".join(random.choice(alphabet) for i in range(length)) + str(suffix))
             if not new.exists():
                 return new
     rand_folder_name = generate

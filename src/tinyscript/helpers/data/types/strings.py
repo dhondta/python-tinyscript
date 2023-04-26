@@ -2,10 +2,9 @@
 """String-related checking functions and argument types.
 
 """
-import ast
-import re
 from six import binary_type, string_types
-from string import ascii_lowercase as LC, ascii_uppercase as UC, ascii_letters as letter, digits, printable, punctuation
+
+from ....preimports import ast, re, string
 
 
 __all__ = __features__ = []
@@ -48,12 +47,12 @@ __all__ += ["is_str", "is_bytes", "is_digits", "is_letters", "is_lowercase", "is
             "is_uppercase"]
 is_str         = lambda s: isinstance(s, string_types)
 is_bytes       = lambda s: isinstance(s, binary_type)
-is_digits      = lambda s, t=1.0: _is_from_alph(s, digits, t)
-is_letters     = lambda s, t=1.0: _is_from_alph(s, letter, t)
-is_lowercase   = lambda s, t=1.0: _is_from_alph(s, LC, t)
-is_printable   = lambda s, t=1.0: _is_from_alph(s, printable, t)
-is_punctuation = lambda s, t=1.0: _is_from_alph(s, punctuation, t)
-is_uppercase   = lambda s, t=1.0: _is_from_alph(s, UC, t)
+is_digits      = lambda s, t=1.0: _is_from_alph(s, string.digits, t)
+is_letters     = lambda s, t=1.0: _is_from_alph(s, string.ascii_letters, t)
+is_lowercase   = lambda s, t=1.0: _is_from_alph(s, string.ascii_lowercase, t)
+is_printable   = lambda s, t=1.0: _is_from_alph(s, string.printable, t)
+is_punctuation = lambda s, t=1.0: _is_from_alph(s, string.punctuation, t)
+is_uppercase   = lambda s, t=1.0: _is_from_alph(s, string.ascii_uppercase, t)
 is_str.__name__         = "string"
 is_bytes.__name__       = "bytes"
 is_digits.__name__      = "digits"

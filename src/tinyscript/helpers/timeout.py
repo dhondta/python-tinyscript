@@ -2,10 +2,10 @@
 """Timeout-related functions.
 
 """
-import signal
 from contextlib import contextmanager
 
 from .constants import WINDOWS
+from ..preimports import signal
 
 
 __all__ = __features__ = ["timeout", "Timeout", "TimeoutError"]

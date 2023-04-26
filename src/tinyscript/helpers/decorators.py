@@ -2,13 +2,13 @@
 """Decorators for classes and methods.
 
 """
-import logging
 from functools import wraps
-from sys import exc_info, exit
 try:  # PYTHON3
     from inspect import getfullargspec
 except ImportError:
     from inspect import getargspec as getfullargspec
+
+from ..preimports import logging, sys
 
 
 __all__ = __features__ = ["applicable_to", "failsafe", "try_and_pass", "try_and_warn", "try_or_die"]
@@ -119,9 +119,9 @@ def try_or_die(message=None, exc=Exception, trace=True, extra_info=""):
                     l.info(getattr(self, extra_info))
                 # if the decorated method is part of a context manager, close it with its __exit__ method and continue
                 if hasattr(self, "__exit__"):
-                    self.__exit__(*exc_info())
+                    self.__exit__(*sys.exc_info())
                 # stop execution
-                exit(1)
+                sys.exit(1)
         return wrapper
     return _try_or_die
 

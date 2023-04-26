@@ -2,7 +2,7 @@
 """Hash-related checking functions and argument types.
 
 """
-import re
+from ....preimports import re
 
 
 __all__ = __features__ = []
