@@ -178,16 +178,19 @@ class TestArgreparse(TestCase):
         self.p.add_argument("test")
         self.assertRaises(SystemExit, self.p.parse_args)
         if version_info >= (3, 8):
-            self.assertRaises(RequirementError, self.p._check_requirements, {'tinyscript': "==0"})
+            self.assertIsNone(self.p._check_requirements("BAD_REQUIRES_DICT"))
+            self.assertRaises(RequirementError, self.p._check_requirements, {'tinyscript': "==0"})   
     
     def test_parser_subparsers(self):
         subparsers = self.p.add_subparsers(dest="command")
         test = subparsers.add_parser("subtest", help="test", parents=[self.p])
         test.add_argument("--test", dest="verbose")
+        test2 = subparsers.add_parser("subtest2", category="test", help="test2", parents=[self.p])
         if PYTHON3:
             args = self.p.parse_args()
         else:
             self.assertRaises(SystemExit, self.p.parse_args)
+        self.assertIsNotNone(self.p.format_help())
     
     def test_help_formatter(self):
         self.p.add_argument("--test", default=",".join(["A"]*30), choices=[1], type=list, help="test", 
@@ -208,6 +211,7 @@ class TestArgreparse(TestCase):
         setattr(ns, "_hidden", "hidden")
         setattr(ns, "name", "shown")
         setattr(ns, "command", "subtest")
+        self.assertIsNotNone(self.p.format_help())
         self.assertEqual(ns._hidden, "hidden")
         self.assertNotIn("hidden", str(ns))
         self.assertEqual(ns.name, "shown")

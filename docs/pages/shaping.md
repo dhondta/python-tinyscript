@@ -232,3 +232,21 @@ parser.add_argument_group("custom arguments", before="extra arguments")
 ...
 ```
 
+-----
+
+## Subparser choices sorted per category
+
+When defining subparsers under the main parser, it is possible to use the "`category`" keyword to set a category to get the subparser sorted in. This allows, when there are lots of choices, to sort them and enhance readability of the help message.
+
+
+```python hl_lines="3 4"
+...
+cmds = parser.add_subparsers(dest="command", metavar="CMD", title="positional argument", description="command to be executed")
+cmd1 = cmds.add_parser("command1", category="category1", help="this does something")
+cmd2 = cmds.add_parser("command2", category="category2", help="this does something")
+initialize()
+...
+```
+
+This examples will yield a help message that proposes "`CMD`", the *command to be executed*, with *category1* holding *command1* and *category2* holding *command2*.
+

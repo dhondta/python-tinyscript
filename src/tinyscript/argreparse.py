@@ -106,6 +106,7 @@ class _NewSubParsersAction(_SubParsersAction):
         super(_NewSubParsersAction, self).__init__(*args, **kwargs)
     
     def add_parser(self, name, **kwargs):
+        category = kwargs.pop('category', "default")
         # set prog from the existing prefix
         if kwargs.get('prog') is None:
             kwargs['prog'] = "%s %s" % (self._prog_prefix, name)
@@ -116,10 +117,12 @@ class _NewSubParsersAction(_SubParsersAction):
             # see [Python2] argparse.py:1029 and [Python3] argparse.py:1059
             args = (name, aliases, help) if PYTHON3 else (name, help)
             choice_action = self._ChoicesPseudoAction(*args)
+            choice_action.category = category
             self._choices_actions.append(choice_action)
         # create the parser, but with another formatter and separating the help into an argument group
         parser = self._parser_class(ArgumentParser.globals_dict, add_help=False, **kwargs)
         parser.name = name
+        # add default extra arguments group
         i = parser.add_argument_group("extra arguments")
         i.add_argument("-h", action="usage", prefix="show", help=gt("show usage message and exit"))
         i.add_argument("--help", action="help", prefix="show", help=gt("show this help message and exit"))
@@ -644,7 +647,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
 class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
     """ Help message formatter for appending a custom note (as input through the add_argument method of
          CustomArgumentParser) to argument help. It also allows to reduce long default values (e.g. a list of integers)
-         to something readable. """
+         to something readable. It also allows to add categories to subparser's choices. """
     def _expand_help(self, action):
         params = dict(vars(action), prog=self._prog)
         for name in list(params):
@@ -666,11 +669,73 @@ class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
             params['default'] = s
         return self._get_help_string(action) % params
     
+    def _format_action(self, action):
+        # determine the required width and the entry label
+        help_position = min(self._action_max_length + 2, self._max_help_position)
+        help_width = max(self._width - help_position, 11)
+        action_width = help_position - self._current_indent - 2
+        action_header = self._format_action_invocation(action)
+        # no help; start on same line and add a final newline
+        if not action.help:
+            action_header = '%*s%s\n' % (self._current_indent, '', action_header)
+        # short action name; start on the same line and pad two spaces
+        elif len(action_header) <= action_width:
+            action_header = '%*s%-*s  ' % (self._current_indent, '', action_width, action_header)
+            indent_first = 0
+        # long action name; start on the next line
+        else:
+            action_header = '%*s%s\n' % (self._current_indent, '', action_header)
+            indent_first = help_position
+        # collect the pieces of the action help
+        parts = [action_header]
+        # if there was help for the action, add lines of help text
+        if action.help:
+            help_text = self._expand_help(action)
+            help_lines = self._split_lines(help_text, help_width)
+            parts.append('%*s%s\n' % (indent_first, '', help_lines[0]))
+            for line in help_lines[1:]:
+                parts.append('%*s%s\n' % (help_position, '', line))
+        # or add a newline if the description doesn't end with one
+        elif not action_header.endswith('\n'):
+            parts.append('\n')
+        # if there are any sub-actions, add their help as well, in categories if relevant
+        categories = getattr(action, "categories", None)
+        if categories is None:
+            for subaction in self._iter_indented_subactions(action):
+                parts.append(self._format_action(subaction))
+        else:
+            for category in sorted(list(categories.keys())):
+                parts.append('%*s[%s]\n' % (self._current_indent, '', category))
+                for subaction in self._iter_indented_subactions(action):
+                    if subaction in categories[category]:
+                        parts.append(self._format_action(subaction))
+        # return a single string
+        return self._join_parts(parts)
+    
     def _get_help_string(self, action):
         help = super(HelpFormatter, self)._get_help_string(action)
         if '%(note)' not in help and hasattr(action, "note") and action.note is not None:
             help += '\n NB: %(note)s'
         return help
+    
+    def add_argument(self, action):
+        if action.help is not SUPPRESS:
+            categories = {}
+            # find all invocations
+            get_invocation = self._format_action_invocation
+            invocations = [get_invocation(action)]
+            for subaction in self._iter_indented_subactions(action):
+                categories.setdefault(subaction.category, [])
+                categories[subaction.category].append(subaction)
+                invocations.append(get_invocation(subaction))
+            # update the maximum item length
+            invocation_length = max([len(s) for s in invocations])
+            action_length = invocation_length + self._current_indent
+            self._action_max_length = max(self._action_max_length, action_length + 2)
+            # add the item to the list
+            if len(categories) > 1 or len(categories) > 0 and list(categories.keys())[0] != "default":
+                action.categories = categories
+            self._add_item(self._format_action, [action])
 
 
 class Namespace(BaseNamespace):
