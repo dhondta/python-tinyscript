@@ -242,7 +242,7 @@ class TestParser(TestCase):
         sys.argv[1:] = []
         parser.add_argument("-a", "--arg1")
         parser.add_argument("-b", "--arg2", action="store_true")
-        initialize()
+        initialize(autocomplete=True)
         self.assertIsNone(validate(('arg1', " ? is None", "Failed", "test")))
         with self.assertRaises(ValueError):
             validate(('bad/arg', "True"))

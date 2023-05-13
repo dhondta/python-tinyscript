@@ -57,6 +57,7 @@ def initialize(add_banner=False,
                noargs_action=None,
                post_actions=True,
                report_func=None,
+               autocomplete=False,
                **kwargs):
     """
     Initialization function ; sets up the arguments for the parser and creates a logger to be inserted in the input
@@ -81,6 +82,7 @@ def initialize(add_banner=False,
     :param noargs_action:       action to be performed when no argument is input
     :param post_actions:        enable post-actions at interrupt
     :param report_func:         report generation function
+    :param autocomplete:        add autocompletion with argcomplete
     """
     global parser, parser_calls
     # handle backward-compatibility arguments
@@ -276,6 +278,10 @@ def initialize(add_banner=False,
         if LINUX:
             i.add_argument("-s", "--syslog", action="store_true", last=True, suffix="mode",
                            help=gt("log to /var/log/syslog"))
+    # if enabled, apply argcomplete's auto-completion
+    if autocomplete:
+        from argcomplete import autocomplete
+        autocomplete(p)
     # now parse inputs
     glob['args'], glob['parser'] = p.parse_args(), p
     # 3) if sudo required, restart the script

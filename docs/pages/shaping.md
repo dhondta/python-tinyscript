@@ -250,3 +250,36 @@ initialize()
 
 This examples will yield a help message that proposes "`CMD`", the *command to be executed*, with *category1* holding *command1* and *category2* holding *command2*.
 
+-----
+
+## Automatic Bash auto-completion with `argcomplete`
+
+Using the related option, auto-completion can be enabled using `argcomplete`. This only applies `argcomplete.autocomplete` to the parser once initialized with the `initialize(...)` function, meaning that setting up the script and the Bash console accordingly is required as documented on [the README of `argcomplete´](https://github.com/kislyuk/argcomplete).
+
+In Bash:
+
+```session
+$ activate-global-python-argcomplete --user
+```
+
+Your script, let us say `test.py`:
+
+```python hl_lines="2 5"
+#!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
+...
+parser.add_argument("test", choices=["a", "b", "c"])
+initialize(autocomplete=True)
+...
+```
+
+!!! note "`PATH`"
+    
+    `test.py` needs to be in a folder registered in the `PATH` environment variable.
+
+In Bash:
+
+```session
+$ eval "$(register-python-argcomplete test.py)"
+```
+
