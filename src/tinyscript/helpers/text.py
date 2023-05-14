@@ -20,7 +20,7 @@ __features__ = ["ansi_seq_strip", "gt", "hexdump", "slugify", "txt2blockquote", 
 __all__ = __features__ + ["DOCFORMAT_THEME"]
 
 DOCFORMAT = None
-DOCFORMAT_THEME = "Makeup"
+DOCFORMAT_THEME = {}
 FORMATS = [None, "console", "html", "md", "rst", "textile"]
 PRINTABLES = lazy_object(lambda: re.sub(r"\s", "", string.printable))
 
@@ -62,8 +62,7 @@ def configure_docformat(glob):
     format = glob.get('__docformat__')
     __check(format=format)
     global DOCFORMAT, DOCFORMAT_THEME
-    DOCFORMAT = format
-    DOCFORMAT_THEME = glob.get('DOCFORMAT_THEME', DOCFORMAT_THEME)
+    DOCFORMAT, DOCFORMAT_THEME = format, glob.get('DOCFORMAT_THEME', DOCFORMAT_THEME)
 
 
 def hexdump(data, width=16, first=0, last=0):
@@ -157,12 +156,18 @@ def txt_terminal_render(text, format=None, debug=False):
                 except KeyError:
                     pass
             md += line + "\n"
-        # 3. links incorrectly rendered with mdv after using pandoc
+        # 3. links incorrectly rendered after using pandoc
         for link in re.findall("(<(.*?)>)", md):
             md = md.replace(link[0], "[{0}]({1}{0})".format(link[1], ["", "mailto:"][is_email(link[1])]))
-    # too expensive to load mdv ; import only if it is required to render Markdown in the terminal
-    from mdv import main
-    return main(md, display_links=True, theme=DOCFORMAT_THEME)
+    # import only when required to render Markdown in the terminal
+    from rich.console import Console
+    from rich.markdown import Markdown
+    from rich.style import Style
+    from rich.theme import Theme
+    c = Console(theme=Theme(styles={n: Style(**s) for n, s in DOCFORMAT_THEME.items()}))
+    c.begin_capture()
+    c.print(Markdown(md))
+    return c.end_capture()
 
 
 def _txt_list(text, format=None, ordered=False):
