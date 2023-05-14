@@ -12,6 +12,13 @@ from ..helpers.attack import MASKS
 from ..helpers.compat import b
 from ..helpers.constants import PYTHON2
 
+# fix to re.sre_parse removed from Python 3.11
+try:
+    re.sre_parse
+except AttributeError:
+    import sre_parse
+    re.sre_parse = sre_parse
+
 
 CATEGORIES = {
     'digit':     digits,
