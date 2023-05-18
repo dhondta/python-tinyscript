@@ -89,6 +89,7 @@ It also provides some other utility functions, decorators, context managers and 
 `ts.BitArray` | slightly extended `BitArray` class from [`bitstring`](https://github.com/scott-griffiths/bitstring)
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
+`ts.dateparse` | date parsing function relying on `dateparser.parse`
 `ts.entropy` | computation function for the Shannon entropy of a string
 `ts.entropy_bits` | computation function for the number of bits of entropy (i.e. for a password)
 `ts.get_terminal_size` | cross-platform terminal size function

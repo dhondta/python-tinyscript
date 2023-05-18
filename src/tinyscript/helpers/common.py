@@ -2,30 +2,25 @@
 """Common utility functions.
 
 """
-try:  # Python2
-    import __builtin__ as builtins
-except ImportError:
-    import builtins
+import builtins
 import ctypes
 import lazy_object_proxy
 import os
+from dateparser import parse as dateparse
 from functools import update_wrapper
 from importlib import import_module
 from inspect import currentframe
 from itertools import cycle
 from string import printable
-try:                 # Python 2
-    from urlparse import urlparse, parse_qs as urlparse_query
-except ImportError:  # Python 3
-    from urllib.parse import urlparse, parse_qs as urlparse_query
+from urllib.parse import urlparse, parse_qs as urlparse_query
 
 from .compat import b
 from .constants import PYTHON3, WINDOWS
 
 
-__all__ = __features__ = ["human_readable_size", "is_admin", "lazy_load_module", "lazy_load_object", "lazy_object",
-                          "set_exception", "strings", "strings_from_file", "urlparse", "urlparse_query", "xor",
-                          "xor_file", "withrepr"]
+__all__ = __features__ = ["dateparse", "human_readable_size", "is_admin", "lazy_load_module", "lazy_load_object",
+                          "lazy_object", "set_exception", "strings", "strings_from_file", "urlparse", "urlparse_query",
+                          "xor", "xor_file", "withrepr"]
 
 lazy_object = lazy_object_proxy.Proxy
 
