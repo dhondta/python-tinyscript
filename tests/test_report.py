@@ -37,6 +37,8 @@ class TestReport(TestCase):
                   Table([[1, 2]], ["test1", "test2"], ["test3"]),
                   Section("test section", useless=None),
                   Subsection("test subsection", does_not_throw="error"),
+                  Subsubsection("test subsubsection", does_not_throw="error"),
+                  Subsubsubsection("test subsubsubsection", does_not_throw="error"),
                   Data({'test': "Test string", 'data': {'a': 1, 'b': 2}}),
                   Text("test text", size="10"),
                   Image("test_image.png", width="50%"),
@@ -48,10 +50,9 @@ class TestReport(TestCase):
         r.extend(l)
         r.append("Free text")
         self.__try_formats(r)
-        r.pdf()
-        if PYTHON3:
-            self.assertTrue(exists("report.pdf"))
-            remove("report.pdf")
+        for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
+            getattr(r, fmt)(save_to_file=True)
+            remove("report.%s" % fmt)
         r.clear()
         r2 = r.copy()
         self.assertNotEqual(id(r), id(r2))
@@ -62,10 +63,21 @@ class TestReport(TestCase):
         r = Report(title="Test")
         self.assertIsNotNone(repr(r))
         for i in range(3):
-            r.html(False)
+            r.html(save_to_file=True)
         remove("report.html")
         remove("report-2.html")
         remove("report-3.html")
+        r.append(List("item1", "item2"))
+        self.assertIsInstance(r.json(data_only=False), dict)
+        for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
+            getattr(r, fmt)()
+        r.pop()
+        r.append(Table([["item1", "item2"]], column_headers=["h1", "h2"]))
+        self.assertIsInstance(r.json(), dict)
+        for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
+            getattr(r, fmt)(save_to_file=True)
+            remove("report.%s" % fmt)
+        self.assertRaises(DeprecationWarning, r.md, text=True)
     
     def test_report_assets(self):
         self.assertRaises(ValueError, Report, css="does_not_exist")
@@ -79,4 +91,16 @@ class TestReport(TestCase):
         self.__try_formats(Table([["a", "b"]], column_headers=None))
         self.__try_formats(Table([["a", "b"]], row_headers="indices"))
         self.__try_formats(Table([[1, 2]], ["test1", "test2"], ["test3"]))
+    
+    def test_report_table(self):
+        t = Table([["a", "b"], ["c", "d"]], column_headers=["col1", "col2"], row_headers=["row1", "row2"])
+        for o in ["split", "columns", "index", "records", "values"]:
+            self.assertIsNotNone(t.json(orient=o))
+        self.assertRaises(ValueError, t.json, orient="BAD")
+        for fmt in ["csv", "json", "md", "rst", "xml", "yaml"]:
+            getattr(t, fmt)()
+        r = Report()
+        r.append(t)
+        for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
+            getattr(r, fmt)()
 

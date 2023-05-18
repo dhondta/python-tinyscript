@@ -22,16 +22,12 @@ class Data(Element):
     def __init__(self, data, **kwargs):
         super(Data, self).__init__(**kwargs)
         if not isinstance(data, (dict, list, set, tuple)):
-            raise ValueError("'data' argument shall be a dictionary or a list (got {})".format(type(data).__name__))
+            raise ValueError("'data' argument shall be a dictionary or a list (got %s)" % type(data).__name__)
         self._data = data
     
     @output
     def html(self, indent=4):
         return json2html(self.data).replace("\"", "'")
-    
-    @output
-    def json(self):
-        return self.data
     
     @output
     def xml(self, indent=2):
@@ -267,6 +263,31 @@ class Table(Element):
         return nl.join(r)
     
     @output
+    def json(self, orient="split"):
+        d = {}
+        if len(self.data) > 0:
+            ch = (self.column_headers[1:] if self.row_headers else self.column_headers) if self.column_headers else \
+                 range(len(self.data[0]))
+            rh = self.row_headers if self.row_headers else range(len(self.data))
+            if orient == "split":
+                if self.column_headers:
+                    d['columns'] = ch
+                if self.row_headers:
+                    d['index'] = rh
+                d['data'] = self.data
+            elif orient == "records":
+                d = [{c: v for c, v in zip(ch, row)} for row in self.data]
+            elif orient == "index":
+                d = {r: {c: v for c, v in zip(ch, row)} for r, row in zip(rh, self.data)}
+            elif orient == "columns":
+                d = {c: {r: v for r, v in zip(rh, [row[i] for row in self.data])} for i, c in enumerate(ch)}
+            elif orient == "values":
+                d = self.data
+            else:
+                raise ValueError("bad 'orient' value (%s)" % orient)
+        return {self.name: d}
+    
+    @output
     def md(self, float_format="%.2g"):
         r = [" | ".join(self.column_headers or list(map(str, range(len(self.data[0])))))]
         r.append(" | ".join("---" for i in range(len(self.data[0]))))
@@ -314,6 +335,10 @@ class Table(Element):
             r.append(ind + "</footer>")
         r.append("</%s>" % self.name)
         return nl.join(r)
+    
+    @output
+    def yaml(self):
+        return self.json(orient="records", save_to_file=False)
 
 
 class Text(Element):
@@ -478,4 +503,8 @@ class Subsubsubsection(Title):
     """
     def __init__(self, title, tag="h5", **kwargs):
         super(Subsubsubsection, self).__init__(title, tag, **kwargs)
+    
+    def rst(self):
+        # RestructuredText specifies levels up to subsubsections, not subsubsubsections
+        return self.data
 

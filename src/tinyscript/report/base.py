@@ -2,38 +2,44 @@
 """Module for defining common functions for report elements.
 
 """
-from functools import wraps
-from inspect import stack
-from os.path import exists, splitext
-from six import string_types
 
-
-__all__ = ["output", "string_types", "Element", "TEXT"]
-
-TEXT = True
+__all__ = ["output", "Element"]
 
 
 def output(f):
     """ This decorator allows to choose to return an output as text or to save it to a file. """
+    from functools import wraps
     f._output = True  # used in tinyscript.parser
     @wraps(f)
     def _wrapper(self, *args, **kwargs):
-        self._text = kwargs.pop('text', getattr(self, "_text", True))
+        from os.path import exists, splitext
+        from six import string_types
+        if 'text' in kwargs:
+            raise DeprecationWarning("'text' keyword has been deprecated, please use 'save_to_file' instead")
+        s2f = kwargs.pop('save_to_file', False)
         r = f(self, *args, **kwargs)
-        if self._text:
+        if not s2f or r is None:
             return r
-        elif r is not None and isinstance(r, string_types):
-            filename = "{}.{}".format(self.filename, f.__name__)
-            while exists(filename):
-                name, ext = splitext(filename)
-                try:
-                    name, i = name.split('-')
-                    i = int(i) + 1
-                except ValueError:
-                    i = 2
-                filename = "{}-{}".format(name, i) + ext
-            with open(filename, 'w') as out:
-                out.write(r)
+        if isinstance(r, dict):
+            if f.__name__ == "json":
+                from json import dumps
+                r = dumps(r, indent=kwargs.get('indent', 2))
+            elif f.__name__ == "yaml":
+                from yaml import dump
+                r = dump(r, indent=kwargs.get('indent', 2), width=kwargs.get('width', 0))
+        if not isinstance(r, string_types):
+            raise TypeError("got report data in an unknown format (%s) ; should be str" % type(r).__name__)
+        filename = "{}.{}".format(self.filename, f.__name__)
+        while exists(filename):
+            name, ext = splitext(filename)
+            try:
+                name, i = name.split('-')
+                i = int(i) + 1
+            except ValueError:
+                i = 2
+            filename = "{}-{}".format(name, i) + ext
+        with open(filename, 'w') as out:
+            out.write(r)
     return _wrapper
 
 
@@ -58,8 +64,13 @@ class Element(object):
     
     @property
     def data(self):
+        from inspect import stack
         output_format = stack()[1][3]  # get the calling output format method name from the stack
         return Element.format_data(self._data, output_format)
+    
+    @data.setter
+    def data(self, data):
+        self._data = data
     
     @property
     def style(self):
@@ -68,10 +79,6 @@ class Element(object):
             if self._style.get(k):
                 r += s % str(self._style[k]) + ";"
         return r
-    
-    @data.setter
-    def data(self, data):
-        self._data = data
     
     @output
     def csv(self, sep=','):
@@ -93,6 +100,10 @@ class Element(object):
     @output
     def xml(self, indent=2):
         return ("<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__).format(self._newline, str(self.data))
+    
+    @output
+    def yaml(self, indent=2):
+        return self.json(indent=indent, save_to_file=False)
     
     @staticmethod
     def format_data(data, fmt):

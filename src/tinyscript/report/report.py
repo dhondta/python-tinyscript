@@ -119,7 +119,7 @@ class Report(list):
     def html(self, indent=4):
         """ Generate an HTML file from the report data. """
         ind = (indent or 0) * " "
-        self.logger.debug("Generating the HTML report{}...".format(["", " (text only)"][self._text]))
+        self.logger.debug("Generating the HTML report...")
         r = []
         for p in self:
             h = p.html(indent=indent)
@@ -134,11 +134,15 @@ class Report(list):
         return nl.join(r)
     
     @output
-    def json(self, data_only=False):
+    def json(self, indent=2, orient="split", data_only=False):
         r = {}
         for p in self:
             if isinstance(p, (Data, List, Table)) or not data_only:
-                r.update(p.json())
+                r.update(p.json(orient=orient) if isinstance(p, Table) else p.json())
+        if len(r) == 1:
+            r1 = list(r.items())[0]
+            if isinstance(r1, dict):
+                r = r1
         return r
     
     @output
@@ -150,24 +154,22 @@ class Report(list):
         return "\n\n".join(r)
     
     @output
+    def pdf(self):
+        """ Generate a PDF file from the report data. """
+        from weasyprint import CSS, HTML
+        self.logger.debug("Generating the PDF report...")
+        html = HTML(string=self.html(save_to_file=False))
+        self._save_to_file = False  # cannot be output as text
+        fn = self.filename if self.filename.endswith(".pdf") else "%s.pdf" % self.filename
+        html.write_pdf(fn, stylesheets=[self.css, CSS(string=PAGE_CSS % self.__dict__)])
+    
+    @output
     def rst(self):
         r = []
         for p in self:
             if p.rst().strip() != "":
                 r.append(p.rst())
         return "\n\n".join(r)
-    
-    @output
-    def pdf(self):
-        """ Generate a PDF file from the report data. """
-        try:
-            from weasyprint import CSS, HTML
-        except ImportError:
-            return
-        self.logger.debug("Generating the PDF report...")
-        html = HTML(string=self.html())
-        fn = self.filename if self.filename.endswith(".pdf") else "%s.pdf" % self.filename
-        html.write_pdf(fn, stylesheets=[self.css, CSS(string=PAGE_CSS % self.__dict__)])
     
     @output
     def xml(self, indent=2, data_only=False):
@@ -180,4 +182,8 @@ class Report(list):
         r.append("</report>")
         r = ("" if indent is None else "\n").join(r)
         return r
+    
+    @output
+    def yaml(self, indent=2, orient="records", data_only=False):
+        return self.json(indent=indent, orient=orient, data_only=data_only)
 
