@@ -42,6 +42,7 @@ dependencies = [
   "codext>=1.15.0",
   "coloredlogs",
   "colorful",
+  "dateparser>=1.1.8",
   "dicttoxml",
   "ipaddress>=1.0.23",
   "json2html",
@@ -67,7 +68,7 @@ dependencies = [
   "terminaltables",
   "toml",
   "tqdm",
-  "virtualenv",
+  "virtualenv>=20.8.1",
   "weasyprint",
   "xmltodict",
 ]

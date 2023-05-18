@@ -1,22 +1,21 @@
-asciistuff>=1.2.3
-bitstring
-codext>=1.8.2
+argcomplete>=3.0.8
+asciistuff>=1.2.5
+bitstring>3
+codext>=1.15.0
 coloredlogs
 colorful
+dateparser>=1.1.8
 dicttoxml
 ipaddress>=1.0.23
 json2html
 lazy_object_proxy>=1.9.0
 markdown2>=2.4.0
-mdv; python_version<'3.9'
-mdv3; python_version>='3.9'
 netaddr
 netifaces
 patchy
 pathlib2
-pillow>=8.2.0
-pip>=20.0
-plyer>=2.0.0; python_version>='3.5'
+pip>=23.0
+plyer>=2.0.0
 pygments>=2.8.1
 pyminizip
 pynput
@@ -25,10 +24,12 @@ pypiwin32; sys_platform=='windows'
 python-magic
 python-slugify
 pyyaml>=5.3.1
+rich
+setuptools
 six
 terminaltables
 toml
 tqdm
-virtualenv>=20.8.1; python_version>='3.5'
-weasyprint; python_version>='3.5'
+virtualenv>=20.8.1
+weasyprint
 xmltodict
