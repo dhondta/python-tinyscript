@@ -112,17 +112,17 @@ class Report(list):
         return list(map(lambda f: splitext(f)[0], filter(lambda f: f.endswith(".css"), listdir(dirname(__file__)))))
     
     @output
-    def csv(self, text=TEXT):
-        return "\n\n".join(p.csv(text=True) for p in self if p.csv(text=True) != "")
+    def csv(self):
+        return "\n\n".join(p.csv() for p in self if p.csv() != "")
     
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         """ Generate an HTML file from the report data. """
         ind = (indent or 0) * " "
-        self.logger.debug("Generating the HTML report{}...".format(["", " (text only)"][text]))
+        self.logger.debug("Generating the HTML report{}...".format(["", " (text only)"][self._text]))
         r = []
         for p in self:
-            h = p.html(indent=indent, text=True)
+            h = p.html(indent=indent)
             if h != "":
                 r.append(h)
         nl = "" if indent is None else "\n"
@@ -134,15 +134,15 @@ class Report(list):
         return nl.join(r)
     
     @output
-    def json(self, data_only=False, text=TEXT):
+    def json(self, data_only=False):
         r = {}
         for p in self:
             if isinstance(p, (Data, List, Table)) or not data_only:
-                r.update(p.json(text=True))
+                r.update(p.json())
         return r
     
     @output
-    def md(self, text=TEXT):
+    def md(self):
         r = []
         for p in self:
             if p.md().strip() != "":
@@ -150,7 +150,7 @@ class Report(list):
         return "\n\n".join(r)
     
     @output
-    def rst(self, text=TEXT):
+    def rst(self):
         r = []
         for p in self:
             if p.rst().strip() != "":
@@ -158,7 +158,7 @@ class Report(list):
         return "\n\n".join(r)
     
     @output
-    def pdf(self, text=TEXT):
+    def pdf(self):
         """ Generate a PDF file from the report data. """
         try:
             from weasyprint import CSS, HTML
@@ -170,11 +170,11 @@ class Report(list):
         html.write_pdf(fn, stylesheets=[self.css, CSS(string=PAGE_CSS % self.__dict__)])
     
     @output
-    def xml(self, indent=2, data_only=False, text=TEXT):
+    def xml(self, indent=2, data_only=False):
         r = ["<report>"]
         for p in self:
             if isinstance(p, (Data, List, Table)) or not data_only:
-                out = ensure_str(p.xml(indent=indent, text=True))
+                out = ensure_str(p.xml(indent=indent))
                 for line in out.split("\n"):
                     r.append((indent or 0) * " " + line)
         r.append("</report>")

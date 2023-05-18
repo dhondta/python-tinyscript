@@ -15,15 +15,12 @@ TEXT = True
 
 def output(f):
     """ This decorator allows to choose to return an output as text or to save it to a file. """
-    f._output = True
+    f._output = True  # used in tinyscript.parser
     @wraps(f)
     def _wrapper(self, *args, **kwargs):
-        try:
-            text = kwargs.get('text') or args[0]
-        except IndexError:
-            text = True
+        self._text = kwargs.pop('text', getattr(self, "_text", True))
         r = f(self, *args, **kwargs)
-        if text:
+        if self._text:
             return r
         elif r is not None and isinstance(r, string_types):
             filename = "{}.{}".format(self.filename, f.__name__)
@@ -77,24 +74,24 @@ class Element(object):
         self._data = data
     
     @output
-    def csv(self, sep=',', text=TEXT):
+    def csv(self, sep=','):
         return ""
     
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         return ""
     
     @output
-    def json(self, text=TEXT):
+    def json(self):
         return {self.name: self.data}
     
     @output
-    def md(self, text=TEXT):
+    def md(self):
         return ""
     rst = md
     
     @output
-    def xml(self, indent=2, text=TEXT):
+    def xml(self, indent=2):
         return ("<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__).format(self._newline, str(self.data))
     
     @staticmethod

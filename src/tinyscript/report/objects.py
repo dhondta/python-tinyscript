@@ -2,8 +2,6 @@
 """Module for defining report element classes.
 
 """
-from inspect import stack
-
 from .base import *
 from ..helpers.data.transform import json2html, json2xml
 
@@ -28,15 +26,15 @@ class Data(Element):
         self._data = data
     
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         return json2html(self.data).replace("\"", "'")
     
     @output
-    def json(self, text=TEXT):
+    def json(self):
         return self.data
     
     @output
-    def xml(self, indent=2, text=TEXT):
+    def xml(self, indent=2):
         return json2xml(self.data)
 
 
@@ -61,7 +59,7 @@ class Footer(Element):
         self.css = HEAD_CSS % d
     
     @output
-    def xml(self, indent=2, text=TEXT):
+    def xml(self, indent=2):
         ind, nl = self._set_indent(indent)
         r = []
         for attr in ["left", "center", "right"]:
@@ -93,7 +91,7 @@ class Image(Element):
                      'width': width or "", 'height': height or ""}
     
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         img = "<img src='%s'" % self.data['source']
         for k in ['title', 'width', 'height']:
             v = self.data.get(k)
@@ -102,11 +100,11 @@ class Image(Element):
         return img + "/>"
     
     @output
-    def md(self, text=TEXT):
+    def md(self):
         return "![%(title)s](%(source)s)" % self.data
     
     @output
-    def rst(self, text=TEXT):
+    def rst(self):
         s = ".. image:: %(source)s" % self.data
         for attr, val in self.data.items():
             if attr != "source" and val:
@@ -114,7 +112,7 @@ class Image(Element):
         return s
     
     @output
-    def xml(self, indent=2, text=TEXT):
+    def xml(self, indent=2):
         ind, nl = self._set_indent(indent)
         xml = "<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__
         attrs = ind + "<source>%s</source>" % self.data['source']
@@ -140,11 +138,11 @@ class List(Element):
         self.tag = ["ul", "ol"][self.ordered]
     
     @output
-    def csv(self, sep=',', text=TEXT):
+    def csv(self, sep=','):
         return "\n".join(self.data)
     
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         ind, nl = self._set_indent(indent)
         s = "<%s" % self.tag
         if self.style:
@@ -155,12 +153,12 @@ class List(Element):
         return s + "</%s>" % self.tag
     
     @output
-    def md(self, text=TEXT):
+    def md(self):
         return "\n".join("%s %s" % (["-", "%d." % (n+1)][self.ordered], i) for n, i in enumerate(self.data))
     rst = md
     
     @output
-    def xml(self, indent=2, text=TEXT):
+    def xml(self, indent=2):
         ind, nl = self._set_indent(indent)
         xml = "<%(name)s>{0}{1}{0}</%(name)s>" % self.__dict__
         return xml.format(nl, "\n".join(ind + "<item>%s</item>" % i for i in self.data))
@@ -169,7 +167,7 @@ class List(Element):
 class Rule(Element):
     """ This class represents an horizontal rule. """    
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         ind, nl = self._set_indent(indent)
         s = "<hr"
         if self.style:
@@ -177,16 +175,16 @@ class Rule(Element):
         return s + ">"
     
     @output
-    def json(self, text=TEXT):
+    def json(self):
         return {}
     
     @output
-    def md(self, text=TEXT, n=5, char="-"):
+    def md(self, n=5, char="-"):
         return n * char
     rst = md
     
     @output
-    def xml(self, indent=2, text=TEXT):
+    def xml(self, indent=2):
         return ""
 
 
@@ -219,6 +217,7 @@ class Table(Element):
         self.title = title or ""
     
     def _format(self, data):
+        from inspect import stack
         d = []
         output_format = stack()[1][3]  # get the calling output format method name from the stack
         for i, row in enumerate(data):
@@ -229,14 +228,14 @@ class Table(Element):
         return d
     
     @output
-    def csv(self, sep=',', text=TEXT):
+    def csv(self, sep=','):
         r = "" if self.column_headers is None else sep.join(self.column_headers)
         for row in self._format(self.data):
             r += "\n" + sep.join(row)
         return r
     
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         ind, nl = self._set_indent(indent)
         t = "<table id='%s'" % self.name
         if self.style:
@@ -268,7 +267,7 @@ class Table(Element):
         return nl.join(r)
     
     @output
-    def md(self, float_format="%.2g", text=TEXT):
+    def md(self, float_format="%.2g"):
         r = [" | ".join(self.column_headers or list(map(str, range(len(self.data[0])))))]
         r.append(" | ".join("---" for i in range(len(self.data[0]))))
         for row in self._format(self.data):
@@ -278,7 +277,7 @@ class Table(Element):
         return "\n".join(r)
     
     @output
-    def rst(self, float_format="%.2g", text=TEXT):
+    def rst(self, float_format="%.2g"):
         def fmt(v):
             try:
                 float(v)
@@ -294,7 +293,7 @@ class Table(Element):
         return r
     
     @output
-    def xml(self, indent=2, text=TEXT):
+    def xml(self, indent=2):
         ind, nl = self._set_indent(indent)
         r = ["<%s>" % self.name]
         for row in self.data:
@@ -329,7 +328,7 @@ class Text(Element):
         self.tag = tag
     
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         h = "<%s" % self.tag
         if self.style:
             h += " style='%s'" % self.style
@@ -337,7 +336,7 @@ class Text(Element):
         return h.replace("\n", "<br>")
     
     @output
-    def md(self, text=TEXT):
+    def md(self):
         return self.data
     rst = md
 
@@ -353,11 +352,11 @@ class Blockquote(Text):
         self.tag = "blockquote"
     
     @output
-    def md(self, text=TEXT):
+    def md(self):
         return "\n".join("> " + l for l in self.data.split("\n"))
     
     @output
-    def rst(self, text=TEXT):
+    def rst(self):
         return "\n".join("    " + l for l in self.data.split("\n"))
 
 
@@ -377,7 +376,7 @@ class Code(Text):
         self.line_numbers = line_numbers
     
     @output
-    def html(self, indent=4, text=TEXT):
+    def html(self, indent=4):
         s, cls = "<pre", "hljs"
         if self.language:
             cls += " " + self.language
@@ -390,7 +389,7 @@ class Code(Text):
         return s + str(self.data).replace("\n", "<br>") + "</pre>"
     
     @output
-    def md(self, text=TEXT):
+    def md(self):
         s = "```"
         if self.language:
             s += self.language
@@ -401,7 +400,7 @@ class Code(Text):
         return s + "\n%s\n```" % self.data
     
     @output
-    def rst(self, text=TEXT):
+    def rst(self):
         s = ".. code-block:"
         if self.language:
             s += " %s" + self.language
@@ -429,11 +428,11 @@ class Title(Text):
         super(Title, self).__init__(title, tag, **kwargs)
     
     @output
-    def md(self, text=TEXT):
+    def md(self):
         return "%(prefix)s %(content)s" % {'prefix': "#" * int(self.tag[-1]), 'content': self.data}
     
     @output
-    def rst(self, text=TEXT):
+    def rst(self):
         i = int(self.tag[-1])
         if i <= 2:
             return "%(line)s\n%(content)s\n%(line)s" % {'line': len(self.data) * "#*"[i-1], 'content': self.data}
