@@ -29,6 +29,8 @@ nav:
     - 'Malicious Macro Tester': examples-rl/malicious-macro-tester.md
     - 'Recursive Compression': examples-rl/recursive-compression.md
     - 'Solitaire Cipher': examples-rl/solitaire-cipher.md
+extra_css:
+  - css/extra.css
 extra:
   generator: false
   social:
