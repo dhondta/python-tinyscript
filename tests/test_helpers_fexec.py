@@ -4,7 +4,7 @@
 
 """
 from tinyscript import logging, shutil
-from tinyscript.helpers.constants import LINUX, PYTHON3
+from tinyscript.helpers.constants import LINUX
 from tinyscript.helpers.fexec import *
 from tinyscript.helpers.path import Path, TempPath
 
@@ -44,10 +44,9 @@ class TestHelpersFexec(TestCase):
     def test_execution_functions(self):
         if LINUX:
             self.assertIsNotNone(execute("id"))
-            if PYTHON3:
-                self.assertIsNotNone(execute("sleep 10", timeout=1))
-                self.assertIsNotNone(execute("sleep 10", shell=True, timeout=1))
-                self.assertRaises(Exception, execute, "sleep 10", timeout=1, reraise=True)
+            self.assertIsNotNone(execute("sleep 10", timeout=1))
+            self.assertIsNotNone(execute("sleep 10", shell=True, timeout=1))
+            self.assertRaises(Exception, execute, "sleep 10", timeout=1, reraise=True)
             self.assertIsNotNone(execute(Path(shutil.which("id"))))
             self.assertIsNotNone(execute_and_log("id"))
             self.assertIsNotNone(execute_and_log(["id"], shell=True))

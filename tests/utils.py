@@ -26,14 +26,20 @@ __all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep", "
 
 
 FIXTURES = {
-    '__author__':    "John Doe",
-    '__copyright__': "test",
-    '__doc__':       "test tool",
-    '__email__':     "john.doe@example.com",
-    '__examples__':  ["-v"],
-    '__license__':   "agpl-v3.0",
-    '__status__':    "beta",
-    '__version__':   "1.2.3",
+    '__author__':       "John Doe",
+    '__contributors__': [
+        {'author': "James McAdams", 'email': "j.mcadams@hotmail.com"},
+        {'author': "h4x0r1234", 'reason': "for his kind testing"},
+        {'reason': "won't be displayed (no author and no email specified)"},
+    ],
+    '__copyright__':    "test",
+    '__credits__':      "Thanks to Bob for his contribution",
+    '__doc__':          "test tool",
+    '__email__':        "john.doe@example.com",
+    '__examples__':     ["-v"],
+    '__license__':      "agpl-v3.0",
+    '__status__':       "beta",
+    '__version__':      "1.2.3",
 }
 
 
