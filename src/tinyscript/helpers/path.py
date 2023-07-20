@@ -3,8 +3,8 @@
 
 """
 import errno
-import imp
 import importlib
+import sys
 from mimetypes import guess_type
 from pathlib2 import Path as BasePath
 from pyminizip import compress_multiple, uncompress
@@ -571,8 +571,7 @@ class PythonPath(Path):
             for p in self.walk(filter_func=f):
                 p.remove(False)
         if self.is_dir():
-            self.modules = []
-            _cached = []
+            self.modules, _cached = [], []
             for e in [".pyc", ".py"]:
                 for p in self.walk(filter_func=lambda x: x.extension == e, base_cls=False):
                     if not p.is_file() or str(p.absolute()) in _cached:
@@ -590,10 +589,15 @@ class PythonPath(Path):
             self.loaded = False
             if self.extension in [".py", ".pyc"]:
                 try:
-                    self.module = [imp.load_compiled, imp.load_source][self.extension == ".py"](self.stem, str(self))
+                    loader_cls = ["SourcelessFileLoader", "SourceFileLoader"][self.extension == ".py"]
+                    loader = getattr(importlib.machinery, loader_cls)(self.stem, str(self))
+                    spec = importlib.util.spec_from_file_location(self.stem, str(self), loader=loader)
+                    self.module = importlib.util.module_from_spec(spec)
+                    sys.modules[self.module.__name__] = self.module
+                    loader.exec_module(self.module)
                     self.loaded = True
                 except (ImportError, NameError, SyntaxError, ValueError):
-                    pass
+                    raise
     
     @property
     def classes(self):
