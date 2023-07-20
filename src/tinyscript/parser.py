@@ -21,7 +21,7 @@ from .helpers.data.types import ip_address, port_number
 from .helpers.text import configure_docformat, gt
 
 
-__all__ = __features__ = ["parser", "initialize", "validate"]
+__all__ = __features__ = ["parser", "initialize"]
 
 AT_EXIT_SET  = False
 BANNER_ARG   = None
@@ -303,7 +303,7 @@ def initialize(add_banner=False,
         # expensive to load asciistuff ; import only when a banner is used
         from asciistuff import AsciiFile, Banner
         f = AsciiFile()
-        banner = getattr(glob['args'], glob.get('BANNER_ARG', BANNER_ARG) or "", None) or p.scriptname
+        banner = getattr(glob['args'], glob.get('BANNER_ARG', BANNER_ARG) or "", None) or p.banner
         f['title', glob.get('BANNER_STYLE', BANNER_STYLE)] = Banner(banner, font=bf)
         print(f)
     # 7) finally, bind the global exit handler
@@ -345,48 +345,6 @@ def initialize(add_banner=False,
         globals()['AT_EXIT_SET'] = False
 
 
-def validate(*arg_checks):
-    """
-    Function for validating group of arguments ; each argument is represented as a 4-tuple like follows:
-
-        (argument_name, fail_condition, error_message, default)
-
-        - argument_name: the name of the argument like entered in add_argument()
-        - fail_condition: condition in Python code with the argument name replaced by ' ? ' (e.g. " ? > 0")
-        - error_message: message describing what failed with the validation ofs the current argument
-        - default [optional]: value to be given if the validation fails ; this implies that the script will not exit
-                              after the validation (if no other blocking argument present)
-
-    :param arg_checks: list of 3/4-tuples
-    """
-    glob = currentframe().f_back.f_globals
-    if glob.get('args') is None:
-        return
-    locals().update(glob)
-    exit_app = False
-    for check in arg_checks:
-        check = check + (None, ) * (4 - len(check))
-        param, condition, message, default = check
-        if re.match(r'^_?[a-zA-Z][a-zA-Z0-9_]*$', param) is None:
-            raise ValueError(gt("Illegal argument name"))
-        if not hasattr(glob['args'], param):
-            raise AttributeError("'{}' argument does not exist".format(param))
-        try:
-            result = eval(condition.replace(" ? ", " glob['args'].{} ".format(param)))
-        except Exception as e:
-            result = True
-            message = str(e)
-        if result:
-            if default is None:
-                logger.error(gt(message or "Validation failed"))
-                exit_app = True
-            else:
-                logger.warning(gt(message or "Validation failed"))
-                setattr(glob['args'], param, default)
-    if exit_app:
-        sys.exit(2)
-
-
 class ProxyArgumentParser(object):
     """
     Proxy class for collecting added arguments before initialization.
@@ -404,6 +362,12 @@ class ProxyArgumentParser(object):
         parser_calls.append((self, self.__call, args, kwargs, subparser))
         del self.__call
         return subparser
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        pass
 
 
 parser = ProxyArgumentParser()

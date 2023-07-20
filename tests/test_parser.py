@@ -236,25 +236,4 @@ class TestParser(TestCase):
             self.assertFalse(hasattr(args, "css"))
             self.assertFalse(hasattr(args, "theme"))
             self.assertFalse(hasattr(args, "filename"))
-    
-    def test_validation(self):
-        temp_stdout(self)
-        sys.argv[1:] = []
-        parser.add_argument("-a", "--arg1")
-        parser.add_argument("-b", "--arg2", action="store_true")
-        initialize(autocomplete=True)
-        self.assertIsNone(validate(('arg1', " ? is None", "Failed", "test")))
-        with self.assertRaises(ValueError):
-            validate(('bad/arg', "True"))
-        with self.assertRaises(ValueError):
-            validate(('os.system("id")', ""))
-        with self.assertRaises(ValueError):
-            validate(('import pty; pty.spawn("/bin/bash")', ""))
-        with self.assertRaises(AttributeError):
-            validate(('arg123', "bad condition"))
-        with self.assertRaises(SystemExit):
-            validate(('arg1', "bad condition"))
-        self.assertIsNone(validate(('arg1', "False", "message", "default")))
-        globals()['args'] = None
-        self.assertIsNone(validate())
 
