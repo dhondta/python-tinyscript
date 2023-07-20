@@ -200,27 +200,31 @@ __set_max = lambda m: float(m) if m == "inf" else m
 
 
 def _generate_random_string_from_regex(regex, max_repeat=MAX_REPEAT, any_set=None):
-    """ Utility function to generate a single random string from a regex pattern. """
+    """ Generate a single random string from a regex pattern. """
     return next(__gen_str_from_re(regex, __set_max(max_repeat), __set_any(any_set), rand=True))
 re.randstr = _generate_random_string_from_regex
+re.randstr.__name__ = "randstr"
 
 
 def _generate_random_strings_from_regex(regex, n=10, max_repeat=MAX_REPEAT, any_set=None):
-    """ Utility function to generate a single random string from a regex pattern. """
+    """ Generate a single random string from a regex pattern. """
     for i in range(n):
         yield next(__gen_str_from_re(regex, __set_max(max_repeat), __set_any(any_set), rand=True))
 re.randstrs = _generate_random_strings_from_regex
+re.randstrs.__name__ = "randstrs"
 
 
 def _generate_all_strings_from_regex(regex, max_repeat=MAX_REPEAT, any_set=None):
-    """ Utility function to generate all possible strings from a regex pattern. """
+    """ Generate all possible strings from a regex pattern. """
     for result in __gen_str_from_re(regex, __set_max(max_repeat), __set_any(any_set)):
         yield result
 re.strings = _generate_all_strings_from_regex
+re.strings.__name__ = "strings"
 
 
 def _get_size_of_regex(regex, max_repeat=MAX_REPEAT, any_set=None):
     """ Utility function to get the number of all possible strings from a regex pattern. """
     return list(__gen_str_from_re(regex, __set_max(max_repeat), __set_any(any_set), count=True))[0]
 re.size = _get_size_of_regex
+re.size.__name__ = "size"
 
