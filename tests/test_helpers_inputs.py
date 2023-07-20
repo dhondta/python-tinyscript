@@ -16,8 +16,6 @@ class TestHelpersInputs(TestCase):
     def test_input_functions(self):
         clear()
         temp_stdout(self)
-        self.assertTrue(b("test"))
-        self.assertEqual(b(1), 1)
         temp_stdin(self, "test\n")
         self.assertEqual(std_input(), "test")
         temp_stdin(self, "test\n")
@@ -42,8 +40,8 @@ class TestHelpersInputs(TestCase):
         self.assertEqual(user_input(default="test"), "test")
         temp_stdin(self, "test\n")
         self.assertEqual(user_input(choices=lambda v: v in ["test"]), "test")
-        temp_stdin(self, "bad\n")
-        self.assertIs(user_input(choices=["1", "2"]), None)
+        temp_stdin(self, "\n")
+        self.assertIs(user_input(), None)
         temp_stdin(self, "bad\n1\n")
         self.assertIsNotNone(user_input(choices=["1", "2"], required=True))
     

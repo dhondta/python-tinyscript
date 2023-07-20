@@ -7,7 +7,7 @@ from six import StringIO
 from .common import lazy_object
 from .compat import ensure_str
 from .constants import *
-from .data.types import is_function, is_lambda, is_str
+from .data.types import is_function, is_str
 from ..preimports import colorful, os, re, signal, sys
 
 # fix to Xlib.error.DisplayConnectionError: Can't connect to display ":0": No protocol specified
@@ -243,7 +243,7 @@ def user_input(prompt="", choices=None, default=None, choices_str=None, default_
     """
     shortcuts = {}
     default_str = kwargs.pop('default_str', ["[{}]".format(default), ""][default is None and required])
-    if type(choices) in [list, tuple, set]:
+    if isinstance(choices, (list, tuple, set)):
         choices = list(map(lambda x: str(x).lower(), choices))
         choices_str = choices_str or "{%s}" % '|'.join(list(map(str, choices)))
         # consider choices of the form ["(Y)es", "(N)o"] ; in this case, we want the choices to be
@@ -254,8 +254,12 @@ def user_input(prompt="", choices=None, default=None, choices_str=None, default_
         shortcuts = {x.group(1).lower(): c for x, c in zip(m, choices) if x is not None}
         # this way, if using ["Yes", "No"], choices will remain so
         _check = lambda v: str(v).lower() in choices or str(v).lower() in shortcuts.keys()
-    elif is_lambda(choices):
-        _check = choices
+    elif is_function(choices, True):  # True: consider builtins as functions too
+        def _check(ui):
+            try:
+                return choices(ui)
+            except:
+                return False
     else:
         _check = lambda v: True
     prompt += " " + "{} {} ".format(choices_str or "",
@@ -263,18 +267,21 @@ def user_input(prompt="", choices=None, default=None, choices_str=None, default_
     ui, first = None, True
     while not ui:
         stdin_flush()
-        ui = std_input(["", prompt][first] + ["", "\n >> "][newline], **kwargs)
+        ui = std_input(["", prompt][first] + ["", "%s >> " % ["", "\n"][first]][newline], **kwargs)
         first = False
-        if type(choices) in [list, tuple, set]:
-            choices = list(map(lambda x: x.lower(), choices))
-            ui = ui.lower()
-        if ui == "" and default is not None and _check(default):
-            s = str(default)
-            return shortcuts.get(s, s)
-        if ui != "" and _check(ui):
+        # handle empty string first
+        if ui == "":
+            # if a default value is defined, use it
+            if default is not None and _check(default):
+                return shortcuts.get(default, default)
+            # if no default and value is not required, return None
+            elif default is None and not required:
+                return
+        # then handle empty string and check for compliant value
+        elif _check(ui):
+            if is_function(choices, True):
+                return choices(ui)
             return shortcuts.get(ui, ui)
-        if not required:
-            return
         ui = None
 
 
