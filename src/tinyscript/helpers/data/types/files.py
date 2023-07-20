@@ -2,7 +2,11 @@
 """Files/Folders-related checking functions and argument types.
 
 """
+from os import environ
+from os.path import sep
+
 from .strings import _str2list
+from ...constants import WINDOWS
 from ...common import lazy_load_module
 from ....preimports import os, re
 
@@ -13,17 +17,20 @@ __all__ = __features__ = []
 
 
 # dummy shortcuts, compliant with the is_* naming convention
-__all__ += ["is_dir", "is_executable", "is_file", "is_filetype", "is_folder", "is_mimetype"]
+__all__ += ["is_dir", "is_executable", "is_file", "is_filemode", "is_filetype", "is_folder", "is_in_path",
+            "is_mimetype"]
 is_dir = is_folder = os.path.isdir
 is_executable = lambda f: os.access(f, os.X_OK)
 is_file = os.path.isfile
+is_filemode = lambda m: len(m) == 3 and all(int(g) in range(8) for g in m)
 is_filetype = lambda f, t: is_file(f) and re.search(t, magic.from_file(f)) is not None
+is_in_path = lambda p: p in [x.rstrip(sep) for x in environ['PATH'].split(":;"[WINDOWS])]
 is_mimetype = lambda f, m: is_file(f) and re.search(m, magic.from_file(f, mime=True)) is not None
 
 
 # file and folder-related argument types
-__all__ += ["file_does_not_exist", "file_exists", "file_mimetype", "file_type", "files_list", "files_mimetype",
-            "files_type", "files_filtered_list", "folder_does_not_exist", "folder_exists",
+__all__ += ["file_does_not_exist", "file_exists", "file_mode", "file_mimetype", "file_type", "files_list",
+            "files_mimetype", "files_type", "files_filtered_list", "folder_does_not_exist", "folder_exists",
             "folder_exists_or_create"]
 
 
@@ -60,6 +67,13 @@ def __file_type(mime=False):
 file_mimetype, file_type = __file_type(True), __file_type()
 file_mimetype.__doc__ = __file_type.__doc__.format("MIME")
 file_type.__doc__ = __file_type.__doc__.format("file")
+
+
+def file_mode(m):
+    """ Check for a valid file permissions mode. """
+    if is_filemode(m):
+        return int(m, 8)
+    raise ValueError("Not a valid file permissions mode")
 
 
 def files_list(l, filter_bad=False):

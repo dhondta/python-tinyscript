@@ -58,6 +58,8 @@ class TestHelpersDataTypes(TestCase):
         self.assertEqual(folder_exists_or_create(TFNE), TFNE)
         self.assertRaises(ValueError, folder_exists_or_create, l1[0])
         self.assertEqual(folder_exists(TFNE), TFNE)
+        self.assertEqual(file_mode("750"), 488)
+        self.assertEqual(file_mode("666"), 438)
 
     def test_general_purpose_types(self):
         self.assertEqual(int_range(1, 2), 1)
