@@ -36,7 +36,7 @@ class TestPreimportsRandom(TestCase):
         self.assertRaises(ValueError, l.test, "abcd")
         self.assertTrue(l.next_block("str"))
         self.assertTrue(l.next_block("bin"))
-        l = random.LFSR("abcdef", (1, 3, 5, 7), 32)
+        random.LFSR("abcdef", (1, 3, 5, 7), 32)
     
     def test_random_geffe(self):
         g = random.Geffe("1234567890ab")

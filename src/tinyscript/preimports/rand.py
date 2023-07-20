@@ -164,19 +164,12 @@ class LFSR(__Base):
          
         See: https://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm
         """
-        bs = list(map(int, [b for b in self.target]))
+        bs = list(map(int, self.target))
         n = len(bs)
-        b, c = [0 for i in range(n)], [0 for i in range(n)]
-        b[0], c[0] = 1, 1
-        l, m, i = 0, -1, 0
+        b, c, l, m, i = [1] + [0 for i in range(n - 1)], [1] + [0 for i in range(n - 1)], 0, -1, 0
         while i < n:
-            v = bs[(i - l):i]
-            v = v[::-1]
-            cc = c[1:l + 1]
-            d = (bs[i] + sum(map(operator.mul, v, cc))) % 2
-            if d == 1:
-                tmp = [x for x in c]
-                p = [0 for k in range(n)]
+            if (bs[i] + sum(map(operator.mul, bs[(i - l):i][::-1], c[1:l + 1]))) % 2 == 1:
+                tmp, p = [x for x in c], [0 for _ in range(n)]
                 for j in range(0, l):
                     if b[j] == 1:
                         p[j + i - m] = 1
@@ -237,9 +230,7 @@ class LFSR(__Base):
         if isinstance(seed, int):
             seed = int2bin(seed, nbits_in=nbits, nbits_out=nbits)
         elif is_str(seed) and not is_bin(seed):
-            if is_hex(seed):
-                seed = hex2str(seed)
-            seed = str2bin(seed).zfill(nbits)
+            seed = (hex2bin if is_hex(seed) else str2bin)(seed).zfill(nbits)
         if not is_bin(seed):
             raise ValueError("Bad seed ({}) ; should be a list of bits".format(seed))
         elif bin2int(seed) == 0:
@@ -252,9 +243,7 @@ class LFSR(__Base):
     def _format_target(target):
         """ Ensure that target is formatted as a list of bits """
         if is_str(target) and not is_bin(target):
-            if is_hex(target):
-                target = hex2str(target)
-            target = [int(b) for b in str2bin(target)]
+            target = [int(b) for b in (hex2bin if is_hex(target) else str2bin)(target)]
         if not is_bin(target):
             raise ValueError("Bad target ({}) ; should be a list of bits".format(target))
         return target
