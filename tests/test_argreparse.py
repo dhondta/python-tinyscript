@@ -151,11 +151,8 @@ class TestArgreparse(TestCase):
         test = subparsers.add_parser("subtest", aliases=["test2"], help="test", parents=[self.p])
         test.add_argument("--test")
         a = self.p._actions[0]
-        temp_stdin(self, "\n")
-        self.assertRaises(EOFError, self.p._set_arg, a)
         ArgumentParser.add_to_config("main", "command", "subtest")
         ArgumentParser.add_to_config("subtest", "test", "value")
-        self.assertRaises(EOFError, self.p._set_arg, a, c=True)
         test._config_parsed = True
         self.p._set_arg(a, c=True)
     
@@ -222,21 +219,4 @@ class TestArgreparse(TestCase):
         self.assertIn("name", o)
         self.assertNotIn("_collisions", o)
         self.assertIs(ns.get("does_not_exist"), None)
-    
-    def test_custom_constants(self):
-        f = {k: v for k, v in FIXTURES.items()}
-        for fn, fmt, val in [
-                ("test.py", "acronym", "TEST"),
-                ("this-is_a_test.py", "acronym", "TIAT"),
-                ("this_is-a_test.py", "as_is", "this_is-a_test"),
-                ("this_is-a_test.py", "none", "this_is-a_test"),
-                ("this-is-a-test.py", "camelcase", "ThisIsATest"),
-                ("this_is_a-test.py", "slugified", "this-is-a-test"),
-            ]:
-            f['__file__'] = fn
-            f['SCRIPTNAME_FORMAT'] = fmt
-            p = ArgumentParser(f)
-            self.assertEqual(p.description.split()[0], val)
-        f['SCRIPTNAME_FORMAT'] = "does_not_exist"
-        self.assertRaises(ValueError, ArgumentParser, f)
 

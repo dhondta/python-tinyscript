@@ -9,8 +9,8 @@ import re
 import shlex
 import sys
 from argparse import _ActionsContainer, _ArgumentGroup, _MutuallyExclusiveGroup, _AttributeHolder, _SubParsersAction, \
-                     ArgumentDefaultsHelpFormatter, Action, ArgumentError, RawTextHelpFormatter, SUPPRESS, \
-                     _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, ArgumentParser as BaseArgumentParser
+                     Action, ArgumentDefaultsHelpFormatter, ArgumentError, ArgumentTypeError, RawTextHelpFormatter, \
+                     SUPPRESS, _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, ArgumentParser as BaseArgumentParser
 from os import environ
 from os.path import abspath, basename, dirname, sep, splitext
 from stat import S_IXUSR
@@ -23,18 +23,18 @@ from .features.loglib import logger
 from .helpers.constants import PYTHON3
 from .helpers.inputs import user_input
 from .helpers.licenses import *
-from .helpers.data.types import is_executable, is_long_opt, is_pos_int, is_short_opt
+from .helpers.data.types import is_executable, is_in_path, is_long_opt, is_pos_int, is_short_opt
 from .helpers.termsize import get_terminal_size
 from .helpers.text import *
 from .helpers.text import configure_docformat, txt_terminal_render
 from .preimports.shutilp import which
 
 
-__all__ = ["ArgumentParser", "DUNDERS", "SCRIPTNAME_FORMAT", "SUPPRESS"]
+__all__ = ["ArgumentParser", "DUNDERS", "SUPPRESS"]
 
 
-BASE_DUNDERS = ['__author__', '__copyright__', '__credits__', '__license__', '__reference__', '__source__',
-                '__training__']
+BASE_DUNDERS = ['__author__', '__contributors__', '__copyright__', '__credits__', '__license__', '__reference__',
+                '__source__', '__training__']
 DUNDERS = BASE_DUNDERS + [
     '__date__', '__details__', '__description__', '__doc__', '__docformat__', '__email__', '__examples__',
     '__functions__', '__maximum_python_version__', '__minimum_python_version__', '__priority__', '__product__',
@@ -45,15 +45,9 @@ if sys.version_info >= (3, 8):
 
 DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
-SCRIPTNAME_FORMAT   = "camelcase"
-SCRIPTNAME_FORMATS  = {
-    'acronym':   lambda s: "".join(x.strip()[0].upper() for x in re.split(r"[ -_]", s.lower())) \
-                           if len(re.split(r"[ -_]", s.lower())) > 1 else s.upper(),
-    'as_is':     lambda s: s,
-    'camelcase': lambda s: "".join(x.strip().capitalize() for x in re.split(r"[ -_]", s)),
-    'none':      lambda s: s,
-    'slugified': lambda s: "-".join(x.strip().lower() for x in re.split(r"[ -_]", s)),
-}
+
+
+stem = lambda p: splitext(basename(p))[0]
 
 
 # ------------------------------- CUSTOM ACTIONS -------------------------------
@@ -279,16 +273,12 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self._docfmt = gd.get('__docformat__')
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         self.examples = gd.get('__examples__', [])
-        script = basename(gd.get('__script__', gd.get('__file__', sys.argv[0])))
-        if script and kwargs.get('prog') is None:
+        script = stem(sys.argv[0])
+        self.banner = gd['__scriptname__'] = gd.get('__banner__', script)
+        if kwargs.get('prog') is None:
             path = abspath(which(script) or script)
-            root = dirname(path)
-            script = basename(script)
-            kwargs['prog'] = gd['__script__'] if gd.get('__script__') else \
-                             "python{} ".format(["", "3"][PYTHON3]) + script if not is_executable(path) else \
-                             "./" + script if root not in [x.rstrip(sep) for x in environ['PATH'].split(":")] else \
-                             splitext(script)[0]
-            ArgumentParser.prog = kwargs['prog']
+            ArgumentParser.prog = kwargs['prog'] = "python " + script if not is_executable(path) else \
+                                                   "./" + script if not is_in_path(dirname(path)) else script
         kwargs['add_help'] = False
         kwargs['conflict_handler'] = "error"
         # when __docformat__ is set, fixing max_help_position to terminal's width forces argparse to format arguments
@@ -300,31 +290,25 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         kwargs['formatter_class'] = HelpFormatter if self._docfmt is None else \
                                     lambda prog: HelpFormatter(prog, max_help_position=mhp)
         # format the epilog message
-        if self.examples and script:
+        if self.examples:
             _ = ["{} {}".format(ArgumentParser.prog, e) for e in self.examples]
             _ = list(filter(lambda x: x.startswith(kwargs['prog']), _))
             if len(_) > 0:
                 kwargs['epilog'] = txt2title(gt("Usage example{}".format(["", "s"][len(_) > 1])) + ":")
                 e = '\n'.join(["\n", "  "][self._docfmt is None] + txt2paragraph(e) for e in _)
                 kwargs['epilog'] += "\n" + e
-        # adapt the script name ; if SCRIPTNAME is provided, it supersedes SCRIPTNAME_FORMAT, otherwise compute the name
-        #  according to the format specified in SCRIPTNAME_FORMAT
-        sname = script
-        sname_func = SCRIPTNAME_FORMATS.get(gd.get('SCRIPTNAME_FORMAT', SCRIPTNAME_FORMAT))
-        if sname_func:
-            sname = sname_func(splitext(script)[0])
-        else:
-            l = "\n- ".join(sorted(SCRIPTNAME_FORMATS.keys()))
-            raise ValueError("Bad script name format ; please use one of the followings:\n{}".format(l))
-        self.scriptname = gd['__scriptname__'] = sname
         # format the description message
-        d = sname
+        d = gd.get('__description__', script)
         d += " " + str(gd.get('__version__') or "")
         d = txt2title(d, level=1)
         v = gd.get('__status__')
         if v:
             d += " (" + v + ")"
-        l = max(list(map(lambda x: len(txt2italic(x.strip('_'))), BASE_DUNDERS)))
+        try:
+            l = max(list(map(lambda x: len(txt2italic(x.strip('_'))),
+                             [bd for bd in BASE_DUNDERS if gd.get(bd) is not None])))
+        except ValueError:
+            l = 0
         for k in BASE_DUNDERS:
             m = gd.get(k)
             if m:
@@ -334,6 +318,25 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                     m = copyright(*m)
                 elif k == '__license__':
                     m = license(m, True) or m
+                elif k == '__contributors__':
+                    # data structure (per contributor):
+                    # {
+                    #   'author': ...,
+                    #   'email':  ..., (optional)
+                    #   'reason': ..., (optional)
+                    # }
+                    m = ""
+                    for i, contributor in enumerate(gd[k]):
+                        s = contributor.get('author') or ""
+                        email = contributor.get('email')
+                        if email:
+                            s += txt2email(e) if s == "" else " ({})".format(txt2email(str(email)))
+                        if s == "":  # do not display an 'reason' if no 'author' and 'email' is defined
+                            continue
+                        reason = contributor.get('reason')
+                        if reason:
+                            s += " - " + str(reason)
+                        m += ["", (l + 2) * " "][i > 0] + s
                 meta = ("{: <%d}: {}" % l).format(txt2italic(k.strip('_').capitalize()), m)
                 if k == '__author__':
                     e = gd.get('__email__')
@@ -386,6 +389,28 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         for a in filter(lambda _: self.is_action(_, *a_types), self._actions):
             yield a
     
+    def _get_value(self, a, s):
+        """ Get the value from an argument string given its related action.
+        NB: This method is mostly the same as the original ; it customizes the "invalid ... value" message.
+        
+        :param a: argparse.Action instance
+        :param s: argument string
+        :return:  resulting valuefro mthe argument string given its action
+        """
+        type_func = self._registry_get('type', a.type, a.type)
+        if not callable(type_func):
+            raise ArgumentError(a, gt('%r is not callable') % type_func)
+        try:
+            result = type_func(s)
+        except ArgumentTypeError:
+            raise ArgumentError(a, str(sys.exc_info()[1]))
+        except (TypeError, ValueError):
+            # clean up the name (do not keep the function name, e.g. "_my_argument_action", but make it more
+            #  user-friendly, e.g. "my argument action"
+            name = getattr(a.type, '__name__', repr(a.type)).strip("_").replace("_", " ")
+            raise ArgumentError(a, gt('invalid %s value: %r') % (name, s))
+        return result
+    
     def _input_arg(self, a):
         """ Ask the user for input of a single argument.
         
@@ -399,20 +424,23 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         prompt = gt((a.help or a.dest).capitalize())
         r = {'newline': True, 'required': a.required}
         # now handle each different action
-        if self.is_action(a, 'store', 'append'):
-            return user_input(prompt, a.choices, a.default, **r)
-        elif self.is_action(a, 'store_const', 'append_const'):
-            return user_input(prompt, (gt("(A)dd"), gt("(D)iscard")), "d", **r)
-        elif self.is_action(a, 'store_true'):
-            return user_input(prompt, (gt("(Y)es"), gt("(N)o")), "n", **r)
-        elif self.is_action(a, 'store_false'):
-            return user_input(prompt, (gt("(Y)es"), gt("(N)o")), "y", **r)
-        elif self.is_action(a, 'count'):
-            return user_input(prompt, is_pos_int, 0, gt("positive integer"), **r)
-        elif self.is_action(a, 'parsers'):
-            pmap = a._name_parser_map
-            _ = list(pmap.keys())
-            return user_input(prompt, _, _[0], **r) if len(_) > 0 else None
+        try:
+            if self.is_action(a, 'store', 'append'):
+                return user_input(prompt, a.choices or self._registry_get('type', a.type, a.type), a.default, **r)
+            elif self.is_action(a, 'store_const', 'append_const'):
+                return user_input(prompt, (gt("(A)dd"), gt("(D)iscard")), "d", **r)
+            elif self.is_action(a, 'store_true'):
+                return user_input(prompt, (gt("(Y)es"), gt("(N)o")), "n", **r)
+            elif self.is_action(a, 'store_false'):
+                return user_input(prompt, (gt("(Y)es"), gt("(N)o")), "y", **r)
+            elif self.is_action(a, 'count'):
+                return user_input(prompt, is_pos_int, 0, gt("positive integer"), **r)
+            elif self.is_action(a, 'parsers'):
+                pmap = a._name_parser_map
+                l = list(pmap.keys())
+                return user_input(prompt, l, l[0], **r) if len(l) > 0 else None
+        except (EOFError, SystemExit):
+            sys.exit(0)
         raise NotImplementedError(gt("Unknown argparse action"))
     
     def _reset_args(self):
@@ -481,11 +509,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             if not value:
                 value = self._input_arg(a)
             pmap = a._name_parser_map
-            if c:
-                pmap[value].config_args(a.dest)
-                pmap[value]._reparse_args['pos'].insert(0, value)
-            else:
-                pmap[value].input_args()
+            pmap[value].config_args(a.dest) if c else pmap[value].input_args()
+            pmap[value]._reparse_args['pos'].insert(0, value)
             self._reparse_args['sub'].append(pmap[value])
         else:
             raise NotImplementedError("Unknown argparse action")
