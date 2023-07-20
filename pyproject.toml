@@ -62,8 +62,9 @@ dependencies = [
   "python-magic",
   "python-slugify",
   "pyyaml>=5.3.1",
+  "requests",
   "rich",
-  "setuptools",
+  "setuptools>=65.5.1",
   "six",
   "terminaltables",
   "toml",
@@ -85,4 +86,4 @@ issues = "https://github.com/dhondta/python-tinyscript/issues"
 repository = "https://github.com/dhondta/python-tinyscript"
 
 [project.scripts]
-tinyscript = "tinyscript.__main__:main"
+tsm = "tinyscript.__main__:main"

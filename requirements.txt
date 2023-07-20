@@ -24,8 +24,9 @@ pypiwin32; sys_platform=='windows'
 python-magic
 python-slugify
 pyyaml>=5.3.1
+requests
 rich
-setuptools
+setuptools>=65.5.1
 six
 terminaltables
 toml
