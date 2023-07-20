@@ -326,8 +326,10 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_dir` / `ts.is_folder` | dummy shortcuts to `os.path.isdir`
 `ts.is_executable` | whether the given path has the execution flag
 `ts.is_file` | dummy shortcut to `os.path.isfile`
+`ts.is_filemode` | simple file mode check (for Linux permissions)
 `ts.is_filetype` | regex-based check for file's type (relying on [`python-magic`](https://pypi.org/project/python-magic/))
 `ts.is_hex` | hexadecimal string (case insensitive)
+`ts.is_in_path` | whether the target path is in the PATH environment variable
 `ts.is_int` / `ts.is_int_range` / `ts.is_pos_int` / `ts.is_neg_int` / `ts.is_prime` | integer (within range / positive / negative / prime)
 `ts.is_list` | list, tuple, set
 `ts.is_long_opt` | for an argument with the "`--option`" format
@@ -417,6 +419,7 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `ts.file_does_not_exist` | `str` | non-existing file path
 `ts.file_exists` | `str` | existing file path
 `ts.file_mimetype(mimetype)` | `str` | file path exists and has a MIME type matching the given one
+`ts.file_mode(mode)` | `str` | file permissions mode has 3 digits from 0 to 7
 `ts.file_type(type)` | `str` | file path exists and has a file type matching the given one
 `ts.files_list` | `list(str)` | list of only existing file paths
 `ts.files_filtered_list` | `list(str)` | list of at least one existing file path (bad paths are filtered)

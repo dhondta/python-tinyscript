@@ -12,6 +12,7 @@ nav:
   - 'Utility features': utility.md
   - Helpers: helpers.md
   - Usage: usage.md
+  - 'Scripts management': tsm.md
   - Examples:
     - 'Simple script': examples/simple-script.md
     - 'Simple tool': examples/simple-tool.md

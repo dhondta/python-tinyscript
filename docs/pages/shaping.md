@@ -7,17 +7,22 @@ Metadata can be defined using *dunders* (double underscore variables) at the ver
 ```python
 from tinyscript import *
 
-__script__    = "MyScript"
-__author__    = "John Doe"
-__copyright__ = "John Doe Inc."
-__email__     = "john.doe@example.com"
-__license__   = "agpl-3.0"
-__version__   = "1.0"
-__reference__ = "..."
-__source__    = "..."
-__training__  = "..."
-__examples__  = ["..."]
-__doc__       = "This tool ..."
+__author__       = "John Doe"
+__contributors__ = [
+    {'author': "James McAdams", 'email': "j.mcadams@hotmail.com"},
+    {'author': "h4x0r1234", 'reason': "for his kind testing"},
+]
+__credits__      = "Thanks to Bob for his contribution"
+__copyright__    = ("John Doe Inc.", 2020, 2023)
+__description__  = "My Script"
+__email__        = "john.doe@example.com"
+__license__      = "agpl-3.0"
+__version__      = "1.0"
+__reference__    = "..."
+__source__       = "..."
+__training__     = "..."
+__examples__     = ["..."]
+__doc__          = "This tool ..."
 
 initialize()
 ```
@@ -26,13 +31,16 @@ This gives the following help message:
 
 ```sh hl_lines="2 3 4 5 6 7 8 12 19"
 $ python tool.py -h
-MyScript v1.0
-Author   : John Doe (john.doe@example.com)
-Copyright: © 2020 John Doe Inc.
-License  : GNU Affero General Public License v3.0
-Reference: ...
-Source   : ...
-Training : ...
+My Script v1.0
+Author      : John Doe (john.doe@example.com)
+Contributors: James McAdams (j.mcadams@hotmail.com)
+              h4x0r1234 - for his kind testing
+Credits     : Thanks to Bob for his contribution
+Copyright   : © 2020-2023 John Doe Inc.
+License     : GNU Affero General Public License v3.0
+Reference   : ...
+Source      : ...
+Training    : ...
 
 usage: tool [-h] [-v]
 
@@ -46,14 +54,6 @@ extra arguments:
 Usage examples:
   python tool.py ...
 ```
-
-If not using `__script__`, the name of the script will be used taking a format into account. This format is defined by the `SCRIPTNAME_FORMAT` constant and defaults to "`camelcase`". The possible values are:
-
-- `acronym`: split the name on whitespaces, hyphens and underscores then make an acronym from the collected tokens (e.g. "`my-super-script`" becomes "`MSS`")
-- `as_is`: do not modify the name
-- `camelcase`: split the name on whitespaces, hyphens and underscores then capitalize and gather the collected tokens (e.g. "`my-script`" becomes "`MyScript`")
-- `none`: equivalent to "`as_is`"
-- `slugified`: split the name on whitespaces, hyphens and underscores then lowercase the tokens and join them with hyphens (e.g. "`my_script`" becomes "`my-script`")
 
 [See example here](examples/metadata.md)
 
