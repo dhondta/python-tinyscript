@@ -91,8 +91,7 @@ def __gen_str_from_re(regex, max_repeat, any_set, rand=False, parsed=False, grou
             # note: this state generates the full list of possible characters from a set, e.g. [A-Z], there shouldn't be
             #        any valid regex-related case that allows to put a subpattern therein ; therefore, non-lazily nature
             #        is not an issue here
-            charset = list(set([x for l in __gen_str_from_re(value, max_repeat, any_set, rand, True, groups) \
-                                for x in l]))
+            charset = sorted(x for l in __gen_str_from_re(value, max_repeat, any_set, rand, True, groups) for x in l)
             if count:
                 size *= len(charset)
             else:
@@ -106,8 +105,9 @@ def __gen_str_from_re(regex, max_repeat, any_set, rand=False, parsed=False, grou
                 tokens.append(chr(value))
         elif code in ["max_repeat", "min_repeat"]:
             start, end = value[:2]
-            end = max_repeat if getattr(end, "name", str(end)).lower() == "maxrepeat" else end
-            end = min(end, max_repeat)
+            end = max_repeat[0] if getattr(end, "name", str(end)).lower() == "maxrepeat" else end
+            if max_repeat[1]:
+                end = min(end, max_repeat)
             start = min(start, end)
             if count:
                 if float(end) == float("inf") or PYTHON2 and end == 4294967295:
@@ -142,9 +142,9 @@ def __gen_str_from_re(regex, max_repeat, any_set, rand=False, parsed=False, grou
                 # 2: case where start=0 and end=1
                 # 3: explicit repeat
                 @itertools.resettable
-                def repeat_gen(v):
+                def repeat_gen(v, s, e):
                     empty_yield = False
-                    for n in ([random.randint(start, end + 1)] if rand else range(start, end + 1)):
+                    for n in ([random.randint(s, e + 1)] if rand else range(s, e + 1)):
                         charset = __gen_str_from_re(v[-1], max_repeat, any_set, rand, True, groups)
                         for c in itertools.product2(charset, repeat=n):
                             r = "".join(c)
@@ -155,7 +155,7 @@ def __gen_str_from_re(regex, max_repeat, any_set, rand=False, parsed=False, grou
                                     yield ""
                             else:
                                 yield r
-                tokens.append(repeat_gen(value))
+                tokens.append(repeat_gen(value, start, end))
         elif code == "negate":
             negate = True
         elif code == "not_literal":
@@ -199,32 +199,32 @@ __set_any = lambda s: MASKS[s] if s in MASKS.keys() else s or printable
 __set_max = lambda m: float(m) if m == "inf" else m
 
 
-def _generate_random_string_from_regex(regex, max_repeat=MAX_REPEAT, any_set=None):
+def _generate_random_string_from_regex(regex, max_repeat=MAX_REPEAT, force_max_repeat=False, any_set=None):
     """ Generate a single random string from a regex pattern. """
-    return next(__gen_str_from_re(regex, __set_max(max_repeat), __set_any(any_set), rand=True))
+    return next(__gen_str_from_re(regex, (__set_max(max_repeat), force_max_repeat), __set_any(any_set), rand=True))
 re.randstr = _generate_random_string_from_regex
 re.randstr.__name__ = "randstr"
 
 
-def _generate_random_strings_from_regex(regex, n=10, max_repeat=MAX_REPEAT, any_set=None):
+def _generate_random_strings_from_regex(regex, n=10, max_repeat=MAX_REPEAT, force_max_repeat=False, any_set=None):
     """ Generate a single random string from a regex pattern. """
     for i in range(n):
-        yield next(__gen_str_from_re(regex, __set_max(max_repeat), __set_any(any_set), rand=True))
+        yield next(__gen_str_from_re(regex, (__set_max(max_repeat), force_max_repeat), __set_any(any_set), rand=True))
 re.randstrs = _generate_random_strings_from_regex
 re.randstrs.__name__ = "randstrs"
 
 
-def _generate_all_strings_from_regex(regex, max_repeat=MAX_REPEAT, any_set=None):
+def _generate_all_strings_from_regex(regex, max_repeat=MAX_REPEAT, force_max_repeat=False, any_set=None):
     """ Generate all possible strings from a regex pattern. """
-    for result in __gen_str_from_re(regex, __set_max(max_repeat), __set_any(any_set)):
+    for result in __gen_str_from_re(regex, (__set_max(max_repeat), force_max_repeat), __set_any(any_set)):
         yield result
 re.strings = _generate_all_strings_from_regex
 re.strings.__name__ = "strings"
 
 
-def _get_size_of_regex(regex, max_repeat=MAX_REPEAT, any_set=None):
+def _get_size_of_regex(regex, max_repeat=MAX_REPEAT, force_max_repeat=False, any_set=None):
     """ Utility function to get the number of all possible strings from a regex pattern. """
-    return list(__gen_str_from_re(regex, __set_max(max_repeat), __set_any(any_set), count=True))[0]
+    return list(__gen_str_from_re(regex, (__set_max(max_repeat), force_max_repeat), __set_any(any_set), count=True))[0]
 re.size = _get_size_of_regex
 re.size.__name__ = "size"
 
