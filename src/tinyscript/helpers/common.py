@@ -3,14 +3,9 @@
 
 """
 import builtins
-import ctypes
 import lazy_object_proxy
-import os
-from dateparser import parse as dateparse
-from functools import update_wrapper
 from importlib import import_module
 from inspect import currentframe
-from itertools import cycle
 from string import printable
 from urllib.parse import urlparse, parse_qs as urlparse_query
 
@@ -40,8 +35,9 @@ def human_readable_size(size, precision=0):
 
 def is_admin():
     """ Check if the user running the script is admin. """
+    from os import geteuid
     try:
-        return ctypes.windll.shell32.IsUserAnAdmin() != 0 if WINDOWS else os.geteuid() == 0
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0 if WINDOWS else geteuid() == 0
     except AttributeError:
         raise NotImplementedError("Admin check is not implemented for this operating system.")
 
@@ -183,6 +179,7 @@ def xor(str1, str2, offset=0):
     :param str2:   second string, with length L2
     :param offset: ASCII offset to be applied on each resulting character
     """
+    from itertools import cycle
     convert = isinstance(str1[0], int) or isinstance(str2[0], int)
     r = b("") if convert else ""
     for c1, c2 in zip(cycle(str1) if len(str1) < len(str2) else str1, cycle(str2) if len(str2) < len(str1) else str2):
@@ -215,6 +212,7 @@ def xor_file(filename, key, offset=0):
 # https://stackoverflow.com/questions/10875442/possible-to-change-a-functions-repr-in-python
 class __reprwrapper(object):
     def __init__(self, repr, func):
+        from functools import update_wrapper
         self._repr, self._func = repr, func
         update_wrapper(self, func)
     
@@ -230,4 +228,8 @@ def withrepr(func_repr):
     def _wrapper(f):
         return __reprwrapper(func_repr, f)
     return _wrapper
+
+
+lazy_load_module("ctypes")
+lazy_load_module("dateparser.parse", alias="dateparse")
 

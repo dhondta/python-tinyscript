@@ -7,7 +7,6 @@ import sys
 from signal import getsignal, signal, SIG_IGN, SIGINT, SIGTERM
 
 from ..helpers.constants import WINDOWS
-from ..helpers.inputs import user_input
 
 
 __features__ = ["at_exit", "at_graceful_exit", "at_interrupt", "at_terminate", "DisableSignals"]
@@ -58,6 +57,7 @@ class ExitHooks(object):
         while self.state == "PAUSED": continue
     
     def quit(self, code=0):
+        from ..helpers.inputs import user_input
         if self.__sigint_action == "confirm" and \
            user_input("Do you really want to interrupt execution ?", ["(Y)es", "(N)o"], "y", style="bold") == "yes":
             self.__sigint_action = "exit"
