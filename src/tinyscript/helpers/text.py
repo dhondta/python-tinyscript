@@ -85,7 +85,7 @@ def hexdump(data, width=16, first=0, last=0):
         yield "%0.8x:  %s  %s" % (i, h.ljust(width*2+(width//2-1)), b)
 
 
-def txt_terminal_render(text, format=None, debug=False):
+def txt_terminal_render(text, format=None, debug=False, alignleft=True):
     """ This renders input text based on the selected format.
     
     :param format: selected format (one of FORMATS)
@@ -161,9 +161,12 @@ def txt_terminal_render(text, format=None, debug=False):
             md = md.replace(link[0], "[{0}]({1}{0})".format(link[1], ["", "mailto:"][is_email(link[1])]))
     # import only when required to render Markdown in the terminal
     from rich.console import Console
-    from rich.markdown import Markdown
+    from rich.markdown import Heading, Markdown
     from rich.style import Style
     from rich.theme import Theme
+    if alignleft:
+        from tinyscript import code
+        code.replace(Heading.__rich_console__, "text.justify = \"center\"", "")
     c = Console(theme=Theme(styles={n: Style(**s) for n, s in DOCFORMAT_THEME.items()}))
     c.begin_capture()
     c.print(Markdown(md))

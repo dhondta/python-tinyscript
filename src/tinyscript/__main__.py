@@ -8,7 +8,7 @@ from tinyscript.template import new as new_script, TARGETS
 from tinyscript.__info__ import __author__, __copyright__, __email__, __license__, __version__
 
 
-__description__ = "Tiny Scripts Manager"
+__script__ = "Tiny Scripts Manager"
 __examples__ = [
     "add-source https://example.com/scripts.list --fetch",
     "install wlf",

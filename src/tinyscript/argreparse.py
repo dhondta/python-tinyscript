@@ -274,7 +274,9 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         self.examples = gd.get('__examples__', [])
         script = stem(sys.argv[0])
-        self.banner = gd['__scriptname__'] = gd.get('__banner__', script)
+        if gd.get('__script__') is None:
+            gd['__script__'] = script
+        self.banner = gd.get('__banner__', script)
         if kwargs.get('prog') is None:
             path = abspath(which(script) or script)
             ArgumentParser.prog = kwargs['prog'] = "python " + script if not is_executable(path) else \
@@ -298,7 +300,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 e = '\n'.join(["\n", "  "][self._docfmt is None] + txt2paragraph(e) for e in _)
                 kwargs['epilog'] += "\n" + e
         # format the description message
-        d = gd.get('__description__', script)
+        d = gd.get('__script__', script)
         d += " " + str(gd.get('__version__') or "")
         d = txt2title(d, level=1)
         v = gd.get('__status__')
@@ -331,12 +333,12 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                         email = contributor.get('email')
                         if email:
                             s += txt2email(e) if s == "" else " ({})".format(txt2email(str(email)))
-                        if s == "":  # do not display an 'reason' if no 'author' and 'email' is defined
+                        if s == "":  # do not display 'reason' if no 'author' and 'email' is defined
                             continue
                         reason = contributor.get('reason')
                         if reason:
                             s += " - " + str(reason)
-                        m += ["", (l + 2) * " "][i > 0] + s
+                        m += ["", "\n" + (l + 2) * " "][i > 0] + s
                 meta = ("{: <%d}: {}" % l).format(txt2italic(k.strip('_').capitalize()), m)
                 if k == '__author__':
                     e = gd.get('__email__')
