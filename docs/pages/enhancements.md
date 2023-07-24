@@ -2,7 +2,7 @@
 
 ## `code`
     
-Formerly a set of [helper functions](helpers.md), the followings have been attached to the `code` module, which is now preimported.
+Formerly a set of [helper functions](helpers.md), the following have been attached to the `code` module, which is now preimported.
     
 Code can be monkey-patched at runtime using multiple functions, depending on what should be patched and how. Note that some of the functions rely on the [`patchy`](https://github.com/adamchainz/patchy) module.
     

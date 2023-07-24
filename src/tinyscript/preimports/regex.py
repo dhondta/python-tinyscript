@@ -120,7 +120,7 @@ def __gen_str_from_re(regex, max_repeat, any_set, rand=False, parsed=False, grou
                         empty_yield = True
                     # tricky case: (|[0-5])? and ([0-5])? give the same outputs, however re.size will give respectively
                     #                  8     and    7   ; why ? because the output value "" is filtered in re.strings
-                    # so, we need to handle this special case by substracting 1 when we have:
+                    # so, we need to handle this special case by subtracting 1 when we have:
                     # - a subpattern (...)
                     # - with a branch ...|...
                     # e.g. [(SUBPATTERN, (1, 0, 0, [(BRANCH, (None, [[], [(IN, [(RANGE, (48, 53))])]]))]))]

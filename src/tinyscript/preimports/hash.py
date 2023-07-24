@@ -45,7 +45,7 @@ class LookupTable(dict):
     :param algorithm:   the hash algorithm to be used
     :param ratio:       ratio of value to be hashed in the lookup table (by default, every value is considered but, i.e.
                          with a big wordlist, a ratio of 2/3/4/5/... can be used in order to limit the memory load)
-    :param dict_filter: function aimed to filter the words from the dictionary (e.g. only alpha-numeric)
+    :param dict_filter: function aimed to filter the words from the dictionary (e.g. only alphanumeric)
     :param prefix:      prefix to be prepended to passwords (e.g. a salt)
     :param suffix:      suffix to be appended to passwords (e.g. a salt)
     """

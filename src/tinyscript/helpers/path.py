@@ -45,7 +45,7 @@ class Path(BasePath):
         if expand:
             p = super(Path, cls).__new__(cls, str(p.expanduser().absolute()), **kwargs)
         if create and touch:
-            raise ValueError("Conflicting options ; 'create' creates a folder hwile 'touch' creates a file")
+            raise ValueError("Conflicting options ; 'create' creates a folder while 'touch' creates a file")
         elif (create or touch) and not p.exists():
             if create:
                 p.mkdir(parents=True)  # exist_ok does not work in Python 2
@@ -137,7 +137,7 @@ class Path(BasePath):
             return f.write(u(data))
     
     def append_bytes(self, data):
-        """ Allows to append bytes to the file, as only write_bytes is available in pathlib2, overwritting the former
+        """ Allows to append bytes to the file, as only write_bytes is available in pathlib2, overwriting the former
              bytes at each write. """
         with self.open(mode='ab') as f:
             return f.write(memoryview(data))
@@ -152,7 +152,7 @@ class Path(BasePath):
             self.append_line(line)
     
     def append_text(self, text, encoding=None, errors=None):
-        """ Allows to append text to the file, as only write_text is available in pathlib2, overwritting the former text
+        """ Allows to append text to the file, as only write_text is available in pathlib2, overwriting the former text
              at each write. """
         return self.__add_text(text, 'a', encoding, errors)
     

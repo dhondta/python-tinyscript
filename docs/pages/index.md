@@ -66,7 +66,7 @@ pip3 install --user tinyscript
 
 ## Rationale
 
-This library is born from the need of efficiently building tools without caring for redefining various things or rewritting/setting the same functionalities like logging or parsing of input arguments.
+This library is born from the need of efficiently building tools without caring for redefining various things or rewriting/setting the same functionalities like logging or parsing of input arguments.
 
 In the meantime, I personnally used this library many times to create tools for my daily job or during cybersecurity or programming competitions and it proved very useful when dealing with rapid development.
 

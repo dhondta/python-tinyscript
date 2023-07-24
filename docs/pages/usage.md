@@ -125,7 +125,7 @@ After customizing the metadata, the `initialize` function can be filled with the
 ```add_interact=[boolean]``` | Add an interaction option.
 ```add_progress=[boolean]``` | Add an option to show a progress bar.
 ```add_step=[boolean]``` | Add a stepping mode option, for setting breakpoints into the code by using the `step` function or the `Step` context manager.
-```add_time=[boolean]``` | Add an execution timing option, for benchmarking the exeuction by using the `get\_time` and `get\_time\_since\_last` functions or the `Timer` context manager.
+```add_time=[boolean]``` | Add an execution timing option, for benchmarking the execution by using the `get\_time` and `get\_time\_since\_last` functions or the `Timer` context manager.
 ```add_version=[boolean]``` | Add the version option.
 ```add_wizard=[boolean]``` | Add a wizard option for asking the user to input each value.
 ```report_func=[function]``` | Add report options (output format, title, stylesheet and filename) by setting a function (taking no argument) that will generate the report at the end of the execution of the script/tool.
