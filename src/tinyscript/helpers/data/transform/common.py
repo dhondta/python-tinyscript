@@ -44,7 +44,7 @@ def __validation(**kwargs) -> None:
                 raise ValueError(f"Bad bits group order '{v}'")
         elif k == "s":
             if not is_str(v):
-                raise ValueError(f"Bad input string of 8-bits characaters '{v}'")
+                raise ValueError(f"Bad input string of 8-bits characters '{v}'")
         elif k == "u":
             if not isinstance(v, bool):
                 raise ValueError(f"Bad value for input boolean {v}")

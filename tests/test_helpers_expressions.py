@@ -21,7 +21,7 @@ class TestHelpersExpressions(TestCase):
         self.assertIsNotNone(eval_ast_nodes(*EXPRESSIONS))
     
     def test_expression_evaluations(self):
-        # simple expresions (including list comprehensions and generators)
+        # simple expressions (including list comprehensions and generators)
         for e in EXPRESSIONS:
             self.assertIsNotNone(eval2(e))
         # missing names

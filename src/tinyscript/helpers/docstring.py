@@ -61,7 +61,7 @@ def parse_docstring(something):
                 metadata["description"] = value
             else:
                 metadata["comments"].append(value)
-        # when comments field is explicitely set
+        # when comments field is explicitly set
         elif key == "comments":
             metadata["comments"].append(value)
         # convert each option to a tuple

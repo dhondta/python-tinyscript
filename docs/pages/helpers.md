@@ -483,7 +483,7 @@ And for network-related types:
 
 -----
 
-## Data type tranformation functions
+## Data type transformation functions
 
 Tinyscript also provides a series of intuitive data transformation functions, formatted as follows:
 

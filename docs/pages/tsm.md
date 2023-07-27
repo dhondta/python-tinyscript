@@ -119,7 +119,7 @@ $ tsm install stegopit --force
 00:12:34 [INFO] Script 'stegopit' updated
 ```
 
-The source to intall the script from can be forced by specifying the `--source` option.
+The source to install the script from can be forced by specifying the `--source` option.
 
 ```sh
 $ tsm install custom-script --source https://example.com/sources.list

@@ -185,7 +185,7 @@ class ExpiringDict(dict):
             self[k] = v
     
     def __check_expiration(self, key):
-        """ Chck for key times and remove expired keys. """
+        """ Check for key times and remove expired keys. """
         t = self.__times.get(key)
         if self.max_age > 0 and t is not None and time() - t > self.max_age:
             del self[key]

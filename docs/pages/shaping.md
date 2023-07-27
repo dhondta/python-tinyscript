@@ -93,7 +93,7 @@ DOCFORMAT_THEME = "Star"
 
 !!! warning "Various formats support"
     
-    The support for HTML, RestructuredText and Textile is based on document conversion with ['pypandoc'](https://pypi.org/project/pypandoc/) to get Markdown before using [`mdv`](https://github.com/axiros/terminal_markdown_viewer). In some cases with complex formate text, Pandoc can cause issues with indentation or break the layout. It is then advised to only use Markdown directly to avoid any conversion.
+    The support for HTML, RestructuredText and Textile is based on document conversion with ['pypandoc'](https://pypi.org/project/pypandoc/) to get Markdown before using [`mdv`](https://github.com/axiros/terminal_markdown_viewer). In some cases with complex format text, Pandoc can cause issues with indentation or break the layout. It is then advised to only use Markdown directly to avoid any conversion.
 
 !!! note "List of themes"
     

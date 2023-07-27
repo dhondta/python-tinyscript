@@ -49,7 +49,7 @@ def set_time_items(glob):
         if start is not None and descr is not None:
             manager.times.append((descr, float(start), float(t)))
         return t - (start or 0)
-    # Time context manager, for easilly benchmarking a block of code
+    # Time context manager, for easily benchmarking a block of code
     class Timer(object):
         def __init__(self, description=None, message=TO_MSG, timeout=None, fail_on_timeout=False, precision=True):
             self.fail = fail_on_timeout
@@ -92,7 +92,7 @@ def set_time_items(glob):
                 if self.timeout is not None:
                     if not self.fail and exc_type is TimeoutError:
                         return True  # this allows to let the execution continue
-            # implicitely returns None ; this lets the exception be raised
+            # implicitly returns None ; this lets the exception be raised
         
         def _handler(self, signum, frame):
             raise TimeoutError(self.message)
