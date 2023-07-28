@@ -368,6 +368,12 @@ class ProxyArgumentParser(object):
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
         pass
+    
+    @staticmethod
+    def reset():
+        global parser_calls
+        parser_calls = []
+        ArgumentParser.reset()
 
 
 parser = ProxyArgumentParser()

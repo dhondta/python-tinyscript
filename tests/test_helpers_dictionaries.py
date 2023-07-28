@@ -56,6 +56,27 @@ class TestHelpersDictionaries(TestCase):
         self.assertEqual(Sub1, d[None, 'sub1'])
         self.assertIsNone(d.__delitem__((None, Sub1)))
     
+    def test_composite_key_dictionary(self):
+        d = CompositeKeyDict(_separator_="|")
+        for i in range(3):
+            d['test%d' % (i+1)] = {}
+        self.assertEqual(d['test1|test2'], {})
+        self.assertRaises(KeyError, d.__getitem__, 'test1|test4')
+        d['test2'].update({'test': "OK"})
+        self.assertRaises(ValueError, d.__getitem__, 'test1|test2')
+        d = CompositeKeyDict()
+        for i in range(3):
+            d['test%d' % (i+1)] = {}
+        self.assertEqual(d[["test1", "test2"]], {})
+        self.assertEqual(d.composite_key({}), ["test1", "test2", "test3"])
+        del d[["test1", "test3"]]
+        self.assertRaises(KeyError, d.__getitem__, ["test1", "test2"])
+        d[42] = "test"
+        d['test1'] = "test"
+        self.assertEqual(d[42], "test")
+        self.assertEqual(d[[42, "test1"]], "test")
+        self.assertRaises(KeyError, d.composite_key, ["test4", "test5"])
+    
     def test_expiring_dictionary(self):
         d = ExpiringDict(max_age=.1)
         d['test'] = "test"

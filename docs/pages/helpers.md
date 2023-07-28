@@ -201,6 +201,7 @@ Some particular data structures are provided:
 **Name** | **Description**
 --- | ---
 `ts.ClassRegistry` | special dictionary whose keys are (base) classes and values are lists of related subclasses (e.g. `{Base: [Sub1, Sub2]}`) ; subclasses can be accessed by using the base class name and the subclass name, e.g. `d["base", "sub1"]`
+`ts.CompositeKeyDict` | dictionary supporting composite keys given a separator (by default none, meaning that a list is used for the key)
 `ts.ExpiringDict(max_age, sort_by_time)` | dictionary with expiring keys ; configured using the `max_age` argument (by default `0` meaning no expiration) and `sort_by_time` (allowing to sort keys either by time, if set to `True`, or in alphabetical order)
 `ts.PathBasedDict` | particular dictionary where the keys are defined like a path (a dictionary is created for each base) ; e.g. `d['path/to/key'] = ...` will give `{'path': {'to': {'key': ...}}}`
 

@@ -13,7 +13,8 @@ from .path import Path
 from ..preimports import re
 
 
-__all__ = __features__ = ["flatten_dict", "merge_dict", "ClassRegistry", "ExpiringDict", "PathBasedDict"]
+__all__ = __features__ = ["flatten_dict", "merge_dict", "ClassRegistry", "CompositeKeyDict", "ExpiringDict",
+                          "PathBasedDict"]
 
 
 def flatten_dict(d, parent_key="", sep="/"):
@@ -167,6 +168,64 @@ def _sort_by_text(text):
             continue
         tokens.append((int(s), len(s) - len(s.lstrip("0"))) if s.isdigit() else s)
     return tokens
+
+
+class CompositeKeyDict(dict):
+    """ Dictionary class handling composite keys either in the form of a (character-separated) list of keys.
+    
+        It registers keys as normal, except that it also supports combinations ;
+        >>> d = CompositeKeyDict(_separator_="|")
+        >>> d['test'] = {}
+        >>> d['test2'] = {}
+        >>> d['test|test2']
+        {}
+        >>> d.composite_key({})
+        'test|test2'
+        >>> d['test|test3']
+        Traceback (most recent call last):
+          [...]
+        KeyError: 'test3'
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__separator = self.pop('_separator_', None)
+    
+    def __delitem__(self, key):
+        """ Custom get method to handle composite keys too. """
+        if self.__separator is None and isinstance(key, list) or self.__separator is not None and isinstance(key, str):
+            for k in (key.split(self.__separator) if isinstance(key, str) else key):
+                super().__delitem__(k)
+    
+    def __getitem__(self, key):
+        """ Custom get method to handle composite keys too. """
+        if self.__separator is None and isinstance(key, list) or self.__separator is not None and isinstance(key, str):
+            refk, refv = None, None
+            for k in (key.split(self.__separator) if isinstance(key, str) else key):
+                v = super().__getitem__(k)
+                if refv is None:
+                    refk, refv = k, v
+                elif v != refv:
+                    raise ValueError("(%s, %s) does not match key-value pair (%s, %s)" % (k, v, refk, refv))
+            return v
+        return super().__getitem__(key)
+    
+    def __setitem__(self, key, value):
+        """ Custom set method to handle composite keys too. """
+        if self.__separator is None and isinstance(key, list) or self.__separator is not None and isinstance(key, str):
+            for k in (key.split(self.__separator) if isinstance(key, str) else key):
+                super().__setitem__(k, value)
+        else:
+            super().__setitem__(key, value)
+    
+    def composite_key(self, value):
+        """ Get the composite key associated to a given value. """
+        ckey = []
+        for k, v in super().items():
+            if v == value:
+                ckey.append(k)
+        if len(ckey) == 0:
+            raise KeyError("Value not found: %s" % value)
+        return list(ckey) if self.__separator is None else self.__separator.join(ckey)
 
 
 class ExpiringDict(dict):
