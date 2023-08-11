@@ -242,7 +242,6 @@ def user_input(prompt="", choices=None, default=None, choices_str=None, default_
     :return:            handled user input
     """
     shortcuts = {}
-    default_str = kwargs.pop('default_str', ["[{}]".format(default), ""][default is None and required])
     if isinstance(choices, (list, tuple, set)):
         choices = list(map(lambda x: str(x).lower(), choices))
         choices_str = choices_str or "{%s}" % '|'.join(list(map(str, choices)))

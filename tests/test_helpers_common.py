@@ -3,22 +3,41 @@
 """Common utility functions' tests.
 
 """
+import datetime
+import lazy_object_proxy
 from tinyscript.helpers.common import *
 
 from utils import remove, TestCase
 
 
+DUMMY_CONST = None
+
+
+def _init_ospathexists():
+    from os.path import exists
+    return exists
+
+
+def _postload(o):
+    global DUMMY_CONST
+    DUMMY_CONST = "OK"
+
+
 class TestHelpersCommon(TestCase):
     def test_common_utility_functions(self):
+        self.assertRaises(TypeError, range2)
         self.assertRaises(TypeError, range2, ())
         self.assertRaises(TypeError, range2, 1, 2, 3, 4)
         self.assertEqual(list(range2(2)), [0.0, 1.0])
         self.assertEqual(list(range2(0, .5)), [0.0])
         self.assertEqual(len(range2(0, .5)), 1)
         r = range2(0, .5, .1)
+        self.assertEqual(repr(r), "range(0.0, 0.5, 0.1)")
         self.assertEqual(list(r), [0.0, 0.1, 0.2, 0.3, 0.4])
+        self.assertEqual(r.count(.3), 1)
         self.assertEqual(r.count(.5), 0)
         self.assertEqual(r.index(.2), 2)
+        self.assertRaises(ValueError, r.index, 1.1)
         self.assertEqual(human_readable_size(123456), "121KB")
         self.assertRaises(ValueError, human_readable_size, "BAD")
         self.assertRaises(ValueError, human_readable_size, -1)
@@ -34,4 +53,30 @@ class TestHelpersCommon(TestCase):
             self.assertEqual(f.read(), CONTENT)
         self.assertEqual(list(strings_from_file(FILE)), ["this is a ", " test"])
         remove(FILE)
+        self.assertEqual(dateparse("2008"), datetime.datetime(2008, 8, 11, 0, 0))
+        def test_func():
+            pass
+        self.assertTrue(repr(test_func).startswith("<function "))
+        @withrepr(lambda f: "<test_function %s at 0x%x" % (f.__name__, id(f)))
+        def test_func2():
+            pass
+        self.assertTrue(repr(test_func2).startswith("<test_function "))
+    
+    def test_lazy_load_functions(self):
+        global DUMMY_CONST
+        lazy_load_object("exists", _init_ospathexists, postload=_postload)
+        self.assertIsNone(DUMMY_CONST)
+        self.assertTrue(isinstance(exists, lazy_object_proxy.Proxy))
+        self.assertTrue(exists(__file__))
+        self.assertTrue(isinstance(exists, type(lambda: None)))
+        self.assertIsNotNone(DUMMY_CONST)
+        DUMMY_CONST = None
+        lazy_load_module("re.sre_parse", alias="sre_parse")
+        self.assertTrue(isinstance(sre_parse, lazy_object_proxy.Proxy))
+        self.assertRaises(ImportError, getattr, sre_parse, "__class__")  # will raise "'re' is not a package"
+        self.assertIsNone(DUMMY_CONST)
+        lazy_load_module("re", postload=_postload)
+        self.assertTrue(isinstance(re, lazy_object_proxy.Proxy))
+        self.assertTrue(isinstance(re.search, type(lambda: None)))
+        self.assertIsNotNone(DUMMY_CONST)
 

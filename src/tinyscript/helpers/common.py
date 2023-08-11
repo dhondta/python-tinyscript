@@ -36,6 +36,7 @@ def human_readable_size(size, precision=0):
 def is_admin():
     """ Check if the user running the script is admin. """
     from os import geteuid
+    lazy_load_module("ctypes")
     try:
         return ctypes.windll.shell32.IsUserAnAdmin() != 0 if WINDOWS else geteuid() == 0
     except AttributeError:
@@ -69,6 +70,12 @@ def lazy_load_object(name, load_func, postload=None):
         return o
     glob[name] = o = lazy_object_proxy.Proxy(_load)
     return o
+
+
+def __init_dp():
+    from dateparser import parse
+    return parse
+lazy_load_object("dateparse", __init_dp)
 
 
 class range2object:
@@ -228,8 +235,4 @@ def withrepr(func_repr):
     def _wrapper(f):
         return __reprwrapper(func_repr, f)
     return _wrapper
-
-
-lazy_load_module("ctypes")
-lazy_load_module("dateparser.parse", alias="dateparse")
 
