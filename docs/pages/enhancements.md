@@ -106,7 +106,8 @@ A context manager is also available:
 
 `random` is slightly enhanced with a few new items:
 
-- `randstr`: allows to generate a random string with a given length and alphabet
+- `randbytes` : allows to generate a random string with a given length (256 by default) using the complete alphabet of 1-byte characters
+- `randstr`: allows to generate a random string with a given length (8 by default) and alphabet
 - `LFSR`: adds an implementation of the Linear-Feedback Shifting Register stream generator, with the possibility of recovering its parameters by setting a target and using the Berlekamp-Massey algorithm.
 - `Geffe`: adds an implementation of the Geffe stream generator.
 
