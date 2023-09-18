@@ -17,7 +17,6 @@ class TestPreimportsRandom(TestCase):
         self.assertNotIn("e", random.randstr(alphabet="abcd"))
         self.assertRaises(ValueError, random.randstr, -1)
         self.assertRaises(ValueError, random.randstr, 8, "")
-        self.assertIsNotNone(random.randbytes())
     
     def test_random_lfsr(self):
         l = random.LFSR(target="0123456789abcdef")

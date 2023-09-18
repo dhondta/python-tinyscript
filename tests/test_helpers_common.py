@@ -53,7 +53,7 @@ class TestHelpersCommon(TestCase):
             self.assertEqual(f.read(), CONTENT)
         self.assertEqual(list(strings_from_file(FILE)), ["this is a ", " test"])
         remove(FILE)
-        self.assertEqual(dateparse("2008"), datetime.datetime(2008, 8, 11, 0, 0))
+        self.assertEqual(dateparse("2008"), datetime.datetime(2008, datetime.now().month, datetime.now().day))
         def test_func():
             pass
         self.assertTrue(repr(test_func).startswith("<function "))

@@ -11,9 +11,6 @@ from ..helpers.compat import b
 from ..helpers.data import *
 
 
-ALL_CHARS = "".join(chr(i) for i in range(256))
-
-
 def __randstr(n=8, alphabet=string.ascii_lowercase+string.ascii_uppercase+string.digits):
     """
     Compose a random string of the given length with the given alphabet.
@@ -26,7 +23,6 @@ def __randstr(n=8, alphabet=string.ascii_lowercase+string.ascii_uppercase+string
     for i in range(n):
         s += random.choice(alphabet)
     return s
-random.randbytes = lambda n=256: __randstr(n, ALL_CHARS)
 random.randstr   = __randstr
 
 
