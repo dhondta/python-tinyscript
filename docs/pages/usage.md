@@ -17,9 +17,9 @@ $ tinyscript new test
 
 This creates a script named `test.py` with minimal code.
 
-??? example "`test.py`"
+???+ example "`test.py`"
 
-        :::python
+        ```python
         #!/usr/bin/env python
         # -*- coding: UTF-8 -*-
         from tinyscript import *
@@ -46,6 +46,7 @@ This creates a script named `test.py` with minimal code.
             # TODO: add arguments
             initialize()
             # TODO: write logic here
+        ```
 
 <br>
 
@@ -140,7 +141,7 @@ After customizing the metadata, the `initialize` function can be filled with the
 ```short_long_help=[boolean]``` | Enable/disable short/long help (usage info with `-h` and full help with `--help`).
 ```sudo=[boolean]``` | Elevate privilege before running.
 
-??? example 
+???+ example 
 
         :::python
         initialize(add_demo=True,
@@ -162,7 +163,7 @@ Once the initialization is tuned, a validation can be set if necessary using the
 - `error_message`: the message to be displayed when the error `condition` is matched
 - `default_value`: self-explanatory ; when not set, a trigger on the `condition` will prevent the script from running, otherwise the script/tool will just display a warning and continue with the default value
 
-??? example 
+???+ example 
 
         :::python
         validate(globals(),
@@ -215,7 +216,7 @@ The `Report` class and its related objects can be used to represent a report.
 
 With the `Report` class, multiple output formats can be used to generate the report as explained in [this section](reporting.html#output-formats).
 
-??? example 
+???+ example 
 
         :::python
         from tinyscript.report import *
@@ -234,7 +235,7 @@ With the `Report` class, multiple output formats can be used to generate the rep
 
 If using the `report_func` argument of `initialize`, a report generation function must be defined. This function must take no argument and return a tuple of report objects in the order to be displayed in the final report.
 
-??? example 
+???+ example 
 
         :::python
         def make_report():
@@ -252,7 +253,7 @@ If using the `report_func` argument of `initialize`, a report generation functio
 
 A header and a footer can also be defined.
 
-??? example 
+???+ example 
 
         :::python
         def make_report():

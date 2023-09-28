@@ -23,7 +23,7 @@ nav:
     - 'Playing a demo': examples/demo.md
     - 'Stepping execution': examples/step.md
     - 'Timing execution': examples/timing.md
-    - 'Hotkeys': hotkeys/examples.md
+    - 'Hotkeys': examples/hotkeys.md
   - 'Real-life examples':
     - 'AppmemDumper': examples-rl/appmemdumper.md
     - 'Bots Scheduler': examples-rl/bots-scheduler.md
@@ -65,3 +65,5 @@ markdown_extensions:
   - toc:
       permalink: true
   - admonition
+  - pymdownx.details
+  - pymdownx.superfences

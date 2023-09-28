@@ -6,7 +6,7 @@ This tool implements Bruce Schneier's [Solitaire Cipher](https://www.schneier.co
 
 ## Code
 
-See [this GitHub repository](https://github.com/dhondta/solitaire-cipher).
+See [this Gist](https://gist.github.com/dhondta/1858f406fc55e5e5d440ff26432ad0a4).
 
 ## Help
 
