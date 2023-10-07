@@ -23,7 +23,7 @@ def __randstr(n=8, alphabet=string.ascii_lowercase+string.ascii_uppercase+string
     for i in range(n):
         s += random.choice(alphabet)
     return s
-random.randstr   = __randstr
+random.randstr = __randstr
 
 
 class __Base(object):

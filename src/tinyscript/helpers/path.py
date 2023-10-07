@@ -231,10 +231,10 @@ class Path(BasePath):
     
     def is_under(self, parentpath):
         """ Check if the path is under a parent path. """
-        p = Path(parentpath)
+        p = Path(parentpath).absolute()
         if not p.is_dir():
             p = Path(p.dirname)
-        return p in self.parents
+        return p in self.absolute().parents
     
     def iterfiles(self, filetype=None, filename_only=False, relative=False):
         """ List all files from the current directory. """

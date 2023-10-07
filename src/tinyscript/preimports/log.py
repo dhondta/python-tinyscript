@@ -7,7 +7,6 @@ import logging
 import re
 import sys
 import types
-from functools import wraps
 from platform import system
 from time import gmtime
 
@@ -73,10 +72,15 @@ def bindLogger(f):
     
     Inspired from: https://stackoverflow.com/questions/17862185/how-to-inject-variable-into-scope-with-a-decorator
     """
-    @wraps(f)
+    from .ftools import functools
+    f_glob = getattr(f, "__globals__", {})
+    wraps_func = [functools.wraps, functools.wraps_cls][isinstance(f, type)]
+    if isinstance(f, type):
+        f.logger = f_glob.get('logger') or inspect.getmainglobals().get('logger') or logging.nullLogger
+    @wraps_func(f)
     def _wrapper(*args, **kwargs):
-        logger = kwargs.pop('logger', None) or f.__globals__.get('logger') or inspect.getmainglobals().get('logger') \
-                 or logging.nullLogger
+        logger = kwargs.pop('logger', None) or f_glob.get('logger') or inspect.getmainglobals().get('logger') or \
+                 logging.nullLogger
         if logger.name not in ["main", "null"]:
             setLogger(logger.name)
         # if f is a method, bind the logger to self
@@ -85,17 +89,16 @@ def bindLogger(f):
             return f(*args, **kwargs)
         # otherwise, pass the logger through globals
         else:
-            glob = f.__globals__
             sentinel = object()
-            old = glob.get('logger', sentinel)
-            glob['logger'] = logger
+            old = f_glob.get('logger', sentinel)
+            f_glob['logger'] = logger
             try:
                 return f(*args, **kwargs)
             finally:
                 if old is sentinel:
-                    del glob['logger']
+                    del f_glob['logger']
                 else:
-                    glob['logger'] = old
+                    f_glob['logger'] = old
     return _wrapper
 logging.bindLogger = bindLogger
 
@@ -258,7 +261,6 @@ def unsetLoggers(*names, **kwargs):
     
     :param names: logger names
     """
-    force = kwargs.get('force', False)
     for name in names:
         unsetLogger(name)
 logging.unsetLoggers = unsetLoggers
