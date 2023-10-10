@@ -37,8 +37,8 @@ classifiers = [
 ]
 dependencies = [
   "argcomplete>=3.0.8",
-  "asciistuff>=1.2.5",
-  "bitstring>3",
+  "asciistuff>=1.2.6",
+  "bitstring==4.0.2",
   "codext>=1.15.0",
   "coloredlogs",
   "colorful",

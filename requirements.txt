@@ -1,5 +1,5 @@
 argcomplete>=3.0.8
-asciistuff>=1.2.5
+asciistuff>=1.2.6
 bitstring>3
 codext>=1.15.0
 coloredlogs

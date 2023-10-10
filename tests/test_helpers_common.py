@@ -3,8 +3,9 @@
 """Common utility functions' tests.
 
 """
-import datetime
 import lazy_object_proxy
+from datetime import datetime
+from pytz import timezone
 from tinyscript.helpers.common import *
 
 from utils import remove, TestCase
@@ -53,7 +54,8 @@ class TestHelpersCommon(TestCase):
             self.assertEqual(f.read(), CONTENT)
         self.assertEqual(list(strings_from_file(FILE)), ["this is a ", " test"])
         remove(FILE)
-        self.assertEqual(dateparse("2008"), datetime.datetime(2008, datetime.now().month, datetime.now().day))
+        tz = timezone("Europe/London")
+        self.assertEqual(dateparse("2008"), datetime(2008, datetime.now(tz).month, datetime.now(tz).day))
         def test_func():
             pass
         self.assertTrue(repr(test_func).startswith("<function "))
