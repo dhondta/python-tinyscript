@@ -21,29 +21,20 @@ PAD = ["ansic9.23", "incremental", "iso7816-4", "pkcs5", "pkcs7", "w3c"]
 
 
 def __init_bitstring(bs):
-    OLD_CODE1, OLD_CODE2, NEW_CODE1, NEW_CODE2 = """
+    OLD_CODE, NEW_CODE = """
         def _getlength(self)%s:
             \"\"\"Return the length of the bitstring in bits.\"\"\"
             return self._datastore.bitlength
     """, """
         def _getlength(self)%s:
             \"\"\"Return the length of the bitstring in bits.\"\"\"
-            return len(self._bitstore)
-    """, """
-        def _getlength(self)%s:
-            \"\"\"Return the length of the bitstring in bits.\"\"\"
             l = self._datastore.bitlength
             return l + (8 - l %% 8) %% 8 if getattr(Bits, "_padding", True) else l
-    """, """
-        def _getlength(self)%s:
-            \"\"\"Return the length of the bitstring in bits.\"\"\"
-            l = len(self._bitstore)
-            return l + (8 - l %% 8) %% 8
     """
     try:
-        patchy.replace(bs.Bits._getlength, OLD_CODE1 % " -> int", NEW_CODE1 % " -> int")
+        patchy.replace(bs.Bits._getlength, OLD_CODE % " -> int", NEW_CODE % " -> int")
     except (SyntaxError, ValueError):
-        patchy.replace(bs.Bits._getlength, OLD_CODE2 % "", NEW_CODE2 % "")
+        patchy.replace(bs.Bits._getlength, OLD_CODE % "", NEW_CODE % "")
     OLD_CODE, NEW_CODE = """
         def _getbin(self)%s:
             \"\"\"Return interpretation as a binary string.\"\"\"
