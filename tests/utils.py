@@ -1,4 +1,3 @@
- #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Test utility functions.
 
@@ -6,12 +5,12 @@
 import logging
 import sys
 from argparse import Action
+from io import StringIO
 from os import makedirs, remove as os_remove, rmdir as os_rmdir
 from os.path import dirname, exists, join
 from shutil import rmtree as shutil_rmtree
-from six import StringIO
 from time import sleep
-from tinyscript.helpers.constants import PYTHON3, WINDOWS
+from tinyscript.helpers.constants import WINDOWS
 from tinyscript.helpers.decorators import failsafe
 from unittest import TestCase
 try:
@@ -22,7 +21,7 @@ except ImportError:
 
 __all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep", "exists", "join", "logger", "logging",
            "makedirs", "mock_patch", "remove", "rmdir", "rmtree", "sleep", "sys", "temp_stdin", "touch", "temp_stdout",
-           "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase", "_FakeParserAction", "FIXTURES", "PYTHON3", "WINDOWS"]
+           "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase", "_FakeParserAction", "FIXTURES", "WINDOWS"]
 
 
 FIXTURES = {

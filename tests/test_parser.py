@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Parser module assets' tests.
 
@@ -52,11 +51,7 @@ class TestParser(TestCase):
         sys.argv[1:] = ["subtest", "-b", "test"]
         test = parser.add_subparsers().add_parser("subtest", parents=[parser])
         test.add_argument("-b", "--arg2")
-        if PYTHON3:
-            initialize()
-        else:  # with Python2, an error occurs with the overwritten sys.argv and "subtest" is not parsed, hence throwing
-               #  SystemExit with code 2 as the subparser selection is missing
-            self.assertRaises(SystemExit, initialize, globals())
+        initialize()
     
     def test_argument_conflicts(self):
         sys.argv[1:] = []
@@ -216,24 +211,22 @@ class TestParser(TestCase):
         initialize()
     
     def test_report_good_function(self):
-        if PYTHON3:
-            temp_stdout(self)
-            sys.argv[1:] = []
-            initialize(report_func=lambda: (Title("Test"), ))
-            self.assertEqual(args.output, "pdf")
-            self.assertIs(args.title, None)
-            self.assertIs(args.css, None)
-            self.assertEqual(args.theme, "default")
-            self.assertIs(args.filename, None)
+        temp_stdout(self)
+        sys.argv[1:] = []
+        initialize(report_func=lambda: (Title("Test"), ))
+        self.assertEqual(args.output, "pdf")
+        self.assertIs(args.title, None)
+        self.assertIs(args.css, None)
+        self.assertEqual(args.theme, "default")
+        self.assertIs(args.filename, None)
     
     def test_report_bad_function(self):
-        if PYTHON3:
-            temp_stdout(self)
-            sys.argv[1:] = []
-            initialize(report_func="bad report function")
-            self.assertFalse(hasattr(args, "output"))
-            self.assertFalse(hasattr(args, "title"))
-            self.assertFalse(hasattr(args, "css"))
-            self.assertFalse(hasattr(args, "theme"))
-            self.assertFalse(hasattr(args, "filename"))
+        temp_stdout(self)
+        sys.argv[1:] = []
+        initialize(report_func="bad report function")
+        self.assertFalse(hasattr(args, "output"))
+        self.assertFalse(hasattr(args, "title"))
+        self.assertFalse(hasattr(args, "css"))
+        self.assertFalse(hasattr(args, "theme"))
+        self.assertFalse(hasattr(args, "filename"))
 

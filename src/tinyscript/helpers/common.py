@@ -3,21 +3,15 @@
 
 """
 import builtins
-import lazy_object_proxy
-from importlib import import_module
-from inspect import currentframe
 from string import printable
 from urllib.parse import urlparse, parse_qs as urlparse_query
 
 from .compat import b
-from .constants import PYTHON3, WINDOWS
+from .constants import WINDOWS
 
 
-__all__ = __features__ = ["dateparse", "human_readable_size", "is_admin", "lazy_load_module", "lazy_load_object",
-                          "lazy_object", "set_exception", "strings", "strings_from_file", "urlparse", "urlparse_query",
-                          "xor", "xor_file", "withrepr"]
-
-lazy_object = lazy_object_proxy.Proxy
+__all__ = __features__ = ["dateparse", "human_readable_size", "is_admin", "set_exception", "strings",
+                          "strings_from_file", "urlparse", "urlparse_query", "xor", "xor_file", "withrepr"]
 
 
 def human_readable_size(size, precision=0):
@@ -41,35 +35,6 @@ def is_admin():
         return ctypes.windll.shell32.IsUserAnAdmin() != 0 if WINDOWS else geteuid() == 0
     except AttributeError:
         raise NotImplementedError("Admin check is not implemented for this operating system.")
-
-
-def lazy_load_module(module, relative=None, alias=None, postload=None):
-    """ Lazily load a module. """
-    glob = currentframe().f_back.f_globals
-    def _load():
-        glob[alias or module] = m = import_module(*((module, ) if relative is None else ("." + module, relative)))
-        m.__name__ = alias or module
-        if postload is not None:
-            postload(m)
-        return m
-    glob[alias or module] = m = lazy_object_proxy.Proxy(_load)
-    return m
-
-
-def lazy_load_object(name, load_func, postload=None):
-    """ Lazily load an object. """
-    glob = currentframe().f_back.f_globals
-    def _load():
-        glob[name] = o = load_func()
-        try:
-            o._instance = o
-        except AttributeError:
-            pass
-        if postload is not None:
-            postload(o)
-        return o
-    glob[name] = o = lazy_object_proxy.Proxy(_load)
-    return o
 
 
 def __init_dp():
@@ -144,7 +109,7 @@ def strings(data, minlen=4, alphabet=printable):
     result = ""
     for c in b(data):
         if c in b(alphabet):
-            result += chr(c) if PYTHON3 else c
+            result += chr(c)
             continue
         if len(result) >= minlen:
             yield result
@@ -170,7 +135,7 @@ def strings_from_file(filename, minlen=4, alphabet=printable, offset=0):
                 break
             for c in data:
                 if c in b(alphabet):
-                    result += chr(c) if PYTHON3 else c
+                    result += chr(c)
                     continue
                 if len(result) >= minlen:
                     yield result

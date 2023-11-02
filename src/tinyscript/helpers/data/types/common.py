@@ -2,11 +2,7 @@
 """Common checking functions and argument types.
 
 """
-from six import integer_types
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 from .strings import _str2list
 from ....preimports import inspect, types
@@ -20,7 +16,7 @@ __all__ += ["is_bool", "is_dict", "is_int", "is_int_range", "is_list", "is_neg_i
             "is_prime"]
 is_bool       = lambda b: isinstance(b, bool)
 is_dict       = lambda d: isinstance(d, dict)
-is_int        = lambda i: isinstance(i, integer_types)
+is_int        = lambda i: isinstance(i, int)
 is_int_range  = lambda i, i1, i2=None: all(is_int(x) for x in [i, i1, i2 or 0]) and i in (range(i1+1) if i2 is None \
                                                                                           else range(i1, i2+1))
 is_list       = lambda l: isinstance(l, (list, set, tuple))

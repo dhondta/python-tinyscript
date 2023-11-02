@@ -5,7 +5,6 @@
 from math import log
 
 from .types import *
-from ..common import lazy_load_module, lazy_object
 from ..compat import ensure_str
 from ...preimports import ast, random, re
 
@@ -48,11 +47,9 @@ def __init_bitstring(bs):
             return r
     """
     try:
-        patchy.replace(bs.Bits._getbin, OLD_CODE % (" -> str", "0, self.len"),
-                                               NEW_CODE % (" -> str", "0, self.len"))
+        patchy.replace(bs.Bits._getbin, OLD_CODE % (" -> str", "0, self.len"), NEW_CODE % (" -> str", "0, self.len"))
     except (SyntaxError, ValueError):
-        patchy.replace(bs.Bits._getbin, OLD_CODE % ("", "self.len, 0"),
-                                               NEW_CODE % ("", "self.len, 0"))
+        patchy.replace(bs.Bits._getbin, OLD_CODE % ("", "self.len, 0"), NEW_CODE % ("", "self.len, 0"))
 lazy_load_module("bitstring", postload=__init_bitstring)
 
 

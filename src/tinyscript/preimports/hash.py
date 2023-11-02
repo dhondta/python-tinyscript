@@ -4,7 +4,8 @@
 """
 import hashlib
 from os.path import expanduser, isfile
-from six import b
+
+from ..helpers.compat import b
 
 
 def hash_file(filename, algo="sha256"):
@@ -28,7 +29,7 @@ hashlib.hash_file = hash_file
 for algo in [x for x in hashlib.__dict__.keys()]:
     try:
         h = hashlib.new(algo)
-        h.update(b(""))
+        h.update(b"")
         def _hash_file(a):
             def _wrapper(f):
                 return hash_file(f, a)

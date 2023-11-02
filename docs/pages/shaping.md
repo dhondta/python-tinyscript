@@ -265,7 +265,7 @@ $ activate-global-python-argcomplete --user
 Your script, let us say `test.py`:
 
 ```python hl_lines="2 5"
-#!/usr/bin/env python
+#!/usr/bin/python3
 # PYTHON_ARGCOMPLETE_OK
 ...
 parser.add_argument("test", choices=["a", "b", "c"])

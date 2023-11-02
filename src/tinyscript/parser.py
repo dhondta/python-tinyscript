@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Module for defining argument parser-related functions and objects.
 
@@ -10,13 +9,12 @@ import re
 import sys
 from inspect import currentframe, getmembers, isfunction, ismethod
 from os.path import basename, splitext
-from six import string_types
 
 from .features.handlers import _hooks
 from .argreparse import *
 from .features import *
 from .helpers.common import is_admin
-from .helpers.constants import LINUX, PYTHON3, WINDOWS
+from .helpers.constants import LINUX, WINDOWS
 from .helpers.data.types import ip_address, port_number
 from .helpers.text import configure_docformat, gt
 
@@ -244,7 +242,7 @@ def initialize(add_banner=False,
         if noarg and noargs_action == "wizard":
             sys.argv[1:] = [opt]
     # reporting feature, for making a reporting with the results of the tool at the end of its execution
-    if report_func is not None and PYTHON3:
+    if report_func is not None:
         if not isfunction(report_func):
             report_func = None
             glob['logger'].error(gt("Bad report generation function"))
@@ -267,9 +265,6 @@ def initialize(add_banner=False,
                 r.add_argument("--theme", default="default", last=True, prefix="report",
                                help=gt("report stylesheet theme"), note=gt("--css overrides this setting"))
                 r.add_argument("--filename", last=True, prefix="report", help=gt("report filename"))
-    elif report_func is not None and not PYTHON3:
-        report_func = None  # disable reporting in the at_exit handler
-        glob['logger'].warning(gt("Report generation is only available with Python 3"))
     # extended logging features
     if ext_logging:
         i.add_argument("-f", "--logfile", last=True, help=gt("destination log file"))
@@ -299,7 +294,7 @@ def initialize(add_banner=False,
     set_time_items(glob)
     # 6) display a banner if relevant
     bf = glob.get('BANNER_FONT', BANNER_FONT)
-    if add_banner or isinstance(bf, string_types):
+    if add_banner or isinstance(bf, str):
         # expensive to load asciistuff ; import only when a banner is used
         from asciistuff import AsciiFile, Banner
         f = AsciiFile()

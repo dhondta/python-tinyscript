@@ -7,6 +7,7 @@ import functools
 
 # source: https://stackoverflow.com/questions/6394511/python-functools-wraps-equivalent-for-classes
 def wraps_cls(cls):
+    """ functools.wraps equivalent for classes. """
     class _Wrapper(cls):
         def __init__(self, wrapped, assignents=functools.WRAPPER_ASSIGNMENTS):
             self.__wrapped__ = wrapped

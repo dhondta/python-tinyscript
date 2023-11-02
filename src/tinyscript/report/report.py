@@ -140,7 +140,7 @@ class Report(list):
             if isinstance(p, (Data, List, Table)) or not data_only:
                 r.update(p.json(orient=orient) if isinstance(p, Table) else p.json())
         if len(r) == 1:
-            r1 = list(r.items())[0]
+            r1 = list(r.values())[0]
             if isinstance(r1, dict):
                 r = r1
         return r

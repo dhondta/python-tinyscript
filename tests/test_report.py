@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Report module assets' tests.
 
@@ -77,7 +76,6 @@ class TestReport(TestCase):
         for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
             getattr(r, fmt)(save_to_file=True)
             remove("report.%s" % fmt)
-        self.assertRaises(DeprecationWarning, r.md, text=True)
     
     def test_report_assets(self):
         self.assertRaises(ValueError, Report, css="does_not_exist")

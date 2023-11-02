@@ -3,7 +3,6 @@
 
 """
 from .strings import _str2list
-from ...common import lazy_load_module, lazy_object
 from ....preimports import itertools, re
 
 
@@ -144,9 +143,6 @@ interface_address_filtered_list.__name__ = "interface addresses filtered list"
 
 def __ip_address(ip, version=None, fail=True):
     """ IP address validation. """
-    # note: netaddr already handles validation and raises a ValueError in case
-    #        of bad address ; we just ensure that the input is converted to
-    #        unicode using six.u (otherwise, it fails in Python 2)
     ip = int(ip) if str(ip).isdigit() else str(ip)
     try:
         return netaddr.IPAddress(ip, version=version)

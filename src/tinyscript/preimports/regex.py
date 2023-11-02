@@ -10,7 +10,6 @@ from string import *
 from .itools import itertools
 from ..helpers.attack import MASKS
 from ..helpers.compat import b
-from ..helpers.constants import PYTHON2
 
 # fix to re.sre_parse removed from Python 3.11
 try:
@@ -110,7 +109,7 @@ def __gen_str_from_re(regex, max_repeat, any_set, rand=False, parsed=False, grou
                 end = min(end, max_repeat)
             start = min(start, end)
             if count:
-                if float(end) == float("inf") or PYTHON2 and end == 4294967295:
+                if float(end) == float("inf"):
                     yield float("inf")
                     return
                 n = list(__gen_str_from_re(value[-1], max_repeat, any_set, rand, True, groups, True))[0]

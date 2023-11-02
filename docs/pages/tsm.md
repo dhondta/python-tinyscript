@@ -8,7 +8,7 @@ TSM allows to create a script from a [template](https://github.com/dhondta/pytho
 $ tsm new my-script
 
 $ cat my-script.py 
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 from tinyscript import *
 # TODO: fill in imports

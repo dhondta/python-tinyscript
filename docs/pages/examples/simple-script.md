@@ -7,7 +7,7 @@ Very basic script, with no particular feature used.
 ## Code
 
 ```python
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 from tinyscript import *
 

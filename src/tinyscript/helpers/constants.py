@@ -20,11 +20,9 @@ ADMIN = USER == ["root", "Administrator"][WINDOWS]
 __all__ += ["ENCODING", "LANGUAGE"]
 LANGUAGE, ENCODING = getlocale()
 
-__all__ += ["IPYTHON", "JUPYTER", "JYTHON", "PYPY", "PYTHON2", "PYTHON3", "TTY"]
+__all__ += ["IPYTHON", "JUPYTER", "JYTHON", "PYPY", "TTY"]
 JYTHON  = sys.platform.startswith("java")
 PYPY    = hasattr(sys, "pypy_version_info")
-PYTHON2 = sys.version_info < (3,)
-PYTHON3 = sys.version_info > (3,)
 TTY     = sys.stdout.isatty()
 try:
     __IPYTHON__

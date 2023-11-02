@@ -3,10 +3,7 @@
 
 """
 from time import time
-try:
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import MutableMapping
+from collections.abc import MutableMapping
 
 from .data.types import is_class, is_list, is_str
 from .path import Path

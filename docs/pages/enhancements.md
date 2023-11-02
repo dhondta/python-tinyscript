@@ -22,6 +22,14 @@ A context manager is also available:
 
 -----
 
+## `functools`
+
+`functools` is enhanced with a new function:
+
+- `wraps_cls`: this is a simple equivalent of `functools.wraps` but for classes
+
+-----
+
 ## `getpass`
 
 `getpass` is enhanced with a new function:
@@ -120,14 +128,6 @@ A context manager is also available:
 - `randstrs`: provides a generator of N random strings from the input regex
 - `size`: computes the number of all possible strings from the input regex
 - `strings`: generates all possible strings from the input regex
-
------
-
-## `shutil`
-
-`shutil` is slightly enhanced with a new function for Python 2:
-
-- `which`: compatibility function (already exists in Python 3) that determines the path to a program.
 
 -----
 

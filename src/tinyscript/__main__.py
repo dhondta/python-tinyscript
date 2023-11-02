@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import requests
 from tinyscript import *
@@ -36,7 +35,7 @@ TIMEOUT = 2
 
 
 __add_fetch = lambda p, **kw: p.add_argument("-f", "--fetch", action="store_true", help="fetch the target URL", **kw)
-__add_name = lambda p, **kw: p.add_argument("name", type=ts.str_matches(r"^([0-9a-z]+[-_]+)?[0-9a-z]+$", re.I),
+__add_name = lambda p, **kw: p.add_argument("name", type=ts.str_matches(r"^[a-z][0-9a-z]*([-_]?[0-9a-z]+)*$", re.I),
                                             help="name of the script (without the .py extension)", **kw)
 __add_src = lambda p, **kw: p.add_argument("-s", "--source", type=url, help="specific source for searching", **kw)
 __add_url = lambda p, **kx: p.add_argument("url", type=url, help="URL of a list of scripts")

@@ -2,7 +2,6 @@
 """Report data transformation functions.
 
 """
-from ...common import lazy_load_module, lazy_object
 from ....preimports import inspect, re
 
 lazy_load_module("dicttoxml")

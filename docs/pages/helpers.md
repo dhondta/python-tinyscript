@@ -20,21 +20,20 @@ It also provides some other constants:
 `ENCODING` | system encoding
 `LANGUAGE` | system language code
 
-It defines a `classproperty` decorator for setting a property to the class level.
+It defines a `classproperty` decorator for setting a property at the class level.
 
-It also defines a few compatibility/utility functions for working with the same code either in Python 2 or 3.
+It also defines a few utility or backward-compatibility functions.
 
 **Name** | **Description**
 --- | ---
-`b` | bytes conversion function, overloading `six.b` for a better compatibility
+`b` | bytes conversion function
 `byteindex` | selects the byte value from a string at the given index
 `colored` | allows to color text in a similar way to [`termcolor.colored`](https://pypi.org/project/termcolor/) (which is NOT in Tinyscript's requirements) but relying on [`colorful`](https://pypi.org/project/colorful/) (which is in Tinyscript's requirements)
-`ensure_binary` | identical to `six.ensure_binary`
-`ensure_str` | similar to `six.ensure_str`
-`ensure_unicode` | dummy alias for `six.text_type`, by analogy to `ensure_binary` and `ensure_unicode`
-`execfile` | added in Python3 for backward-compatibility
-`iterbytes` | iterates over the bytes of a string (trivial in Python3 but
-`u` | alias for `six.u`
+`ensure_binary` | identical to `six.ensure_binary` (kept for backward compatibility)
+`ensure_str` | ensures the input, either string or bytes, is a string
+`execfile` | same function as used in Python 2
+`iterbytes` | iterates over the bytes of a string (kept for backward compatibility)
+`u` | dummy alias for `str` (kept for backward compatibility)
 
 !!! warning "Global scope and the `ts` module"
     

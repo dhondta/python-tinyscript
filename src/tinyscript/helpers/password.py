@@ -24,12 +24,12 @@ __all__ = __features__ = ["getpass", "getrepass"]
 
 BAD_PASSWORDS_LISTS = {
     'default': {
-        'password.lst': ["./", "~/"],
-        'rockyou.txt':  ["./", "~/"],
+        'password.lst': ["./", "~/", "~/Dictionaries"],
+        'rockyou.txt':  ["./", "~/", "~/Dictionaries"],
     },
     'linux': {
         'password.lst': ["./", "~/", "/opt/john/run", "/usr/local/share/john", "/usr/share/john", "/var/lib/john"],
-        'rockyou.txt':  ["./", "~/"],
+        'rockyou.txt':  ["./", "~/", "~/.dict", "~/.dictionaries", "~/Dictionaries"],
     },
 }
 DEFAULT_POLICY = {

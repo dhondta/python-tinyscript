@@ -2,13 +2,7 @@
 """Config-related checking functions and argument types.
 
 """
-try:
-    import ConfigParser as ini
-except ImportError:
-    import configparser as ini
-from six import u
-
-from ...common import lazy_load_module
+import configparser as ini
 
 for _m in ["json", "toml", "yaml"]:
     lazy_load_module(_m)
@@ -42,7 +36,7 @@ def __check_file(c, ctype, fail=True, is_file=True):
                 if len(cfg.read(c)) == 0:
                     raise ValueError("Config file does not exist")
             else:
-                cfg.read_string(u(c))
+                cfg.read_string(str(c))
         elif ctype in ["json", "toml"]:
             m = globals()[ctype]
             if is_file:

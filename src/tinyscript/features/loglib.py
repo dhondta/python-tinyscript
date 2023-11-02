@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Module for defining logging-related constants and objects.
 
@@ -62,13 +61,11 @@ def configure_logger(glob, multi_level, relative=False, logfile=None, syslog=Fal
     # create the "last record" logger, used for reminding the last log record, i.e. with a shortcut key
     lastrec = logging.getLogger("__last_record__")
     kw = {'fmt': "\r" + glob.pop('LOG_FORMAT', LOG_FORMAT), 'datefmt': glob.pop('DATE_FORMAT', DATE_FORMAT)}
+    h = lastrec.handlers[0] if len(lastrec.handlers) == 1 else logging.StreamHandler()
     if len(lastrec.handlers) != 1:
-        for h in lastrec.handlers:
-            lastrec.removeHandler(h)
-        h = logging.StreamHandler()
+        for old_h in lastrec.handlers:
+            lastrec.removeHandler(old_h)
         lastrec.addHandler(h)
-    else:
-        h = lastrec.handlers[0]
     h.setFormatter(logging.Formatter(*kw.values()))
     lastrec.setLevel(1)
     coloredlogs.install(1, logger=lastrec, **kw)

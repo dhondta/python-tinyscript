@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Argreparse module assets' tests.
 
@@ -76,6 +75,7 @@ class TestArgreparse(TestCase):
         self.assertFalse(args.verb_mode)
         self.assertIs(args.version, None)
         self.assertFalse(args.show_version)
+        self.assertRaises(ValueError, p.add_argument, "test", type="BAD")
     
     def test_mutually_exclusive_arguments(self):
         g = self.p.add_mutually_exclusive_group()
@@ -183,10 +183,7 @@ class TestArgreparse(TestCase):
         test = subparsers.add_parser("subtest", help="test", parents=[self.p])
         test.add_argument("--test", dest="verbose")
         test2 = subparsers.add_parser("subtest2", category="test", help="test2", parents=[self.p])
-        if PYTHON3:
-            args = self.p.parse_args()
-        else:
-            self.assertRaises(SystemExit, self.p.parse_args)
+        args = self.p.parse_args()
         self.assertIsNotNone(self.p.format_help())
     
     def test_help_formatter(self):

@@ -3,20 +3,11 @@
 
 """
 from functools import wraps
-from six import string_types
+from queue import Queue
+from subprocess import TimeoutExpired
 from threading import Thread
-try:
-    from Queue import Queue
-except ImportError:
-    from queue import Queue
-try:  # only used in Python3
-    from subprocess import TimeoutExpired
-except ImportError:
-    pass
 
-from .common import lazy_load_module
 from .compat import b, ensure_str
-from .constants import PYTHON3
 from ..preimports import inspect, os, re, shlex, signal, subprocess, sys
 
 lazy_load_module("multiprocessing")
@@ -32,7 +23,7 @@ THREADS   = []
 
 def __set_cmd(cmd, **kwargs):
     sh = kwargs.get('shell', False)
-    if isinstance(cmd, string_types):
+    if isinstance(cmd, str):
         if not sh:
             cmd = shlex.split(cmd)
     elif isinstance(cmd, (list, tuple)):
@@ -54,21 +45,18 @@ def execute(cmd, **kwargs):
     """
     rc, to, rr = kwargs.pop('returncode', False), kwargs.pop('timeout', None), kwargs.pop('reraise', False)
     sh = kwargs.get('shell', False)
-    if PYTHON3 and sh:
+    if sh:
         kwargs['preexec_fn'] = os.setsid
     p = subprocess.Popen(__set_cmd(cmd, **kwargs), stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
-    if PYTHON3:
-        try:
-            out, err = p.communicate(timeout=to)
-        except TimeoutExpired:
-            p.terminate()
-            if sh:
-                os.killpg(os.getpgid(p.pid), signal.SIGTERM)
-            out, err = p.communicate()
-            if rr:
-                raise
-    else:
+    try:
+        out, err = p.communicate(timeout=to)
+    except TimeoutExpired:
+        p.terminate()
+        if sh:
+            os.killpg(os.getpgid(p.pid), signal.SIGTERM)
         out, err = p.communicate()
+        if rr:
+            raise
     return (out, err, p.returncode) if rc else (out, err)
 
 

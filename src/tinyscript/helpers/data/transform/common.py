@@ -4,7 +4,6 @@
 """
 from ..types import is_bin, is_bytes, is_hex, is_int, is_list, is_pos_int, is_str
 from ..utils import BitArray as Bits
-from ...common import lazy_load_module
 from ...compat import b, ensure_str
 
 for _m in ["binascii", "functools", "math"]:

@@ -7,7 +7,6 @@ from os.path import sep
 
 from .strings import _str2list
 from ...constants import WINDOWS
-from ...common import lazy_load_module
 from ....preimports import os, re
 
 lazy_load_module("magic")
@@ -22,7 +21,7 @@ __all__ += ["is_dir", "is_executable", "is_file", "is_filemode", "is_filetype", 
 is_dir = is_folder = os.path.isdir
 is_executable = lambda f: os.access(f, os.X_OK)
 is_file = os.path.isfile
-is_filemode = lambda m: len(m) == 3 and all(int(g) in range(8) for g in m)
+is_filemode = lambda m: len(m) == 3 and all(g.isdigit() and int(g) in range(8) for g in m)
 is_filetype = lambda f, t: is_file(f) and re.search(t, magic.from_file(f)) is not None
 is_in_path = lambda p: p in [x.rstrip(sep) for x in environ['PATH'].split(":;"[WINDOWS])]
 is_mimetype = lambda f, m: is_file(f) and re.search(m, magic.from_file(f, mime=True)) is not None

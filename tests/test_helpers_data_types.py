@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Custom type validations' tests.
 
@@ -60,6 +59,7 @@ class TestHelpersDataTypes(TestCase):
         self.assertEqual(folder_exists(TFNE), TFNE)
         self.assertEqual(file_mode("750"), 488)
         self.assertEqual(file_mode("666"), 438)
+        self.assertRaises(ValueError, file_mode, "BAD")
 
     def test_general_purpose_types(self):
         self.assertEqual(int_range(1, 2), 1)

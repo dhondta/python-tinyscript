@@ -2,7 +2,6 @@
 """CLI layout objects.
 
 """
-from .common import lazy_load_module, lazy_object
 from .termsize import get_terminal_size
 
 for _m in ["terminaltables", "textwrap"]:

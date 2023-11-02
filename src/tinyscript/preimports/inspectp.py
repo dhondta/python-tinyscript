@@ -40,13 +40,3 @@ def getparentframe(**kwargs):
     return frame
 inspect.getparentframe = getparentframe
 
-
-if sys.version_info < (3,):
-    def unwrap(func):
-        """ Simple function to get the object wrapped by func. This is already implemented (more complex) in Python 3.
-             This function is for compatibility with Python 2. """
-        while hasattr(func, '__wrapped__') and func is not func.__wrapped__:
-            func = func.__wrapped__
-        return func
-    inspect.unwrap = unwrap
-

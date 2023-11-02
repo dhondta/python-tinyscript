@@ -7,7 +7,6 @@ import patchy
 import types
 from collections import deque
 from functools import wraps
-from six import string_types
 
 
 BLOCK_KW = ["class", "def", "elif", "else", "except", "finally", "for", "if", "try", "while", "with"]
@@ -92,8 +91,7 @@ def __sort_int_text_pairs(text, lst, item):
             raise PatchError(s + " (double index {})".format(n))
         # check for inconsistent line
         line = lst[i+1]
-        _ = [line, ""][line is None]
-        if line is not None and not isinstance(_, string_types):
+        if line is not None and not isinstance([line, ""][line is None], str):
             raise PatchError(s + " (bad line '{}')".format(line))
         d[n] = line
     # then return the sorted list of pairs

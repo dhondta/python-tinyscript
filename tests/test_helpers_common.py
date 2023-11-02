@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Common utility functions' tests.
 
@@ -81,4 +80,11 @@ class TestHelpersCommon(TestCase):
         self.assertTrue(isinstance(re, lazy_object_proxy.Proxy))
         self.assertTrue(isinstance(re.search, type(lambda: None)))
         self.assertIsNotNone(DUMMY_CONST)
+        lazy_load_object("dummy_alias", lambda: str)
+    
+    def test_deprecation(self):
+        def test_func(): pass
+        deprecate(test_func, "new_test_func")
+        self.assertIsNone(test_func())
+        deprecate("old.module", "new.module")
 

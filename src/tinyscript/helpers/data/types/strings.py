@@ -2,8 +2,6 @@
 """String-related checking functions and argument types.
 
 """
-from six import binary_type, string_types
-
 from ....preimports import ast, re, string
 
 
@@ -45,8 +43,8 @@ def _is_from_alph(s, a, t):
 # various string-related check functions
 __all__ += ["is_str", "is_bytes", "is_digits", "is_letters", "is_lowercase", "is_printable", "is_punctuation",
             "is_uppercase"]
-is_str         = lambda s: isinstance(s, string_types)
-is_bytes       = lambda s: isinstance(s, binary_type)
+is_str         = lambda s: isinstance(s, str)
+is_bytes       = lambda s: isinstance(s, bytes)
 is_digits      = lambda s, t=1.0: _is_from_alph(s, string.digits, t)
 is_letters     = lambda s, t=1.0: _is_from_alph(s, string.ascii_letters, t)
 is_lowercase   = lambda s, t=1.0: _is_from_alph(s, string.ascii_lowercase, t)

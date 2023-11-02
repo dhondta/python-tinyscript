@@ -9,11 +9,9 @@ from mimetypes import guess_type
 from pathlib2 import Path as BasePath
 from pyminizip import compress_multiple, uncompress
 from shutil import copy, copy2, copytree, rmtree
-from six import string_types
 from tempfile import gettempdir, NamedTemporaryFile as TempFile
 
 from .constants import *
-from .compat import u
 from .data.types import is_dict, is_list, is_str
 from .password import getpass, getrepass
 from ..preimports import ctypes, os, random, re
@@ -48,7 +46,7 @@ class Path(BasePath):
             raise ValueError("Conflicting options ; 'create' creates a folder while 'touch' creates a file")
         elif (create or touch) and not p.exists():
             if create:
-                p.mkdir(parents=True)  # exist_ok does not work in Python 2
+                p.mkdir(parents=True)
             elif touch:
                 p.touch()
         return p
@@ -129,12 +127,12 @@ class Path(BasePath):
         return self.read_text()
     
     def __add_text(self, data, mode='w', encoding=None, errors=None):
-        """ Allows to write/append text to the file, both in Python 2 and 3. """
-        if not isinstance(data, string_types):
+        """ Allows to write/append text to the file. """
+        if not isinstance(data, str):
             raise TypeError("data must be str, not %s" % 
                             data.__class__.__name__)
         with self.open(mode=mode, encoding=encoding, errors=errors) as f:
-            return f.write(u(data))
+            return f.write(str(data))
     
     def append_bytes(self, data):
         """ Allows to append bytes to the file, as only write_bytes is available in pathlib2, overwriting the former
@@ -172,7 +170,7 @@ class Path(BasePath):
         """ Copy this folder or file to the given destination. """
         try:
             copytree(str(self), str(new_path), **kwargs)
-        except OSError as e:  # does not use NotADirectoryError as it is only available from Python3
+        except OSError as e:
             if e.errno == errno.ENOTDIR:
                 (copy2 if kwargs.pop('metadata', True) else copy)(str(self), str(new_path), **kwargs)
             else:
@@ -180,7 +178,7 @@ class Path(BasePath):
         return self.__class__(new_path)
     
     def expanduser(self):
-        """ Fixed expanduser() method, working for both Python 2 and 3. """
+        """ Fixed expanduser() method. """
         return Path(os.path.expanduser(str(self)))
     
     def find(self, name=None, regex=False):
@@ -261,20 +259,10 @@ class Path(BasePath):
             if filter_func(item):
                 yield item
     
-    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
-        """ Fix to non-existing argument exist_ok in Python 2. """
-        arg = (exist_ok, ) if PYTHON3 else ()
-        super(Path, self).mkdir(mode, parents, *arg)
-    
     def read_lines(self, encoding=None, errors=None):
         """ Extra method for reading a file as lines. """
         for l in self.read_text(encoding, errors).splitlines():
             yield l
-    
-    def read_text(self, encoding=None, errors=None):
-        """ Fix to non-existing method in Python 2. """
-        with self.open(mode='r', encoding=encoding, errors=errors) as f:
-            return f.read()
     
     def reset(self):
         """ Ensure the file exists and is empty. """
@@ -311,15 +299,6 @@ class Path(BasePath):
             for item in self.listdir(lambda p: not p.is_dir(), sort):
                 if filter_func(item):
                     yield out(rel(item))
-    
-    def write_bytes(self, data):
-        """ Fix to non-existing method in Python 2. """
-        with self.open(mode='wb') as f:
-            return f.write(memoryview(data))
-    
-    def write_text(self, data, encoding=None, errors=None):
-        """ Fix to non-existing method in Python 2. """
-        return self.__add_text(data, 'w', encoding, errors)
     
 
 class ConfigPath(Path):
@@ -566,9 +545,7 @@ class PythonPath(Path):
     def __init__(self, path, remove_cache=False):
         super(PythonPath, self).__init__()
         if remove_cache:
-            f = (lambda x: x.is_file() and x.extension == ".pyc") if PYTHON2 else \
-                (lambda x: x.is_dir() and x.basename == "__pycache__")
-            for p in self.walk(filter_func=f):
+            for p in self.walk(filter_func=lambda x: x.is_dir() and x.basename == "__pycache__"):
                 p.remove(False)
         if self.is_dir():
             self.modules, _cached = [], []
@@ -576,12 +553,10 @@ class PythonPath(Path):
                 for p in self.walk(filter_func=lambda x: x.extension == e, base_cls=False):
                     if not p.is_file() or str(p.absolute()) in _cached:
                         continue
-                    if e == ".pyc" and (PYTHON3 and p.absolute().dirname.parts[-1] == "__pycache__" or PYTHON2):
+                    if e == ".pyc" and p.absolute().dirname.parts[-1] == "__pycache__":
                         parts = p.filename.split(".")
-                        if PYTHON3 and len(parts) == 3 and re.match(r".?python\-?[23]\d", parts[-2]) or PYTHON2:
-                            d = p.absolute().dirname
-                            d = d if PYTHON2 else d.parent
-                            _cached.append(str(d.joinpath("%s.py" % parts[0])))
+                        if len(parts) == 3 and re.match(r".?python\-?[23]\d", parts[-2]):
+                            _cached.append(str(p.absolute().dirname.parent.joinpath("%s.py" % parts[0])))
                     p = PythonPath(p)
                     if p.loaded:
                         self.modules.append(p.module)

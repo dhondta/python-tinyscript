@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Handlers module assets' tests.
 
@@ -46,7 +45,7 @@ def exec_script(handler, template):
     t = ["os.kill(os.getpid(), signal.{})".format(s), ""][s is None]
     with open(FILE, 'w+') as f:
         f.write(template.format(handler, FILE2, s, t))
-    p = subprocess.Popen(["python{}".format(["2", "3"][PYTHON3]), FILE])
+    p = subprocess.Popen(["python3", FILE])
     p.wait()
     try:
         with open(FILE2) as f:

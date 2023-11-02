@@ -11,7 +11,6 @@ from importlib import import_module
 from pip._internal.cli.main_parser import parse_command
 from pip._internal.exceptions import PipError
 from shutil import rmtree
-from six import string_types
 from slugify import slugify
 from subprocess import Popen, PIPE
 
@@ -98,7 +97,7 @@ def __get_virtualenv(error=True):
 
 def __install(package, *args, **kwargs):
     """
-    Python2/3-compatible Pip install function.
+    Pip install function.
     
     :param package: package name
     :param args:    options to be used with the pip install command
@@ -138,7 +137,7 @@ def __is_installed(package, *args, **kwargs):
     """
     found = False
     for name, version in __list_packages(*args, **kwargs):
-        if isinstance(package, string_types) and package == name or isinstance(package, (list, tuple, set)) and \
+        if isinstance(package, str) and package == name or isinstance(package, (list, tuple, set)) and \
            package[0] == name and package[1] == version:
             found = True
             break
@@ -216,7 +215,7 @@ def __setup(venv_dir, requirements=None, force_reinstall=False, no_cache=True, v
         #  for Python3, ImportError when using virtualenv installed with pip ;
         #  works while installed with apt (python3-virtualenv)
     __activate(venv_dir)
-    if isinstance(requirements, string_types):
+    if isinstance(requirements, str):
         with open(requirements) as f:
             requirements = [l.strip() for l in f]
     if isinstance(requirements, (tuple, list, set)):

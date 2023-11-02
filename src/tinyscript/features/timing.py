@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Module for defining benchmark mode logic.
 
@@ -9,7 +8,7 @@ from errno import ETIME
 from os import strerror
 
 from .loglib import logger
-from ..helpers.constants import PYTHON3, WINDOWS
+from ..helpers.constants import WINDOWS
 from ..helpers.timeout import TimeoutError
 
 
@@ -71,21 +70,15 @@ def set_time_items(glob):
                     l.time(self.descr)
                 self.start = _take_time()
                 if self.precision:
-                    if PYTHON3:
-                        self.startp = time.perf_counter()
-                    else:
-                        l.warning("Precision timer is not available with Python 2")
+                    self.startp = time.perf_counter()
                 return self
         
         def __exit__(self, exc_type, exc_value, exc_traceback):
             if manager.enabled:
                 if self.precision:
-                    if PYTHON3:
-                        dt = time.perf_counter() - self.startp
-                        l.time("> Precise time elapsed: %.6f seconds"% dt)
-                        manager.times.append(("", 0, dt))
-                    else:
-                        l.warning("Precision timer is not available with Python 2")
+                    dt = time.perf_counter() - self.startp
+                    l.time("> Precise time elapsed: %.6f seconds"% dt)
+                    manager.times.append(("", 0, dt))
                 d = _take_time(self.start, self.descr)
                 if manager._timings:
                     l.time("> Time elapsed: %.2f seconds"% d)

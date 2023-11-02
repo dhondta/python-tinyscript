@@ -3,10 +3,7 @@
 
 """
 from functools import wraps
-try:  # PYTHON3
-    from inspect import getfullargspec
-except ImportError:
-    from inspect import getargspec as getfullargspec
+from inspect import getfullargspec
 
 from ..preimports import logging, sys
 

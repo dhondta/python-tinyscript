@@ -7,7 +7,7 @@ Very basic tool, using the demonstration feature when no argument is given. It a
 ## Code
 
 ```python
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 __author__ = "John Doe"
 __version__ = "1.0"

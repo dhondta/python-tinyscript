@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Pathlib2 extension tests.
 
@@ -26,11 +25,11 @@ class TestHelpersPath(TestCase):
         m.mkdir()
         f = Path(str(m.joinpath("test1.py")), touch=True)
         MODULE = m.joinpath("test2.py")
-        f.write_text("#!/usr/bin/env python\nimport os")
-        f.write_bytes(b"#!/usr/bin/env python\nimport os")
+        f.write_text("#!/usr/bin/python3\nimport os")
+        f.write_bytes(b"#!/usr/bin/python3\nimport os")
         py_compile.compile(str(f))
-        (m.joinpath("__pycache__") if PYTHON3 else f.dirname).joinpath("not-cached.pyc").touch()
-        MODULE.write_text("#!/usr/bin/env python\nimport os\n\nclass Test(object):\n   pass\n\n"
+        m.joinpath("__pycache__").joinpath("not-cached.pyc").touch()
+        MODULE.write_text("#!/usr/bin/python3\nimport os\n\nclass Test(object):\n   pass\n\n"
                           "def test(): pass #TODO: test")
         FILE = PATH.joinpath("test.txt")
         FILE.touch()

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import re
 
@@ -20,7 +19,7 @@ TARGETS = {
         bot.send_receive("...")
 """
 }
-TEMPLATE = """#!/usr/bin/env python
+TEMPLATE = """#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 {target}from tinyscript import *
 # TODO: fill in imports

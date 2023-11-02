@@ -2,9 +2,8 @@
 """Common utility functions.
 
 """
-from six import StringIO
+from io import StringIO
 
-from .common import lazy_object
 from .compat import ensure_str
 from .constants import *
 from .data.types import is_function, is_str
@@ -186,7 +185,7 @@ def silent(f):
 
 
 def std_input(prompt="", style=None, palette=None):
-    """ Very simple Python2/3-compatible input function handling prompt styling.
+    """ Very simple input function handling prompt styling.
     
     :param prompt:  prompt message
     :param style:   colorful styling function, e.g. red_on_green (for green foreground and red background colors)
@@ -197,7 +196,7 @@ def std_input(prompt="", style=None, palette=None):
         if isinstance(style, (list, tuple, set)):
             style = "_".join(style)
         prompt = colored(prompt, style=style)
-    return (input(prompt) if PYTHON3 else raw_input(prompt)).strip()
+    return input(prompt).strip()
 
 
 def stdin_flush():
@@ -217,19 +216,15 @@ def stdin_flush():
 
 
 def stdin_pipe():
-    """ Python2/3-compatible stdin pipe read function. """
-    if PYTHON3:
-        with open(0, 'rb') as f:
-            for l in f:
-                yield l
-    else:
-        for l in sys.stdin:
+    """ Stdin pipe read function. """
+    with open(0, 'rb') as f:
+        for l in f:
             yield l
 
 
 def user_input(prompt="", choices=None, default=None, choices_str=None, default_str=None, required=False, newline=False,
                **kwargs):
-    """ Python2/3-compatible input function handling choices and default value.
+    """ Input function handling choices and default value.
     
     :param prompt:      prompt message
     :param choices:     list of possible choices or lambda function

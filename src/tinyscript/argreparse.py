@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Module for extending argparse features, for simplifying parser.py.
 
@@ -13,6 +12,7 @@ from argparse import _ActionsContainer, _ArgumentGroup, _MutuallyExclusiveGroup,
                      SUPPRESS, _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, ArgumentParser as BaseArgumentParser
 from os import environ
 from os.path import abspath, basename, dirname, sep, splitext
+from shutil import which
 from stat import S_IXUSR
 try:
     from configparser import ConfigParser, NoOptionError, NoSectionError
@@ -20,14 +20,12 @@ except ImportError:
     from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
 from .features.loglib import logger
-from .helpers.constants import PYTHON3
 from .helpers.inputs import user_input
 from .helpers.licenses import *
 from .helpers.data.types import is_executable, is_in_path, is_long_opt, is_pos_int, is_short_opt
 from .helpers.termsize import get_terminal_size
 from .helpers.text import *
 from .helpers.text import configure_docformat, txt_terminal_render
-from .preimports.shutilp import which
 
 
 __all__ = ["ArgumentParser", "DUNDERS", "SUPPRESS"]
@@ -45,9 +43,6 @@ if sys.version_info >= (3, 8):
 
 DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
-
-
-stem = lambda p: splitext(basename(p))[0]
 
 
 # ------------------------------- CUSTOM ACTIONS -------------------------------
@@ -108,9 +103,7 @@ class _NewSubParsersAction(_SubParsersAction):
         aliases = kwargs.pop('aliases', [])
         if 'help' in kwargs:
             help = kwargs.pop('help')
-            # see [Python2] argparse.py:1029 and [Python3] argparse.py:1059
-            args = (name, aliases, help) if PYTHON3 else (name, help)
-            choice_action = self._ChoicesPseudoAction(*args)
+            choice_action = self._ChoicesPseudoAction(name, aliases, help)
             choice_action.category = category
             self._choices_actions.append(choice_action)
         # create the parser, but with another formatter and separating the help into an argument group
@@ -122,7 +115,7 @@ class _NewSubParsersAction(_SubParsersAction):
         i.add_argument("--help", action="help", prefix="show", help=gt("show this help message and exit"))
         # add it to the map
         self._name_parser_map[name] = parser
-        # make parser available under aliases also (Python3 only ; see before)
+        # make parser available under aliases also
         for alias in aliases:
             self._name_parser_map[alias] = parser
         return parser
@@ -273,22 +266,21 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self._docfmt = gd.get('__docformat__')
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         self.examples = gd.get('__examples__', [])
-        script = stem(sys.argv[0])
+        script = basename(sys.argv[0])
+        _stem = lambda p: splitext(p)[0]
         if gd.get('__script__') is None:
             gd['__script__'] = script
-        self.banner = gd.get('__banner__', script)
+        self.banner = gd.get('__banner__', _stem(script))
         if kwargs.get('prog') is None:
-            path = abspath(which(script) or script)
+            path = abspath(which(script) or which(_stem(script)) or script)
             ArgumentParser.prog = kwargs['prog'] = "python " + script if not is_executable(path) else \
                                                    "./" + script if not is_in_path(dirname(path)) else script
         kwargs['add_help'] = False
         kwargs['conflict_handler'] = "error"
         # when __docformat__ is set, fixing max_help_position to terminal's width forces argparse to format arguments
         #  with their help on the same line ; in other words, formatting is left to the renderer
-        try:
-            mhp = get_terminal_size()[0]
-        except TypeError:
-            mhp = 80
+        wh = get_terminal_size()
+        mhp = 80 if wh is None else wh[0]
         kwargs['formatter_class'] = HelpFormatter if self._docfmt is None else \
                                     lambda prog: HelpFormatter(prog, max_help_position=mhp)
         # format the epilog message
@@ -375,13 +367,9 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             if not operator(actual, desired):
                 errors.append((m, o or ">=", str(desired), str(actual)))
         if len(errors) > 0:
-            if len(errors) == 1:
-                msg = "Bad version for module '%s' ; should be %s%s while actual version is %s" % errors[0]
-            else:
-                msg = ""
-                for error in errors:
-                    msg += "\n- Bad version for module '%s' ; should be %s%s while actual version is %s" % error
-            raise RequirementError(msg)
+            line = ["", "\n- "][len(errors) > 1] + \
+                   "Bad version for module '%s' ; should be %s%s while actual version is %s"
+            raise RequirementError(["", "\n"][len(errors) > 1] + "\n".join(line % e for e in errors))
     
     def _filtered_actions(self, *a_types):
         """ Get actions filtered on a list of action types.

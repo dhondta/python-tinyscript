@@ -4,7 +4,6 @@
 """
 from gettext import gettext as gt
 
-from .common import lazy_load_module, lazy_object
 from .compat import b
 from .data.transform.common import str2hex
 from .data.types.network import is_email, is_url

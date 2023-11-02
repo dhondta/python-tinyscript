@@ -21,7 +21,6 @@ __imports__ = {
         'logging':    "log",
         'random':     "rand",
         're':         "regex",
-        'shutil':     "shutilp",
         'string':     "stringp",
         'virtualenv': "venv",
     },
@@ -40,6 +39,7 @@ __imports__ = {
         "os",
         "platform",
         "shlex",
+        "shutil",
         "signal",
         "string",
         "struct",
@@ -68,7 +68,7 @@ def _load_preimports(*extras, lazy=True):
     i = __imports__
     for module, enhanced in i['enhanced'].copy().items():
         # these modules are used somewhere in the imported code anyway, hence laziness makes no sense
-        load(module, enhanced, lazy=module in ["inspect", "logging", "shutil"] or lazy)
+        load(module, enhanced, lazy=module in ["inspect", "logging"] or lazy)
         # handle specific classes to be added to the global namespace
         if module == "virtualenv":
             cls = ["PipPackage", "VirtualEnv"]

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """Initialization of Tinyscript package.
 
@@ -9,19 +8,18 @@
 #  see https://github.com/pypa/setuptools/issues/3044
 #import setuptools
 
+from .__conf__ import *
+
 from warnings import filterwarnings
 filterwarnings("ignore", "Setuptools is replacing distutils.")
 
-
 from .__info__ import __author__, __copyright__, __license__, __version__
 
-from .deprecation import *
 from .features import *
 from .helpers import *
 from .parser import *
 from .preimports import *
 
-from .deprecation import __features__ as _deprecation
 from .features import __features__ as _features
 from .helpers import __features__ as _helpers
 from .parser import __features__ as _parser
@@ -34,5 +32,5 @@ ts.__license__   = __license__
 ts.__version__   = __version__
 
 
-__all__ = _deprecation + _features + _helpers + _parser + _preimports
+__all__ = _features + _helpers + _parser + _preimports
 
