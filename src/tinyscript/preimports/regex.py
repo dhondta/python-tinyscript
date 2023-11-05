@@ -15,8 +15,7 @@ from ..helpers.compat import b
 try:
     re.sre_parse
 except AttributeError:
-    import sre_parse
-    re.sre_parse = sre_parse
+    re.sre_parse = re._parser
 
 
 CATEGORIES = {
