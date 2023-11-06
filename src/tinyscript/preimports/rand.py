@@ -11,10 +11,16 @@ from ..helpers.compat import b
 from ..helpers.data import *
 
 
+random._choice = random.choice
+def __choice(lst, exclusions=(), error=True):
+    """ Simple extension of the original choice() function for excluding a given list of values. """
+    l = [x for x in lst if x not in exclusions]
+    return None if not error and len(l) == 0 else random._choice(l)
+random.choice = __choice
+
+
 def __randstr(n=8, alphabet=string.ascii_lowercase+string.ascii_uppercase+string.digits):
-    """
-    Compose a random string of the given length with the given alphabet.
-    """
+    """ Compose a random string of the given length with the given alphabet. """
     if n < 0:
         raise ValueError("Bad random string length")
     if len(alphabet) == 0:
@@ -27,7 +33,7 @@ random.randstr = __randstr
 
 
 class __Base(object):
-    """ Class holding some common methods for other classes of this module """
+    """ Class holding some common methods for other classes of this module. """
     def next_block(self, output_format="str", update=True):
         """
         Get the next 32bits-block of data.
@@ -55,8 +61,7 @@ class __Base(object):
 
 
 class Geffe(__Base):
-    """
-    Geffe generator class.
+    """ Geffe generator class.
     
     This can be defined by its key (12-chars string or 96 bits) or by a tuple of 3 seeds for its internal LFSR.
 
@@ -83,8 +88,7 @@ class Geffe(__Base):
         self.target = self._lfsrs[0].target
     
     def get(self, length=None, output_format="str", update=False):
-        """
-        Get a given number of bits from the Geffe generator with the given output format.
+        """ Get a given number of bits from the Geffe generator with the given output format.
         
         :param length:        number of bits to be generated
         :param output_format: output format (string, hexadecimal or binary)
@@ -130,8 +134,7 @@ class Geffe(__Base):
 
 
 class LFSR(__Base):
-    """
-    Linear Feedback Shift Register (LFSR) class.
+    """ Linear Feedback Shift Register (LFSR) class.
     
     This can be defined by its parameters (seed, taps, nbits) or can be determined from a target using the
      Berlekamp-Massey algorithm.
@@ -145,7 +148,7 @@ class LFSR(__Base):
     Example usage:
 
       >>> from tinyscript import *
-      >>> l = random.LFSR("0123456789abcdef")
+      >>> l = random.LFSR(target="0123456789abcdef")
       >>> print(l.next_block())
     """
     def __init__(self, seed=0, taps=None, nbits=None, target=None):
@@ -159,8 +162,7 @@ class LFSR(__Base):
         self.test()
     
     def __berlekamp_massey_algorithm(self):
-        """
-        Berlekamp-Massey algorithm for finding the shortest LFSR for a given binary output sequence.
+        """ Berlekamp-Massey algorithm for finding the shortest LFSR for a given binary output sequence.
          
         See: https://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm
         """
@@ -183,8 +185,7 @@ class LFSR(__Base):
         self.seed, self.taps, self.n = LFSR._format_param(self.target[:l], c, l)
     
     def get(self, length=None, output_format="str", update=False):
-        """
-        Get a given number of bits from the LFSR with the given output format.
+        """ Get a given number of bits from the LFSR with the given output format.
         
         :param length:        number of bits to be generated
         :param output_format: output format (string, hexadecimal or binary)

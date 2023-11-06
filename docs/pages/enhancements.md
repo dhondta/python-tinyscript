@@ -114,6 +114,7 @@ A context manager is also available:
 
 `random` is slightly enhanced with a few new items:
 
+- `choice`: redefined to add an argument for an exclusion list (aim is to provide a short form instead of using list comprehension) and an extra argument for setting if an error shall be thrown when the resulting list is empty
 - `randstr`: allows to generate a random string with a given length (8 by default) and alphabet
 - `LFSR`: adds an implementation of the Linear-Feedback Shifting Register stream generator, with the possibility of recovering its parameters by setting a target and using the Berlekamp-Massey algorithm.
 - `Geffe`: adds an implementation of the Geffe stream generator.

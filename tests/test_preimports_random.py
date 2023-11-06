@@ -9,6 +9,9 @@ from utils import *
 
 class TestPreimportsRandom(TestCase):
     def test_utility_functions(self):
+        self.assertEqual(random.choice([1, 2, 3], [2, 3]), 1)
+        self.assertRaises(IndexError, random.choice, [])
+        self.assertIsNone(random.choice([], error=False))
         self.assertIsNotNone(random.randstr())
         self.assertEqual(random.randstr(0), "")
         self.assertEqual(len(random.randstr()), 8)
