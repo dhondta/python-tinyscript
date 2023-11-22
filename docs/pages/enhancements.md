@@ -6,7 +6,7 @@ Formerly a set of [helper functions](helpers.md), the following have been attach
     
 Code can be monkey-patched at runtime using multiple functions, depending on what should be patched and how. Note that some of the functions rely on the [`patchy`](https://github.com/adamchainz/patchy) module.
     
-- `add_line`, `add_lines`, `insert_line`, `insert_line`: it allows to add line(s) at specific indices (starting from 0), before or after (using `after=True`).
+- `add_line`, `add_lines`, `insert_line`, `insert_lines`: it allows to add line(s) at specific indices (starting from 0), before or after (using `after=True`).
 - `delete_line`, `delete_lines`, `remove_line`, `remove_lines`: it allows to delete line(s) by index (starting from 0).
 - `patch`: alias for `patchy.patch`, taking a function and a patch file's text as arguments.
 - `replace`: wrapper for `patchy.replace`, handling multiple replacements at a time, either replacing whole function (like in original `replace`) or only parts of the code.

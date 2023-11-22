@@ -155,7 +155,7 @@ def main():
         __add_src(search)
     with commands.add_parser("update", help="update the list of publicly available scripts") as update:
         update.add_argument("-s", "--source", nargs="*", type=url, help="set a source URL for a list of scripts")
-    initialize(noargs_action="wizard")
+    initialize(add_version=True, noargs_action="wizard")
     if args.command =="add-source":
         s, sources = args.url, _get_sources_list()
         if not args.fetch or args.fetch and _fetch_source(s):
