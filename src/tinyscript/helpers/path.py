@@ -259,10 +259,35 @@ class Path(BasePath):
             if filter_func(item):
                 yield item
     
-    def read_lines(self, encoding=None, errors=None):
+    def read_lines(self, encoding=None, errors=None, reverse=False, blocksize=16):
         """ Extra method for reading a file as lines. """
-        for l in self.read_text(encoding, errors).splitlines():
-            yield l
+        dec = lambda l: l if encoding is None else l.decode(encoding=encoding, errors=errors or "strict")
+        with self.open('rb') as f:
+            if reverse:
+                buff, first, pos = b"", True, blocksize
+                while True:
+                    try:
+                        f.seek(-pos, 2)
+                    except OSError:
+                        f.seek(0)
+                        blocksize = self.size % blocksize
+                        break
+                    finally:
+                        data = f.read(blocksize)
+                        buff = data + buff
+                        if first:
+                            buff = buff.rstrip(b"\n")
+                            first = False
+                        lines = buff.split(b"\n")
+                        if len(lines) > 1:
+                            buff = b"\n".join(lines[:-1])
+                            yield dec(lines[-1])
+                    pos += blocksize
+                if buff:
+                    yield dec(buff)
+            else:
+                for l in f:
+                    yield dec(l.rstrip(b"\n"))
     
     def reset(self):
         """ Ensure the file exists and is empty. """

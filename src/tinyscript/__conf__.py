@@ -40,11 +40,12 @@ bi.lazy_object = Proxy
 
 def lazy_load_module(module, relative=None, alias=None, preload=None, postload=None):
     """ Lazily load a module. """
+    alias = alias or module
     glob = currentframe().f_back.f_globals
     def _load():
         if callable(preload):
             preload()
-        glob[alias or module] = m = import_module(*((module, ) if relative is None else ("." + module, relative)))
+        glob[alias] = glob[module] = m = import_module(*((module, ) if relative is None else ("." + module, relative)))
         m.__name__ = alias or module
         if callable(postload):
             try:
@@ -52,7 +53,7 @@ def lazy_load_module(module, relative=None, alias=None, preload=None, postload=N
             except TypeError:
                 postload(m)
         return m
-    glob[alias or module] = m = Proxy(_load)
+    glob[alias] = glob[module] = m = Proxy(_load)
     return m
 bi.lazy_load_module = lazy_load_module
 

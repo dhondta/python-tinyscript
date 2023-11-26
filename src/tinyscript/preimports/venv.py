@@ -284,7 +284,7 @@ class PipPackage(object):
             try:
                 pkgloc = list(Path(self.location).find(name))[0]
                 tl = list(pkgloc.find("top_level.txt"))[0]
-                self.top_level = tl.read_lines()
+                self.top_level = tl.read_lines(encoding="utf-8")
             except IndexError:
                 pass
 virtualenv.PipPackage = PipPackage
