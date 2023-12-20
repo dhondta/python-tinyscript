@@ -33,3 +33,4 @@ tqdm
 virtualenv>=20.8.1
 weasyprint
 xmltodict
+fonttools>=4.43.0 # not directly required, pinned by Snyk to avoid a vulnerability
