@@ -73,7 +73,7 @@ def _load_preimports(*extras, lazy=True):
         if module == "virtualenv":
             cls = ["PipPackage", "VirtualEnv"]
             for c in cls:
-                globals()[c] = lazy_object_proxy.Proxy(lambda: getattr(m, c))
+                globals()[c] = lazy_object_proxy.Proxy(lambda: getattr(module, c))
             __features__.extend(cls)
     for module in i['standard'] + list(extras):
         load(module, lazy=lazy)
