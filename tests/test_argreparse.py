@@ -3,7 +3,8 @@
 
 """
 from sys import version_info
-from tinyscript.argreparse import ArgumentParser, HelpFormatter, Namespace, SUPPRESS as SUP, _NewSubParsersAction
+from tinyscript.argreparse import *
+from tinyscript.argreparse import HelpFormatter, _NewSubParsersAction
 
 from utils import *
 
@@ -11,6 +12,7 @@ from utils import *
 class TestArgreparse(TestCase):
     @classmethod
     def setUpClass(cls):
+        get_tool_globals()
         cls.argv = sys.argv[1:]  # backup input arguments
     
     @classmethod
@@ -21,7 +23,19 @@ class TestArgreparse(TestCase):
         temp_stdout(self)
         sys.argv[1:] = []
         ArgumentParser.reset()
-        self.p = ArgumentParser(FIXTURES)
+        self.p = ArgumentParser()
+    
+    def test_input_command(self):
+        ArgumentParser._globals_dict = FIXTURES
+        p = ArgumentParser(command="test-tool --opt1 test --opt2")
+        self.assertIn("test-tool", p._tokens)
+        self.assertIn("--opt1", p._tokens)
+        self.assertIn("--opt2", p._tokens)
+        p.add_argument("--opt1")
+        p.add_argument("--opt2", action="store_true")
+        args = p.parse_args()
+        self.assertEqual(args.opt1, "test")
+        self.assertEqual(args.opt2, True)
 
     def test_dunders(self):
         self.assertIn("test", self.p.description)
@@ -47,21 +61,23 @@ class TestArgreparse(TestCase):
 
     def test_optional_arguments(self):
         self.p.add_argument("--opt1")
-        sys.argv += ["--opt1", "test"]
+        sys.argv += ["--opt1", "<test>"]
         self.p.add_argument("--opt2", action="store_true")
         sys.argv += ["--opt2"]
         self.p.add_argument("-e", dest="ext", action="extend")
         sys.argv += ["-e", "1", "-e", "2", "-e", "3"]
         self.p.add_argument("-e2", dest="ext2", action="extend", default="BAD")
         sys.argv += ["-e2", "test"]
-        args = self.p.parse_args()
+        self.assertRaises(ValueError, self.p.parse_args, namespace=Namespace(self.p, test=True))
+        args = self.p.parse_args(namespace=Namespace(self.p, test="test"))
         self.assertEqual(args.opt1, "test")
         self.assertEqual(args.opt2, True)
         self.assertEqual(args.ext, ["1", "2", "3"])
         self.assertEqual(args.ext2, ["test"])
 
     def test_fixed_arguments(self):
-        p = ArgumentParser({'__examples__': []})
+        ArgumentParser._globals_dict = {'__examples__': []}
+        p = ArgumentParser()
         p.add_argument("-v", "--verb")
         # this will conflict with the previous one and will then be suffixed
         p.add_argument("-v", "--verb", suffix="mode", action="store_true")
@@ -76,6 +92,7 @@ class TestArgreparse(TestCase):
         self.assertIs(args.version, None)
         self.assertFalse(args.show_version)
         self.assertRaises(ValueError, p.add_argument, "test", type="BAD")
+        del ArgumentParser._globals_dict
     
     def test_mutually_exclusive_arguments(self):
         g = self.p.add_mutually_exclusive_group()
@@ -101,8 +118,8 @@ class TestArgreparse(TestCase):
         self.p.add_argument("-e", action="count")
         self.p.add_argument("--fff", action="count")
         self.p.add_argument("-g", default=1, choices=[1, 2])
-        self.p.add_argument("-h", action="usage", dest=SUP)
-        self.p.add_argument("--help", action="help", dest=SUP)
+        self.p.add_argument("-h", action="usage", dest=SUPPRESS)
+        self.p.add_argument("--help", action="help", dest=SUPPRESS)
         for a in self.p._actions:
             temp_stdin(self, "\n")
             self.p._input_arg(a)
@@ -126,8 +143,8 @@ class TestArgreparse(TestCase):
         self.p.add_argument("-d", action="store_false")
         self.p.add_argument("-e", action="count")
         self.p.add_argument("--fff", action="count")
-        self.p.add_argument("-h", action="usage", dest=SUP)
-        self.p.add_argument("--help", action="help", dest=SUP)
+        self.p.add_argument("-h", action="usage", dest=SUPPRESS)
+        self.p.add_argument("--help", action="help", dest=SUPPRESS)
         ArgumentParser.add_to_config("main", "a", "TEST")
         ArgumentParser.add_to_config("main", "b", "add")
         ArgumentParser.add_to_config("main", "c", "y")
@@ -135,7 +152,7 @@ class TestArgreparse(TestCase):
         ArgumentParser.add_to_config("main", "e", "1")
         ArgumentParser.add_to_config("main", "fff", "2")
         for a in self.p._actions:
-            self.p._set_arg(a, c=True)
+            self.p._set_arg(a, config=True)
         args = self.p.parse_args()
         self.assertEqual(args.a, "TEST")
         self.assertEqual(args.b, "TEST")
@@ -149,12 +166,13 @@ class TestArgreparse(TestCase):
     def test_subparser_action(self):
         subparsers = self.p.add_subparsers(dest="command")
         test = subparsers.add_parser("subtest", aliases=["test2"], help="test", parents=[self.p])
+        self.assertIsNotNone(self.p.tokens)
         test.add_argument("--test")
         a = self.p._actions[0]
         ArgumentParser.add_to_config("main", "command", "subtest")
         ArgumentParser.add_to_config("subtest", "test", "value")
         test._config_parsed = True
-        self.p._set_arg(a, c=True)
+        self.p._set_arg(a, config=True)
     
     def test_bad_action(self):
         self.assertRaises(ValueError, self.p.add_argument, "-a", action="does_not_exist")
@@ -162,7 +180,7 @@ class TestArgreparse(TestCase):
         self.p.add_argument("-a", dest="test", action="does_not_exist")
         a = list(self.p._filtered_actions("does_not_exist"))[0]
         self.assertRaises(NotImplementedError, self.p._input_arg, a)
-        self.assertRaises(NotImplementedError, self.p._set_arg, a, c=True)
+        self.assertRaises(NotImplementedError, self.p._set_arg, a, config=True)
         
     def test_reset_args(self):
         subparsers = self.p.add_subparsers(dest="command")
@@ -188,7 +206,7 @@ class TestArgreparse(TestCase):
     
     def test_help_formatter(self):
         self.p.add_argument("--test", default=",".join(["A"]*30), choices=[1], type=list, help="test", 
-                            note="special argument", dest=SUP)
+                            note="special argument", dest=SUPPRESS)
         self.p.parse_args()
         self.p.print_help()
         self.p.print_extended_help(3)
@@ -203,8 +221,7 @@ class TestArgreparse(TestCase):
         test.add_argument("--test")
         ns = Namespace(self.p)
         setattr(ns, "_hidden", "hidden")
-        setattr(ns, "name", "shown")
-        setattr(ns, "command", "subtest")
+        ns.update(name="shown", command="subtest")
         self.assertIsNotNone(self.p.format_help())
         self.assertEqual(ns._hidden, "hidden")
         self.assertNotIn("hidden", str(ns))
@@ -216,4 +233,10 @@ class TestArgreparse(TestCase):
         self.assertIn("name", o)
         self.assertNotIn("_collisions", o)
         self.assertIs(ns.get("does_not_exist"), None)
+    
+    def test_proxy_parser(self):
+        with ProxyArgumentParser() as pap:
+            self.assertIsNotNone(pap)
+            pap.add_argument("test", help="test")
+            pap.reset()
 
