@@ -2,14 +2,16 @@
 """Module for extending argparse features, for simplifying parser.py.
 
 """
+import argparse as ap
 import operator as op
 import random
 import re
 import shlex
 import sys
+from argparse import *
 from argparse import _ActionsContainer, _ArgumentGroup, _MutuallyExclusiveGroup, _AttributeHolder, _SubParsersAction, \
-                     Action, ArgumentDefaultsHelpFormatter, ArgumentError, ArgumentTypeError, RawTextHelpFormatter, \
-                     SUPPRESS, _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, ArgumentParser as BaseArgumentParser
+                     Action, _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, ArgumentParser as BaseArgumentParser
+from inspect import currentframe
 from os import environ
 from os.path import abspath, basename, dirname, sep, splitext
 from shutil import which
@@ -28,7 +30,8 @@ from .helpers.text import *
 from .helpers.text import configure_docformat, txt_terminal_render
 
 
-__all__ = ["ArgumentParser", "DUNDERS", "SUPPRESS"]
+__all__ = ["get_tool_globals", "parser_calls", "ArgumentParser", "Namespace", "ProxyArgumentParser",
+           "DUNDERS", "SUPPRESS"]
 
 
 BASE_DUNDERS = ['__author__', '__contributors__', '__copyright__', '__credits__', '__license__', '__reference__',
@@ -43,6 +46,61 @@ if sys.version_info >= (3, 8):
 
 DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
+
+parser_calls = []  # will be populated by calls to ProxyArgumentParser
+
+
+def get_tool_globals():
+    # get caller's frame
+    frame = currentframe().f_back
+    while not isinstance(frame.f_globals.get('parser'), ProxyArgumentParser) or \
+          frame.f_globals.get('__name__') in ["tinyscript.argreparse", "tinyscript.parser"]:
+        frame = frame.f_back
+        if frame is None:
+            return {}
+    # walk the stack until a frame containing a known object is found
+    glob = frame.f_globals
+    # search for dunders
+    for d in DUNDERS:
+        f = frame
+        while f and (d not in f.f_globals.keys() or f.f_globals[d] is None):
+            f = f.f_back
+        try:
+            glob[d] = f.f_globals[d]
+        except (AttributeError, KeyError):
+            pass
+    return glob
+
+
+class ProxyArgumentParser(object):
+    """
+    Proxy class for collecting added arguments before initialization.
+    """
+    def __getattr__(self, name):
+        """ Each time a method is called, return __collect to make it capture the input arguments and keyword-arguments
+             if it exists in the original parser class. """
+        self.__call = name
+        return self.__collect
+
+    def __collect(self, *args, **kwargs):
+        """ Capture the input arguments and keyword-arguments of the currently called method, appending a proxy
+             subparser in case it should be used for mutually exclusive groups or subparsers. """
+        subparser = ProxyArgumentParser()
+        parser_calls.append((self, self.__call, args, kwargs, subparser))
+        del self.__call
+        return subparser
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        pass
+    
+    @staticmethod
+    def reset():
+        global parser_calls
+        parser_calls = []
+        ArgumentParser.reset()
 
 
 # ------------------------------- CUSTOM ACTIONS -------------------------------
@@ -107,7 +165,7 @@ class _NewSubParsersAction(_SubParsersAction):
             choice_action.category = category
             self._choices_actions.append(choice_action)
         # create the parser, but with another formatter and separating the help into an argument group
-        parser = self._parser_class(ArgumentParser.globals_dict, add_help=False, **kwargs)
+        parser = self._parser_class(add_help=False, **kwargs)
         parser.name = name
         # add default extra arguments group
         i = parser.add_argument_group("extra arguments")
@@ -146,7 +204,8 @@ class _WizardAction(Action):
 class _NewActionsContainer(_ActionsContainer):
     """ Modified version of argparse._ActionsContainer for handling a new "note" keyword argument. """
     def __init__(self, *args, **kwargs):
-        super(_NewActionsContainer, self).__init__(*args, **kwargs)
+        super(_NewActionsContainer, self).__init__(*[kwargs.get(k) for k in \
+                                               ['description', 'prefix_chars', 'argument_default', 'conflict_handler']])
         self.register('action', 'parsers', _NewSubParsersAction)
         self.register('action', 'config', _ConfigAction)
         self.register('action', 'demo', _DemoAction)
@@ -239,11 +298,9 @@ class _NewMutuallyExclusiveGroup(_MutuallyExclusiveGroup, _NewArgumentGroup):
     pass
 
 
-class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
+class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
     """ Modified version of argparse.ArgumentParser, based on the modified ActionsContainer.
     
-    :param globals_dict: globals() dictionary from the calling script/tool
-                         NB: only for help formatting purpose ; therefore this is NOT propagated through subparsers
     :param args:         arguments applicable for argparse.ArgumentParser
     :param kwargs:       kwarguments applicable for argparse.ArgumentParser
                          NB: 'prog' set to preformatted program name
@@ -257,8 +314,11 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     is_action = lambda s, a, *l: any(type(a) is s._registry_get('action', n) for n in l)
     name = "main"
     
-    def __init__(self, globals_dict=None, *args, **kwargs):
-        ArgumentParser.globals_dict = gd = globals_dict or {}
+    def __init__(self, *args, **kwargs):
+        self.tokens = kwargs.pop('command', None)
+        if not hasattr(ArgumentParser, "_globals_dict"):
+            ArgumentParser._globals_dict = get_tool_globals()
+        gd = ArgumentParser._globals_dict
         if sys.version_info >= (3, 8):
             self._check_requirements(gd.get('__requires__'))
         configure_docformat(gd)
@@ -266,7 +326,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self._docfmt = gd.get('__docformat__')
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         self.examples = gd.get('__examples__', [])
-        script = basename(sys.argv[0])
+        script = basename(self.tokens[0])
         _stem = lambda p: splitext(p)[0]
         if gd.get('__script__') is None:
             gd['__script__'] = script
@@ -280,16 +340,15 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         # when __docformat__ is set, fixing max_help_position to terminal's width forces argparse to format arguments
         #  with their help on the same line ; in other words, formatting is left to the renderer
         wh = get_terminal_size()
-        mhp = 80 if wh is None else wh[0]
         kwargs['formatter_class'] = HelpFormatter if self._docfmt is None else \
-                                    lambda prog: HelpFormatter(prog, max_help_position=mhp)
+                                    lambda prog: HelpFormatter(prog, max_help_position=80 if wh is None else wh[0])
         # format the epilog message
         if self.examples:
-            _ = ["{} {}".format(ArgumentParser.prog, e) for e in self.examples]
-            _ = list(filter(lambda x: x.startswith(kwargs['prog']), _))
-            if len(_) > 0:
-                kwargs['epilog'] = txt2title(gt("Usage example{}".format(["", "s"][len(_) > 1])) + ":")
-                e = '\n'.join(["\n", "  "][self._docfmt is None] + txt2paragraph(e) for e in _)
+            l = ["{} {}".format(ArgumentParser.prog, e) for e in self.examples]
+            l = list(filter(lambda x: x.startswith(kwargs['prog']), l))
+            if len(l) > 0:
+                kwargs['epilog'] = txt2title(gt("Usage example{}".format(["", "s"][len(l) > 1])) + ":")
+                e = '\n'.join(["\n", "  "][self._docfmt is None] + txt2paragraph(e) for e in l)
                 kwargs['epilog'] += "\n" + e
         # format the description message
         d = gd.get('__script__', script)
@@ -344,6 +403,7 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self.details = gd.get('__details__', [])
         # now initialize argparse's ArgumentParser with the new arguments
         super(ArgumentParser, self).__init__(*args, **kwargs)
+        self._namespace = Namespace(self)
     
     def _check_requirements(self, requires):
         """ Check for package requirements before continuing.
@@ -371,62 +431,98 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                    "Bad version for module '%s' ; should be %s%s while actual version is %s"
             raise RequirementError(["", "\n"][len(errors) > 1] + "\n".join(line % e for e in errors))
     
-    def _filtered_actions(self, *a_types):
-        """ Get actions filtered on a list of action types.
-        
-        :param a_type: argparse.Action instance name (e.g. count, append)
-        """
-        for a in filter(lambda _: self.is_action(_, *a_types), self._actions):
-            yield a
+    def _filtered_actions(self, *action_types):
+        """ Get actions filtered on a list of action types. """
+        for action in filter(lambda a: self.is_action(a, *action_types), self._actions):
+            yield action
     
-    def _get_value(self, a, s):
+    def _get_string(self, action, string):
+        """ Get the string from an argument string given its related action, prompting for user input if relevant. This
+             also replaces markers using the current namespace. """
+        orig = string
+        # first, resolve inputs
+        if not isinstance(action, _NewSubParsersAction) and string == "<input>":
+            string = self._input_arg(action)
+        # then, resolve other markers replacing values from the current namespace
+        for arg in re.findall(r"<(.*?)>", string):
+            if arg in self._namespace.keys():
+                val = self._namespace.get(arg)
+                if isinstance(val, bool):
+                    raise ValueError(gt("marker replacement does not work for boolean options"))
+                string = string.replace(f"<{arg}>", str(val))
+        # finally, locate and replace string in command's tokens
+        if orig != string:
+            self.tokens[self.tokens.index(orig)] = string
+        return string
+    
+    def _get_value(self, action, string):
         """ Get the value from an argument string given its related action.
-        NB: This method is mostly the same as the original ; it customizes the "invalid ... value" message.
-        
-        :param a: argparse.Action instance
-        :param s: argument string
-        :return:  resulting valuefro mthe argument string given its action
-        """
-        type_func = self._registry_get('type', a.type, a.type)
+        NB: This method is mostly the same as the original ; it customizes the "invalid ... value" message. """
+        type_func = self._registry_get('type', action.type, action.type)
         if not callable(type_func):
-            raise ArgumentError(a, gt('%r is not callable') % type_func)
+            raise ArgumentError(action, gt("%r is not callable") % type_func)
         try:
-            result = type_func(s)
+            result = type_func(string)
         except ArgumentTypeError:
-            raise ArgumentError(a, str(sys.exc_info()[1]))
+            raise ArgumentError(action, str(sys.exc_info()[1]))
         except (TypeError, ValueError):
             # clean up the name (do not keep the function name, e.g. "_my_argument_action", but make it more
             #  user-friendly, e.g. "my argument action"
-            name = getattr(a.type, '__name__', repr(a.type)).strip("_").replace("_", " ")
-            raise ArgumentError(a, gt('invalid %s value: %r') % (name, s))
+            name = getattr(action.type, '__name__', repr(action.type)).strip("_").replace("_", " ")
+            raise ArgumentError(action, gt("invalid %s value: %r") % (name, string))
         return result
     
-    def _input_arg(self, a):
-        """ Ask the user for input of a single argument.
-        
-        :param a: argparse.Action instance
-        :return:  the user input, asked according to the action
-        """
+    def _get_values(self, action, arg_strings):
+        # first, resolve input and variable markers
+        arg_strings = [self._get_string(action, s) for s in arg_strings]
+        # for everything but PARSER args, strip out '--'
+        if action.nargs not in [PARSER, REMAINDER]:
+            arg_strings = [s for s in arg_strings if s != '--']
+        # optional argument produces a default when not present
+        if not arg_strings and action.nargs == OPTIONAL:
+            value = action.const if action.option_strings else action.default
+            if isinstance(value, str):
+                value = self._get_value(action, value)
+                self._check_value(action, value)
+        # when nargs='*' on a positional, if there were no command-line args, use default (if not None)
+        elif not arg_strings and action.nargs == ZERO_OR_MORE and not action.option_strings:
+            value = arg_strings if action.default is None else action.default
+            self._check_value(action, value)
+        elif len(arg_strings) == 1 and action.nargs in [None, OPTIONAL]:
+            value = self._get_value(action, arg_strings[0])
+            self._check_value(action, value)
+        else:
+            value = [self._get_value(action, v) for v in arg_strings]
+            if action.nargs == PARSER:
+                self._check_value(action, value[0])
+            elif action.nargs != REMAINDER:
+                for v in value:
+                    self._check_value(action, v)
+        return value
+    
+    def _input_arg(self, action):
+        """ Ask the user for input of a single argument. """
         # if action of an argument that suppresses any other, just return
-        if a.dest == SUPPRESS or a.default == SUPPRESS:
+        if action.dest == SUPPRESS or action.default == SUPPRESS:
             return
         # prepare the prompt
-        prompt = gt((a.help or a.dest).capitalize())
-        r = {'newline': True, 'required': a.required}
+        prompt = gt((action.help or action.dest).capitalize())
+        r = {'newline': True, 'required': action.required}
         # now handle each different action
         try:
-            if self.is_action(a, 'store', 'append'):
-                return user_input(prompt, a.choices or self._registry_get('type', a.type, a.type), a.default, **r)
-            elif self.is_action(a, 'store_const', 'append_const'):
+            if self.is_action(action, 'store', 'append'):
+                return user_input(prompt, action.choices or self._registry_get('type', action.type, action.type),
+                                  action.default, **r)
+            elif self.is_action(action, 'store_const', 'append_const'):
                 return user_input(prompt, (gt("(A)dd"), gt("(D)iscard")), "d", **r)
-            elif self.is_action(a, 'store_true'):
+            elif self.is_action(action, 'store_true'):
                 return user_input(prompt, (gt("(Y)es"), gt("(N)o")), "n", **r)
-            elif self.is_action(a, 'store_false'):
+            elif self.is_action(action, 'store_false'):
                 return user_input(prompt, (gt("(Y)es"), gt("(N)o")), "y", **r)
-            elif self.is_action(a, 'count'):
+            elif self.is_action(action, 'count'):
                 return user_input(prompt, is_pos_int, 0, gt("positive integer"), **r)
-            elif self.is_action(a, 'parsers'):
-                pmap = a._name_parser_map
+            elif self.is_action(action, 'parsers'):
+                pmap = action._name_parser_map
                 l = list(pmap.keys())
                 return user_input(prompt, l, l[0], **r) if len(l) > 0 else None
         except (EOFError, SystemExit):
@@ -440,54 +536,50 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
         return args
     
-    def _set_arg(self, a, s="main", c=False):
-        """ Set a single argument.
-        
-        :param a: argparse.Action instance
-        :param s: config section title
-        :param c: use class' ConfigParser instance to get parameters
-        """
+    def _set_arg(self, action, section="main", config=False):
+        """ Set a single argument. """
         # if action of an argument that suppresses any other, just return
-        if a.dest is SUPPRESS or a.default is SUPPRESS:
+        if action.dest is SUPPRESS or action.default is SUPPRESS:
             return
-        # check if an option string is used for this action in sys.argv ; if so, return as it will be parsed normally
-        if any(o in sys.argv[1:] for o in a.option_strings):
+        # check if an option string is used for this action in command's tokens (either user input or sys.argv) ;
+        #  if so, return as it will be parsed normally
+        if any(o in self.tokens[1:] for o in action.option_strings):
             return
         # in case of non-null config, get the value from the config object
-        default = a.default if a.default is None else str(a.default)
-        if c:
+        default = action.default if action.default is None else str(action.default)
+        if config:
             try:
-                value = ArgumentParser._config.get(s, a.dest)
+                value = ArgumentParser._config.get(section, action.dest)
             except (NoOptionError, NoSectionError) as e:
                 item = "setting" if isinstance(e, NoOptionError) else "section"
                 # if the argument is required, just ask for the value
-                value = self._input_arg(a) if a.required else default
-                logger.debug(gt("{} {} not present in config (set to {})").format(a.dest, item, value))
+                value = self._input_arg(action) if action.required else default
+                logger.debug(gt("{} {} not present in config (set to {})").format(action.dest, item, value))
         # in case of null config, just ask for the value
         else:
-            value = self._input_arg(a)
+            value = self._input_arg(action)
         # collect the option string before continuing
         try:
-            ostr = a.option_strings[0]
+            ostr = action.option_strings[0]
         except IndexError:  # occurs when positional argument
             ostr = None
         # now handle arguments regarding the action
-        if self.is_action(a, 'store', 'append'):
+        if self.is_action(action, 'store', 'append'):
             if value:
                 if ostr:
                     self._reparse_args['opt'].extend([ostr, value])
                 else:
                     self._reparse_args['pos'].extend([value])
-        elif self.is_action(a, 'store_const', 'append_const'):
+        elif self.is_action(action, 'store_const', 'append_const'):
             if value.lower() == "add" or value != default:
                 self._reparse_args['opt'].append(ostr)
-        elif self.is_action(a, 'store_true'):
+        elif self.is_action(action, 'store_true'):
             if value.lower() in ["y", "true"]:
                 self._reparse_args['opt'].append(ostr)
-        elif self.is_action(a, 'store_false'):
+        elif self.is_action(action, 'store_false'):
             if value.lower() in ["n", "false"]:
                 self._reparse_args['opt'].append(ostr)
-        elif self.is_action(a, 'count'):
+        elif self.is_action(action, 'count'):
             v = int(value or 0)
             if v > 0:
                 if ostr.startswith("--"):
@@ -495,11 +587,11 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
                 else:
                     new_arg = ["-{}".format(v * ostr.strip('-'))]
                 self._reparse_args['opt'].extend(new_arg)
-        elif self.is_action(a, 'parsers'):
+        elif self.is_action(action, 'parsers'):
             if not value:
-                value = self._input_arg(a)
-            pmap = a._name_parser_map
-            pmap[value].config_args(a.dest) if c else pmap[value].input_args()
+                value = self._input_arg(action)
+            pmap = action._name_parser_map
+            pmap[value].config_args(action.dest) if config else pmap[value].input_args()
             pmap[value]._reparse_args['pos'].insert(0, value)
             self._reparse_args['sub'].append(pmap[value])
         else:
@@ -515,18 +607,15 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
             yield a
     
     def config_args(self, section="main"):
-        """ Additional method for feeding input arguments from a config file.
-        
-        :param section: current config section name
-        """
+        """ Additional method for feeding input arguments from a config file. """
         if self._config_parsed:
             return
         for a in self._filtered_actions("config"):
             for o in a.option_strings:
                 try:
-                    i = sys.argv.index(o)
-                    sys.argv.pop(i)  # remove the option string
-                    sys.argv.pop(i)  # remove the value that follows
+                    i = self.tokens.index(o)
+                    self.tokens.pop(i)  # remove the option string
+                    self.tokens.pop(i)  # remove the value that follows
                 except ValueError:
                     pass
         for a in self._sorted_actions():
@@ -610,26 +699,28 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
         for a in self._sorted_actions():
             self._set_arg(a)
     
-    def parse_args(self, args=None, namespace=None):
+    def parse_args(self, args=None, namespace=None, **kwargs):
         """ Reparses new arguments when _DemoAction (triggering parser.demo_args()) or _WizardAction (triggering
              input_args()) was called. """
-        if not namespace:  # use the new Namespace class for handling _config
-            namespace = Namespace(self)
-        if len(sys.argv) == 2 and sys.argv[1] == "DISPLAY_USAGE":
+        # use the new argreparse.Namespace class for handling _config
+        self._namespace = Namespace(self) if namespace is None else namespace
+        self._namespace.update(kwargs)
+        if len(self._tokens) == 2 and self._tokens[1] == "DISPLAY_USAGE":
             self.print_usage()
             self.exit()
-        namespace = super(ArgumentParser, self).parse_args(args, namespace)
-        if len(self._reparse_args['pos']) > 0 or len(self._reparse_args['opt']) > 0 or \
-           len(self._reparse_args['sub']) > 0:
-            args = self._reset_args()
-            namespace = super(ArgumentParser, self).parse_args(args, namespace)
+        self._namespace = super(ArgumentParser, self).parse_args(args or self._tokens[1:], self._namespace)
+        ra = self._reparse_args
+        if len(ra['pos']) > 0 or len(ra['opt']) > 0 or len(ra['sub']) > 0:
+            self._namespace = super(ArgumentParser, self).parse_args(self._reset_args(), self._namespace)
         # process "-hh..." here, after having parsed the arguments
-        help_level = getattr(namespace, "help", 0)
+        help_level = getattr(self._namespace, "help", 0)
         if help_level > 0:
             self.print_help()
             self.print_extended_help(help_level)
             self.exit()
-        return namespace
+        from shlex import join
+        self._namespace._command = join(self._tokens)
+        return self._namespace
     
     def print_extended_help(self, level=1, file=None):
         if not isinstance(self.details, (tuple, list, set)):
@@ -641,14 +732,29 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     def print_usage(self, file=None):
         self._print_message(txt_terminal_render(self.format_usage()), file or sys.stdout)
     
+    @property
+    def tokens(self):
+        p = self
+        while hasattr(p, "_parent") and p._parent is not None:
+            p = p._parent
+        if hasattr(p, "_tokens"):
+            return p._tokens
+    
+    @tokens.setter
+    def tokens(self, command):
+        p = self
+        while hasattr(p, "_parent") and p._parent is not None:
+            p = p._parent
+        if hasattr(p, "_tokens"):
+            return
+        p._tokens = sys.argv if command is None else command
+        if isinstance(p._tokens, str):
+            from shlex import split
+            p._tokens = split(p._tokens)
+    
     @classmethod
     def add_to_config(cls, section, name, value):
-        """ Add a parameter to the shared ConfigParser object.
-        
-        :param section: parameter's section
-        :param name:    parameter's name
-        :param value:   parameter's value
-        """
+        """ Add a parameter to the shared ConfigParser object. """
         if value:
             if not cls._config.has_section(section):
                 cls._config.add_section(section)
@@ -656,6 +762,8 @@ class ArgumentParser(_NewActionsContainer, BaseArgumentParser):
     
     @classmethod
     def reset(cls):
+        global parser_calls
+        parser_calls = []
         cls._config = ConfigParser()
 
 
@@ -761,10 +869,11 @@ class Namespace(BaseNamespace):
     # exclude list for saving options in a ConfigParser object
     excludes = ["_current_parser", "_debug_level", "_collisions", "_subparsers", "read_config", "write_config"]
     
-    def __init__(self, parser):
+    def __init__(self, parser=None, **kwargs):
         self._current_parser = parser.name
         self._collisions = {a.orig: a.dest for a in parser._actions if getattr(a, "orig", None)}
         self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
+        super(Namespace, self).__init__(**kwargs)
     
     def __getattr__(self, name):
         # handle __privdict__ entry first
@@ -784,7 +893,7 @@ class Namespace(BaseNamespace):
             ArgumentParser.add_to_config(self._current_parser, name, value)
         # finally switch the current parser value if the option name is part of a subparser's list of options ; this new
         #  name will allow to save new options in a new section of the ConfigParser object
-        if hasattr(self, "_subparsers") and name in self._subparsers and value:
+        if hasattr(self, "_subparsers") and name in self._subparsers:
             self._current_parser = name
     
     def get(self, name):
@@ -792,4 +901,12 @@ class Namespace(BaseNamespace):
             return self.__getattr__(name)
         except AttributeError:
             return
+    
+    def keys(self):
+        return [k for k in self.__dict__ if not k.startswith("_")]
+    
+    def update(self, kwargs_dict=None, **kwargs):
+        for d in [kwargs, kwargs_dict or {}]:
+            for k, v in d.items():
+                setattr(self, k, v)
 

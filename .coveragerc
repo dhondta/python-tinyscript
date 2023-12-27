@@ -47,3 +47,4 @@ exclude_lines =
     Xlib.error.DisplayConnectionError
     def send_mail
     except KeyboardInterrupt:
+    re.sre_parse
