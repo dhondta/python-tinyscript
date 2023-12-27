@@ -7,9 +7,14 @@ from tinyscript.report import *
 from utils import *
 
 
+FORMATS = ["csv", "html", "json", "md", "pdf", "rst", "xml", "yaml"]
+
+
 class TestReport(TestCase):
     def __try_formats(self, element):
-        for fmt in ["csv", "html", "json", "md", "rst", "xml"]:
+        for fmt in FORMATS:
+            if fmt == "pdf":
+                continue
             self.assertIsNotNone(getattr(element, fmt)())
     
     def test_report_text_elements(self):
@@ -49,7 +54,7 @@ class TestReport(TestCase):
         r.extend(l)
         r.append("Free text")
         self.__try_formats(r)
-        for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
+        for fmt in FORMATS:
             getattr(r, fmt)(save_to_file=True)
             remove("report.%s" % fmt)
         r.clear()
@@ -68,12 +73,12 @@ class TestReport(TestCase):
         remove("report-3.html")
         r.append(List("item1", "item2"))
         self.assertIsInstance(r.json(data_only=False), dict)
-        for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
+        for fmt in FORMATS:
             getattr(r, fmt)()
         r.pop()
         r.append(Table([["item1", "item2"]], column_headers=["h1", "h2"]))
         self.assertIsInstance(r.json(), dict)
-        for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
+        for fmt in FORMATS:
             getattr(r, fmt)(save_to_file=True)
             remove("report.%s" % fmt)
     
@@ -99,6 +104,6 @@ class TestReport(TestCase):
             getattr(t, fmt)()
         r = Report()
         r.append(t)
-        for fmt in ["csv", "json", "md", "pdf", "rst", "xml", "yaml"]:
+        for fmt in FORMATS:
             getattr(r, fmt)()
 

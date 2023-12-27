@@ -171,7 +171,7 @@ class Rule(Element):
         return s + ">"
     
     @output
-    def json(self):
+    def json(self, indent=2):
         return {}
     
     @output
@@ -263,7 +263,7 @@ class Table(Element):
         return nl.join(r)
     
     @output
-    def json(self, orient="split"):
+    def json(self, indent=2, orient="split"):
         d = {}
         if len(self.data) > 0:
             ch = (self.column_headers[1:] if self.row_headers else self.column_headers) if self.column_headers else \

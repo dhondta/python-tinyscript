@@ -13,9 +13,6 @@ def output(f):
     @wraps(f)
     def _wrapper(self, *args, **kwargs):
         from os.path import exists, splitext
-        if 'text' in kwargs:
-            kwargs.pop('text', None)
-            warn("'text' keyword has been deprecated, please use 'save_to_file' instead", DeprecationWarning)
         s2f = kwargs.pop('save_to_file', False)
         r = f(self, *args, **kwargs)
         if not s2f or r is None:
@@ -27,8 +24,6 @@ def output(f):
             elif f.__name__ == "yaml":
                 from yaml import dump
                 r = dump(r, indent=kwargs.get('indent', 2), width=kwargs.get('width', 0))
-        if not isinstance(r, str):
-            raise TypeError("got report data in an unknown format (%s) ; should be str" % type(r).__name__)
         filename = "{}.{}".format(self.filename, f.__name__)
         while exists(filename):
             name, ext = splitext(filename)
@@ -89,7 +84,7 @@ class Element(object):
         return ""
     
     @output
-    def json(self):
+    def json(self, indent=2):
         return {self.name: self.data}
     
     @output
@@ -103,7 +98,7 @@ class Element(object):
     
     @output
     def yaml(self, indent=2):
-        return self.json(indent=indent, save_to_file=False)
+        return self.json(indent=indent)
     
     @staticmethod
     def format_data(data, fmt):
