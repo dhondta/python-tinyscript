@@ -7,7 +7,7 @@ import atexit
 import os
 import re
 import sys
-from inspect import currentframe, getmembers, isfunction, ismethod
+from inspect import getmembers, isfunction, ismethod
 from os.path import basename, splitext
 
 from .features.handlers import _hooks
@@ -25,8 +25,6 @@ AT_EXIT_SET  = False
 BANNER_ARG   = None
 BANNER_FONT  = None
 BANNER_STYLE = {}
-
-parser_calls = []  # will be populated by calls to ProxyArgumentParser
 
 
 def _save_config(glob):
@@ -82,38 +80,23 @@ def initialize(add_banner=False,
     :param report_func:         report generation function
     :param autocomplete:        add autocompletion with argcomplete
     """
-    global parser, parser_calls
+    global parser
+    tokens = kwargs.get('command', sys.argv)
     # handle backward-compatibility arguments
     exit_at_interrupt = kwargs.pop('exit_at_interrupt', None)
     if len(kwargs) > 0:
         raise TypeError("Unexpected keyword-arguments (%s)" % ", ".join(kwargs.keys()))
-    # get caller's frame
-    frame = currentframe().f_back
     # walk the stack until a frame containing a known object is found
-    glob = {}
-    while frame:
-        if isinstance(frame.f_globals.get('parser'), ProxyArgumentParser):
-            glob = frame.f_globals
-            # search for dunders
-            for d in DUNDERS:
-                f = frame
-                while f and (d not in f.f_globals.keys() or f.f_globals[d] is None):
-                    f = f.f_back
-                try:
-                    glob[d] = f.f_globals[d]
-                except (AttributeError, KeyError):
-                    pass
-            break
-        frame = frame.f_back
+    glob = get_tool_globals()
     if any(glob.get(k) is not None for k in ["NOTIFICATION_ICONS_PATH", "NOTIFICATION_LEVEL", "NOTIFICATION_TIMEOUT"]):
         add_notify = True
     add = {'config': add_config, 'demo': add_demo, 'interact': add_interact, 'notify': add_notify,
            'progress': add_progress, 'step': add_step, 'time': add_time, 'version': add_version, 'wizard': add_wizard,
            'help': True, 'usage': True}
-    p = ArgumentParser(glob)
+    p = ArgumentParser(command=tokens)
     # 1) handle action when no input argument is given
     add['demo'] = add['demo'] and p.examples
-    noarg = len(sys.argv) == 1
+    noarg = len(tokens) == 1
     if noarg and noargs_action:
         if noargs_action not in add.keys():
             raise ValueError(gt("Bad action when no args (should be one of: {})").format('|'.join(add.keys())))
@@ -141,6 +124,7 @@ def initialize(add_banner=False,
             return [__proxy_to_real_parser(_) for _ in value]
         return value
     #  now iterate over the registered calls
+    from .argreparse import parser_calls
     for proxy_parser, method, args, kwargs, proxy_subparser in parser_calls:
         real_parser = __parsers[proxy_parser]
         args = (__proxy_to_real_parser(v) for v in args)
@@ -150,7 +134,6 @@ def initialize(add_banner=False,
             __parsers[proxy_subparser] = real_subparser
     # this allows to ensure that another call to initialize(...) will have a clean list of calls and an empty _config
     #  attribute
-    parser_calls = []
     ArgumentParser.reset()
     i = p.add_argument_group("extra arguments")
     # configure documentation formatting
@@ -162,13 +145,13 @@ def initialize(add_banner=False,
                              note=gt("this overrides other arguments"))
         c.add_argument("-w", "--write-config", metavar="INI", help=gt("write args to a config file"))
         if noarg and noargs_action == "config":
-            sys.argv[1:] = [opt, "config.ini"]
+            tokens[1:] = [opt, "config.ini"]
     # demonstration feature, for executing an example amongst these defined in __examples__, useful for observing what
     #  the tool does
     if add['demo']:
         opt = i.add_argument("--demo", action="demo", prefix="play", help=gt("demonstrate a random example"))
         if noarg and noargs_action == "demo":
-            sys.argv[1:] = [opt]
+            tokens[1:] = [opt]
     # help feature, for displaying classical or extended help about the tool
     if add['help']:
         if glob.get('__details__'):
@@ -180,9 +163,9 @@ def initialize(add_banner=False,
         else:
             opt = i.add_argument("-h", "--help", action="help", help=gt("show this help message and exit"))
         if noarg and noargs_action == "help":
-            sys.argv[1:] = ["--help"]
+            tokens[1:] = ["--help"]
         elif noarg and noargs_action == "usage":
-            sys.argv[1:] = ["DISPLAY_USAGE"]
+            tokens[1:] = ["DISPLAY_USAGE"]
     # interaction mode feature, for interacting with the tool during its execution, useful for debugging
     if add['interact']:
         j = p.add_argument_group("interaction arguments")
@@ -193,25 +176,25 @@ def initialize(add_banner=False,
             j.add_argument("--port", default=12345, type=port_number, prefix="remote",
                            help=gt("remote interacting port"))
         if noarg and noargs_action == "interact":
-            sys.argv[1:] = [opt]
+            tokens[1:] = [opt]
         set_interact_items(glob)
     # notification feature, for displaying notifications during the execution
     if add['notify']:
         opt = i.add_argument("-n", "--notify", action="store_true", suffix="mode", help=gt("notify mode"))
         if noarg and noargs_action == "notify":
-            sys.argv[1:] = [opt]
+            tokens[1:] = [opt]
         set_notify_items(glob)
     # progress mode feature, for displaying a progress bar during the execution
     if add['progress']:
         opt = i.add_argument("-p", "--progress", action="store_true", suffix="mode", help=gt("progress mode"))
         if noarg and noargs_action == "progress":
-            sys.argv[1:] = [opt]
+            tokens[1:] = [opt]
         set_progress_items(glob)
     # stepping mode feature, for stepping within the tool during its execution, especially useful for debugging
     if add['step']:
         opt = i.add_argument("--step", action="store_true", last=True, suffix="mode", help=gt("stepping mode"))
         if noarg and noargs_action == "step":
-            sys.argv[1:] = [opt]
+            tokens[1:] = [opt]
         set_step_items(glob)
     # timing mode feature, for measuring time along the execution of the tool
     if add['time']:
@@ -221,7 +204,7 @@ def initialize(add_banner=False,
         b.add_argument("--timings", action='store_true', last=True, suffix="mode",
                        help=gt("display time stats during execution"))
         if noarg and noargs_action == "time":
-            sys.argv[1:] = [opt]
+            tokens[1:] = [opt]
     # version feature, for displaying the version from __version__
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
@@ -229,7 +212,7 @@ def initialize(add_banner=False,
             opt = i.add_argument("--version", action='version', prefix="show", version=version,
                                  help=gt("show program's version number and exit"))
             if noarg and noargs_action == "version":
-                sys.argv[1:] = [opt]
+                tokens[1:] = [opt]
     # verbosity feature, for displaying debugging messages, with the possibility to handle multi-level verbosity
     if multi_level_debug:
         i.add_argument("-v", dest="verbose", default=0, action="count", suffix="mode", cancel=True, last=True,
@@ -240,7 +223,7 @@ def initialize(add_banner=False,
     if add['wizard']:
         opt = i.add_argument("-w", "--wizard", action="wizard", prefix="start", help=gt("start a wizard"))
         if noarg and noargs_action == "wizard":
-            sys.argv[1:] = [opt]
+            tokens[1:] = [opt]
     # reporting feature, for making a reporting with the results of the tool at the end of its execution
     if report_func is not None:
         if not isfunction(report_func):
@@ -282,7 +265,7 @@ def initialize(add_banner=False,
     # 3) if sudo required, restart the script
     if sudo and not is_admin():
         exe = ["runas", "/env", "/user:Administrator"] if WINDOWS else ["sudo", "-E"]
-        os.execvp(["sudo", "runas"][WINDOWS], exe + [sys.executable] + sys.argv)
+        os.execvp(["sudo", "runas"][WINDOWS], exe + [sys.executable] + tokens)
     # 4) configure logging and get the main logger
     a = glob['args']
     configure_logger(glob, multi_level_debug,
@@ -338,37 +321,6 @@ def initialize(add_banner=False,
     if not AT_EXIT_SET:
         atexit.register(__at_exit)
         globals()['AT_EXIT_SET'] = False
-
-
-class ProxyArgumentParser(object):
-    """
-    Proxy class for collecting added arguments before initialization.
-    """
-    def __getattr__(self, name):
-        """ Each time a method is called, return __collect to make it capture the input arguments and keyword-arguments
-             if it exists in the original parser class. """
-        self.__call = name
-        return self.__collect
-
-    def __collect(self, *args, **kwargs):
-        """ Capture the input arguments and keyword-arguments of the currently called method, appending a proxy
-             subparser in case it should be used for mutually exclusive groups or subparsers. """
-        subparser = ProxyArgumentParser()
-        parser_calls.append((self, self.__call, args, kwargs, subparser))
-        del self.__call
-        return subparser
-    
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        pass
-    
-    @staticmethod
-    def reset():
-        global parser_calls
-        parser_calls = []
-        ArgumentParser.reset()
 
 
 parser = ProxyArgumentParser()

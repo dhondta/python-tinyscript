@@ -12,6 +12,7 @@ from shutil import rmtree as shutil_rmtree
 from time import sleep
 from tinyscript.helpers.constants import WINDOWS
 from tinyscript.helpers.decorators import failsafe
+from tinyscript.argreparse import ArgumentParser
 from unittest import TestCase
 try:
     from unittest.mock import patch as mock_patch
@@ -24,7 +25,7 @@ __all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep", "
            "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase", "_FakeParserAction", "FIXTURES", "WINDOWS"]
 
 
-FIXTURES = {
+FIXTURES = ArgumentParser._globals_dict = {
     '__author__':       "John Doe",
     '__contributors__': [
         {'author': "James McAdams", 'email': "j.mcadams@hotmail.com"},
@@ -34,6 +35,7 @@ FIXTURES = {
     '__copyright__':    "test",
     '__credits__':      "Thanks to Bob for his contribution",
     '__doc__':          "test tool",
+    '__details__':      "some more information",
     '__email__':        "john.doe@example.com",
     '__examples__':     ["-v"],
     '__license__':      "agpl-v3.0",

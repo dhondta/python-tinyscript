@@ -20,6 +20,7 @@ from .inputs import *
 from .layout import *
 from .licenses import *
 from .notify import *
+from .parser import *
 from .password import *
 from .path import *
 from .termsize import *
@@ -41,6 +42,7 @@ from .inputs import __features__ as _inputs
 from .layout import __features__ as _layout
 from .licenses import __features__ as _lic
 from .notify import __features__ as _notify
+from .parser import __features__ as _parser
 from .password import __features__ as _pswd
 from .path import __features__ as _path
 from .termsize import __features__ as _tsize
@@ -49,7 +51,7 @@ from .timeout import __features__ as _to
 
 
 __helpers__ = _attack + _common + _data + _dec + _dict + _docs + _expr + _fexec + _inputs + _layout + _lic + _notify + \
-              _path + _pswd + _tsize + _text + _to
+              _parser + _path + _pswd + _tsize + _text + _to
 
 ts = ModuleType("ts", """
     Tinyscript helpers
