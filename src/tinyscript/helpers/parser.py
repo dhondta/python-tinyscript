@@ -22,7 +22,7 @@ def get_parsers(tool, logger=None, **kwargs):
         tool = Path(which(tool), expand=True)
     # copy the target tool to modify it so that its parser tree can be retrieved
     ntool = tool.copy(tmp.joinpath(f"_{tool.basename}.py"))
-    ntool.write_text(ntool.read_text().replace("if __name__ == '__main__':", f"{kwargs.get('cond', '')}\ndef main():") \
+    ntool.write_text(ntool.read_text().replace("if __name__ == '__main__':", f"{kwargs.pop('cond', '')}\ndef main():") \
                                       .replace("if __name__ == \"__main__\":", "def main():") \
                                       .replace("initialize(", "return parser\n    initialize(") \
                                       .rstrip("\n") + "\n\nif __name__ == '__main__':\n    main()\n")
