@@ -2,6 +2,8 @@
 """Preimports random assets' tests.
 
 """
+from collections import Counter
+from math import log
 from tinyscript.preimports import random
 
 from utils import *
@@ -19,6 +21,12 @@ class TestPreimportsRandom(TestCase):
         self.assertNotIn("e", random.randstr(alphabet="abcd"))
         self.assertRaises(ValueError, random.randstr, -1)
         self.assertRaises(ValueError, random.randstr, 8, "")
+        self.assertTrue(isinstance(random.randstr(16, b"\x00\x01\x02"), bytes))
+        for n, na in zip([8, 16, 64], [3, 4, 5]):
+            for bs in [0, 16, 256]:
+                for i in range(512):
+                    self.assertLess(max(Counter(random.randstr(n, "".join(chr(i) for i in range(na)), True, bs))\
+                                        .values()), n/(na-1) if (bs or n) > (na-1)/(1-(na-1)/na) else n/(na-2))
     
     def test_random_lfsr(self):
         l = random.LFSR(target="0123456789abcdef")

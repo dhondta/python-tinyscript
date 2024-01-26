@@ -82,10 +82,10 @@ A context manager is also available:
 
 `itertools` is extended with the following items:
 
-- `product2`: this is an improvement of the original `product`, also handling generators
-- `reset`: given a generator function decorated by `resettable`, this functions can reset a generator instantiated by this function
-- `resettable`: decorator for registering the reference to the generator function and its arguments used to make a generator, then making resettable each generator made by this function
-- `NonResettableGeneratorException`: specific exception for handling a generator not decorated by `resettable` thrown while trying to reset it with the `reset` function
+- `product2`: this is an improvement of the original `product`, also handling generators.
+- `reset`: given a generator function decorated by `resettable`, this functions can reset a generator instantiated by this function.
+- `resettable`: decorator for registering the reference to the generator function and its arguments used to make a generator, then making resettable each generator made by this function.
+- `NonResettableGeneratorException`: specific exception for handling a generator not decorated by `resettable` thrown while trying to reset it with the `reset` function.
 
 -----
 
@@ -114,8 +114,8 @@ A context manager is also available:
 
 `random` is slightly enhanced with a few new items:
 
-- `choice`: redefined to add an argument for an exclusion list (aim is to provide a short form instead of using list comprehension) and an extra argument for setting if an error shall be thrown when the resulting list is empty
-- `randstr`: allows to generate a random string with a given length (8 by default) and alphabet
+- `choice`: redefined to add an argument for an exclusion list (aim is to provide a short form instead of using list comprehension) and an extra argument for setting if an error shall be thrown when the resulting list is empty.
+- `randstr`: allows to generate a random string with a given length (8 by default) and alphabet ; it also supports a 'balance' parameter that ensures that there is no character that can have more than n / (n_alphabet - 1) occurrences and a 'blocksize' parameter to enforce balancing on a per-block basis.
 - `LFSR`: adds an implementation of the Linear-Feedback Shifting Register stream generator, with the possibility of recovering its parameters by setting a target and using the Berlekamp-Massey algorithm.
 - `Geffe`: adds an implementation of the Geffe stream generator.
 
@@ -125,10 +125,10 @@ A context manager is also available:
 
 `re` is enhanced with some new (fully lazy) functions to generate strings from regular expression patterns:
 
-- `randstr`: generates a single random string from the input regex
-- `randstrs`: provides a generator of N random strings from the input regex
-- `size`: computes the number of all possible strings from the input regex
-- `strings`: generates all possible strings from the input regex
+- `randstr`: generates a single random string from the input regex.
+- `randstrs`: provides a generator of N random strings from the input regex.
+- `size`: computes the number of all possible strings from the input regex.
+- `strings`: generates all possible strings from the input regex.
 
 -----
 
@@ -137,8 +137,8 @@ A context manager is also available:
 `string` is slightly enhanced with a few new functions:
 
 - `shorten`: shortens a string, taking by default the terminal width, otherwise a length of 40 characters (unless user-defined), and using an end token (by default "`...`").
-- `sort_natural`: sort a list of strings taking numbers into account (returns nothing)
-- `sorted_natural`: return a list of strings taking numbers into account
+- `sort_natural`: sort a list of strings taking numbers into account (returns nothing).
+- `sorted_natural`: return a list of strings taking numbers into account.
 
 -----
 

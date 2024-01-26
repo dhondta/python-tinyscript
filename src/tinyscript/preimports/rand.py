@@ -19,15 +19,39 @@ def __choice(lst, exclusions=(), error=True):
 random.choice = __choice
 
 
-def __randstr(n=8, alphabet=string.ascii_lowercase+string.ascii_uppercase+string.digits):
-    """ Compose a random string of the given length with the given alphabet. """
+def __randstr(n=8, alphabet=string.ascii_lowercase+string.ascii_uppercase+string.digits, balance=False, blocksize=0):
+    """ Compose a random string of the given length with the given alphabet. It can be chosen if it has to be balanced,
+         either in its whole or per block (given a block size). Note that, when balancing per block, it is not ensured
+         that the whole string is balanced too. """
+    na = len(alphabet)
     if n < 0:
         raise ValueError("Bad random string length")
-    if len(alphabet) == 0:
+    if na == 0:
         raise ValueError("Bad alphabet")
-    s = ""
+    is_b = isinstance(alphabet, bytes)
+    s = ["", b""][is_b]
+    if is_b:
+        alphabet = [alphabet[i:i+1] for i in range(na)]
+    if balance:
+        bs = min(n, blocksize) or n
+        t = bs / (na-1 or 1)
+        if bs <= (na-1)/(1-(na-1)/na):
+            t = bs / (na-2)
+        orig_alphabet = alphabet[:] if is_b else alphabet
     for i in range(n):
-        s += random.choice(alphabet)
+        if balance:
+            if i == 0 or blocksize > 0 and i % blocksize == 0:
+                alphabet, cnts = orig_alphabet[:] if is_b else orig_alphabet, {}
+            while cnts.get(c := random.choice(alphabet), 0) >= t - 1:
+                if is_b:
+                    alphabet.remove(c)
+                else:
+                    alphabet = alphabet.replace(c, "")
+            cnts.setdefault(c, 0)
+            cnts[c] += 1
+        else:
+            c = random.choice(alphabet)
+        s += c
     return s
 random.randstr = __randstr
 
