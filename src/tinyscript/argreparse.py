@@ -73,9 +73,7 @@ def get_tool_globals():
 
 
 class ProxyArgumentParser(object):
-    """
-    Proxy class for collecting added arguments before initialization.
-    """
+    """ Proxy class for collecting added arguments before initialization. """
     def __getattr__(self, name):
         """ Each time a method is called, return __collect to make it capture the input arguments and keyword-arguments
              if it exists in the original parser class. """
@@ -231,7 +229,7 @@ class _NewActionsContainer(_ActionsContainer):
             action.orig = orig
             action.prefix = prefix
             action.suffix = suffix
-            return args[-1]
+            return action
         except ArgumentError:
             # drop the argument if conflict and cancel set to True
             if cancel:
@@ -295,7 +293,11 @@ class _NewArgumentGroup(_ArgumentGroup, _NewActionsContainer):
 class _NewMutuallyExclusiveGroup(_MutuallyExclusiveGroup, _NewArgumentGroup):
     """ Alternative argparse._MutuallyExclusiveGroup for modifying arguments mutually exclusive groups handling in the
          modified ActionsContainer. """
-    pass
+    def add_argument(self, *args, **kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], Action):
+            self._group_actions.append(args[0])
+            return args[0]
+        return super(_NewMutuallyExclusiveGroup, self).add_argument(*args, **kwargs)
 
 
 class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
@@ -859,6 +861,7 @@ class HelpFormatter(ArgumentDefaultsHelpFormatter, RawTextHelpFormatter):
             if len(categories) > 1 or len(categories) > 0 and list(categories.keys())[0] != "default":
                 action.categories = categories
             self._add_item(self._format_action, [action])
+        return action
 
 
 class Namespace(BaseNamespace):

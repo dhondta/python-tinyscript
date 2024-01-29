@@ -121,7 +121,7 @@ def initialize(add_banner=False,
         if isinstance(value, ProxyArgumentParser):
             return __parsers[value]
         elif isinstance(value, (list, tuple)):
-            return [__proxy_to_real_parser(_) for _ in value]
+            return [__proxy_to_real_parser(v) for v in value]
         return value
     #  now iterate over the registered calls
     from .argreparse import parser_calls
@@ -145,13 +145,13 @@ def initialize(add_banner=False,
                              note=gt("this overrides other arguments"))
         c.add_argument("-w", "--write-config", metavar="INI", help=gt("write args to a config file"))
         if noarg and noargs_action == "config":
-            tokens[1:] = [opt, "config.ini"]
+            tokens[1:] = [opt.option_strings[-1], "config.ini"]
     # demonstration feature, for executing an example amongst these defined in __examples__, useful for observing what
     #  the tool does
     if add['demo']:
         opt = i.add_argument("--demo", action="demo", prefix="play", help=gt("demonstrate a random example"))
         if noarg and noargs_action == "demo":
-            tokens[1:] = [opt]
+            tokens[1:] = [opt.option_strings[-1]]
     # help feature, for displaying classical or extended help about the tool
     if add['help']:
         if glob.get('__details__'):
@@ -176,25 +176,25 @@ def initialize(add_banner=False,
             j.add_argument("--port", default=12345, type=port_number, prefix="remote",
                            help=gt("remote interacting port"))
         if noarg and noargs_action == "interact":
-            tokens[1:] = [opt]
+            tokens[1:] = [opt.option_strings[-1]]
         set_interact_items(glob)
     # notification feature, for displaying notifications during the execution
     if add['notify']:
         opt = i.add_argument("-n", "--notify", action="store_true", suffix="mode", help=gt("notify mode"))
         if noarg and noargs_action == "notify":
-            tokens[1:] = [opt]
+            tokens[1:] = [opt.option_strings[-1]]
         set_notify_items(glob)
     # progress mode feature, for displaying a progress bar during the execution
     if add['progress']:
         opt = i.add_argument("-p", "--progress", action="store_true", suffix="mode", help=gt("progress mode"))
         if noarg and noargs_action == "progress":
-            tokens[1:] = [opt]
+            tokens[1:] = [opt.option_strings[-1]]
         set_progress_items(glob)
     # stepping mode feature, for stepping within the tool during its execution, especially useful for debugging
     if add['step']:
         opt = i.add_argument("--step", action="store_true", last=True, suffix="mode", help=gt("stepping mode"))
         if noarg and noargs_action == "step":
-            tokens[1:] = [opt]
+            tokens[1:] = [opt.option_strings[-1]]
         set_step_items(glob)
     # timing mode feature, for measuring time along the execution of the tool
     if add['time']:
@@ -204,7 +204,7 @@ def initialize(add_banner=False,
         b.add_argument("--timings", action='store_true', last=True, suffix="mode",
                        help=gt("display time stats during execution"))
         if noarg and noargs_action == "time":
-            tokens[1:] = [opt]
+            tokens[1:] = [opt.option_strings[-1]]
     # version feature, for displaying the version from __version__
     if add['version']:
         version = glob['__version__'] if '__version__' in glob else None
@@ -212,7 +212,7 @@ def initialize(add_banner=False,
             opt = i.add_argument("--version", action='version', prefix="show", version=version,
                                  help=gt("show program's version number and exit"))
             if noarg and noargs_action == "version":
-                tokens[1:] = [opt]
+                tokens[1:] = [opt.option_strings[-1]]
     # verbosity feature, for displaying debugging messages, with the possibility to handle multi-level verbosity
     if multi_level_debug:
         i.add_argument("-v", dest="verbose", default=0, action="count", suffix="mode", cancel=True, last=True,
@@ -223,7 +223,7 @@ def initialize(add_banner=False,
     if add['wizard']:
         opt = i.add_argument("-w", "--wizard", action="wizard", prefix="start", help=gt("start a wizard"))
         if noarg and noargs_action == "wizard":
-            tokens[1:] = [opt]
+            tokens[1:] = [opt.option_strings[-1]]
     # reporting feature, for making a reporting with the results of the tool at the end of its execution
     if report_func is not None:
         if not isfunction(report_func):

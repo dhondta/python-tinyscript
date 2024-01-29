@@ -56,7 +56,7 @@ def execute(cmd, **kwargs):
             os.killpg(os.getpgid(p.pid), signal.SIGTERM)
         out, err = p.communicate()
         if rr:
-            raise
+            raise TimeoutExpired(__set_cmd(cmd, shell=True), to)
     return (out, err, p.returncode) if rc else (out, err)
 
 
