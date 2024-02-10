@@ -288,7 +288,7 @@ class _NewActionsContainer(_ActionsContainer):
 class _NewArgumentGroup(_ArgumentGroup, _NewActionsContainer):
     """ Alternative argparse._ArgumentGroup for modifying argument groups handling in the modified ActionsContainer. """
     pass
-        
+
 
 class _NewMutuallyExclusiveGroup(_MutuallyExclusiveGroup, _NewArgumentGroup):
     """ Alternative argparse._MutuallyExclusiveGroup for modifying arguments mutually exclusive groups handling in the

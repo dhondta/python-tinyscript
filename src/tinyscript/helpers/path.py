@@ -210,6 +210,15 @@ class Path(BasePath):
                 return new
     rand_folder_name = generate
     
+    def is_executable(self):
+        """ Check if the path can be executed. """
+        return os.access(str(self.expanduser().absolute()), os.X_OK)
+    
+    def is_in_path_env_var(self):
+        """ Check if the current path is in the PATH environment variable. """
+        return (self.dirname if self.is_file() else self).expanduser().absolute() in \
+               [Path(p, expand=True) for p in os.environ['PATH'].split(":")]
+    
     def is_hidden(self):
         """ Check if the current path is hidden. """
         if DARWIN:
@@ -233,6 +242,14 @@ class Path(BasePath):
         if not p.is_dir():
             p = Path(p.dirname)
         return p in self.absolute().parents
+    
+    def is_readable(self):
+        """ Check if the path can be read. """
+        return os.access(str(self.expanduser().absolute()), os.R_OK)
+    
+    def is_writable(self):
+        """ Check if the path can be written. """
+        return os.access(str(self.expanduser().absolute()), os.W_OK)
     
     def iterfiles(self, filetype=None, filename_only=False, relative=False):
         """ List all files from the current directory. """

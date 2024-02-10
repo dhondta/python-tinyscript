@@ -25,7 +25,18 @@ This tool allows to quickly create a new Tinyscript script/tool from a template.
 """
 
 
-BIN = Path("~/.bin", expand=True, create=True)
+for _bin in ["~/.bin", "~/.local/bin", "~/.opt/bin"]:
+    BIN = Path(_bin, expand=True, create=True)
+    if BIN.is_in_path_env_var():
+        break
+    BIN = None
+if BIN is None:
+    for p in os.environ['PATH'].split(":"):
+        p = Path(p, expand=True)
+        if p.is_writable():
+            BIN = p
+            break
+
 CACHE = ts.ConfigPath("tinyscript", create=True).joinpath("cache.json")
 DUNDERS = ["__author__", "__email__", "__version__", "__copyright__", "__license__"]
 SOURCES = ts.ConfigPath("tinyscript").joinpath("sources.conf")
@@ -49,13 +60,13 @@ def __download(url, **kw):
             content = b"".join(chunk for chunk in resp.iter_content(chunk_size=4096)).decode()
             return content, _parse_metadata(content)
     except requests.exceptions.Timeout:
-        logger.error("Request for '%s' timed out" % url)
+        logger.error(f"Request for '{url}' timed out")
     except requests.exceptions.TooManyRedirects:
-        logger.error("Too many redirects for '%s'" % url)
+        logger.error(f"Too many redirects for '{url}'")
     except requests.exceptions.RequestException as e:
         resp = e.response
         if resp:
-            logger.error("'%s' cannot be opened (status code: %d - %s)" % (url, resp.status_code, resp.reason))
+            logger.error(f"'{url}' cannot be opened (status code: {resp.status_code} - {resp.reason})")
         else:
             logger.error(str(e))
     return None, {}
@@ -63,7 +74,7 @@ def __download(url, **kw):
 
 def _fetch_source(target):
     target = target.strip(" \r\n")
-    logger.info("Fetching source '%s'..." % target)
+    logger.info(f"Fetching source '{target}'...")
     CACHE.touch()
     with CACHE.open() as f:
         try:
@@ -97,7 +108,7 @@ def _get_sources_list(fetch=False):
                 if source == "" or source.startswith("#"):
                     continue
                 if fetch:
-                    logger.info("Fetching source '%s'..." % source)
+                    logger.info(f"Fetching source '{source}'...")
                     __download(source)
                 r.append(source)
     return r
@@ -111,12 +122,12 @@ def _iter_sources(source=None):
             try:
                 yield cache, source, cache[source]
             except KeyError:
-                logger.error("Source '%s' does not exist" % source)
+                logger.error(f"Source '{source}' does not exist")
         else:
             for source, scripts in cache.items():
                 yield cache, source, scripts
     else:
-        logger.warning("No cache available ; please use 'tinyscript update' to get script links from sources")
+        logger.warning("No cache available ; please use 'tsm update' to get script links from sources")
 
 
 def _parse_metadata(content):
@@ -160,17 +171,21 @@ def main():
         s, sources = args.url, _get_sources_list()
         if not args.fetch or args.fetch and _fetch_source(s):
             if s in sources:
-                logger.warning("Source '%s' already exists" % s)
+                logger.warning(f"Source '{s}' already exists")
             else:
                 with SOURCES.open('a') as f:
                     f.write(s)
-                logger.info("Added source '%s'" % s)
+                logger.info(f"Added source '{s}'")
     elif args.command == "install":
-        script = BIN.joinpath(args.name)
+        if BIN is None:
+            script = Path(args.name)
+            logger.warning("Could not find a suitable path from the PATH environment variable to put the script in")
+        else:
+            script = BIN.joinpath(args.name)
         if script.exists() and not args.force:
             meta = _parse_metadata(script.read_text())
             v = meta.get('version')
-            logger.warning(("Script '%s' already exists" % args.name) + [" (version: %s)" % v, ""][v is None])
+            logger.warning((f"Script '{args.name}' already exists") + [f" (version: {v})", ""][v is None])
         else:
             local_v = __version(_parse_metadata(script.read_text()).get('version') if script.exists() else "0.0.0")
             for cache, source, scripts in _iter_sources(args.source):
@@ -185,11 +200,11 @@ def main():
                         script.write_text(content)
                         cache[source][args.name].update(meta)
                         script.chmod(args.mode)
-                        logger.info("Script '%s' %s" % (args.name, status))
+                        logger.info(f"Script '{args.name}' {status}")
                     else:
                         logger.warning("Remote script has a lower version, hence not updated")
+                    _update_cache(cache)
                     break
-            _update_cache(cache)
     elif args.command == "new":
         new_script(args.name, args.target)
     elif args.command == "remove-source":
@@ -199,18 +214,18 @@ def main():
             l = len(sources)
             new = [_ for _ in sources if _.strip(" #\r\n") != s]
             if l == len(new):
-                logger.warning("'%s' not found" % s)
+                logger.warning(f"'{s}' not found")
             else:
                 f.seek(0)
                 f.truncate()
                 f.writelines(new)
-                logger.info("Removed source '%s'" % s)
+                logger.info(f"Removed source '{s}'")
     elif args.command == "search":
         for cache, source, scripts in _iter_sources(args.source):
             for name, data in scripts.items():
                 link = data['link']
                 if re.search(args.pattern, name) or args.extended and re.search(args.pattern, link):
-                    print("%s\n  URL   : %s\n  Source: %s" % (name, link, source))
+                    print(f"{name}\n  URL   : {link}\n  Source: {source}")
                     if args.fetch:
                         _, meta = __download(link, headers={'Range': "bytes=32-1024"})
                         cache[source][name] = {'link': link}
@@ -228,7 +243,7 @@ def main():
                                      ["\n", ""]["email" in dunders]
                             elif k == "email":
                                 if "author" in dunders:
-                                    s += " (%s)\n" % v
+                                    s += f" ({v})\n"
                             else:
                                 func = globals().get(k, lambda s: s)
                                 try:
@@ -247,5 +262,5 @@ def main():
                         continue
                     _fetch_source(l)
         else:
-            logger.warning("'%s' does not exist" % SOURCES)
+            logger.warning(f"'{SOURCES}' does not exist")
 

@@ -69,6 +69,10 @@ class TestHelpersPath(TestCase):
         self.assertEqual(FILE.generate(), FILE)
         self.assertRaises(TypeError, FILE.append_text, 0)
         self.assertTrue(FILE.is_under(FILE))
+        self.assertIsNotNone(FILE.is_executable())
+        self.assertIsNotNone(FILE.is_readable())
+        self.assertIsNotNone(FILE.is_writable())
+        self.assertIsNotNone(FILE.is_in_path_env_var())
         self.assertTrue(FILE.copy(FILE2).is_file())
         FILE2.remove()
         self.assertFalse(FILE2.copy(FILE).is_file())
@@ -89,6 +93,10 @@ class TestHelpersPath(TestCase):
         self.assertNotEqual(len(list(PATH.find("test"))), 0)
         self.assertNotEqual(len(list(PATH.find("te*"))), 0)
         self.assertEqual(len(list(PATH.find("test2.+", True))), 0)
+        self.assertIsNotNone(PATH.is_executable())
+        self.assertIsNotNone(PATH.is_readable())
+        self.assertIsNotNone(PATH.is_writable())
+        self.assertIsNotNone(PATH.is_in_path_env_var())
     
     def test_config_path(self):
         PATH = ConfigPath("test-app", file=True)

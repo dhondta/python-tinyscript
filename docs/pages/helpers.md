@@ -246,9 +246,13 @@ Tinyscript also provides modified/additional `pathlib`-related classes:
     - `choice(*filetypes:str)`: chooses a random file in the current folder among the given extensions (mentioning the dot ; e.g. `.py`)
     - `find(name:str, regex:bool)`: finds a file or folder, using `name` as a regex or not
     - `generate(prefix:str, suffix:str, length:int, alphabet:str)`: generates a random folder name (guaranteed to be non-existent) using the given prefix, suffix, length and alphabet, and returns the joined path
+    - `is_executable()`: checks whether the path is executable
     - `is_hidden()`: checks whether the current file/folder is hidden
+    - `is_in_path_env_var()`: checks whether the path (if not a folder, its `.dirname`) is in the `PATH` environment variable
+    - `is_readable()`: checks whether the path is readable
     - `is_samepath(other_path:str|Path)`: checks whether the given path is the same
     - `is_under(path:str|Path)`: checks whether the path is under the given parent path
+    - `is_writable()`: checks whether the path is writable
     - `iterfiles()`: iterates over files only
     - `iterpubdir()`: iterates over visible directories only
     - `listdir(filter_func:lambda, sort:bool)`: list the current path based on a filter function, sorted or not
