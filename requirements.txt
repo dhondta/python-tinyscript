@@ -34,3 +34,5 @@ tqdm
 virtualenv>=20.8.1
 weasyprint
 xmltodict
+# Snyk false alarms
+pillow>=1.2.0  # solved with asciistuff>=1.3.0
