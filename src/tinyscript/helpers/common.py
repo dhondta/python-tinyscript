@@ -11,7 +11,7 @@ from .constants import WINDOWS
 
 
 __all__ = __features__ = ["dateparse", "human_readable_size", "is_admin", "set_exception", "strings",
-                          "strings_from_file", "urlparse", "urlparse_query", "xor", "xor_file", "withrepr"]
+                          "strings_from_file", "urlparse", "urlparse_query", "xor", "xor_file", "withrepr", "zeropad"]
 
 
 def human_readable_size(size, precision=0):
@@ -179,6 +179,42 @@ def xor_file(filename, key, offset=0):
             f.seek(cursor)
             f.write(xor(data, b(key[:len(data)])))
             cursor += l
+
+
+def zeropad(length, default="\x00"):
+    """ Simple decorator to zero-pad the result of the input function regarding its output type.
+    
+    :param length: desired length
+    
+    Examples:
+      zeropad(5)("ok")          => "ok\x00\x00\x00"
+      zeropad(5)("011")         => "01100"
+      zeropad(5)([0,1,1])       =>  [0,1,1,0,0]
+      zeropad(5)(["0","1","1"]) =>  ["0","1","1","0","0"]
+      
+      @zeropad(5)
+      def test(...):
+          ... # e.g. return "ok" => "ok\x00\x00\x00"
+    """
+    from tinyscript.helpers import is_bin, is_function, is_list
+    def _pad(v):
+        l = len(v)
+        if l == 0:
+            return length * ([default] if is_list(v) else default)
+        if l >= length:
+            return v
+        return v + (length - l) * (["\x00", "0"][l > 0 and is_bin(v)] if isinstance(v, str) else \
+                                   [[["\x00", "0"][l > 0 and is_bin(v)]], [0]][l > 0 and isinstance(v[0], int)] \
+                                   if is_list(v) else None)
+    def _zeropad(f):
+        if not is_function(f):
+            return _pad(f)
+        from functools import wraps
+        @wraps(f)
+        def _wrapper(*a, **kw):
+            return _pad(f(*a, **kw))
+        return _wrapper
+    return _zeropad
 
 
 # https://stackoverflow.com/questions/10875442/possible-to-change-a-functions-repr-in-python

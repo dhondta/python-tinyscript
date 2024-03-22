@@ -7,7 +7,6 @@ import importlib
 import sys
 from mimetypes import guess_type
 from pathlib2 import Path as BasePath
-from pyminizip import compress_multiple, uncompress
 from shutil import copy, copy2, copytree, rmtree
 from tempfile import gettempdir, NamedTemporaryFile as TempFile
 
@@ -506,6 +505,7 @@ class ProjectPath(Path):
             dst_list.append(str(f.relative_to(self).dirname))
         # Pyminizip changes the current working directory after creation of an archive ; so backup the current
         #  working directory to restore it after compression
+        from pyminizip import compress_multiple, uncompress
         cwd = os.getcwd()
         compress_multiple(src_list, dst_list, str(dst), password or "", 9)
         os.chdir(cwd)
@@ -538,6 +538,7 @@ class ProjectPath(Path):
         dst = Path(path or str(self.dirname.joinpath(self.stem)), create=True)
         # Pyminizip changes the current working directory after extraction of an archive ; so backup the current
         #  working directory to restore it after decompression
+        from pyminizip import uncompress
         cwd = os.getcwd()
         uncompress(str(self), password or "", str(dst), False)
         os.chdir(cwd)

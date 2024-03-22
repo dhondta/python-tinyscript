@@ -62,6 +62,15 @@ class TestHelpersCommon(TestCase):
         def test_func2():
             pass
         self.assertTrue(repr(test_func2).startswith("<test_function "))
+        self.assertEqual(zeropad(5)("ok"), "ok\x00\x00\x00")
+        self.assertEqual(zeropad(5)("011"), "01100")
+        self.assertEqual(zeropad(5)([0,1,1]), [0,1,1,0,0])
+        self.assertEqual(zeropad(5)(["0","1","1"]), ["0","1","1","0","0"])
+        self.assertEqual(zeropad(5)(lambda: "ok")(), "ok\x00\x00\x00")
+        self.assertEqual(zeropad(5)(lambda: "011")(), "01100")
+        self.assertEqual(zeropad(5)([]), ["\x00","\x00","\x00","\x00","\x00"])
+        self.assertEqual(zeropad(5, default=0)([]), [0,0,0,0,0])
+        self.assertEqual(zeropad(5, default="0")(""), "00000")
     
     def test_lazy_load_functions(self):
         global DUMMY_CONST

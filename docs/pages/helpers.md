@@ -110,6 +110,7 @@ It also provides some other utility functions, decorators, context managers and 
 `ts.xor` | repeated XOR function, also allowing to apply an ordinal offset on XORed characters
 `ts.xor_file` | XOR a file with a given key
 `ts.withrepr` | decorator for modifying the representation of a function
+`ts.zeropad` | decorator for zero-padding the result of either an input function or a value, depending on the output value (binary string is padded with "`0`", normal string is padded with "`\x00`", etc).
 
 -----
 
