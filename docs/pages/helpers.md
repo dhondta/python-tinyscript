@@ -33,6 +33,7 @@ It also defines a few utility or backward-compatibility functions.
 `ensure_str` | ensures the input, either string or bytes, is a string
 `execfile` | same function as used in Python 2
 `iterbytes` | iterates over the bytes of a string (kept for backward compatibility)
+`reduce` | similar to `functools.reduce`, but with a `condition` optional argument to define a stop condition
 `u` | dummy alias for `str` (kept for backward compatibility)
 
 !!! warning "Global scope and the `ts` module"

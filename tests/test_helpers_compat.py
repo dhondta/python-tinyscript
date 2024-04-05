@@ -21,4 +21,8 @@ class TestHelpersCompat(TestCase):
         self.assertRaises(TypeError, ensure_binary, [])
         self.assertEqual(ensure_binary("test"), b("test"))
         self.assertEqual(ensure_binary(b"test"), b("test"))
+        l = (_ for _ in range(100000000))
+        self.assertRaises(TypeError, reduce, lambda x: x, [])
+        self.assertEqual(reduce(lambda a, b: a+b, l, stop=lambda x: x > 1000), 990)
+        self.assertEqual(reduce(lambda a, b: a+b, l, 20, stop=lambda x: x > 1000), 938)
 

@@ -2,9 +2,6 @@
 """Formerly common Python2/3 compatibility functions, now left for backward-compatibility.
 
 """
-from functools import reduce
-
-
 __all__ = __features__ = ["b", "binary_type", "byteindex", "execfile", "ensure_binary", "ensure_str", "iterbytes",
                           "reduce", "string_types", "text_type", "u"]
 
@@ -62,4 +59,22 @@ def iterbytes(text):
         text = b(text)
     for c in text:
         yield c
+
+
+_initial_missing = object()
+
+def reduce(function, sequence, initial=_initial_missing, stop=None):
+    """ Similar to functools.reduce, but with a stop condition.
+    reduce(function, sequence[, initial, stop]) -> value """
+    it = iter(sequence)
+    try:
+        value = next(it) if initial is _initial_missing else initial
+    except StopIteration:
+        raise TypeError("reduce() of empty sequence with no initial value") from None
+    for element in it:
+        v = function(value, element)
+        if stop and stop(v):
+            break
+        value = v
+    return value
 

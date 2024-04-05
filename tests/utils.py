@@ -10,8 +10,7 @@ from os import makedirs, remove as os_remove, rmdir as os_rmdir
 from os.path import dirname, exists, join
 from shutil import rmtree as shutil_rmtree
 from time import sleep
-from tinyscript.helpers.constants import WINDOWS
-from tinyscript.helpers.decorators import failsafe
+from tinyscript.helpers import failsafe, Path, WINDOWS
 from tinyscript.argreparse import ArgumentParser
 from unittest import TestCase
 try:
@@ -22,7 +21,7 @@ except ImportError:
 
 __all__ = ["args", "dirname", "dummy_function", "dummy_lambda", "dummy_sleep", "exists", "join", "logger", "logging",
            "makedirs", "mock_patch", "remove", "rmdir", "rmtree", "sleep", "sys", "temp_stdin", "touch", "temp_stdout",
-           "tmpf", "FakeLogRecord", "FakeNamespace", "TestCase", "_FakeParserAction", "FIXTURES", "WINDOWS"]
+           "tmpf", "FakeLogRecord", "FakeNamespace", "Path", "TestCase", "_FakeParserAction", "FIXTURES", "WINDOWS"]
 
 
 FIXTURES = ArgumentParser._globals_dict = {
