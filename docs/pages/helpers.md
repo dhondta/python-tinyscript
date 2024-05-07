@@ -334,6 +334,7 @@ Tinyscript provides some type checking functions, for common data:
 `ts.is_file` | dummy shortcut to `os.path.isfile`
 `ts.is_filemode` | simple file mode check (for Linux permissions)
 `ts.is_filetype` | regex-based check for file's type (relying on [`python-magic`](https://pypi.org/project/python-magic/))
+`ts.is_float` / `ts.is_pos_float` / `ts.is_neg_float` | float (positive / negative)
 `ts.is_hex` | hexadecimal string (case insensitive)
 `ts.is_in_path` | whether the target path is in the PATH environment variable
 `ts.is_int` / `ts.is_int_range` / `ts.is_pos_int` / `ts.is_neg_int` / `ts.is_prime` | integer (within range / positive / negative / prime)
@@ -436,8 +437,12 @@ While adding arguments to the parser (relying on `argparse`), Tinyscript provide
 `ts.ints` | `list(int)` | list of integers
 `ts.int_range` | single integer within range (second bound included!)
 `ts.ints_range` | list of integers within range (second bound included!)
+`ts.neg_float` / `negative_float` | `float` | single negative float
+`ts.neg_floats` / `negative_floats` | `list(float)` | list of negative floats
 `ts.neg_int` / `negative_int` | `int` | single negative integer
 `ts.neg_ints` / `negative_ints` | `list(int)` | list of negative integers
+`ts.pos_float` / `positive_float` | `float` | single positive float
+`ts.pos_floats` / `positive_floats` | `list(float)` | list of positive floats
 `ts.pos_int` / `positive_int` | `int` | single positive integer
 `ts.pos_ints` / `positive_ints` | `list(int)` | list of positive integers
 `ts.regular_expression` | `str` | string that can be parsed as a regular expression

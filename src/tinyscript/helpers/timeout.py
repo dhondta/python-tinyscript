@@ -8,11 +8,7 @@ from .constants import WINDOWS
 from ..preimports import signal
 
 
-__all__ = __features__ = ["timeout", "Timeout", "TimeoutError"]
-
-
-class TimeoutError(Exception):
-    pass  # TimeoutError is not handled in Python 2
+__all__ = __features__ = ["timeout", "Timeout"]
 
 
 class Timeout(object):
@@ -40,6 +36,7 @@ class Timeout(object):
             raise NotImplementedError("signal.SIGALRM does not exist in Windows")
         else:
             signal.signal(signal.SIGALRM, signal.SIG_IGN)
+            signal.alarm(0)
         return not self.stop
     
     def _handler(self, signum, frame):

@@ -9,7 +9,6 @@ from os import strerror
 
 from .loglib import logger
 from ..helpers.constants import WINDOWS
-from ..helpers.timeout import TimeoutError
 
 
 __all__ = ["set_time_items"]

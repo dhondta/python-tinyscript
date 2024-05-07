@@ -12,16 +12,19 @@ __all__ = __features__ = []
 
 
 # various object type check functions
-__all__ += ["is_bool", "is_dict", "is_int", "is_int_range", "is_list", "is_neg_int", "is_percentage", "is_pos_int",
-            "is_prime"]
+__all__ += ["is_bool", "is_dict", "is_float", "is_int", "is_int_range", "is_list", "is_neg_float", "is_neg_int",
+            "is_percentage", "is_pos_float", "is_pos_int", "is_prime"]
 is_bool       = lambda b: isinstance(b, bool)
 is_dict       = lambda d: isinstance(d, dict)
+is_float      = lambda f: isinstance(f, float)
 is_int        = lambda i: isinstance(i, int)
 is_int_range  = lambda i, i1, i2=None: all(is_int(x) for x in [i, i1, i2 or 0]) and i in (range(i1+1) if i2 is None \
                                                                                           else range(i1, i2+1))
 is_list       = lambda l: isinstance(l, (list, set, tuple))
+is_neg_float  = lambda f, zero=False: is_float(f) and (f <= 0. if zero else f < 0.)
 is_neg_int    = lambda i, zero=False: is_int(i) and (i <= 0 if zero else i < 0)
 is_percentage = lambda f: isinstance(f, (int, float)) and 0. <= float(f) <= 1.
+is_pos_float  = lambda f, zero=False: is_float(f) and (f >= 0. if zero else f > 0.)
 is_pos_int    = lambda i, zero=True: is_int(i) and (i >= 0 if zero else i > 0)
 is_prime      = lambda i: __prime_number(i)
 
@@ -43,29 +46,44 @@ is_type          = lambda t: isinstance(t, type)
 
 
 # -------------------- DATA FORMAT ARGUMENT TYPES --------------------
-__all__ += ["int_range", "neg_int", "negative_int", "pos_int", "positive_int", "ints", "ints_range", "neg_ints",
-            "negative_ints", "pos_ints", "positive_ints", "prime_number", "values_list"]
+__all__ += ["floats", "int_range", "ints", "ints_range", "neg_float", "neg_floats", "negative_float", "negative_floats",
+            "neg_int", "neg_ints", "negative_int", "negative_ints", "pos_float", "pos_floats", "positive_float",
+            "positive_floats", "pos_int", "positive_int", "pos_ints", "positive_ints", "prime_number", "values_list"]
 
 
-def __ints(l, check_func=lambda x: False, idescr=None, shouldbe=None, **kwargs):
-    """ Parses a comma-separated list of ints. """
-    l = _str2list(l)
-    msg = "{} {}integer{}".format(["Bad list of", "Not a"][len(l) == 1], "" if idescr is None else idescr + " ",
-                                  ["s", ""][len(l) == 1])
-    if shouldbe is not None:
-        msg += " (should be %s)" % shouldbe
-    if not all(check_func(_, **kwargs) for _ in l):
-        raise ValueError(msg)
-    return l
-ints = lambda l: __ints(l, is_int)
-int_range = lambda i, i1, i2=None: __ints(i, is_int_range, "valid", "in range [%d,%d]" % \
-                                          (0 if i2 is None else i1, i1 if i2 is None else i2), i1=i1, i2=i2)[0]
-negative_int = neg_int = lambda i, zero=False: __ints(i, is_neg_int, "negative", zero=zero)[0]
-positive_int = pos_int = lambda i, zero=True: __ints(i, is_pos_int, "positive", zero=zero)[0]
-ints_range = lambda l, i1, i2=None: __ints(l, is_int_range, "valid", "in range [%d,%d]" % \
-                                           (0 if i2 is None else i1, i1 if i2 is None else i2), i1=i1, i2=i2)
-negative_ints = neg_ints = lambda l, zero=False: __ints(l, is_neg_int, "negative", zero=zero)
-positive_ints = pos_ints = lambda l, zero=True: __ints(l, is_pos_int, "positive", zero=zero)
+def __n(ntype):
+    def _wrapper(l, check_func=lambda x: False, idescr=None, shouldbe=None, **kwargs):
+        """ Parses a comma-separated list of ints. """
+        l = _str2list(l)
+        if not all(check_func(x, **kwargs) for x in l):
+            msg = f"{['Bad list of', 'Not a'][len(l) == 1]} {'' if idescr is None else idescr + ' '}{ntype}" \
+                  f"{['s', ''][len(l) == 1]}"
+            if shouldbe is not None:
+                msg += f" (should be {shouldbe})"
+            raise ValueError(msg)
+        return l
+    return _wrapper
+
+floats = lambda l: __n("float")(l, is_float)
+negative_float = neg_float = lambda i, zero=False: __n("float")(i, is_neg_float, "negative", zero=zero)[0]
+positive_float = pos_float = lambda i, zero=True: __n("float")(i, is_pos_float, "positive", zero=zero)[0]
+negative_floats = neg_floats = lambda l, zero=False: __n("float")(l, is_neg_float, "negative", zero=zero)
+positive_floats = pos_floats = lambda l, zero=True: __n("float")(l, is_pos_float, "positive", zero=zero)
+floats.__name__ = "floats"
+negative_float.__name__  = neg_float.__name__  = "negative float"
+negative_floats.__name__ = neg_floats.__name__ = "negative floats list"
+positive_float.__name__  = pos_float.__name__  = "positive float"
+positive_floats.__name__ = pos_floats.__name__ = "positive floats list"
+
+ints = lambda l: __n("integer")(l, is_int)
+int_range = lambda i, i1, i2=None: __n("integer")(i, is_int_range, "valid", "in range [%d,%d]" % \
+                                                  (0 if i2 is None else i1, i1 if i2 is None else i2), i1=i1, i2=i2)[0]
+negative_int = neg_int = lambda i, zero=False: __n("integer")(i, is_neg_int, "negative", zero=zero)[0]
+positive_int = pos_int = lambda i, zero=True: __n("integer")(i, is_pos_int, "positive", zero=zero)[0]
+ints_range = lambda l, i1, i2=None: __n("integer")(l, is_int_range, "valid", "in range [%d,%d]" % \
+                                                   (0 if i2 is None else i1, i1 if i2 is None else i2), i1=i1, i2=i2)
+negative_ints = neg_ints = lambda l, zero=False: __n("integer")(l, is_neg_int, "negative", zero=zero)
+positive_ints = pos_ints = lambda l, zero=True: __n("integer")(l, is_pos_int, "positive", zero=zero)
 ints.__name__       = "integers"
 int_range.__name__  = "integer (from range)"
 ints_range.__name__ = "integers list (from range)"

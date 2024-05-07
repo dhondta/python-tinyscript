@@ -2,7 +2,7 @@
 """Timeout utility assets' tests.
 
 """
-from tinyscript.helpers.timeout import timeout, Timeout, TimeoutError
+from tinyscript.helpers.timeout import timeout, Timeout
 
 from utils import *
 
