@@ -89,6 +89,15 @@ A context manager is also available:
 
 -----
 
+## `json`
+    
+`json`, while imported with Tinyscript, is enhanced with two additional convenience functions, that is:
+
+- `dumpc`: this dumps a JSON with its comments previously loaded while using `loadc`.
+- `loadc`: this loads a JSON that has comments (starting with `#`) so that it does not fail when loading with `json` while annotated.
+
+-----
+
 ## `logging`
 
 `logging` is slightly enhanced with a few things:
