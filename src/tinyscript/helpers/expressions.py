@@ -14,11 +14,13 @@ __all__ = __features__ = ["eval_ast_nodes", "eval_free_variables"]  # eval2 is b
 
 BL_BUILTINS = ("breakpoint", "classmethod", "compile", "delattr", "eval", "exec", "exit", "getattr", "globals", "help",
                "hasattr", "input", "locals", "memoryview", "open", "print", "property", "quit", "staticmethod", "super")
+COMP_NODES = ("DictComp", "Lambda", "ListComp", "SetComp", "GeneratorExp")
 WL_NODES = ("add", "and", "binop", "bitand", "bitor", "bitxor", "boolop", "call", "cmpop", "compare", "comprehension",
-            "constant", "dict", "div", "eq", "expr", "expr_context", "expression", "floordiv", "for", "generatorexp",
-            "gt", "gte", "in", "index", "invert", "is", "isnot", "list", "listcomp", "load", "lshift", "lt", "lte",
-            "matmult", "mod", "mult", "name", "nameconstant", "not", "noteq", "notin", "num", "operator", "or", "pow",
-            "rshift", "set", "slice", "store", "str", "sub", "subscript", "tuple", "uadd", "unaryop", "usub")
+            "constant", "dict", "dictcomp", "div", "eq", "expr", "expr_context", "expression", "floordiv", "for",
+            "generatorexp", "gt", "gte", "in", "index", "invert", "is", "isnot", "list", "listcomp", "load", "lshift",
+            "lt", "lte", "matmult", "mod", "mult", "name", "nameconstant", "not", "noteq", "notin", "num", "operator",
+            "or", "pow", "rshift", "set", "setcomp", "slice", "store", "str", "sub", "subscript", "tuple", "uadd",
+            "unaryop", "usub")
 
 
 set_exception("ForbiddenNameError", "NameError")
@@ -40,7 +42,7 @@ def __eval(expr, globals=None, locals=None, bl_builtins=BL_BUILTINS, wl_nodes=WL
     # walk the AST and only allow the whitelisted nodes
     extra_names = []
     for node in __walk(ast.parse(expr, mode="eval")):
-        if any(n in list(map(lambda x: x.name, node.parents)) for n in ("Lambda", "ListComp", "GeneratorExp")) and \
+        if any(n in list(map(lambda x: x.name, node.parents)) for n in COMP_NODES) and \
            hasattr(node, "id") and node.id not in extra_names:
             extra_names.append(node.id)
         # blacklist dunders and input list
@@ -100,7 +102,7 @@ def eval_free_variables(expression, **variables):
     """
     free_vars = []
     for node in __walk(ast.parse(expression, mode="eval")):
-        if any(n in list(map(lambda x: x.name, node.parents)) for n in ("Lambda", "ListComp", "GeneratorExp")) and \
+        if any(n in list(map(lambda x: x.name, node.parents)) for n in COMP_NODES) and \
            hasattr(node, "id") and node.id not in variables and node.id not in free_vars:
             free_vars.append(node.id)
     return free_vars
