@@ -13,7 +13,7 @@ def wraps_cls(cls):
             self.__wrapped__ = wrapped
             for attr in assignents:
                 setattr(self, attr, getattr(wrapped, attr))
-            super().__init__()
+            super().__init__(wrapped)
         
         def __repr__(self):
             return repr(self.__wrapped__)

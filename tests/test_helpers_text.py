@@ -132,6 +132,9 @@ class TestHelpersText(TestCase):
         self.assertRaises(ValueError, txt2url, TXT)
         for help, fmt in zip([HTML, MD, RST, TEXTILE], ["html", "md", "rst", "textile"]):
             self.assertIsNotNone(txt_terminal_render(help, fmt))
+        self.assertIsNotNone(txt_terminal_render(TXT, pad=(2,2)))
+        self.assertIsNotNone(txt_terminal_render("test:\n  string: ok\n", pad=(2,2), syntax="yaml"))
+        self.assertIsNotNone(txt_terminal_render("test:\n  string: ok\n", format="rst", pad=(2,2), syntax="yaml"))
     
     def test_text_utils(self):
         self.assertEqual(list(hexdump(URL)), ["00000000:  6874 7470 733a 2f2f 6a6f 686e 3a64 6f65  https://john:doe",

@@ -6,6 +6,7 @@ import py_compile
 from tempfile import gettempdir
 from unittest import TestCase
 
+from tinyscript import b
 from tinyscript.helpers.path import *
 
 from utils import *
@@ -14,7 +15,7 @@ from utils import *
 class TestHelpersPath(TestCase):
     @classmethod
     def setUpClass(cls):
-        global FILE, FILE2, MODULE, NOTEX, PATH, SPATH, TEST, TPATH1, TPATH2
+        global FILE, FILE2, MODULE, NOTEX, PATH, SPATH, TEST, TPATH1, TPATH2, TXT
         TEST = "test_dir"
         PATH = Path(TEST, expand=True, create=True)
         SPATH = PATH.joinpath("test")
@@ -36,6 +37,7 @@ class TestHelpersPath(TestCase):
         FILE2 = PATH.joinpath("test2.txt")
         SPATH.joinpath("test.txt").touch()
         NOTEX = Path("DOES_NOT_EXIST")
+        TXT = "this is a\n test"
     
     @classmethod
     def tearDownClass(cls):
@@ -60,11 +62,11 @@ class TestHelpersPath(TestCase):
         self.assertIsNone(FILE.remove())
         self.assertFalse(FILE.exists())
         self.assertIsNone(FILE.touch())
-        self.assertEqual(FILE.write_text("this is a test"), 14)
-        self.assertEqual(list(FILE.read_lines()), [b"this is a test"])
-        self.assertEqual(list(FILE.read_lines(reverse=True)), [b"this is a test"])
-        self.assertEqual(list(FILE.read_lines(encoding="utf-8")), ["this is a test"])
-        self.assertEqual(list(FILE.read_lines(encoding="utf-8", reverse=True)), ["this is a test"])
+        self.assertEqual(FILE.write_text(TXT), 15)
+        self.assertEqual(list(FILE.read_lines()), list(map(b, TXT.split("\n"))))
+        self.assertEqual(list(FILE.read_lines(reverse=True)), list(map(b, TXT.split("\n")))[::-1])
+        self.assertEqual(list(FILE.read_lines(encoding="utf-8")), TXT.split("\n"))
+        self.assertEqual(list(FILE.read_lines(encoding="utf-8", reverse=True)), TXT.split("\n")[::-1])
         self.assertEqual(FILE.choice(), FILE)
         self.assertEqual(FILE.generate(), FILE)
         self.assertRaises(TypeError, FILE.append_text, 0)
@@ -81,7 +83,7 @@ class TestHelpersPath(TestCase):
         self.assertEqual(str(PATH), str(Path(TEST).absolute()))
         self.assertEqual(Path(TEST).child, Path("."))
         self.assertEqual(SPATH.size, 4096)
-        self.assertEqual(PATH.size, [4096 + 4096 + 14, 8213][WINDOWS])  # PATH + SPATH + FILE
+        self.assertEqual(PATH.size, [4096 + 4096 + 15, 8213][WINDOWS])  # PATH + SPATH + FILE
         self.assertTrue(PATH.choice(".txt", ".py", ".other").is_samepath(FILE))
         self.assertIsInstance(PATH.generate(), Path)
         self.assertEqual(list(PATH.iterfiles()), [FILE.absolute()])

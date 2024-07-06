@@ -177,25 +177,21 @@ def initialize(add_banner=False,
                            help=gt("remote interacting port"))
         if noarg and noargs_action == "interact":
             tokens[1:] = [opt.option_strings[-1]]
-        set_interact_items(glob)
     # notification feature, for displaying notifications during the execution
     if add['notify']:
         opt = i.add_argument("-n", "--notify", action="store_true", suffix="mode", help=gt("notify mode"))
         if noarg and noargs_action == "notify":
             tokens[1:] = [opt.option_strings[-1]]
-        set_notify_items(glob)
     # progress mode feature, for displaying a progress bar during the execution
     if add['progress']:
         opt = i.add_argument("-p", "--progress", action="store_true", suffix="mode", help=gt("progress mode"))
         if noarg and noargs_action == "progress":
             tokens[1:] = [opt.option_strings[-1]]
-        set_progress_items(glob)
     # stepping mode feature, for stepping within the tool during its execution, especially useful for debugging
     if add['step']:
         opt = i.add_argument("--step", action="store_true", last=True, suffix="mode", help=gt("stepping mode"))
         if noarg and noargs_action == "step":
             tokens[1:] = [opt.option_strings[-1]]
-        set_step_items(glob)
     # timing mode feature, for measuring time along the execution of the tool
     if add['time']:
         b = p.add_argument_group("timing arguments")
@@ -272,9 +268,10 @@ def initialize(add_banner=False,
                      getattr(a, a._collisions.get("relative", "relative"), False),
                      getattr(a, a._collisions.get("logfile", "logfile"), None),
                      getattr(a, a._collisions.get("syslog", "syslog"), None))
-    # 5) configure features that need it (even if not enabled)
+    # 5) configure features (with glob['args'] computed)
+    for k in ['interact', 'notify', 'progress', 'step', 'time']:
+        globals()[f'set_{k}_items'](glob)
     set_hotkeys(glob)
-    set_time_items(glob)
     # 6) display a banner if relevant
     bf = glob.get('BANNER_FONT', BANNER_FONT)
     if add_banner or isinstance(bf, str):

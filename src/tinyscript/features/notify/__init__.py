@@ -21,14 +21,14 @@ def set_notify_items(glob):
     """
     a = glob['args']
     enabled = getattr(a, a._collisions.get("notify") or "notify", False)
-    appname = glob.get('__banner__', glob.get('__script__'))
+    appname = glob.get('__banner__', glob.get('__script__', "my-app"))
     timeout = positive_int(glob.get('NOTIFICATION_TIMEOUT', 5), zero=False)
     icon_path = folder_exists(glob.get('NOTIFICATION_ICONS_PATH', dirname(__file__)))
     level = positive_int(glob.get('NOTIFICATION_LEVEL', logging.SUCCESS))
     
     class NotificationHandler(logging.Handler):
         def emit(self, record):
-            title = "{}[{}]:".format(appname, record.name) if record.name != "main" else appname
+            title = f"{appname}[{record.name}]:" if record.name != "main" else appname
             icon = record.levelname.lower()
             ipath = join(icon_path, icon) + ".png"
             if isfile(ipath):

@@ -84,15 +84,36 @@ def hexdump(data, width=16, first=0, last=0):
         yield "%0.8x:  %s  %s" % (i, h.ljust(width*2+(width//2-1)), b)
 
 
-def txt_terminal_render(text, format=None, debug=False, alignleft=True):
+def txt_terminal_render(text, format=None, debug=False, alignleft=True, pad=None, syntax=None):
     """ This renders input text based on the selected format.
     
     :param format: selected format (one of FORMATS)
     """
+    from rich.console import Console
+    from rich.markup import escape
+    from rich.style import Style
+    from rich.theme import Theme
+    c = Console(theme=Theme(styles={n: Style(**s) for n, s in DOCFORMAT_THEME.items()}))
+    # inner function for capturing rich object's resulting text
+    def _capture(obj):
+        c.begin_capture()
+        c.print(obj)
+        return c.end_capture()
+    # inner function for rendering padding and/or syntax
+    def _beautify(txt, raw=False):
+        r = txt
+        if syntax:
+            from rich.syntax import Syntax
+            r = _capture(Syntax(r, syntax, padding=pad))
+        elif pad:
+            from rich.padding import Padding
+            r = _capture(Padding(escape(r) if raw else r, pad=pad))
+        return r
+    # start processing input text
     format = format or DOCFORMAT
     __check(format=format)
     if format is None:
-        return text
+        return _beautify(text, raw=True)
     # collect whitespaces in argument lines and line indentations
     ARG_REGEX = re.compile(r"((?P<h>\-{1,2})[a-z][a-z0-9_]*(?:\s+[A-Z][A-Z_]*)?"
                            r"(?:\,\s+(?P=h)\-[a-z][a-z0-9_]*(?:\s+[A-Z][A-Z_]*)?)?)(\s+)(.*)$")
@@ -159,17 +180,12 @@ def txt_terminal_render(text, format=None, debug=False, alignleft=True):
         for link in re.findall("(<(.*?)>)", md):
             md = md.replace(link[0], "[{0}]({1}{0})".format(link[1], ["", "mailto:"][is_email(link[1])]))
     # import only when required to render Markdown in the terminal
-    from rich.console import Console
-    from rich.markdown import Heading, Markdown
-    from rich.style import Style
-    from rich.theme import Theme
+    from rich.markdown import Markdown
     if alignleft:
+        from rich.markdown import Heading
         from tinyscript import code
         code.replace(Heading.__rich_console__, "text.justify = \"center\"", "")
-    c = Console(theme=Theme(styles={n: Style(**s) for n, s in DOCFORMAT_THEME.items()}))
-    c.begin_capture()
-    c.print(Markdown(md))
-    return c.end_capture()
+    return _beautify(_capture(Markdown(md)))
 
 
 def _txt_list(text, format=None, ordered=False):
