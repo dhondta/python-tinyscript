@@ -218,6 +218,8 @@ def __setup(venv_dir, requirements=None, force_reinstall=False, no_cache=True, v
     if isinstance(requirements, str):
         with open(requirements) as f:
             requirements = [l.strip() for l in f]
+    if requirements is None:
+        requirements = []
     if isinstance(requirements, (tuple, list, set)):
         args = []
         if force_reinstall:
@@ -227,10 +229,12 @@ def __setup(venv_dir, requirements=None, force_reinstall=False, no_cache=True, v
         if verbose:
             args.append("-v")
         kwargs = {'prefix': venv_dir}
+        if not __is_installed("setuptools"):
+            requirements = ["setuptools"] + [r for r in requirements if r != "setuptools"]
         for req in requirements:
             pkg = __install(req, *args, **kwargs)
             for tl in pkg.top_level:
-                if hasattr(virtualenv, tl):
+                if hasattr(virtualenv, tl) and req != "setuptools":
                     raise TopLevelAlreadyExists("{} ({})".format(tl, pkg.name))
                 m = import_module(tl)
                 setattr(virtualenv, tl, m)
@@ -250,7 +254,7 @@ def __teardown(venv_dir=None):
 virtualenv.teardown = __teardown
 
 
-class PipPackage(object):
+class PipPackage:
     """
     This class is used to represent a Pip package and its attribute.
     """
@@ -290,7 +294,7 @@ class PipPackage(object):
 virtualenv.PipPackage = PipPackage
 
 
-class VirtualEnv(object):
+class VirtualEnv:
     """
     This context manager simplifies the use of a virtual environment.
     

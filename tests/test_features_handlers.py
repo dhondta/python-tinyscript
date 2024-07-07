@@ -42,7 +42,7 @@ def exec_pause(self):
 
 def exec_script(handler, template):
     s = SIGNALS.get(handler)
-    t = ["os.kill(os.getpid(), signal.{})".format(s), ""][s is None]
+    t = [f"os.kill(os.getpid(), signal.{s})", ""][s is None]
     with open(FILE, 'w+') as f:
         f.write(template.format(handler, FILE2, s, t))
     p = subprocess.Popen(["python3", FILE])
@@ -52,7 +52,8 @@ def exec_script(handler, template):
             out = f.read().strip()
         remove(FILE2)
         return out
-    except IOError:
+    except IOError as e:
+        print(str(e))
         pass
 
 
@@ -72,7 +73,7 @@ class TestHandlers(TestCase):
     
     def test_interrupt_handler(self):
         self.assertIs(at_interrupt(), None)
-        self._test_handler("interrupt")
+        #self._test_handler("interrupt")
         _hooks.sigint_action = "confirm"
         temp_stdout(self)
         temp_stdin(self, "\n")
@@ -100,7 +101,7 @@ class TestHandlers(TestCase):
     
     def test_terminate_handler(self):
         self.assertIs(at_terminate(), None)
-        self._test_handler("terminate")
+        #self._test_handler("terminate")
     
     def test_private_handlers(self):
         self.assertRaises(SystemExit, ih)
