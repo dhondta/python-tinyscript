@@ -53,7 +53,6 @@ def exec_script(handler, template):
         remove(FILE2)
         return out
     except IOError as e:
-        print(str(e))
         pass
 
 
@@ -73,7 +72,9 @@ class TestHandlers(TestCase):
     
     def test_interrupt_handler(self):
         self.assertIs(at_interrupt(), None)
-        #self._test_handler("interrupt")
+        #FIXME: signals seem not to work anymore in Python 3.12
+        if sys.version_info.major == 3 and sys.version_info.minor < 12:
+            self._test_handler("interrupt")
         _hooks.sigint_action = "confirm"
         temp_stdout(self)
         temp_stdin(self, "\n")
@@ -101,7 +102,9 @@ class TestHandlers(TestCase):
     
     def test_terminate_handler(self):
         self.assertIs(at_terminate(), None)
-        #self._test_handler("terminate")
+        #FIXME: signals seem not to work anymore in Python 3.12
+        if sys.version_info.major == 3 and sys.version_info.minor < 12:
+            self._test_handler("terminate")
     
     def test_private_handlers(self):
         self.assertRaises(SystemExit, ih)
