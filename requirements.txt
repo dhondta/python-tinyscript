@@ -27,7 +27,7 @@ python-slugify
 pyyaml>=5.3.1
 requests
 rich
-setuptools>=65.5.1
+setuptools>=70.0.0
 terminaltables
 toml
 tqdm
