@@ -205,10 +205,10 @@ def stdin_flush():
     Source: https://rosettacode.org/wiki/Keyboard_input/Flush_the_keyboard_buffer#Python
     """
     try:
-        try:  # Windows
+        if WINDOWS:
             from msvcrt import getch, kbhit
             while kbhit(): getch()
-        except ImportError:  # Linux/Unix
+        else:
             from termios import tcflush, TCIOFLUSH
             tcflush(sys.stdin, TCIOFLUSH)
     except Exception:

@@ -8,7 +8,6 @@ from ....preimports import itertools, re
 
 __all__ = __features__ = []
 
-lazy_load_module("email", alias="emaillib")
 for _m in ["netaddr", "netifaces"]:
     lazy_load_module(_m)
 
@@ -70,9 +69,10 @@ domain_name.__name__ = "domain name"
 
 def __email_address(email, fail=True):
     """ Email address validation. """
+    from email.utils import parseaddr
     # reference: https://stackoverflow.com/questions/8022530/
     if len(email) <= 320 and re.match(r"^[^@]+@[^@]+$", email) and \
-       is_hostname(email.split("@")[1]) and emaillib.utils.parseaddr(email)[1] != "":
+       is_hostname(email.split("@")[1]) and parseaddr(email)[1] != "":
         return email
     if fail:
         raise ValueError("Bad email address")

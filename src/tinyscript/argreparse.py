@@ -11,15 +11,12 @@ import sys
 from argparse import *
 from argparse import _ActionsContainer, _ArgumentGroup, _MutuallyExclusiveGroup, _AttributeHolder, _SubParsersAction, \
                      Action, _UNRECOGNIZED_ARGS_ATTR, Namespace as BaseNamespace, ArgumentParser as BaseArgumentParser
+from configparser import ConfigParser, NoOptionError, NoSectionError
 from inspect import currentframe
 from os import environ
 from os.path import abspath, basename, dirname, sep, splitext
 from shutil import which
 from stat import S_IXUSR
-try:
-    from configparser import ConfigParser, NoOptionError, NoSectionError
-except ImportError:
-    from ConfigParser import ConfigParser, NoOptionError, NoSectionError
 
 from .features.loglib import logger
 from .helpers.inputs import user_input
@@ -96,8 +93,6 @@ class ProxyArgumentParser(object):
     
     @staticmethod
     def reset():
-        global parser_calls
-        parser_calls = []
         ArgumentParser.reset()
 
 
@@ -415,7 +410,7 @@ class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
         environ['SETUPTOOLS_USE_DISTUTILS'] = "stdlib"
         # importlib.metadata is available only from Python 3.8
         from importlib.metadata import version as get_version
-        from setuptools.extern.packaging.version import Version
+        from packaging.version import Version
         errors = []
         requires = requires or {}
         if not isinstance(requires, dict):
