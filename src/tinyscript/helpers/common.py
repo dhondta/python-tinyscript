@@ -94,8 +94,9 @@ builtins.range2 = range2object
 def set_exception(name, etype="ValueError"):
     """ Set a custom exception in the builtins. """
     if not hasattr(builtins, name):
-        exec("class %s(%s): __module__ = 'builtins'" % (name, etype))
-        setattr(builtins, name, locals()[name])
+        ns = {}
+        exec(f"class {name}({etype}): __module__ = 'builtins'", {}, ns)
+        setattr(builtins, name, ns[name])
 set_exception("RequirementError", "ImportError")
 
 

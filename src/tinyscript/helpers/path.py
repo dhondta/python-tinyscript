@@ -343,7 +343,7 @@ class Path(BasePath):
     
 
 class ConfigPath(Path):
-    """ Extension of the class Path for handling a temporary path.
+    """ Extension of the class Path for handling a configuration path under user's home folder.
     
     :param app:  application name for naming the config file or folder
     :param file: whether the target should be a config file or folder

@@ -23,6 +23,19 @@ logging.nullLogger.setLevel(1000)
 logging.nullLogger.addHandler(logging.NullHandler())
 
 
+try:
+    logging._acquireLock
+except AttributeError:
+    def _acquireLock():
+        if logging._lock:
+            logging._lock.acquire()
+    logging._acquireLock = _acquireLock
+    def _releaseLock():
+        if logging._lock:
+            logging._lock.release()
+    logging._releaseLock = _releaseLock
+
+
 def __del(d, k):
     try:
         if isinstance(d, dict):
