@@ -235,9 +235,14 @@ class Path(BasePath):
         """ Check if both paths have the same parts. """
         return self.absolute().parts == Path(otherpath).absolute().parts
     
-    def is_under(self, parentpath):
+    def is_under(self, parentpath, error=False):
         """ Check if the path is under a parent path. """
         p = Path(parentpath).absolute()
+        if not p.exists():
+            if error:
+                raise OSError("Path to be compared does not exist")
+            else:
+                return False
         if not p.is_dir():
             p = Path(p.dirname)
         return p in self.absolute().parents
