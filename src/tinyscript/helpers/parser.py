@@ -12,8 +12,9 @@ __all__ = __features__ = ["get_parser", "get_parsers"]
 
 
 def get_parser(tool, logger=None, **kwargs):
-    return [p for p in get_parsers(tool, logger=logger, **kwargs).values() if isinstance(p, ArgumentParser) and \
-                                                                              not hasattr(p, "_parent")][0]
+    for p in get_parsers(tool, logger=logger, **kwargs).values():
+        if p.name == ArgumentParser.name:
+            return p
 
 
 def get_parsers(tool, logger=None, **kwargs):

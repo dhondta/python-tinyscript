@@ -35,12 +35,9 @@ BASE_DUNDERS = ['__author__', '__contributors__', '__copyright__', '__credits__'
                 '__source__', '__training__']
 DUNDERS = BASE_DUNDERS + [
     '__date__', '__details__', '__description__', '__doc__', '__docformat__', '__email__', '__examples__',
-    '__functions__', '__maximum_python_version__', '__minimum_python_version__', '__priority__', '__product__',
-    '__script__', '__status__', '__version__',
+    '__example_limit__', '__functions__', '__maximum_python_version__', '__minimum_python_version__', '__priority__',
+    '__product__', '__requires__', '__script__', '__status__', '__version__',
 ]
-if sys.version_info >= (3, 8):
-    DUNDERS.append('__requires__')
-
 DEFAULT_MAX_LEN     = 20
 DEFAULT_LST_MAX_LEN = 10
 
@@ -158,14 +155,14 @@ class _NewSubParsersAction(_SubParsersAction):
             choice_action.category = category
             self._choices_actions.append(choice_action)
         # create the parser, but with another formatter and separating the help into an argument group
+        kwargs.update(name=name, parent_action=self)
         parser = self._parser_class(add_help=False, **kwargs)
-        parser.name = name
         # add default extra arguments group
         i = parser.add_argument_group("extra arguments")
         i.add_argument("-h", action="usage", prefix="show", help=gt("show usage message and exit"))
         i.add_argument("--help", action="help", prefix="show", help=gt("show this help message and exit"))
         # add it to the map
-        self._name_parser_map[name] = parser
+        self._name_parser_map[parser.name] = parser
         # make parser available under aliases also
         for alias in aliases:
             self._name_parser_map[alias] = parser
@@ -316,13 +313,16 @@ class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
         if not hasattr(ArgumentParser, "_globals_dict"):
             ArgumentParser._globals_dict = get_tool_globals()
         gd = ArgumentParser._globals_dict
-        if sys.version_info >= (3, 8):
-            self._check_requirements(gd.get('__requires__'))
+        self._check_requirements(gd.get('__requires__'))
         configure_docformat(gd)
         self._config_parsed = False
         self._docfmt = gd.get('__docformat__')
+        self._parent_action = kwargs.pop('parent_action', None)
+        self._parent = self._parent_action._parent if self._parent_action else None
         self._reparse_args = {'pos': [], 'opt': [], 'sub': []}
+        self.name = kwargs.pop('name', self.__class__.name)
         self.examples = gd.get('__examples__', [])
+        self.example_limit = gd.get('__example_limit__', {})
         script = basename(self.tokens[0])
         _stem = lambda p: splitext(p)[0]
         if gd.get('__script__') is None:
@@ -344,6 +344,19 @@ class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
             l = ["{} {}".format(ArgumentParser.prog, e) for e in self.examples]
             l = list(filter(lambda x: x.startswith(kwargs['prog']), l))
             if len(l) > 0:
+                dest = self._parent_action.dest if getattr(self, "_parent_action", None) else None
+                if (n := self.example_limit if isinstance(self.example_limit, int) else \
+                         self.example_limit.get(self.name, self.example_limit.get(dest, 0))):
+                    from random import shuffle
+                    from shlex import split
+                    shuffle(l)
+                    _tmp, new_l = set(), []
+                    for example in l:
+                        token = split(example)[self.depth+1]
+                        if token not in _tmp:
+                            new_l.append(example)
+                            _tmp.add(token)
+                    l = sorted(new_l)
                 kwargs['epilog'] = txt2title(gt("Usage example{}".format(["", "s"][len(l) > 1])) + ":")
                 e = '\n'.join(["\n", "  "][self._docfmt is None] + txt2paragraph(e) for e in l)
                 kwargs['epilog'] += "\n" + e
@@ -603,6 +616,11 @@ class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
         for a in filter(lambda _: self.is_action(_, 'parsers'), self._actions):
             yield a
     
+    def add_subparsers(self, **kwargs):
+        action = super(ArgumentParser, self).add_subparsers(**kwargs)
+        action._parent = self
+        return action
+    
     def config_args(self, section="main"):
         """ Additional method for feeding input arguments from a config file. """
         if self._config_parsed:
@@ -730,19 +748,26 @@ class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
         self._print_message(txt_terminal_render(self.format_usage()), file or sys.stdout)
     
     @property
-    def tokens(self):
+    def depth(self):
+        p, d = self, 0
+        while (p := getattr(p, "_parent", None)):
+            d += 1
+        return d
+    
+    @property
+    def root(self):
         p = self
-        while hasattr(p, "_parent") and p._parent is not None:
+        while getattr(p, "_parent", None):
             p = p._parent
-        if hasattr(p, "_tokens"):
-            return p._tokens
+        return p
+    
+    @property
+    def tokens(self):
+        return getattr(self.root, "_tokens", None)
     
     @tokens.setter
     def tokens(self, command):
-        p = self
-        while hasattr(p, "_parent") and p._parent is not None:
-            p = p._parent
-        if hasattr(p, "_tokens"):
+        if hasattr(p := self.root, "_tokens"):
             return
         p._tokens = sys.argv if command is None else command
         if isinstance(p._tokens, str):
