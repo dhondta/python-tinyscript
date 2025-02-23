@@ -52,7 +52,7 @@ dependencies = [
   "pathlib2",
   "pip>=24.0",
   "plyer>=2.0.0",
-  "pydyf>=0.8.0,<0.11.0; python_version=='3.8'",
+  "pydyf>=0.11.0",
   "pygments>=2.8.1",
   "pyminizip",
   "pynput",
