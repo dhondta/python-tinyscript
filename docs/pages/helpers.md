@@ -86,7 +86,6 @@ It also provides some other utility functions, decorators, context managers and 
 **Name** | **Description**
 --- | ---
 `range2` | alternative to `range` that supports floats
-`ts.BitArray` | slightly extended `BitArray` class from [`bitstring`](https://github.com/scott-griffiths/bitstring)
 `ts.capture` | decorator for capturing `stdout` and `stderr` of a function
 `ts.Capture` | context manager for capturing `stdout` and `stderr` of a code block
 `ts.dateparse` | date parsing function relying on `dateparser.parse`

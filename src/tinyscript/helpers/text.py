@@ -177,7 +177,7 @@ def txt_terminal_render(text, format=None, debug=False, alignleft=True, pad=None
                     pass
             md += line + "\n"
         # 3. links incorrectly rendered after using pandoc
-        for link in re.findall("(<(.*?)>)", md):
+        for link in re.findall(r"(<(.*?)>)", md):
             md = md.replace(link[0], "[{0}]({1}{0})".format(link[1], ["", "mailto:"][is_email(link[1])]))
     # import only when required to render Markdown in the terminal
     from rich.markdown import Markdown
@@ -201,7 +201,7 @@ def _txt_list(text, format=None, ordered=False):
         r = "<{}l>".format(["u", "o"][ordered])
     elif format in ["md", "rst", "textile"]:
         r = ""
-    for line in re.split("\n[\-\*] ", text):
+    for line in re.split(r"\n[\-\*] ", text):
         line = line.lstrip("*- ")
         if format == "html":
             r += "\n<li>{}</li>".format(line)

@@ -13,10 +13,6 @@ class TestHelpersDataUtils(TestCase):
         BIN = "01010"
         STR = "test"
         HEX = "deadbeefc0f3b1ac00"
-        bs = BitArray("01010101")
-        self.assertEqual(bs.nbits, 8)
-        self.assertEqual(bs.bin, "01010101")
-        self.assertEqual(bs.hex, "55")
         self.assertEqual(pad(STR, "\x00"), STR + 4 * "\x00")
         self.assertEqual(pad(STR, ">\x00"), 4 * "\x00" + STR)
         self.assertEqual(unpad(pad(STR, "\x00"), "\x00"), STR)
