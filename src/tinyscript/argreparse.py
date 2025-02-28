@@ -753,7 +753,7 @@ class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
             if not hasattr(namespace, dest):
                 setattr(namespace, dest, self._defaults[dest])
         # parse the arguments and exit if there are any errors
-        a = (args, namespace) if sys.version_info.minor < 12 else (args, namespace, False)
+        a = (args, namespace) if sys.version_info.minor < 13 else (args, namespace, False)
         if self.exit_on_error:
             try:
                 namespace, args = self._parse_known_args(*a)
