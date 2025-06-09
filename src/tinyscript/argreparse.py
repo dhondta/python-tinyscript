@@ -928,6 +928,8 @@ class Namespace(BaseNamespace):
         self._current_parser = parser.name
         self._collisions = {a.orig: a.dest for a in parser._actions if getattr(a, "orig", None)}
         self._subparsers = [a.dest for a in parser._filtered_actions("parsers")]
+        if not hasattr(self, _UNRECOGNIZED_ARGS_ATTR):
+            setattr(self, _UNRECOGNIZED_ARGS_ATTR, [])
         super(Namespace, self).__init__(**kwargs)
     
     def __getattr__(self, name):

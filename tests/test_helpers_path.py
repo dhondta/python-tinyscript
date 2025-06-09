@@ -142,6 +142,7 @@ class TestHelpersPath(TestCase):
         PATH4.save()  # id and secret are "" ; this should thus do nothing
         self.assertFalse(PATH4.exists())
         PATH4.write_text("BAD")
+        self.assertTrue(PATH4.exists())
         self.assertRaises(ValueError, PATH4.load)
         self.assertRaises(ValueError, PATH4.ask, id=("BAD", "identifier", "format"))
         self.assertRaises(ValueError, PATH4.ask, secret=("BAD", "secret", "format"))
@@ -151,7 +152,6 @@ class TestHelpersPath(TestCase):
         self.assertEqual(PATH4.id, "")
         self.assertEqual(PATH4.secret, "")
         PATH4.remove()
-        Path("test_creds").remove()
     
     def test_mirror_path(self):
         PATH2 = Path(TEST + "2", expand=True, create=True)

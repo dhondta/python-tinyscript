@@ -128,8 +128,7 @@ class Path(BasePath):
     def __add_text(self, data, mode='w', encoding=None, errors=None):
         """ Allows to write/append text to the file. """
         if not isinstance(data, str):
-            raise TypeError("data must be str, not %s" % 
-                            data.__class__.__name__)
+            raise TypeError(f"data must be str, not {data.__class__.__name__}")
         with self.open(mode=mode, encoding=encoding, errors=errors) as f:
             return f.write(str(data))
     
@@ -375,13 +374,11 @@ class CredentialsPath(Path):
     :param secret: secret
     """
     def __new__(cls, *parts, **kwargs):
-        p = Path(*parts)
-        path, fn = (str(p), "creds.txt") if p.suffix == "" else (p.dirname, p.filename)
-        kw = {'create': True, 'expand': True}
-        path = Path(*parts, **kw)
-        kwargs['exist_ok'] = True
-        kwargs['create'] = False
-        self = super(CredentialsPath, cls).__new__(cls, str(path), fn, **kwargs)
+        kwargs['create'], kwargs['expand'] = False, True
+        self = super(CredentialsPath, cls).__new__(cls, *parts, **kwargs)
+        if self.exists() and self.is_dir():
+            self = self.joinpath("creds.txt")
+        self.dirname.mkdir(exist_ok=True)
         self.id = kwargs.get("id") or ""
         self.secret = kwargs.get("secret") or ""
         d = kwargs.get("delimiter") or ":"
@@ -416,12 +413,13 @@ class CredentialsPath(Path):
         while self.id == "":
             self.id = user_input(id_prompt, required=True)
             if id_pattern and not re.search(id_pattern, self.id):
-                raise ValueError("Bad %s" % id_alias)
+                raise ValueError(f"Bad {id_alias}")
         self.secret = ""
         try:
             self.secret = (getpass if is_dict(sec_pattern) else getrepass)(sec_prompt, None, sec_pattern).strip()
         except ValueError as e:
-            raise e("Non-compliant %s:\n- %s" % (sec_alias, "\n- ".join(e.errors))) if hasattr(e, "errors") else e
+            d = "\n- "
+            raise e(f"Non-compliant {sec_alias}:{d}{d.join(e.errors)}") if hasattr(e, "errors") else e
     
     def load(self, delimiter=":"):
         """ This loads credentials from the path taking a delimiter (default: ":") into account. """
@@ -433,8 +431,8 @@ class CredentialsPath(Path):
         try:
             self.id, self.secret = c.split(delimiter)
         except ValueError:
-            raise ValueError("Bad delimiter '%s' ; it should not be a character present in the identifier or secret" % \
-                             delimiter)
+            raise ValueError(f"Bad delimiter '{delimiter}' ; it shall be a character not present in the identifier or "
+                              "secret")
     
     def save(self, delimiter=":"):
         """ This saves the defined credentials to the path taking a delimiter (default: ":") into account. """
@@ -442,9 +440,9 @@ class CredentialsPath(Path):
             return
         self.touch(0o600)
         if delimiter in self.id or delimiter in self.secret:
-            raise ValueError("Bad delimiter '%s' ; it should not be a character present in the identifier or secret" % \
-                             delimiter)
-        self.write_text("%s%s%s" % (self.id, delimiter, self.secret))
+            raise ValueError(f"Bad delimiter '{delimiter}' ; it shall be a character not present in the identifier or "
+                              "secret")
+        self.write_text(f"{self.id}{delimiter}{self.secret}")
 
 
 class MirrorPath(Path):
@@ -604,7 +602,7 @@ class PythonPath(Path):
                     if e == ".pyc" and p.absolute().dirname.parts[-1] == "__pycache__":
                         parts = p.filename.split(".")
                         if len(parts) == 3 and re.match(r".?python\-?[23]\d", parts[-2]):
-                            _cached.append(str(p.absolute().dirname.parent.joinpath("%s.py" % parts[0])))
+                            _cached.append(str(p.absolute().dirname.parent.joinpath(f"{parts[0]}.py")))
                     p = PythonPath(p)
                     if p.loaded:
                         self.modules.append(p.module)
