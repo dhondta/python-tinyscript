@@ -33,8 +33,8 @@ classifiers = [
 ]
 dependencies = [
   "argcomplete>=3.0.8",
-  "asciistuff>=1.3.1",
-  "codext>=1.15.4",
+  "asciistuff>=1.3.3",
+  "codext>=1.15.7",
   "coloredlogs",
   "colorful",
   "dateparser>=1.1.8",
@@ -67,7 +67,7 @@ dependencies = [
   "toml",
   "tqdm",
   "virtualenv>=20.26.3",
-  "weasyprint>=64.1",
+  "weasyprint>=65.1",
   "xmltodict",
 ]
 dynamic = ["version"]
