@@ -4,3 +4,4 @@ mkdocs-bootswatch
 mkdocs-material
 mkdocs-rtd-dropdown
 pymdown-extensions
+requests>=2.32.4 # not directly required, pinned by Snyk to avoid a vulnerability
