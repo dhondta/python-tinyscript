@@ -31,7 +31,6 @@ class Path(BasePath):
     :param create: create the directory if it doesn't exist
     :param touch:  create the file if it doesn't exist (mutually exclusive with 'create')
     """
-
     _flavour = BasePath()._flavour  # fix to AttributeError
     
     def __new__(cls, *parts, **kwargs):
@@ -588,7 +587,7 @@ class ProjectPath(Path):
 
 class PythonPath(Path):
     """ Path extension for handling the dynamic import of Python modules. """
-    def __init__(self, path, remove_cache=False):
+    def __init__(self, path, remove_cache=False, ignore_main=True):
         super(PythonPath, self).__init__()
         if remove_cache:
             for p in self.walk(filter_func=lambda x: x.is_dir() and x.basename == "__pycache__"):
@@ -608,14 +607,35 @@ class PythonPath(Path):
                         self.modules.append(p.module)
         else:
             self.loaded = False
+            name = self.dirname.stem if self.stem == "__init__" else self.stem
             if self.extension in [".py", ".pyc"]:
                 try:
                     loader_cls = ["SourcelessFileLoader", "SourceFileLoader"][self.extension == ".py"]
-                    loader = getattr(importlib.machinery, loader_cls)(self.stem, str(self))
-                    spec = importlib.util.spec_from_file_location(self.stem, str(self), loader=loader)
+                    loader = getattr(importlib.machinery, loader_cls)(name, str(self))
+                    spec = importlib.util.spec_from_file_location(name, str(self), loader=loader)
                     self.module = importlib.util.module_from_spec(spec)
                     sys.modules[self.module.__name__] = self.module
-                    loader.exec_module(self.module)
+                    if self.extension == ".py" and ignore_main:
+                        from ast import parse, Compare, Constant, Eq, If, Name
+                        from types import ModuleType
+                        with self.open('r', encoding="utf-8") as f:
+                            source = f.read()
+                        tree = parse(source, filename=str(self))
+                        filtered_body = []
+                        for node in tree.body:
+                            if isinstance(node, If):
+                                test = node.test
+                                if isinstance(test, Compare) and isinstance(test.left, Name) and \
+                                   test.left.id == "__name__" and any(isinstance(op, Eq) for op in test.ops) and \
+                                   any(isinstance(comp, Constant) and \
+                                   comp.value == "__main__" for comp in test.comparators):
+                                    continue  # skip this `if __name__ == '__main__':` block
+                            filtered_body.append(node)
+                        tree.body = filtered_body
+                        code = compile(tree, str(self), "exec")
+                        exec(code, self.module.__dict__)
+                    else:
+                        loader.exec_module(self.module)
                     self.loaded = True
                 except (ImportError, NameError, SyntaxError, ValueError):
                     raise
