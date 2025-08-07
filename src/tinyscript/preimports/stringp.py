@@ -4,38 +4,39 @@
 """
 import re
 import string
+from functools import wraps
 
 from ..helpers.termsize import get_terminal_size
 
 
-def _natural_key(text):
+def _natural_key(case_sensitive=False):
     """ Key computation function for considering keys in a natural way.
     
     :param text: text to be used for computing the key
     """
-    tokens = []
-    for s in re.split(r"(\d+|\D+)", text):
-        tokens.append(int(s) if s.isdigit() else s.lower())
-    return tokens
+    def _wrapper(text):
+        return [(0, int(t)) if t.isdigit() else (1, t if case_sensitive else t.lower()) for t in \
+                re.split(r"(\d+|\D+)", text)]
+    return _wrapper
 string.natural_key = _natural_key
 
 
-def sort_natural(strings):
+def sort_natural(strings, case_sensitive=False):
     """ Simple function to sort a list of strings with numbers inside.
     
     :param strings: list of strings
     """
-    strings.sort(key=_natural_key)
+    strings.sort(key=_natural_key(case_sensitive))
 string.sort_natural = sort_natural
 
 
-def sorted_natural(lst):
+def sorted_natural(lst, case_sensitive=False):
     """ Simple function to return a sorted list of strings with numbers inside.
     
     :param strings: list of strings
     :return:        list of strings sorted based on numbers inside
     """
-    return sorted(lst, key=_natural_key)
+    return sorted(lst, key=_natural_key(case_sensitive))
 string.sorted_natural = sorted_natural
 
 
