@@ -112,6 +112,7 @@ A context manager is also available:
 - `renameLogger`: renames a logger from an old to a new name.
 - `setLogger` / `setLoggers`: sets respectively one or multiple loggers using Tinyscript's logger configuration.
 - `setLoggingLevel`: sets a logging level to every logger matching the given patterns.
+- `silentLogger` : returns the logger configured to log nothing (useful to silent the logger of a dependency).
 - `unsetLogger` / `unsetLoggers`: unsets respectively one or multiple loggers (removing them from the root `logging` dictionary).
 - `InterceptionHandler`: handler that intercepts the last log record.
 - `RelativeTimeColoredFormatter`: custom formatter for handling relative log times.

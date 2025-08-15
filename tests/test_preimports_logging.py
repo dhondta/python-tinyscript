@@ -13,7 +13,7 @@ def f_with_logging(testcase, **kwargs):
     testcase.assertEqual(logger.name, "other")
 
 
-class LoggingInFunc(object):
+class LoggingInFunc:
     def f1(self, testcase):
         testcase.assertRaises(AttributeError, getattr, self, "logger")
     
@@ -48,6 +48,9 @@ class TestPreimportsLogging(TestCase):
         h = logging.StreamHandler()
         l.addHandler(h)
         self.assertIn(h, l.handlers)
+        logging.silentLogger("test")
+        self.assertNotIn(h, l.handlers)
+        self.assertEqual(l.level, logging.NONE)
         self.assertIsNone(logging.setLoggers())
         self.assertIsNone(logging.setLogger("test"))
         self.assertNotIn(h, l.handlers)

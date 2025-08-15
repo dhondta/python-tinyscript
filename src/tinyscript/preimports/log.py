@@ -14,14 +14,8 @@ from .inspectp import inspect
 
 
 PY3 = sys.version[0] == "3"
+logging.NONE = 1000
 logging.START_TIME = None
-
-
-# setup a null logger
-logging.nullLogger = logging.getLogger("null")
-logging.nullLogger.setLevel(1000)
-logging.nullLogger.addHandler(logging.NullHandler())
-
 
 try:
     logging._acquireLock
@@ -247,6 +241,17 @@ def setLoggingLevel(level="INFO", *patterns, **kwargs):
             l.setLevel(level)
             kwargs.get('config_func', logging.configLogger)(l, level)
 logging.setLoggingLevel = setLoggingLevel
+
+
+def silentLogger(name):
+    """ Silent the input logger. """
+    (l := logging.getLogger(name)).setLevel(logging.NONE)
+    for h in l.handlers:
+        l.removeHandler(h)
+    l.addHandler(logging.NullHandler())
+    return l
+logging.silentLogger = silentLogger
+logging.nullLogger = silentLogger("null")  # setup a null logger
 
 
 def unsetLogger(name, force=False):
