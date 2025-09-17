@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "setuptools-scm"]
+requires = ["setuptools>=80.0.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
@@ -62,7 +62,7 @@ dependencies = [
   "pyyaml>=5.3.1",
   "requests>=2.32.2",
   "rich",
-  "setuptools>=70.2.0",
+  "setuptools>=80.0.0",
   "terminaltables",
   "toml",
   "tqdm",
