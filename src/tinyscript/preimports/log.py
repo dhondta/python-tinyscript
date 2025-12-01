@@ -143,11 +143,10 @@ def delLevelName(level):
     """ Remove association of 'levelName' with 'level'. """
     logging._acquireLock()
     if isinstance(level, int):
-        levelName = logging._levelToName[level] if PY3 else logging._levelNames[level]
+        levelName = logging._levelToName[level]
     else:
         levelName = level.upper()
-        level = logging._nameToLevel.get(levelName) if PY3 else \
-                {v: k for k, v in logging._levelNames.items()}.get(levelName)
+        level = logging._nameToLevel.get(levelName)
     __del(getattr(logging, "_levelToName", None), level)
     __del(getattr(logging, "_levelNames", None), level)
     __del(getattr(logging, "_nameToLevel", None), levelName)

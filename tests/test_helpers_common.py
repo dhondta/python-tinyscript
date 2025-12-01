@@ -38,7 +38,7 @@ class TestHelpersCommon(TestCase):
         self.assertEqual(r.count(.5), 0)
         self.assertEqual(r.index(.2), 2)
         self.assertRaises(ValueError, r.index, 1.1)
-        self.assertEqual(human_readable_size(123456), "121KB")
+        self.assertEqual(human_readable_size(123456), "121 KB")
         self.assertRaises(ValueError, human_readable_size, "BAD")
         self.assertRaises(ValueError, human_readable_size, -1)
         self.assertIsNotNone(is_admin())

@@ -14,7 +14,7 @@ __all__ = __features__ = ["dateparse", "human_readable_size", "is_admin", "set_e
                           "strings_from_file", "urlparse", "urlparse_query", "xor", "xor_file", "withrepr", "zeropad"]
 
 
-def human_readable_size(size, precision=0):
+def human_readable_size(size, precision=0, sep=" "):
     """ Convert size in bytes to a more readable form. """
     if not isinstance(size, (int, float)):
         raise ValueError("Bad size")
@@ -24,7 +24,7 @@ def human_readable_size(size, precision=0):
     while size > 1024 and i < len(units):
         i += 1
         size /= 1024.0
-    return "%.*f%s" % (precision, size, units[i])
+    return f"{size:.{precision}f}{sep}{units[i]}"
 
 
 def is_admin():
@@ -56,7 +56,7 @@ class range2object:
         elif l == 3:
             self.start, self.stop, self.step = list(map(float, args))
         else:
-            raise TypeError("range2 expected at most 3 arguments, got %s" % l)
+            raise TypeError(f"range2 expected at most 3 arguments, got {l}")
     
     def __iter__(self):
         n_rnd, cursor = max(len(str(f).split(".")[1]) for f in [self.start, self.stop, self.step]), self.start
@@ -72,7 +72,7 @@ class range2object:
     
     def __repr__(self):
         v = [[self.start, self.stop], [self.start, self.stop, self.step]][self.step != 1.]
-        return "range(%s)" % ", ".join(map(str, v))
+        return f"range({', '.join(map(str, v))})"
     
     def count(self, value):
         """ return number of occurrences of value """
@@ -87,7 +87,7 @@ class range2object:
         for i, x in enumerate(self):
             if value == x:
                 return i
-        raise ValueError("%s is not in range" % str(value))
+        raise ValueError(f"{value} is not in range")
 builtins.range2 = range2object
 
 

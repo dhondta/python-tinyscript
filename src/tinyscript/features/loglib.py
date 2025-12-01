@@ -71,4 +71,5 @@ def configure_logger(glob, multi_level, relative=False, logfile=None, syslog=Fal
     coloredlogs.install(1, logger=lastrec, **kw)
     logging.configLogger(logger, dl, syslog=syslog, stream=logfile, relative=relative,
                          milliseconds=glob.get('TIME_MILLISECONDS', TIME_MILLISECONDS), **kw)
+    logger.propagate = False
 
