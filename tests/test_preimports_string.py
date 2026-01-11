@@ -20,4 +20,5 @@ class TestPreimportsString(TestCase):
         string.sort_natural(l)
         self.assertEqual(tuple(LST), tuple(l))
         self.assertEqual(tuple(LST), tuple(string.sorted_natural(l)))
+        self.assertEqual(tuple(string.sorted_natural(["1", "A", "-1"])), ("-1", "1", "A"))
 

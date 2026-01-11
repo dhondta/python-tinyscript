@@ -60,7 +60,7 @@ def execute(cmd, **kwargs):
     return (out, err, p.returncode) if rc else (out, err)
 
 
-def execute_and_log(cmd, out_maxlen=256, silent=None, **kwargs):
+def execute_and_log(cmd, out_maxlen=256, silent=None, warn=None, **kwargs):
     """ Wrapper for subprocess.Popen, logging execution using the logger from kwargs or globals.
 
     :param cmd:        command string
@@ -80,7 +80,10 @@ def execute_and_log(cmd, out_maxlen=256, silent=None, **kwargs):
         if err:
             err = ensure_str(err).strip()
             if all(re.search(pattern, err) is None for pattern in (silent or [])):
-                (logger.warning if err.startswith("WARNING") else logger.error)(err)
+                if any(err.startswith(x) for x in ["WARNING ", "[WARNING] ", "(WARNING) ", "{WARNING} "]):
+                    logger.warning(err.split(" ", 1)[1])
+                else:
+                    (logger.warning if any(re.search(p, err) is None for p in (warn or [])) else logger.error)(err)
     return out, err, retc
 
 

@@ -11,12 +11,12 @@ from ..helpers.termsize import get_terminal_size
 
 def _natural_key(case_sensitive=False):
     """ Key computation function for considering keys in a natural way.
-    
+
     :param text: text to be used for computing the key
     """
     def _wrapper(text):
-        return [(0, int(t)) if t.isdigit() else (1, t if case_sensitive else t.lower()) for t in \
-                re.split(r"(\d+|\D+)", text)]
+        return [(0, int(t)) if t.lstrip("-").isdigit() else (1, t if case_sensitive else t.lower()) for t in \
+                re.split(r"(\-?(?:\d+|\D+))", text)]
     return _wrapper
 string.natural_key = _natural_key
 
