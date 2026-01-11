@@ -14,7 +14,13 @@ def hash_file(filename, algo="sha256"):
     :param filename: name of the file to be hashed
     :return:         ALGO(file)
     """
-    h = hashlib.new(algo)
+    try:
+        h = hashlib.new(algo)
+    except ValueError:  # unsupported hash type
+        try:
+            h = hashlib.__dict__[algo]()
+        except KeyError:
+            raise ValueError(f"unsupported hash type {algo}")
     with open(filename, 'rb') as f:
         while True:
             data = f.read(h.block_size)
@@ -25,18 +31,66 @@ def hash_file(filename, algo="sha256"):
 hashlib.hash_file = hash_file
 
 
+def mmh3_32(data: bytes = b"", seed: int = 0):
+    """ 32-bit MurmurHash3 """
+    from mmh3 import mmh3_32 as _mmh3_32
+    class mmh3_32:
+        __module__ = "builtins"
+        _h: _mmh3_32
+        def __init__(self, data: bytes = b"", seed: int = 0) -> None: self._h = _mmh3_32(data, seed)
+        def copy(self) -> "mmh3_32":
+            cls = self.__class__.__new__(self.__class__)
+            cls._h = self._h.copy()
+            return cls
+        def digest(self) -> bytes: return self._h.digest()
+        def hexdigest(self) -> str: return self._h.digest().hex()
+        def sintdigest(self) -> int: return self._h.sintdigest()
+        def uintdigest(self) -> int: return self._h.uintdigest()
+        def update(self, data: bytes) -> None: self._h.update(data)
+        block_size = property(lambda self: self._h.block_size)
+        digest_size = property(lambda self: self._h.digest_size)
+        name = property(lambda self: self._h.name)
+    return mmh3_32(data, seed)
+hashlib.mmh3_32 = mmh3_32
+hashlib.algorithms_available.add("mmh3_32")
+
+
+def mmh3_128(data: bytes = b"", seed: int = 0):
+    """ 128-bit MurmurHash3 """
+    from mmh3 import mmh3_x64_128 as _mmh3_x64_128
+    class mmh3_128:
+        __module__ = "builtins"
+        _h: _mmh3_x64_128
+        def __init__(self, data: bytes = b"", seed: int = 0) -> None: self._h = _mmh3_x64_128(data, seed)
+        def copy(self) -> "mmh3_128":
+            cls = self.__class__.__new__(self.__class__)
+            cls._h = self._h.copy()
+            return cls
+        def digest(self) -> bytes: return self._h.digest()
+        def hexdigest(self) -> str: return self._h.digest().hex()
+        def sintdigest(self) -> int: return self._h.sintdigest()
+        def uintdigest(self) -> int: return self._h.uintdigest()
+        def update(self, data: bytes) -> None: self._h.update(data)
+        block_size = property(lambda self: self._h.block_size)
+        digest_size = property(lambda self: self._h.digest_size)
+        name = property(lambda self: self._h.name)
+    return mmh3_128(data, seed)
+hashlib.mmh3_128 = mmh3_128
+hashlib.algorithms_available.add("mmh3_128")
+
+
 # this binds new file hashing functions to the hashlib for each existing hash algorithm
-for algo in [x for x in hashlib.__dict__.keys()]:
+for algo in hashlib.algorithms_available:
     try:
         h = hashlib.new(algo)
-        h.update(b"")
-        def _hash_file(a):
-            def _wrapper(f):
-                return hash_file(f, a)
-            return _wrapper
-        setattr(hashlib, "{}_file".format(algo), _hash_file(algo))
     except ValueError:  # unsupported hash type
-        pass
+        h = hashlib.__dict__[algo]()
+    h.update(b"")
+    def _hash_file(a):
+        def _wrapper(f):
+            return hash_file(f, a)
+        return _wrapper
+    setattr(hashlib, f"{algo}_file", _hash_file(algo))
 
 
 class LookupTable(dict):

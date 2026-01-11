@@ -38,7 +38,6 @@ dependencies = [
   "coloredlogs",
   "colorful",
   "dateparser>=1.1.8",
-  "dateutil",
   "dicttoxml",
   "fonttools>=4.43.0",  # SNYK-PYTHON-FONTTOOLS-6133203
   "ipaddress>=1.0.23",

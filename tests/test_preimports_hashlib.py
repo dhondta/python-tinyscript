@@ -8,6 +8,7 @@ from utils import *
 
 
 FILE = "test-file.txt"
+TEST = b"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis ex eget urna tincidunt orci." 
 
 
 class TestPreimportsHashlib(TestCase):
@@ -26,8 +27,19 @@ class TestPreimportsHashlib(TestCase):
                           "not_existing_hash_algo")
         remove(FILE)
     
-    def test_hashlib_lookup_table(self):
+    def test_hashlib_new_hash_algorithms(self):
         touch(FILE)
+        h = hashlib.mmh3_32(TEST)
+        self.assertEqual(h.hexdigest(), "ac5da696")
+        self.assertEqual(h.copy().hexdigest(), "ac5da696")
+        h = hashlib.mmh3_128(TEST)
+        self.assertEqual(h.hexdigest(), "eaf48e881786a5007db2ab0a4bdfcb82")
+        self.assertEqual(h.copy().hexdigest(), "eaf48e881786a5007db2ab0a4bdfcb82")
+        self.assertEqual(hashlib.mmh3_32_file(FILE), "00000000")
+        self.assertEqual(hashlib.hash_file(FILE, "mmh3_128"), "00000000000000000000000000000000")
+        remove(FILE)
+    
+    def test_hashlib_lookup_table(self):
         with open(FILE, 'w') as f:
             f.write("12345678\nabcdefghi")
         self.assertEqual(hashlib.LookupTable(FILE), {'25d55ad283aa400af464c76d713c07ad': "12345678",
