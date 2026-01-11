@@ -38,12 +38,15 @@ dependencies = [
   "coloredlogs",
   "colorful",
   "dateparser>=1.1.8",
+  "dateutil",
   "dicttoxml",
   "fonttools>=4.43.0",  # SNYK-PYTHON-FONTTOOLS-6133203
   "ipaddress>=1.0.23",
   "json2html",
   "lazy_object_proxy>=1.9.0",
   "markdown2>=2.5.4",
+  "markdown-it-py",
+  "mmh3",
   "netaddr",
   "netifaces",
   "packaging",
@@ -57,6 +60,7 @@ dependencies = [
   "pynput",
   "pypandoc",
   "pypiwin32; sys_platform=='windows'",
+  "python-dateutil",
   "python-magic",
   "python-slugify",
   "pyyaml>=5.3.1",
@@ -68,6 +72,7 @@ dependencies = [
   "tqdm",
   "virtualenv>=20.26.3",
   "weasyprint>=65.1",
+  "webencodings",
   "xmltodict",
 ]
 dynamic = ["version"]
