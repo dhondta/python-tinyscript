@@ -368,13 +368,13 @@ class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
         if v:
             d += " (" + v + ")"
         try:
-            l = max(list(map(lambda x: len(txt2italic(x.strip('_'))),
-                             [bd for bd in BASE_DUNDERS if gd.get(bd) is not None])))
+            l = max(len(txt2italic(bd.strip('_'))) for bd in BASE_DUNDERS if gd.get(bd) is not None)
+            l2 = max(len(bd.strip('_')) for bd in BASE_DUNDERS if gd.get(bd) is not None)
         except ValueError:
-            l = 0
+            l = l2 = 0
         for k in BASE_DUNDERS:
-            m = gd.get(k)
-            if m:
+            par = True
+            if m := gd.get(k):
                 if k == '__copyright__':
                     if not isinstance(m, tuple):
                         m = (m, )
@@ -399,13 +399,14 @@ class ArgumentParser(BaseArgumentParser, _NewActionsContainer):
                         reason = contributor.get('reason')
                         if reason:
                             s += " - " + str(reason)
-                        m += ["", "\n" + (l + 2) * " "][i > 0] + s
+                        m += ["", "\n" + (l2 + 2) * " "][i > 0] + s
+                    par = False
                 meta = ("{: <%d}: {}" % l).format(txt2italic(k.strip('_').capitalize()), m)
                 if k == '__author__':
                     e = gd.get('__email__')
                     if e:
                         meta += " ({})".format(txt2email(e))
-                d += ["\n\n", "\n"][self._docfmt is None] + txt2paragraph(meta)
+                d += ["\n\n", "\n"][self._docfmt is None] + (txt2paragraph(meta) if par else meta)
         doc = txt2blockquote(gd.get('__doc__') or "")
         if doc:
             d += "\n\n" + doc
