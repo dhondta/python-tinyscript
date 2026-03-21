@@ -101,7 +101,7 @@ def execute_and_kill(cmd, patterns=None, **kwargs):
         finally:
             queue.put(None)
     
-    bs, out, err = kwargs.pop('bufsize', -1), b"", b""
+    bs, out, err = kwargs.pop('bufsize', 1), b"", b""
     patterns = [b(x) for x in (patterns or [])]
     p = subprocess.Popen(__set_cmd(cmd, **kwargs), stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=bs, **kwargs)
     q = Queue()
