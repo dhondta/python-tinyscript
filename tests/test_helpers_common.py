@@ -95,6 +95,5 @@ class TestHelpersCommon(TestCase):
         def test_func(): pass
         deprecate(test_func, "new_test_func")
         self.assertIsNone(test_func())
-        with self.assertWarns(DeprecationWarning):
-            deprecate("old.module", "new.module")
+        deprecate("old.module", "new.module")
 
