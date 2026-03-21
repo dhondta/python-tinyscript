@@ -18,12 +18,12 @@ while true; do sleep .1; echo "."; >&2 echo "PATTERN$(echo $((1 + $RANDOM % 3)))
 
 
 @process
-def _proc():
+def test1():
     pass
 
 
 @thread
-def _thrd():
+def test2():
     pass
 
 
@@ -57,8 +57,8 @@ class TestHelpersFexec(TestCase):
             self.assertIn(b"PATTERN1", err)
             self.assertNotEqual(retc, 0)
             self.assertIsNotNone(filter_bin("cat", "id", "netstat", "whoami"))
-        self.assertIsNotNone(_proc())
-        self.assertIsNotNone(_thrd())
+        self.assertIsNotNone(test1())
+        self.assertIsNotNone(test2())
         self.assertIsNone(processes_clean())
         self.assertIsNone(threads_clean())
         self.assertEqual(apply([lambda x: x+1, lambda x: x+2], (1, )), [2, 3])
