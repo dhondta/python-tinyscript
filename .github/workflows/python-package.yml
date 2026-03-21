@@ -3,9 +3,6 @@
 
 name: build
 
-env:
-  package: tinyscript
-
 on:
   push:
     branches: [ "main" ]
@@ -17,17 +14,30 @@ permissions:
   contents: read
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.pkg.outputs.package }}
+    steps:
+      - name: Compute package name from the repository's
+        id: pkg
+        run: |
+          name="${GITHUB_REPOSITORY##*/}"
+          echo "package=${name#python-}" >> $GITHUB_OUTPUT
   build:
+    needs: prepare
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    env:
+      package: ${{ needs.prepare.outputs.package }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install pandoc
@@ -42,16 +52,18 @@ jobs:
       run: |
         pytest --cov=$package
   coverage:
-    needs: build
+    needs: [prepare, build]
     runs-on: ubuntu-latest
     env:
       cov_badge_path: docs/coverage.svg
+      package: ${{ needs.prepare.outputs.package }}
+      python_version: "3.13"
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - uses: actions/checkout@v5
+    - name: Set up Python ${{ env.python_version }}
+      uses: actions/setup-python@v6
       with:
-        python-version: "3.13"
+        python-version: ${{ env.python_version }}
     - name: Install pandoc
       run: sudo apt-get install -y pandoc notification-daemon
     - name: Install ${{ env.package }}
@@ -79,15 +91,15 @@ jobs:
         git commit -m "Updated coverage.svg"
     - name: Push changes
       if: steps.changed_files.outputs.files_changed == 'true'
-      uses: ad-m/github-push-action@v1.0.0
+      uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.github_token }}
         branch: ${{ github.ref }}
   deploy:
     runs-on: ubuntu-latest
-    needs: coverage
+    needs: [prepare, coverage]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
     - name: Check for version change
@@ -104,7 +116,7 @@ jobs:
         awk '{if (match($0,"## Supporters")) exit; print}' README.md > README
         mv -f README README.md
     - if: steps.filter.outputs.version == 'true'
-      name: Build ${{ env.package }} package
+      name: Build ${{ needs.prepare.outputs.package }} package
       run: python3 -m pip install --upgrade build && python3 -m build
     - if: steps.filter.outputs.version == 'true'
       name: Publish to PyPI
