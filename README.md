@@ -67,6 +67,7 @@ Please see the [example tools](#example-tools) herebelow for examples of usage o
 - [Paddinganograph](https://gist.github.com/dhondta/90a07d9d106775b0cd29bb51ffe15954) (base32/64 padding-based steganography)
 - [PDF Passwords Bruteforcer](https://gist.github.com/dhondta/efe84a92e4dfae3b6c14932c73ab2577) (bruteforce tool)
 - [Solitaire Cipher](https://gist.github.com/dhondta/1858f406fc55e5e5d440ff26432ad0a4) (encryption)
+- [StegoEMD](https://gist.github.com/dhondta/7a7339eb5f5de61c6bd1365ace6e1581) (Exploiting Modification Direction))
 - [StegoLSB](https://gist.github.com/dhondta/d2151c82dcd9a610a7380df1c6a0272c) (Least Significant Bit)
 - [StegoPIT](https://gist.github.com/dhondta/30abb35bb8ee86109d17437b11a1477a) (Pixel Indicator Technique)
 - [StegoPVD](https://gist.github.com/dhondta/feaf4f5fb3ed8d1eb7515abe8cde4880) (Pixel Value Differencing)
