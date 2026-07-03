@@ -1,7 +1,7 @@
 site_author: dhondta
 site_name: "Tinyscript - Devkit for quickly building CLI tools with Python"
 repo_url: https://github.com/dhondta/python-tinyscript
-copyright: Copyright &copy; 2017-2023 Alexandre D'Hondt
+copyright: Copyright &copy; 2017-2026 Alexandre D'Hondt
 docs_dir: pages
 nav:
   - Introduction: index.md
@@ -32,6 +32,8 @@ nav:
     - 'Solitaire Cipher': examples-rl/solitaire-cipher.md
 extra_css:
   - css/extra.css
+plugins:
+  - search
 extra:
   generator: false
   social:
@@ -60,7 +62,6 @@ theme:
         name: Switch to light mode
   logo: img/logo.png
   favicon: img/icon.png
-use_directory_urls: false
 markdown_extensions:
   - toc:
       permalink: true

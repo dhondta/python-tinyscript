@@ -53,7 +53,7 @@ dependencies = [
   "pip>=24.0",
   "plyer>=2.0.0",
   "pydyf>=0.11.0",
-  "pygments>=2.8.1",
+  "pygments>=2.20.0",  # SNYK-PYTHON-PYGMENTS-15746419
   "pyminizip",
   "pynput",
   "pypandoc",
@@ -62,12 +62,13 @@ dependencies = [
   "python-magic",
   "python-slugify",
   "pyyaml>=5.3.1",
-  "requests>=2.32.2",
+  "requests>=2.32.2",  # SNYK-PYTHON-REQUESTS-6928867
   "rich",
   "setuptools>=80.0.0",
   "terminaltables",
   "toml",
   "tqdm",
+  "urllib3>=2.2.2",  # SNYK-PYTHON-URLLIB3-7267250
   "virtualenv>=20.26.3",
   "weasyprint>=65.1",
   "webencodings",
