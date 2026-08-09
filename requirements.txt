@@ -19,7 +19,7 @@ pathlib2
 pip>=24.0
 plyer>=2.0.0
 pydyf>=0.11.0
-pygments>=2.8.1
+pygments>=2.20.0
 pyminizip
 pynput
 pypandoc
@@ -30,7 +30,7 @@ python-slugify
 pyyaml>=5.3.1
 requests>=2.32.2
 rich
-setuptools>=80.0.0
+setuptools>=82.0.0
 terminaltables
 toml
 tqdm

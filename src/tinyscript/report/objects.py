@@ -27,11 +27,20 @@ class Data(Element):
     
     @output
     def html(self, indent=4):
-        return json2html(self.data).replace("\"", "'")
+        return json2html(self._data).replace("\"", "'")
+    
+    @output
+    def json(self, indent=2):
+        return self._data
     
     @output
     def xml(self, indent=2):
-        return json2xml(self.data)
+        return json2xml(self._data)
+    
+    @output
+    def yaml(self, indent=2):
+        from yaml import dump
+        return dump(self._data)
 
 
 class Footer(Element):

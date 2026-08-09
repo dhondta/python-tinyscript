@@ -98,7 +98,8 @@ class Element(object):
     
     @output
     def yaml(self, indent=2):
-        return self.json(indent=indent)
+        from yaml import dump
+        return dump(self.json(indent=indent))
     
     @staticmethod
     def format_data(data, fmt):
