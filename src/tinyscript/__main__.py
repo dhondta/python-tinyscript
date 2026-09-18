@@ -149,6 +149,8 @@ def main():
     with commands.add_parser("add-source", help="add a source for installing scripts") as addsrc:
         __add_url(addsrc)
         __add_fetch(addsrc)
+    with commands.add_parser("list", help="list all installable scripts") as slist:
+        pass
     with commands.add_parser("install", help="install a script from a source") as install:
         __add_name(install, note="will install the first seen occurrence from sources if no source is specified")
         install.add_argument("-f", "--force", action="store_true", help="overwrite the script if it exists")
@@ -205,6 +207,14 @@ def main():
                         logger.warning("Remote script has a lower version, hence not updated")
                     _update_cache(cache)
                     break
+    elif args.command == "list":
+        l = []
+        for _, _, scripts in _iter_sources():
+            for s in scripts.keys():
+                if s not in l:
+                    l.append(s)
+        for s in sorted(l):
+            print(s)
     elif args.command == "new":
         new_script(args.name, args.target)
     elif args.command == "remove-source":
